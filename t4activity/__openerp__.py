@@ -2,7 +2,7 @@
 {
     'name': 'T4 Activity',
     'version': '0.1',
-    'category': 'Clinical',
+    'category': 'General',
     'license': 'AGPL-3',
     'summary': '',
     'description': """    """,
