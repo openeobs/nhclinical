@@ -182,7 +182,6 @@ class t4_activity(orm.Model):
         #'summary': 'Not specified',
     }
 
-
     def create(self, cr, uid, vals, context=None):
         except_if(not vals.get('data_model'), msg="data_model is not defined!")
         data_model_pool = self.pool.get(vals['data_model'])
@@ -317,6 +316,7 @@ class t4_activity_data(orm.AbstractModel):
     _submit_view_xmlid = None
     _complete_view_xmlid = None
     _cancel_view_xmlid = None
+    _form_description = None
     
     def is_action_allowed(self, state, action):
         return action in self._transitions[state]
@@ -327,7 +327,7 @@ class t4_activity_data(orm.AbstractModel):
         'date_started': fields.related('activity_id', 'date_started', string='Start Time', type='datetime'),
         'date_terminated': fields.related('activity_id', 'date_terminated', string='Terminated Time', type='datetime'),
         'state': fields.related('activity_id', 'state', string='State', type='char', size=64),
-        'pos_id': fields.related('activity_id', 'pos_id', type='many2one', relation='t4.clinical.pos', string='POS'),
+        'pos_id': fields.related('activity_id', 'pos_id', type='many2one', relation='t4.clinical.pos', string='POS')
     }
 
     def create(self, cr, uid, vals, context=None):
