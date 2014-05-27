@@ -181,7 +181,6 @@ class t4_activity(orm.Model):
         #'summary': 'Not specified',
     }
 
-
     def create(self, cr, uid, vals, context=None):
         except_if(not vals.get('data_model'), msg="data_model is not defined!")
         data_model_pool = self.pool.get(vals['data_model'])
@@ -316,6 +315,7 @@ class t4_activity_data(orm.AbstractModel):
     _submit_view_xmlid = None
     _complete_view_xmlid = None
     _cancel_view_xmlid = None
+    _form_description = None
     
     def is_action_allowed(self, state, action):
         return action in self._transitions[state]
