@@ -77,10 +77,9 @@ class t4_activity(orm.Model):
 
 
     def _get_data_type_selection(self, cr, uid, context=None):
-#         sql = "select data_model, summary from t4_activity_type"
-#         cr.execute(sql)
+
         res = [(model_name, model._description) for model_name, model in self.pool.models.items()
-                           if hasattr(model, '_description') and 't4.clinical' in model_name]        
+                           if hasattr(model, '_description')]        
         return res
 
     def _activity2data_res_id(self, cr, uid, ids, field, arg, context=None):
@@ -327,7 +326,7 @@ class t4_activity_data(orm.AbstractModel):
         'date_started': fields.related('activity_id', 'date_started', string='Start Time', type='datetime'),
         'date_terminated': fields.related('activity_id', 'date_terminated', string='Terminated Time', type='datetime'),
         'state': fields.related('activity_id', 'state', string='State', type='char', size=64),
-        'pos_id': fields.related('activity_id', 'pos_id', type='many2one', relation='t4.clinical.pos', string='POS'),
+        #'pos_id': fields.related('activity_id', 'pos_id', type='many2one', relation='t4.clinical.pos', string='POS'),
     }
 
     def create(self, cr, uid, vals, context=None):
