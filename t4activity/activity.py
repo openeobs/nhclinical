@@ -82,15 +82,6 @@ class t4_activity(orm.Model):
                            if hasattr(model, '_description')]        
         return res
 
-    def _activity2data_res_id(self, cr, uid, ids, field, arg, context=None):
-        res = {}
-        if not ids:
-            return res
-        ids = isinstance(ids, (list, tuple)) and ids or [ids]
-        for activity in self.read(cr, uid, ids, ['data_ref'], context):
-            res[activity['id']] = activity['data_ref'].split(",")[1] if activity['data_ref'] else False
-        return res
-
     def _is_schedule_allowed(self, cr, uid, ids, field, arg, context=None):
         res = {}
         for activity in self.browse(cr, uid, ids, context):
@@ -158,8 +149,6 @@ class t4_activity(orm.Model):
         'date_deadline': fields.datetime('Deadline Time', readonly=True),
         'date_expiry': fields.datetime('Expiry Time', readonly=True),
         # activity type and related model/resource
-        'data_res_id': fields.function(_activity2data_res_id, type='integer', string="Data Model's ResID",
-                                       help="Data Model's ResID", readonly=True),
         'data_model': fields.text("Data Model", required=True),
         'data_ref': fields.reference('Data Reference', _get_data_type_selection, size=256, readonly=True),
         # UI actions
@@ -193,7 +182,32 @@ class t4_activity(orm.Model):
     def write(self, cr, uid, ids, vals, context=None):
         res = super(t4_activity, self).write(cr, uid, ids, vals, context)
         return res
-
+    
+    
+    def activity_rank_map(self, cr, uid, 
+                        partition_by="user_id", where=None, 
+                        partition_order="id desc", 
+                        rank_order="desc", limit=None):
+        
+        args = {
+                  "partition_by": partition_by,
+                  "where": where and "where %s" % where or "",
+                  "partition_order": partition_order,
+                  "rank_order": rank_order,
+                  "limit": limit and "limit %s" % limit or ""
+                }
+        sql = """
+            select 
+                id,
+                rank() over (partition by %(partition_by)s order by %(partition_order)s) as rank
+            from t4_activity
+            %(where)s
+            order by rank %(rank_order)s
+            %(limit)s
+        """ % args
+        cr.execute(sql)
+        res = {activity['rank']:activity['id'] for activity in cr.dictfetchall()}
+        return res 
     # DATA API
 
     @data_model_event(callback="start_act_window")
@@ -448,13 +462,13 @@ class t4_activity_data(orm.AbstractModel):
             "activity '%s', activity.id=%s assigned to user.id=%s" % (activity.data_model, activity.id, user_id))
         return {}
 
-    def unassign(self, cr, uid, activity_id, user_id, context=None):
+    def unassign(self, cr, uid, activity_id, context=None):
         activity_pool = self.pool['t4.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context)
         except_if(not self.is_action_allowed(activity.state, 'unassign'),
                   msg="activity of type '%s' can not be unassigned in state '%s'" % (
                   activity.data_model, activity.state))
-        except_if(activity.user_id, msg="activity is not assigned yet!")
+        except_if(not activity.user_id, msg="activity is not assigned yet!")
         activity_pool.write(cr, uid, activity_id, {'user_id': False}, context)
         _logger.debug("activity '%s', activity.id=%s unassigned" % (activity.data_model, activity.id))
         return {}
@@ -486,7 +500,7 @@ class t4_activity_data(orm.AbstractModel):
         activity_pool = self.pool['t4.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context)
         model_pool = self.pool[activity.data_model]
-        return model_pool.read(cr, uid, activity.data_res_id, [], context)
+        return model_pool.read(cr, uid, activity.data_ref.id, [], context)
 
 
     def retrieve_browse(self, cr, uid, activity_id, context=None):
