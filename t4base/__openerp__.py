@@ -1,0 +1,20 @@
+# -*- encoding: utf-8 -*-
+{
+    'name': 'T4 Base',
+    'version': '0.1',
+    'category': 'Base',
+    'license': 'AGPL-3',
+    'summary': 'T4 Base',
+    'description': """ T4 Base   """,
+    'author': 'Tactix4',
+    'website': 'http://www.tactix4.com/',
+    'depends': [],
+    'data': [],
+    'demo': [],
+    'images': [],
+    'css': [],
+    'test': [],
+    'application': True,
+    'installable': True,
+    'active': False,
+} 
