@@ -139,6 +139,7 @@ class t4_activity(orm.Model):
         'write_date': fields.datetime('Write Date', readonly=True),
         'create_uid': fields.many2one('res.users', 'Created By', readonly=True),
         'write_uid': fields.many2one('res.users', 'Updated By', readonly=True),
+        'complete_uid': fields.many2one('res.users', 'Completed By', readonly=True),
         # dates planning
         'date_planned': fields.datetime('Planned Time', readonly=True),
         'date_scheduled': fields.datetime('Scheduled Time', readonly=True),
@@ -442,7 +443,7 @@ class t4_activity_data(orm.AbstractModel):
                   msg="activity of type '%s' can not be completed from state '%s'" % (
                   activity.data_model, activity.state))
         now = dt.today().strftime('%Y-%m-%d %H:%M:%S')
-        activity_pool.write(cr, uid, activity.id, {'state': 'completed', 'date_terminated': now}, context)
+        activity_pool.write(cr, uid, activity.id, {'state': 'completed', 'complete_uid':uid, 'date_terminated': now}, context)
         _logger.debug("activity '%s', activity.id=%s completed" % (activity.data_model, activity.id))
         return {}
 
