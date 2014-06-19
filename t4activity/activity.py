@@ -321,7 +321,7 @@ class t4_activity_data(orm.AbstractModel):
         'planned': ['schedule', 'start', 'complete', 'cancel', 'submit', 'assign', 'unassign', 'retrieve', 'validate'],
         'scheduled': ['start', 'complete', 'cancel', 'submit', 'assign', 'unassign', 'retrieve', 'validate'],
         'started': ['complete', 'cancel', 'submit', 'assign', 'unassign', 'retrieve', 'validate'],
-        'completed': ['retrieve', 'validate'],
+        'completed': ['retrieve', 'validate', 'cancel'],
         'cancelled': ['retrieve', 'validate']
     }
     _description = _name #"Activity Data Base Model"
