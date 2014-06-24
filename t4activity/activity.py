@@ -159,7 +159,7 @@ class t4_activity(orm.Model):
         'is_complete_allowed': fields.function(_is_complete_allowed, type='boolean', string='Is Complete Allowed?'),
         'is_cancel_allowed': fields.function(_is_cancel_allowed, type='boolean', string='Is Cancel Allowed?'),
         # order
-        'termination_sequence': fields.integer("Termination Sequence"),
+        'termination_seq': fields.integer("Termination Sequence"),
     }
 
     _sql_constrints = {
@@ -443,11 +443,12 @@ class t4_activity_data(orm.AbstractModel):
                   msg="activity of type '%s' can not be completed from state '%s'" % (
                   activity.data_model, activity.state))
         now = dt.today().strftime('%Y-%m-%d %H:%M:%S')
-        cr.execute("select coalesce(max(termination_sequence), 0) from t4_activity")
-        termination_sequence = cr.fetchone()[0] + 1
+        # ideally reading termination seq and writing would be atomic op, i.e. 1 sql query
+        cr.execute("select coalesce(max(termination_seq), 0) from t4_activity")
+        termination_seq = cr.fetchone()[0] + 1
         activity_pool.write(cr, uid, activity.id, 
                             {'state': 'completed', 'complete_uid':uid, 
-                             'date_terminated': now, 'termination_sequence': termination_sequence}, context)
+                             'date_terminated': now, 'termination_seq': termination_seq}, context)
         _logger.debug("activity '%s', activity.id=%s completed" % (activity.data_model, activity.id))
         return {}
 
@@ -488,10 +489,10 @@ class t4_activity_data(orm.AbstractModel):
                   msg="activity of type '%s' can not be cancelled in state '%s'" % (
                   activity.data_model, activity.state))
         now = dt.today().strftime('%Y-%m-%d %H:%M:%S')
-        cr.execute("select max(termination_sequence) from t4_activity")
-        termination_sequence = cr.fetchone()[0] + 1
+        # ideally reading termination seq and writing would be atomic op, i.e. 1 sql query
+        termination_seq = cr.fetchone()[0] + 1
         activity_pool.write(cr, uid, activity_id, {'state': 'cancelled', 
-                            'date_terminated': now, 'termination_sequence': termination_sequence}, context)
+                            'date_terminated': now, 'termination_seq': termination_seq}, context)
         _logger.debug("activity '%s', activity.id=%s cancelled" % (activity.data_model, activity.id))
         return {}
 
