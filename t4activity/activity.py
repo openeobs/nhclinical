@@ -490,6 +490,7 @@ class t4_activity_data(orm.AbstractModel):
                   activity.data_model, activity.state))
         now = dt.today().strftime('%Y-%m-%d %H:%M:%S')
         # ideally reading termination seq and writing would be atomic op, i.e. 1 sql query
+        cr.execute("select coalesce(max(termination_seq), 0) from t4_activity")
         termination_seq = cr.fetchone()[0] + 1
         activity_pool.write(cr, uid, activity_id, {'state': 'cancelled', 
                             'date_terminated': now, 'termination_seq': termination_seq}, context)
