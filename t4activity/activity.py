@@ -459,13 +459,12 @@ class t4_activity_data(orm.AbstractModel):
                   msg="activity of type '%s' can not be assigned in state '%s'" % (activity.data_model, activity.state))
         except_if(activity.user_id, msg="activity is assigned already assigned to %s!" % activity.user_id.name)
         activity_vals = {'user_id': user_id}
-        if len(activity.user_id.employee_ids or []) == 1:
-            activity_vals.update({'employee_id': activity.user_id.employee_ids[0].id})
-        if activity.user_id.employee_ids:
-            activity_vals.update({'employee_ids': [(4, e.id) for e in activity.user_id.employee_ids]})
+#         if len(activity.user_id.employee_ids or []) == 1:
+#             activity_vals.update({'employee_id': activity.user_id.employee_ids[0].id})
+#         if activity.user_id.employee_ids:
+#             activity_vals.update({'employee_ids': [(4, e.id) for e in activity.user_id.employee_ids]})
         activity_pool.write(cr, uid, activity_id, activity_vals)
-        _logger.debug(
-            "activity '%s', activity.id=%s assigned to user.id=%s" % (activity.data_model, activity.id, user_id))
+        _logger.debug("activity '%s', activity.id=%s assigned to user.id=%s" % (activity.data_model, activity.id, user_id))
         return {}
 
     def unassign(self, cr, uid, activity_id, context=None):
