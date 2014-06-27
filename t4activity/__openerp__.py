@@ -8,7 +8,7 @@
     'description': """    """,
     'author': 'Tactix4',
     'website': 'http://www.tactix4.com/',
-    'depends': ['mail'],
+    'depends': ['mail', 't4base'],
     'data': [
              'views/activity_view.xml',           
              'security/ir.model.access.csv'],
