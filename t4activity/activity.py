@@ -341,6 +341,7 @@ class t4_activity_data(orm.AbstractModel):
         'date_started': fields.related('activity_id', 'date_started', string='Start Time', type='datetime'),
         'date_terminated': fields.related('activity_id', 'date_terminated', string='Terminated Time', type='datetime'),
         'state': fields.related('activity_id', 'state', string='State', type='char', size=64),
+        'complete_uid': fields.related('activity_id', 'complete_uid', string='Completed By', type='many2one', relation='res.users')
         #'pos_id': fields.related('activity_id', 'pos_id', type='many2one', relation='t4.clinical.pos', string='POS'),
     }
 
