@@ -9,6 +9,11 @@ from openerp.osv.expression import *
     # Parsing
     # ----------------------------------------
 
+def _quote(to_quote):
+    if '"' not in to_quote:
+        return '"%s"' % to_quote
+    return to_quote
+
 def parse(self, cr, uid, context):
     """ Transform the leaves of the expression
 
