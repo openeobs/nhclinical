@@ -112,7 +112,7 @@ def parse(self, cr, uid, context):
         field_path = left.split('.', 1)
         field = working_model._columns.get(field_path[0])
         # TACTIX4 BEGIN
-        if field_path[0] == 'id':
+        if not working_model._columns.get(field_path[0]) and field_path[0] == 'id':
             """
             field 'id' normally is not in the _columns
             the problem appeared with call search('t4clinical.task.base', [('responsible_user_ids','in',uid)])
