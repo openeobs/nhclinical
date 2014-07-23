@@ -6,6 +6,7 @@ from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
 import logging
 import pytz
 
+
 _logger = logging.getLogger(__name__)
 # in this method result[groupby] is expected to be a list. In some cases int, long is returned
 # we use this fragment for workload intervals on project.task
