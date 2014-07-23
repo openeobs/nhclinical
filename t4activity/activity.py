@@ -345,6 +345,8 @@ class t4_activity_data(orm.AbstractModel):
         #'pos_id': fields.related('activity_id', 'pos_id', type='many2one', relation='t4.clinical.pos', string='POS'),
     }
 
+    _order = 'id desc'
+
     def create(self, cr, uid, vals, context=None):
         rec_id = super(t4_activity_data, self).create(cr, uid, vals, context)
         return rec_id
