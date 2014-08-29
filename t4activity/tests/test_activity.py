@@ -179,8 +179,16 @@ class ActivityTest(common.SingleTransactionCase):
         
     def savepoint_create(self, name=None):
         next_seed()
-        name = name or fake.first_name().lower()
-        cr.execute("savepoint %s" % name)
+        i = 0
+        while i < 1000:
+            try:
+                name = name or fake.first_name().lower()
+                cr.execute("savepoint %s" % name)
+                break
+            except:
+                pass
+        assert i < 1000, "Couldn't create savepoint after 1000 attempts!"
+            
         return name
     
     def savepoint_rollback(self, name):
