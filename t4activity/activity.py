@@ -340,16 +340,12 @@ class t4_activity_data(orm.AbstractModel):
     def is_action_allowed(self, state, action):
         return action in self._transitions[state]
     
-    def _get_state(self, cr, uid, ids, field, args, context=None):
-        return {data.id: data.activity_id.state for data in self.browse(cr, uid, ids)}
-    
     _columns = {
         'name': fields.char('Name', size=256),
         'activity_id': fields.many2one('t4.activity', "activity"),
         'date_started': fields.related('activity_id', 'date_started', string='Start Time', type='datetime'),
         'date_terminated': fields.related('activity_id', 'date_terminated', string='Terminated Time', type='datetime'),
-        'state': fields.function(_get_state, type='char', string='State', size=64, 
-                    store={'t4.activity': (lambda s, cr, uid, ids, c: [a.data_ref.id for a in s.browse(cr, uid, ids) if a.data_ref], ['state'], 10)}),
+        'state': fields.related('activity_id', 'state', type='char', string='State', size=64),
         'complete_uid': fields.related('activity_id', 'complete_uid', string='Completed By', type='many2one', relation='res.users')
     }
 
