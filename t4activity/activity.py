@@ -55,7 +55,7 @@ def data_model_event(callback=None):
                 res = eval("model_pool.%s(*args[1:], **kwargs)" % callback)
             else:
                 _logger.error("@data_model_event() skipping call. data_model='%s', args='%s', kwargs='%s'"
-                              % (activity.data_model, args, kwargs))
+                              % (model_pool.data_model, args, kwargs))
             return res
 
         return wrapper
@@ -159,7 +159,7 @@ class t4_activity(orm.Model):
         'is_complete_allowed': fields.function(_is_complete_allowed, type='boolean', string='Is Complete Allowed?'),
         'is_cancel_allowed': fields.function(_is_cancel_allowed, type='boolean', string='Is Cancel Allowed?'),
         # order
-        'termination_seq': fields.integer("Termination Sequence"),
+        'sequence': fields.integer("State Switch Sequence"),
     }
 
     _sql_constrints = {
@@ -181,6 +181,11 @@ class t4_activity(orm.Model):
         return activity_id
 
     def write(self, cr, uid, ids, vals, context=None):
+        if 'state' in vals:
+            cr.execute("select coalesce(max(sequence), 0) from t4_activity")
+            sequence = cr.fetchone()[0] + 1
+            vals.update({'sequence': sequence})     
+            _logger.debug("Sequence set to: %s" % sequence)    
         res = super(t4_activity, self).write(cr, uid, ids, vals, context)
         return res
     
@@ -334,15 +339,18 @@ class t4_activity_data(orm.AbstractModel):
     
     def is_action_allowed(self, state, action):
         return action in self._transitions[state]
-
+    
+    def _get_state(self, cr, uid, ids, field, args, context=None):
+        return {data.id: data.activity_id.state for data in self.browse(cr, uid, ids)}
+    
     _columns = {
         'name': fields.char('Name', size=256),
         'activity_id': fields.many2one('t4.activity', "activity"),
         'date_started': fields.related('activity_id', 'date_started', string='Start Time', type='datetime'),
         'date_terminated': fields.related('activity_id', 'date_terminated', string='Terminated Time', type='datetime'),
-        'state': fields.related('activity_id', 'state', string='State', type='char', size=64),
+        'state': fields.function(_get_state, type='char', string='State', size=64, 
+                    store={'t4.activity': (lambda s, cr, uid, ids, c: [a.data_ref.id for a in s.browse(cr, uid, ids) if a.data_ref], ['state'], 10)}),
         'complete_uid': fields.related('activity_id', 'complete_uid', string='Completed By', type='many2one', relation='res.users')
-        #'pos_id': fields.related('activity_id', 'pos_id', type='many2one', relation='t4.clinical.pos', string='POS'),
     }
 
     _order = 'id desc'
@@ -446,12 +454,9 @@ class t4_activity_data(orm.AbstractModel):
                   msg="activity of type '%s' can not be completed from state '%s'" % (
                   activity.data_model, activity.state))
         now = dt.today().strftime('%Y-%m-%d %H:%M:%S')
-        # ideally reading termination seq and writing would be atomic op, i.e. 1 sql query
-        cr.execute("select coalesce(max(termination_seq), 0) from t4_activity")
-        termination_seq = cr.fetchone()[0] + 1
         activity_pool.write(cr, uid, activity.id, 
                             {'state': 'completed', 'complete_uid':uid, 
-                             'date_terminated': now, 'termination_seq': termination_seq}, context)
+                             'date_terminated': now}, context)
         _logger.debug("activity '%s', activity.id=%s completed" % (activity.data_model, activity.id))
         return {}
 
@@ -462,10 +467,6 @@ class t4_activity_data(orm.AbstractModel):
                   msg="activity of type '%s' can not be assigned in state '%s'" % (activity.data_model, activity.state))
         except_if(activity.user_id, msg="activity is assigned already assigned to %s!" % activity.user_id.name)
         activity_vals = {'user_id': user_id}
-#         if len(activity.user_id.employee_ids or []) == 1:
-#             activity_vals.update({'employee_id': activity.user_id.employee_ids[0].id})
-#         if activity.user_id.employee_ids:
-#             activity_vals.update({'employee_ids': [(4, e.id) for e in activity.user_id.employee_ids]})
         activity_pool.write(cr, uid, activity_id, activity_vals)
         _logger.debug("activity '%s', activity.id=%s assigned to user.id=%s" % (activity.data_model, activity.id, user_id))
         return {}
@@ -491,11 +492,8 @@ class t4_activity_data(orm.AbstractModel):
                   msg="activity of type '%s' can not be cancelled in state '%s'" % (
                   activity.data_model, activity.state))
         now = dt.today().strftime('%Y-%m-%d %H:%M:%S')
-        # ideally reading termination seq and writing would be atomic op, i.e. 1 sql query
-        cr.execute("select coalesce(max(termination_seq), 0) from t4_activity")
-        termination_seq = cr.fetchone()[0] + 1
         activity_pool.write(cr, uid, activity_id, {'state': 'cancelled', 
-                            'date_terminated': now, 'termination_seq': termination_seq}, context)
+                            'date_terminated': now}, context)
         _logger.debug("activity '%s', activity.id=%s cancelled" % (activity.data_model, activity.id))
         return {}
 
