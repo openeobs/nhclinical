@@ -63,6 +63,16 @@ def data_model_event(callback=None):
     return decorator
 
 
+class t4_cancel_reason(orm.Model):
+    """cancellation reason
+    """
+    _name = 't4.cancel.reason'
+    _columns = {
+        'name': fields.char('Name', size=300),
+        'system': fields.boolean('System/User Reason')
+    }
+
+
 class t4_activity(orm.Model):
     """ activity
     """
@@ -132,6 +142,7 @@ class t4_activity(orm.Model):
         # state
         'notes': fields.text('Notes'),
         'state': fields.selection(_states, 'State', readonly=True),
+        'cancel_reason_id': fields.many2one('t4.cancel.reason', 'Cancellation Reason'),
         # identification
         'user_id': fields.many2one('res.users', 'Assignee', readonly=True),
         # system data
