@@ -139,7 +139,7 @@ class t4_activity(orm.Model):
         'write_date': fields.datetime('Write Date', readonly=True),
         'create_uid': fields.many2one('res.users', 'Created By', readonly=True),
         'write_uid': fields.many2one('res.users', 'Updated By', readonly=True),
-        'complete_uid': fields.many2one('res.users', 'Completed By', readonly=True),
+        'terminate_uid': fields.many2one('res.users', 'Completed By', readonly=True),
         # dates planning
         'date_planned': fields.datetime('Planned Time', readonly=True),
         'date_scheduled': fields.datetime('Scheduled Time', readonly=True),
@@ -346,7 +346,7 @@ class t4_activity_data(orm.AbstractModel):
         'date_started': fields.related('activity_id', 'date_started', string='Start Time', type='datetime'),
         'date_terminated': fields.related('activity_id', 'date_terminated', string='Terminated Time', type='datetime'),
         'state': fields.related('activity_id', 'state', type='char', string='State', size=64),
-        'complete_uid': fields.related('activity_id', 'complete_uid', string='Completed By', type='many2one', relation='res.users')
+        'terminate_uid': fields.related('activity_id', 'terminate_uid', string='Completed By', type='many2one', relation='res.users')
     }
 
     _order = 'id desc'
@@ -451,7 +451,7 @@ class t4_activity_data(orm.AbstractModel):
                   activity.data_model, activity.state))
         now = dt.today().strftime('%Y-%m-%d %H:%M:%S')
         activity_pool.write(cr, uid, activity.id, 
-                            {'state': 'completed', 'complete_uid':uid, 
+                            {'state': 'completed', 'terminate_uid':uid,
                              'date_terminated': now}, context)
         _logger.debug("activity '%s', activity.id=%s completed" % (activity.data_model, activity.id))
         return {}
@@ -489,7 +489,7 @@ class t4_activity_data(orm.AbstractModel):
                   activity.data_model, activity.state))
         now = dt.today().strftime('%Y-%m-%d %H:%M:%S')
         activity_pool.write(cr, uid, activity_id, {'state': 'cancelled', 
-                            'date_terminated': now}, context)
+                            'terminate_uid': uid, 'date_terminated': now}, context)
         _logger.debug("activity '%s', activity.id=%s cancelled" % (activity.data_model, activity.id))
         return {}
 
