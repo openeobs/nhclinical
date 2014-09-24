@@ -12,7 +12,6 @@ def _read_group_fill_results(self, cr, uid, domain, groupby, remaining_groupbys,
     # should be displayed even if they don't contain any record.
 
     # Grab the list of all groups that should be displayed, including all present groups
-    import pdb; pdb.set_trace()
     
     # NHC BEGIN
     # ORIGINAL: present_group_ids = [x[groupby][0] for x in read_group_result if x[groupby]]
