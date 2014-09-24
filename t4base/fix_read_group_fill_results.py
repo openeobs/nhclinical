@@ -12,7 +12,12 @@ def _read_group_fill_results(self, cr, uid, domain, groupby, remaining_groupbys,
     # should be displayed even if they don't contain any record.
 
     # Grab the list of all groups that should be displayed, including all present groups
-    present_group_ids = [x[groupby][0] for x in read_group_result if x[groupby]]
+    import pdb; pdb.set_trace()
+    
+    # NHC BEGIN
+    # ORIGINAL: present_group_ids = [x[groupby][0] for x in read_group_result if x[groupby]]
+    present_group_ids = [x[groupby] for x in read_group_result if x[groupby]]
+    # NHC END
     all_groups,folded = self._group_by_full[groupby](self, cr, uid, present_group_ids, domain,
                                               read_group_order=read_group_order,
                                               access_rights_uid=openerp.SUPERUSER_ID,
