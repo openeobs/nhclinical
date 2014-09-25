@@ -21,7 +21,9 @@ def _read_group_fill_results(self, cr, uid, domain, groupby, remaining_groupbys,
                                               read_group_order=read_group_order,
                                               access_rights_uid=openerp.SUPERUSER_ID,
                                               context=context)
-    
+    ##### NHC BEGIN
+    all_group_tuples = {k: (k,v) for k, v in all_groups}
+    #### NHC END
     result_template = dict.fromkeys(aggregated_fields, False)
     result_template[groupby + '_count'] = 0
     if remaining_groupbys:
@@ -52,7 +54,7 @@ def _read_group_fill_results(self, cr, uid, domain, groupby, remaining_groupbys,
         right_side = all_groups[0] if all_groups else None
         ##### NHC BEGIN
         if left_side and not isinstance(left_side[groupby], (tuple,list)):
-            left_side[groupby] = right_side
+            left_side[groupby] = all_group_tuples[left_side[groupby]]
         #### NHC END
         assert left_side is None or left_side[groupby] is False \
              or isinstance(left_side[groupby], (tuple,list)), \
