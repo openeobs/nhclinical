@@ -4,7 +4,7 @@ from datetime import datetime
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
 import logging
 from openerp.osv.expression import *
-
+_logger = logging.getLogger()
     # ----------------------------------------
     # Parsing
     # ----------------------------------------
