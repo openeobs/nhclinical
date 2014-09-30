@@ -49,7 +49,7 @@ class ActivityTest(common.SingleTransactionCase):
         activity_id = self.create_activity('test.activity.data.model', {}, {'field1': 'test1'})
         self.transitions_test(activity_id)
         res = activity_pool.activity_rank_map(cr, uid)
-        print res
+#         print res
         
     def create_activity(self, model, activity_vals={}, data_vals={}):
         model_pool = self.registry(model) 
