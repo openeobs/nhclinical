@@ -1,5 +1,5 @@
 from openerp.osv import orm, fields, osv
-from openerp.addons.t4activity.activity import except_if
+from openerp.addons.nh_activity.activity import except_if
 
 import logging        
 _logger = logging.getLogger(__name__)
@@ -51,7 +51,7 @@ class DemoLoader(orm.AbstractModel):
         data = []
         # must be get_available location_ids(type, usage)
         locations = ['B'+str(n) for n in range(1,8)]
-        location_ids = self.pool['t4.clinical.location'].search(cr, uid, [('code','in',locations)])
+        location_ids = self.pool['nh.clinical.location'].search(cr, uid, [('code','in',locations)])
         n = 0
         for location_id in location_ids:
             if n > qty:
@@ -65,7 +65,7 @@ class DemoLoader(orm.AbstractModel):
         data = []
         # must be get_available location_ids(type, usage)
         locations = ['B'+str(n) for n in range(1,8)]
-        location_ids = self.pool['t4.clinical.location'].search(cr, uid, [('code','in',locations)])
+        location_ids = self.pool['nh.clinical.location'].search(cr, uid, [('code','in',locations)])
         n = 0
         for patient_id in patient_ids:
                 data.append({
@@ -85,11 +85,11 @@ class DemoLoader(orm.AbstractModel):
     def scenario1(self, cr, uid, rollback=True):
         register_data = self.get_register_data(1000)
         admit_data = self.get_admit_data(register_data, 800)
-        register_pool = self.pool['t4.clinical.adt.patient.register']
-        admit_pool = self.pool['t4.clinical.adt.patient.admit']
-        activity_pool = self.pool['t4.activity']
-        placement_pool = self.pool['t4.clinical.patient.placement']
-        api_pool = self.pool['t4.clinical.api']
+        register_pool = self.pool['nh.clinical.adt.patient.register']
+        admit_pool = self.pool['nh.clinical.adt.patient.admit']
+        activity_pool = self.pool['nh.activity']
+        placement_pool = self.pool['nh.clinical.patient.placement']
+        api_pool = self.pool['nh.clinical.api']
 
         for rd in register_data:
             register_pool.create_activity(cr, uid, {}, rd)
@@ -109,7 +109,7 @@ class DemoLoader(orm.AbstractModel):
             activity_pool.start(cr, uid, placement_activity_id) 
             activity_pool.complete(cr, uid, placement_activity_id) 
             n += 1
-        ews_pool = self.pool['t4.clinical.patient.observation.ews']
+        ews_pool = self.pool['nh.clinical.patient.observation.ews']
         for n in range(1,100):
             ews_data = self.get_ews_data(cr, uid, patient_ids)
             for ews in ews_data:                           
@@ -132,12 +132,12 @@ class DemoLoader(orm.AbstractModel):
 
         register_data = self.get_register_data(0)
         admit_data = self.get_admit_data(register_data, 0)
-        register_pool = self.pool['t4.clinical.adt.patient.register']
-        admit_pool = self.pool['t4.clinical.adt.patient.admit']
-        activity_pool = self.pool['t4.activity']
-        placement_pool = self.pool['t4.clinical.patient.placement']
-        location_pool = self.pool['t4.clinical.location']
-        api_pool = self.pool['t4.clinical.api']
+        register_pool = self.pool['nh.clinical.adt.patient.register']
+        admit_pool = self.pool['nh.clinical.adt.patient.admit']
+        activity_pool = self.pool['nh.activity']
+        placement_pool = self.pool['nh.clinical.patient.placement']
+        location_pool = self.pool['nh.clinical.location']
+        api_pool = self.pool['nh.clinical.api']
         
         for rd in register_data:
             register_pool.create_activity(cr, uid, {}, rd)

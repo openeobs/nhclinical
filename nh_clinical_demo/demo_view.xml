@@ -4,14 +4,14 @@
 
         <menuitem name="Demo Wizards"
                   sequence="99"
-                  id="menu_t4ui_left_demo"
-                  parent="t4clinical_base.menu_t4_clinical"
-                  groups="t4clinical_base.group_t4clinical_ward_manager,t4clinical_base.group_t4clinical_hca,t4clinical_base.group_t4clinical_doctor,t4clinical_base.group_t4clinical_dev,base.user_root"/>
+                  id="menu_nhui_left_demo"
+                  parent="nh_clinical_base.menu_nh_clinical"
+                  groups="nh_clinical_base.group_nhc_ward_manager,nh_clinical_base.group_nhc_hca,nh_clinical_base.group_nhc_doctor,nh_clinical_base.group_nhc_dev,base.user_root"/>
 
     
-         <record model="ir.ui.view" id="view_t4clinical_demo_register_form">
-            <field name="name">t4.clinical.demo.register.form</field>
-            <field name="model">t4.clinical.demo.register</field>
+         <record model="ir.ui.view" id="view_nhc_demo_register_form">
+            <field name="name">nh.clinical.demo.register.form</field>
+            <field name="model">nh.clinical.demo.register</field>
             <field name="arch" type="xml">
                 <form string="register">
 
@@ -31,25 +31,25 @@
         </record>
 
         
-        <record model="ir.actions.act_window" id="action_t4clinical_demo_register" >
+        <record model="ir.actions.act_window" id="action_nhc_demo_register" >
             <field name="name">Register-Place</field>
-            <field name="res_model">t4.clinical.demo.register</field>
+            <field name="res_model">nh.clinical.demo.register</field>
             <field name="view_type">form</field>
             <field name="view_mode">form</field>
-            <field name="view_id" ref="view_t4clinical_demo_register_form"/>
+            <field name="view_id" ref="view_nhc_demo_register_form"/>
             <field name="target">new</field>
         </record>
 
         <menuitem name="Register"
                   id="menu_demo_register"
-                  parent="menu_t4ui_left_demo"
-                  action="action_t4clinical_demo_register"
-                  groups="t4clinical_base.group_t4clinical_ward_manager,t4clinical_base.group_t4clinical_dev,base.user_root"/>    
+                  parent="menu_nhui_left_demo"
+                  action="action_nhc_demo_register"
+                  groups="nh_clinical_base.group_nhc_ward_manager,nh_clinical_base.group_nhc_dev,base.user_root"/>    
 
 
-         <record model="ir.ui.view" id="view_t4clinical_demo_discharge_form">
-            <field name="name">t4.clinical.demo.discharge.form</field>
-            <field name="model">t4.clinical.demo.discharge</field>
+         <record model="ir.ui.view" id="view_nhc_demo_discharge_form">
+            <field name="name">nh.clinical.demo.discharge.form</field>
+            <field name="model">nh.clinical.demo.discharge</field>
             <field name="arch" type="xml">
                 <form string="Discharge">
 
@@ -64,26 +64,26 @@
         </record>
 
         
-        <record model="ir.actions.act_window" id="action_t4clinical_demo_discharge" >
+        <record model="ir.actions.act_window" id="action_nhc_demo_discharge" >
             <field name="name">Discharge</field>
-            <field name="res_model">t4.clinical.demo.discharge</field>
+            <field name="res_model">nh.clinical.demo.discharge</field>
             <field name="view_type">form</field>
             <field name="view_mode">form</field>
-            <field name="view_id" ref="view_t4clinical_demo_discharge_form"/>
+            <field name="view_id" ref="view_nhc_demo_discharge_form"/>
             <field name="target">new</field>
         </record>
 
         <menuitem name="Discharge"
                   id="menu_demo_discharge"
-                  parent="menu_t4ui_left_demo"
-                  action="action_t4clinical_demo_discharge"
-                  groups="t4clinical_base.group_t4clinical_ward_manager,t4clinical_base.group_t4clinical_dev,base.user_root"/>
+                  parent="menu_nhui_left_demo"
+                  action="action_nhc_demo_discharge"
+                  groups="nh_clinical_base.group_nhc_ward_manager,nh_clinical_base.group_nhc_dev,base.user_root"/>
 
 
 
-         <record model="ir.ui.view" id="view_t4clinical_demo_placement_form">
-            <field name="name">t4.clinical.demo.placement.form</field>
-            <field name="model">t4.clinical.demo.placement</field>
+         <record model="ir.ui.view" id="view_nhc_demo_placement_form">
+            <field name="name">nh.clinical.demo.placement.form</field>
+            <field name="model">nh.clinical.demo.placement</field>
             <field name="arch" type="xml">
                 <form string="Placement">
 
@@ -104,25 +104,25 @@
         </record>
 
         
-        <record model="ir.actions.act_window" id="action_t4clinical_demo_placement" >
+        <record model="ir.actions.act_window" id="action_nhc_demo_placement" >
             <field name="name">Register-Place</field>
-            <field name="res_model">t4.clinical.demo.placement</field>
+            <field name="res_model">nh.clinical.demo.placement</field>
             <field name="view_type">form</field>
             <field name="view_mode">form</field>
-            <field name="view_id" ref="view_t4clinical_demo_placement_form"/>
+            <field name="view_id" ref="view_nhc_demo_placement_form"/>
             <field name="target">new</field>
         </record>
 
         <menuitem name="Register-Place"
                   id="menu_demo_register_place"
-                  parent="menu_t4ui_left_demo"
-                  action="action_t4clinical_demo_placement"
-                  groups="t4clinical_base.group_t4clinical_ward_manager,t4clinical_base.group_t4clinical_dev,base.user_root"/>
+                  parent="menu_nhui_left_demo"
+                  action="action_nhc_demo_placement"
+                  groups="nh_clinical_base.group_nhc_ward_manager,nh_clinical_base.group_nhc_dev,base.user_root"/>
                   
                   
-         <record model="ir.ui.view" id="view_t4clinical_demo_user_form">
-            <field name="name">t4.clinical.demo.user.form</field>
-            <field name="model">t4.clinical.demo.user</field>
+         <record model="ir.ui.view" id="view_nhc_demo_user_form">
+            <field name="name">nh.clinical.demo.user.form</field>
+            <field name="model">nh.clinical.demo.user</field>
             <field name="arch" type="xml">
                 <form string="User">
 					Name<field name="name"/>
@@ -137,24 +137,24 @@
         </record>
 
         
-        <record model="ir.actions.act_window" id="action_t4clinical_demo_user" >
+        <record model="ir.actions.act_window" id="action_nhc_demo_user" >
             <field name="name">User</field>
-            <field name="res_model">t4.clinical.demo.user</field>
+            <field name="res_model">nh.clinical.demo.user</field>
             <field name="view_type">form</field>
             <field name="view_mode">form</field>
-            <field name="view_id" ref="view_t4clinical_demo_user_form"/>
+            <field name="view_id" ref="view_nhc_demo_user_form"/>
             <field name="target">new</field>
         </record>
 
         <menuitem name="User"
                   id="menu_demo_user"
-                  parent="menu_t4ui_left_demo"
-                  action="action_t4clinical_demo_user"
-                  groups="t4clinical_base.group_t4clinical_ward_manager,t4clinical_base.group_t4clinical_dev,base.user_root"/>              
+                  parent="menu_nhui_left_demo"
+                  action="action_nhc_demo_user"
+                  groups="nh_clinical_base.group_nhc_ward_manager,nh_clinical_base.group_nhc_dev,base.user_root"/>              
 
-         <record model="ir.ui.view" id="view_t4clinical_demo_location_form">
-            <field name="name">t4.clinical.demo.location.form</field>
-            <field name="model">t4.clinical.demo.location</field>
+         <record model="ir.ui.view" id="view_nhc_demo_location_form">
+            <field name="name">nh.clinical.demo.location.form</field>
+            <field name="model">nh.clinical.demo.location</field>
             <field name="arch" type="xml">
                 <form string="Location">
 					Name<field name="name"/>
@@ -167,19 +167,19 @@
             </field>
         </record>
 
-        <record model="ir.actions.act_window" id="action_t4clinical_demo_location" >
+        <record model="ir.actions.act_window" id="action_nhc_demo_location" >
             <field name="name">Location</field>
-            <field name="res_model">t4.clinical.demo.location</field>
+            <field name="res_model">nh.clinical.demo.location</field>
             <field name="view_type">form</field>
             <field name="view_mode">form</field>
-            <field name="view_id" ref="view_t4clinical_demo_location_form"/>
+            <field name="view_id" ref="view_nhc_demo_location_form"/>
             <field name="target">new</field>
         </record>
 
         <menuitem name="Location"
                   id="menu_demo_location"
-                  parent="menu_t4ui_left_demo"
-                  action="action_t4clinical_demo_location"
-                  groups="t4clinical_base.group_t4clinical_ward_manager,t4clinical_base.group_t4clinical_dev,base.user_root"/> 
+                  parent="menu_nhui_left_demo"
+                  action="action_nhc_demo_location"
+                  groups="nh_clinical_base.group_nhc_ward_manager,nh_clinical_base.group_nhc_dev,base.user_root"/> 
 	</data>
 </openerp>

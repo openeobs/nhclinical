@@ -5,13 +5,13 @@
         <menuitem name="Demo Activity Data"
                   sequence="100"
                   id="menu_demo_activity_data"
-                  parent="t4clinical_base.menu_t4_clinical"
-                  groups="t4clinical_base.group_t4clinical_ward_manager,t4clinical_base.group_t4clinical_hca,t4clinical_base.group_t4clinical_doctor,t4clinical_base.group_t4clinical_dev,base.user_root"/>
+                  parent="nh_clinical_base.menu_nh_clinical"
+                  groups="nh_clinical_base.group_nhc_ward_manager,nh_clinical_base.group_nhc_hca,nh_clinical_base.group_nhc_doctor,nh_clinical_base.group_nhc_dev,base.user_root"/>
 
     
-         <record model="ir.ui.view" id="view_t4clinical_demo_adt_patient_register_tree">
-            <field name="name">view_t4clinical_demo_adt_patient_register_tree</field>
-            <field name="model">t4.clinical.adt.patient.register</field>
+         <record model="ir.ui.view" id="view_nhc_demo_adt_patient_register_tree">
+            <field name="name">view_nhc_demo_adt_patient_register_tree</field>
+            <field name="model">nh.clinical.adt.patient.register</field>
             <field name="arch" type="xml">
                 <tree string="adt register">
 					<field name="dob"/>
@@ -26,9 +26,9 @@
             </field>
         </record>
 
-         <record model="ir.ui.view" id="view_t4clinical_demo_adt_patient_register_form">
-            <field name="name">view_t4clinical_demo_adt_patient_register_form</field>
-            <field name="model">t4.clinical.adt.patient.register</field>
+         <record model="ir.ui.view" id="view_nhc_demo_adt_patient_register_form">
+            <field name="name">view_nhc_demo_adt_patient_register_form</field>
+            <field name="model">nh.clinical.adt.patient.register</field>
             <field name="arch" type="xml">
                 <form string="adt register">
 					<field name="dob"/>
@@ -43,9 +43,9 @@
             </field>
         </record>
         
-        <record model="ir.actions.act_window" id="action_t4clinical_demo_adt_patient_register" >
+        <record model="ir.actions.act_window" id="action_nhc_demo_adt_patient_register" >
             <field name="name">ADT Patient Register</field>
-            <field name="res_model">t4.clinical.adt.patient.register</field>
+            <field name="res_model">nh.clinical.adt.patient.register</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
         </record>
@@ -53,12 +53,12 @@
         <menuitem name="ADT Patient Register"
                   id="menu_demo_adt_patient_register"
                   parent="menu_demo_activity_data"
-                  action="action_t4clinical_demo_adt_patient_register"
-                  groups="t4clinical_base.group_t4clinical_ward_manager,t4clinical_base.group_t4clinical_dev,base.user_root"/>    
+                  action="action_nhc_demo_adt_patient_register"
+                  groups="nh_clinical_base.group_nhc_ward_manager,nh_clinical_base.group_nhc_dev,base.user_root"/>    
                   
-         <record model="ir.ui.view" id="view_t4clinical_demo_adt_patient_admit_tree">
-            <field name="name">view_t4clinical_demo_adt_patient_admit_tree</field>
-            <field name="model">t4.clinical.adt.patient.admit</field>
+         <record model="ir.ui.view" id="view_nhc_demo_adt_patient_admit_tree">
+            <field name="name">view_nhc_demo_adt_patient_admit_tree</field>
+            <field name="model">nh.clinical.adt.patient.admit</field>
             <field name="arch" type="xml">
                 <tree string="adt admit">
                 	<field name="suggested_location_id"/>
@@ -76,9 +76,9 @@
             </field>
         </record>
 
-         <record model="ir.ui.view" id="view_t4clinical_demo_adt_patient_admit_form">
-            <field name="name">view_t4clinical_demo_adt_patient_admit_form</field>
-            <field name="model">t4.clinical.adt.patient.admit</field>
+         <record model="ir.ui.view" id="view_nhc_demo_adt_patient_admit_form">
+            <field name="name">view_nhc_demo_adt_patient_admit_form</field>
+            <field name="model">nh.clinical.adt.patient.admit</field>
             <field name="arch" type="xml">
                 <form string="adt admit">
                 	<field name="suggested_location_id"/>
@@ -96,9 +96,9 @@
             </field>
         </record>
         
-        <record model="ir.actions.act_window" id="action_t4clinical_demo_adt_patient_admit" >
+        <record model="ir.actions.act_window" id="action_nhc_demo_adt_patient_admit" >
             <field name="name">ADT Patient admit</field>
-            <field name="res_model">t4.clinical.adt.patient.admit</field>
+            <field name="res_model">nh.clinical.adt.patient.admit</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
         </record>
@@ -106,12 +106,12 @@
         <menuitem name="ADT Patient Admit"
                   id="menu_demo_adt_patient_admit"
                   parent="menu_demo_activity_data"
-                  action="action_t4clinical_demo_adt_patient_admit"
-                  groups="t4clinical_base.group_t4clinical_ward_manager,t4clinical_base.group_t4clinical_dev,base.user_root"/>    
+                  action="action_nhc_demo_adt_patient_admit"
+                  groups="nh_clinical_base.group_nhc_ward_manager,nh_clinical_base.group_nhc_dev,base.user_root"/>    
                   
-         <record model="ir.ui.view" id="view_t4clinical_demo_adt_patient_discharge_tree">
-            <field name="name">view_t4clinical_demo_adt_patient_discharge_tree</field>
-            <field name="model">t4.clinical.adt.patient.discharge</field>
+         <record model="ir.ui.view" id="view_nhc_demo_adt_patient_discharge_tree">
+            <field name="name">view_nhc_demo_adt_patient_discharge_tree</field>
+            <field name="model">nh.clinical.adt.patient.discharge</field>
             <field name="arch" type="xml">
                 <tree string="adt discharge">
 
@@ -121,9 +121,9 @@
             </field>
         </record>
 
-         <record model="ir.ui.view" id="view_t4clinical_demo_adt_patient_discharge_form">
-            <field name="name">view_t4clinical_demo_adt_patient_discharge_form</field>
-            <field name="model">t4.clinical.adt.patient.discharge</field>
+         <record model="ir.ui.view" id="view_nhc_demo_adt_patient_discharge_form">
+            <field name="name">view_nhc_demo_adt_patient_discharge_form</field>
+            <field name="model">nh.clinical.adt.patient.discharge</field>
             <field name="arch" type="xml">
                 <form string="adt admit">
     
@@ -133,9 +133,9 @@
             </field>
         </record>
         
-        <record model="ir.actions.act_window" id="action_t4clinical_demo_adt_patient_discharge" >
+        <record model="ir.actions.act_window" id="action_nhc_demo_adt_patient_discharge" >
             <field name="name">ADT Patient discharge</field>
-            <field name="res_model">t4.clinical.adt.patient.discharge</field>
+            <field name="res_model">nh.clinical.adt.patient.discharge</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
         </record>
@@ -143,12 +143,12 @@
         <menuitem name="ADT Patient discharge"
                   id="menu_demo_adt_patient_discharge"
                   parent="menu_demo_activity_data"
-                  action="action_t4clinical_demo_adt_patient_discharge"
-                  groups="t4clinical_base.group_t4clinical_ward_manager,t4clinical_base.group_t4clinical_dev,base.user_root"/>                           
+                  action="action_nhc_demo_adt_patient_discharge"
+                  groups="nh_clinical_base.group_nhc_ward_manager,nh_clinical_base.group_nhc_dev,base.user_root"/>                           
 
-         <record model="ir.ui.view" id="view_t4clinical_demo_patient_admission_tree">
-            <field name="name">view_t4clinical_demo_patient_admission_tree</field>
-            <field name="model">t4.clinical.patient.admission</field>
+         <record model="ir.ui.view" id="view_nhc_demo_patient_admission_tree">
+            <field name="name">view_nhc_demo_patient_admission_tree</field>
+            <field name="model">nh.clinical.patient.admission</field>
             <field name="arch" type="xml">
                 <tree string="Admission">
                 	<field name="suggested_location_id"/>
@@ -159,9 +159,9 @@
             </field>
         </record>
 
-         <record model="ir.ui.view" id="view_t4clinical_demo_patient_admission_form">
-            <field name="name">view_t4clinical_demo_patient_admission_form</field>
-            <field name="model">t4.clinical.patient.admission</field>
+         <record model="ir.ui.view" id="view_nhc_demo_patient_admission_form">
+            <field name="name">view_nhc_demo_patient_admission_form</field>
+            <field name="model">nh.clinical.patient.admission</field>
             <field name="arch" type="xml">
                 <form string="Admission">
                 	<field name="suggested_location_id"/>
@@ -172,9 +172,9 @@
             </field>
         </record>
         
-        <record model="ir.actions.act_window" id="action_t4clinical_demo_patient_admission" >
+        <record model="ir.actions.act_window" id="action_nhc_demo_patient_admission" >
             <field name="name">Patient Admission</field>
-            <field name="res_model">t4.clinical.patient.admission</field>
+            <field name="res_model">nh.clinical.patient.admission</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
         </record>
@@ -182,13 +182,13 @@
         <menuitem name="Patient Admission"
                   id="menu_demo_patient_admission"
                   parent="menu_demo_activity_data"
-                  action="action_t4clinical_demo_patient_admission"
-                  groups="t4clinical_base.group_t4clinical_ward_manager,t4clinical_base.group_t4clinical_dev,base.user_root"/>   
+                  action="action_nhc_demo_patient_admission"
+                  groups="nh_clinical_base.group_nhc_ward_manager,nh_clinical_base.group_nhc_dev,base.user_root"/>   
                   
  
-          <record model="ir.ui.view" id="view_t4clinical_demo_spell_tree">
-            <field name="name">view_t4clinical_demo_spell_tree</field>
-            <field name="model">t4.clinical.spell</field>
+          <record model="ir.ui.view" id="view_nhc_demo_spell_tree">
+            <field name="name">view_nhc_demo_spell_tree</field>
+            <field name="model">nh.clinical.spell</field>
             <field name="arch" type="xml">
                 <tree string="Spell">
                 	<field name="patient_id"/>
@@ -198,9 +198,9 @@
             </field>
         </record>
 
-         <record model="ir.ui.view" id="view_t4clinical_demo_spell_form">
-            <field name="name">view_t4clinical_demo_spell_form</field>
-            <field name="model">t4.clinical.spell</field>
+         <record model="ir.ui.view" id="view_nhc_demo_spell_form">
+            <field name="name">view_nhc_demo_spell_form</field>
+            <field name="model">nh.clinical.spell</field>
             <field name="arch" type="xml">
                 <form string="Spell">
                 	<field name="patient_id"/>
@@ -210,9 +210,9 @@
             </field>
         </record>
         
-        <record model="ir.actions.act_window" id="action_t4clinical_demo_spell" >
+        <record model="ir.actions.act_window" id="action_nhc_demo_spell" >
             <field name="name">Spell</field>
-            <field name="res_model">t4.clinical.spell</field>
+            <field name="res_model">nh.clinical.spell</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
         </record>
@@ -220,8 +220,8 @@
         <menuitem name="Spell"
                   id="menu_demo_spell"
                   parent="menu_demo_activity_data"
-                  action="action_t4clinical_demo_spell"
-                  groups="t4clinical_base.group_t4clinical_ward_manager,t4clinical_base.group_t4clinical_dev,base.user_root"/>           
+                  action="action_nhc_demo_spell"
+                  groups="nh_clinical_base.group_nhc_ward_manager,nh_clinical_base.group_nhc_dev,base.user_root"/>           
     
 	</data>
 </openerp>
