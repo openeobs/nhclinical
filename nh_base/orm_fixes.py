@@ -24,7 +24,7 @@ def _read_group_fill_results(self, cr, uid, domain, groupby, groupby_list, aggre
 
     # Grab the list of all groups that should be displayed, including all present groups
     #import pdb; pdb.set_trace()
-# TACTIX4 BEGIN
+# Neova Health BEGIN
     present_group_ids = []
     for result in read_group_result:
         if not isinstance (result[groupby], (list,tuple)):
@@ -32,7 +32,7 @@ def _read_group_fill_results(self, cr, uid, domain, groupby, groupby_list, aggre
             result[groupby] = [result[groupby]]
         else:
             present_group_ids.append(result[groupby][0])
-# TACTIX4 END
+# Neova Health END
 # ORIGINAL         present_group_ids = [x[groupby][0] for x in read_group_result if x[groupby]]
     all_groups,folded = self._group_by_full[groupby](self, cr, uid, present_group_ids, domain,
                                               read_group_order=read_group_order,

@@ -111,7 +111,7 @@ def parse(self, cr, uid, context):
             left, operator, right = leaf.leaf
         field_path = left.split('.', 1)
         field = working_model._columns.get(field_path[0])
-        # TACTIX4 BEGIN
+        # Neova Health BEGIN
         if not working_model._columns.get(field_path[0]) and field_path[0] == 'id':
             """
             field 'id' normally is not in the _columns
@@ -120,7 +120,7 @@ def parse(self, cr, uid, context):
             """
             field = fields.integer('fake id field. quick fix')
             field._obj = working_model._name
-        # TACTIX4 END
+        # Neova Health END
         if field and field._obj:
             relational_model = working_model.pool.get(field._obj)
         else:
