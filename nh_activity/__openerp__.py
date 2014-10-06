@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 {
-    'name': 'T4 Activity',
+    'name': 'NH Activity',
     'version': '0.1',
     'category': 'General',
     'license': 'AGPL-3',
@@ -8,7 +8,7 @@
     'description': """    """,
     'author': 'Tactix4',
     'website': 'http://www.tactix4.com/',
-    'depends': ['mail', 't4base'],
+    'depends': ['mail', 'nh_base'],
     'data': [
              'views/activity_view.xml',           
              'security/ir.model.access.csv'],

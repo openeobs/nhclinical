@@ -1,13 +1,13 @@
 # -*- encoding: utf-8 -*-
 {
-    'name': 'T4 Base',
+    'name': 'NH Base',
     'version': '0.1',
     'category': 'Base',
     'license': 'AGPL-3',
-    'summary': 'T4 Base',
-    'description': """ T4 Base   """,
-    'author': 'Tactix4',
-    'website': 'http://www.tactix4.com/',
+    'summary': 'NH Base',
+    'description': """ NH Base   """,
+    'author': 'Neova Health',
+    'website': 'http://www.neovahealth.co.uk/',
     'depends': [],
     'data': [],
     'demo': [],

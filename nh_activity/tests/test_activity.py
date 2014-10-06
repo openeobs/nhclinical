@@ -36,7 +36,7 @@ class ActivityTest(common.SingleTransactionCase):
 
         cr, uid = self.cr, self.uid
         test_pool = self.registry('test.activity.data.model')      
-        activity_pool = self.registry('t4.activity')
+        activity_pool = self.registry('nh.activity')
         user_pool = self.registry('res.users')
         imd_pool = self.registry('ir.model.data')
         

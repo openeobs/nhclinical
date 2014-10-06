@@ -63,11 +63,11 @@ def data_model_event(callback=None):
     return decorator
 
 
-class t4_activity(orm.Model):
+class nh_activity(orm.Model):
     """ activity
     """
 
-    _name = 't4.activity'
+    _name = 'nh.activity'
     _rec_name = 'summary'
     # _inherit = ['mail.thread']
 
@@ -123,12 +123,12 @@ class t4_activity(orm.Model):
         'summary': fields.char('Summary', size=256),
 
         # hierarchies
-        'parent_id': fields.many2one('t4.activity', 'Parent activity', readonly=True,
+        'parent_id': fields.many2one('nh.activity', 'Parent activity', readonly=True,
                                      help="Business hierarchy"),
-        'child_ids': fields.one2many('t4.activity', 'parent_id', 'Child Activities', readonly=True),
-        'creator_id': fields.many2one('t4.activity', 'Creator activity', readonly=True,
+        'child_ids': fields.one2many('nh.activity', 'parent_id', 'Child Activities', readonly=True),
+        'creator_id': fields.many2one('nh.activity', 'Creator activity', readonly=True,
                                       help="Evolution hierarchy"),
-        'created_ids': fields.one2many('t4.activity', 'creator_id', 'Created Activities', readonly=True),
+        'created_ids': fields.one2many('nh.activity', 'creator_id', 'Created Activities', readonly=True),
         # state
         'notes': fields.text('Notes'),
         'state': fields.selection(_states, 'State', readonly=True),
@@ -176,17 +176,17 @@ class t4_activity(orm.Model):
         data_model_pool = self.pool.get(vals['data_model'])
         except_if(not data_model_pool, msg="data_model does not exist in the model pool!")
         not vals.get('summary') and vals.update({'summary': data_model_pool._description})           
-        activity_id = super(t4_activity, self).create(cr, uid, vals, context)
+        activity_id = super(nh_activity, self).create(cr, uid, vals, context)
         _logger.debug("activity '%s' created, activity.id=%s" % (vals.get('data_model'), activity_id))
         return activity_id
 
     def write(self, cr, uid, ids, vals, context=None):
         if 'state' in vals:
-            cr.execute("select coalesce(max(sequence), 0) from t4_activity")
+            cr.execute("select coalesce(max(sequence), 0) from nh_activity")
             sequence = cr.fetchone()[0] + 1
             vals.update({'sequence': sequence})     
             _logger.debug("Sequence set to: %s" % sequence)    
-        res = super(t4_activity, self).write(cr, uid, ids, vals, context)
+        res = super(nh_activity, self).write(cr, uid, ids, vals, context)
         return res
     
     
@@ -206,7 +206,7 @@ class t4_activity(orm.Model):
             select 
                 id,
                 rank() over (partition by %(partition_by)s order by %(partition_order)s) as rank
-            from t4_activity
+            from nh_activity
             %(where)s
             order by rank %(rank_order)s
             %(limit)s
@@ -318,8 +318,8 @@ class t4_activity(orm.Model):
         return {}
 
 
-class t4_activity_data(orm.AbstractModel):
-    _name = 't4.activity.data'
+class nh_activity_data(orm.AbstractModel):
+    _name = 'nh.activity.data'
     _transitions = {
         'new': ['schedule', 'plan', 'start', 'complete', 'cancel', 'submit', 'assign', 'unassign', 'retrieve',
                 'validate'],
@@ -342,7 +342,7 @@ class t4_activity_data(orm.AbstractModel):
     
     _columns = {
         'name': fields.char('Name', size=256),
-        'activity_id': fields.many2one('t4.activity', "activity"),
+        'activity_id': fields.many2one('nh.activity', "activity"),
         'date_started': fields.related('activity_id', 'date_started', string='Start Time', type='datetime'),
         'date_terminated': fields.related('activity_id', 'date_terminated', string='Terminated Time', type='datetime'),
         'state': fields.related('activity_id', 'state', type='char', string='State', size=64),
@@ -352,13 +352,13 @@ class t4_activity_data(orm.AbstractModel):
     _order = 'id desc'
 
     def create(self, cr, uid, vals, context=None):
-        rec_id = super(t4_activity_data, self).create(cr, uid, vals, context)
+        rec_id = super(nh_activity_data, self).create(cr, uid, vals, context)
         return rec_id
 
     def create_activity(self, cr, uid, vals_activity={}, vals_data={}, context=None):
         assert isinstance(vals_activity, dict), "vals_activity must be a dict, found %" % type(vals_activity)
         assert isinstance(vals_data, dict), "vals_data must be a dict, found %" % type(vals_data)
-        activity_pool = self.pool['t4.activity']
+        activity_pool = self.pool['nh.activity']
         vals_activity.update({'data_model': self._name})
         new_activity_id = activity_pool.create(cr, uid, vals_activity, context)
         vals_data and activity_pool.submit(cr, uid, new_activity_id, vals_data, context)
@@ -367,7 +367,7 @@ class t4_activity_data(orm.AbstractModel):
 
     def submit_ui(self, cr, uid, ids, context=None):
         if context.get('active_id'):
-            activity_pool = self.pool['t4.activity']
+            activity_pool = self.pool['nh.activity']
             activity_pool.write(cr, uid, context['active_id'], {'data_ref': "%s,%s" % (self._name, str(ids[0]))})
             activity = activity_pool.browse(cr, uid, context['active_id'], context)
             activity_pool.update_activity(cr, SUPERUSER_ID, activity.id, context)
@@ -376,7 +376,7 @@ class t4_activity_data(orm.AbstractModel):
 
     def complete_ui(self, cr, uid, ids, context=None):
         if context.get('active_id'):
-            activity_pool = self.pool['t4.activity']
+            activity_pool = self.pool['nh.activity']
             activity_pool.write(cr, uid, context['active_id'], {'data_ref': "%s,%s" % (self._name, str(ids[0]))})
             activity = activity_pool.browse(cr, uid, context['active_id'], context)
             activity_pool.update_activity(cr, SUPERUSER_ID, activity.id, context)
@@ -402,7 +402,7 @@ class t4_activity_data(orm.AbstractModel):
 
     def act_window(self, cr, uid, activity_id, command, context=None):
         activity_id = isinstance(activity_id, (list, tuple)) and activity_id[0] or activity_id      
-        activity_pool = self.pool['t4.activity']
+        activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context)        
         imd_pool = self.pool['ir.model.data']
         model_xmlid = "model_%s" % activity.data_ref._name.replace(".","_")
@@ -414,7 +414,7 @@ class t4_activity_data(orm.AbstractModel):
         view = imd_pool.get_object(cr, uid, model_imd.module, view_xmlid, context)
         except_if(not view, msg="View with xmlid='%s' not found" % view_xmlid)
         ctx = context or {}
-        ctx.update({'t4_source': 't4.activity'})
+        ctx.update({'nh_source': 'nh.activity'})
         aw = {
             'type': 'ir.actions.act_window',
             'view_id': view.id,
@@ -433,7 +433,7 @@ class t4_activity_data(orm.AbstractModel):
         return {}
 
     def start(self, cr, uid, activity_id, context=None):
-        activity_pool = self.pool['t4.activity']
+        activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context)
         except_if(not self.is_action_allowed(activity.state, 'start'),
                   msg="activity of type '%s' can not be started from state '%s'" % (
@@ -443,7 +443,7 @@ class t4_activity_data(orm.AbstractModel):
         return {}
 
     def complete(self, cr, uid, activity_id, context=None):
-        activity_pool = self.pool['t4.activity']
+        activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context)
         except_if(not self.is_action_allowed(activity.state, 'complete'),
                   msg="activity of type '%s' can not be completed from state '%s'" % (
@@ -456,7 +456,7 @@ class t4_activity_data(orm.AbstractModel):
         return {}
 
     def assign(self, cr, uid, activity_id, user_id, context=None):
-        activity_pool = self.pool['t4.activity']
+        activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context)
         except_if(not self.is_action_allowed(activity.state, 'assign'),
                   msg="activity of type '%s' can not be assigned in state '%s'" % (activity.data_model, activity.state))
@@ -467,7 +467,7 @@ class t4_activity_data(orm.AbstractModel):
         return {}
 
     def unassign(self, cr, uid, activity_id, context=None):
-        activity_pool = self.pool['t4.activity']
+        activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context)
         except_if(not self.is_action_allowed(activity.state, 'unassign'),
                   msg="activity of type '%s' can not be unassigned in state '%s'" % (
@@ -481,7 +481,7 @@ class t4_activity_data(orm.AbstractModel):
         return {}
 
     def cancel(self, cr, uid, activity_id, context=None):
-        activity_pool = self.pool['t4.activity']
+        activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context)
         except_if(not self.is_action_allowed(activity.state, 'cancel'),
                   msg="activity of type '%s' can not be cancelled in state '%s'" % (
@@ -493,7 +493,7 @@ class t4_activity_data(orm.AbstractModel):
         return {}
 
     def retrieve(self, cr, uid, activity_id, context=None):
-        activity_pool = self.pool['t4.activity']
+        activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context)
         except_if(not self.is_action_allowed(activity.state, 'retrieve'),
                   msg="Data can't be retrieved from activity of type '%s' in state '%s'" % (
@@ -502,19 +502,19 @@ class t4_activity_data(orm.AbstractModel):
 
 
     def retrieve_read(self, cr, uid, activity_id, context=None):
-        activity_pool = self.pool['t4.activity']
+        activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context)
         model_pool = self.pool[activity.data_model]
         return model_pool.read(cr, uid, activity.data_ref.id, [], context)
 
 
     def retrieve_browse(self, cr, uid, activity_id, context=None):
-        activity_pool = self.pool['t4.activity']
+        activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context)
         return activity.data_ref
 
     def schedule(self, cr, uid, activity_id, date_scheduled=None, context=None):
-        activity_pool = self.pool['t4.activity']
+        activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context=None)
         except_if(not self.is_action_allowed(activity.state, 'schedule'),
                   msg="activity of type '%s' can't be scheduled in state '%s'" % (activity.data_model, activity.state))
@@ -527,7 +527,7 @@ class t4_activity_data(orm.AbstractModel):
         return {}
 
     def submit(self, cr, uid, activity_id, vals, context=None):
-        activity_pool = self.pool['t4.activity']
+        activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context)
         except_if(not self.is_action_allowed(activity.state, 'submit'),
                   msg="Data can't be submitted to activity of type '%s' in state '%s'" % (
