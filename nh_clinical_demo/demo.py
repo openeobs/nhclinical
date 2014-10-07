@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from openerp.osv import orm, fields, osv
-from openerp.addons.t4activity.activity import except_if
+from openerp.addons.nh_activity.activity import except_if
 import logging        
 from pprint import pprint as pp
 _logger = logging.getLogger(__name__)
@@ -13,10 +13,10 @@ def next_seed():
     seed += 1
     return seed
 
-class t4_clinical_demo(orm.Model):    
-    _inherit = 't4.clinical.demo.env'
+class nh_clinical_demo(orm.Model):    
+    _inherit = 'nh.clinical.demo.env'
     def _get_activity_ids(self, cr, uid, ids, field, args, context=None):
-        api = self.pool['t4.clinical.api']
+        api = self.pool['nh.clinical.api']
         pos_env_map = {env.pos_id.id: env.id for env in self.browse(cr, uid, ids)}
         res = {}
         for id, values in api.activity_map(cr, uid, pos_ids=pos_env_map.keys()).items():
@@ -25,26 +25,26 @@ class t4_clinical_demo(orm.Model):
         return res
         
     _columns = {
-        'activity_ids': fields.function(_get_activity_ids, type='many2many', relation='t4.activity', string='Activities', order='write_date'),
+        'activity_ids': fields.function(_get_activity_ids, type='many2many', relation='nh.activity', string='Activities', order='write_date'),
     }
     def create(self, cr, uid, values, context=None):
 
-        env_id = super(t4_clinical_demo, self).create(cr, uid, values, context)
+        env_id = super(nh_clinical_demo, self).create(cr, uid, values, context)
 
         return env_id
     
     def button_adt_patient_register(self, cr, uid, ids, context=None):
         env_id = ids[0]
         adt_user_id = self.get_adt_user_ids(cr, uid, env_id)[0]
-        register_activity = self.create_complete(cr, adt_user_id, env_id, 't4.clinical.adt.patient.register')
+        register_activity = self.create_complete(cr, adt_user_id, env_id, 'nh.clinical.adt.patient.register')
         return {'type': 'ir.actions.act_window_close'}
     
     def button_adt_patient_admit(self, cr, uid, ids, context=None):
         env_id = ids[0]
         adt_user_id = self.get_adt_user_ids(cr, uid, env_id)[0]
-        register_activity = self.create_complete(cr, adt_user_id, env_id, 't4.clinical.adt.patient.register')
+        register_activity = self.create_complete(cr, adt_user_id, env_id, 'nh.clinical.adt.patient.register')
         admit_data = {'other_identifier': register_activity.data_ref.other_identifier}
-        admit_activity = self.create_complete(cr, adt_user_id, env_id, 't4.clinical.adt.patient.admit', data_vals=admit_data)
+        admit_activity = self.create_complete(cr, adt_user_id, env_id, 'nh.clinical.adt.patient.admit', data_vals=admit_data)
         return {'type': 'ir.actions.act_window_close'}
     
 class demo(orm.AbstractModel):
@@ -61,7 +61,7 @@ class demo(orm.AbstractModel):
                 'parent_id': parent_id        
                }
         
-        location_id = self.pool['t4.clinical.location'].create(cr, uid, data)
+        location_id = self.pool['nh.clinical.location'].create(cr, uid, data)
         return location_id
 
     def create_bed(self, cr, uid, parent_id):
@@ -74,12 +74,12 @@ class demo(orm.AbstractModel):
                 'usage': 'bed', 
                 'parent_id': parent_id        
                }
-        location_id = self.pool['t4.clinical.location'].create(cr, uid, data)
+        location_id = self.pool['nh.clinical.location'].create(cr, uid, data)
         return location_id
 
     def create_pos(self, cr, uid):
-        pos_pool = self.pool['t4.clinical.pos']
-        location_pool = self.pool['t4.clinical.location']
+        pos_pool = self.pool['nh.clinical.pos']
+        location_pool = self.pool['nh.clinical.location']
         fake.seed(next_seed())
         # POS location 
         code = "POS"+str(fake.random_int(min=1, max=9))
@@ -105,8 +105,8 @@ class demo(orm.AbstractModel):
     
     def adt_patient_register(self, cr, uid):
         res = {}
-        activity_pool = self.pool['t4.activity']
-        register_pool = self.pool['t4.clinical.adt.patient.register']
+        activity_pool = self.pool['nh.activity']
+        register_pool = self.pool['nh.clinical.adt.patient.register']
         fake.seed(next_seed()) 
         gender = fake.random_element(('M','F'))
         other_identifier = str(fake.random_int(min=1000001, max=9999999))
@@ -129,7 +129,7 @@ class demo(orm.AbstractModel):
     
     def adt_patient_update(self, cr, uid, patient_id):
         # FIXME! to be done via adt.patient.update 
-        patient_pool = self.pool['t4.clinical.patient']
+        patient_pool = self.pool['nh.clinical.patient']
         fake.seed(next_seed())
         data = {}
         data['street'] = fake.street_address()
@@ -142,10 +142,10 @@ class demo(orm.AbstractModel):
      
     def adt_patient_admit(self, cr, uid, patient_id, suggested_location_ids):
         res = {}
-        patient_pool = self.pool['t4.clinical.patient']
-        location_pool = self.pool['t4.clinical.location']
-        admit_pool = self.pool['t4.clinical.adt.patient.admit']
-        activity_pool = self.pool['t4.activity']
+        patient_pool = self.pool['nh.clinical.patient']
+        location_pool = self.pool['nh.clinical.location']
+        admit_pool = self.pool['nh.clinical.adt.patient.admit']
+        activity_pool = self.pool['nh.activity']
         fake.seed(next_seed())
         suggested_location_names = [location.name for location in location_pool.browse(cr, uid, suggested_location_ids)]
         patient = patient_pool.browse(cr, uid, patient_id)
@@ -164,9 +164,9 @@ class demo(orm.AbstractModel):
     
     def complete_placement(self, cr, uid, placement_activity_id):
         res = {}
-        patient_pool = self.pool['t4.clinical.patient']
-        activity_pool = self.pool['t4.activity']
-        location_pool = self.pool['t4.clinical.location']
+        patient_pool = self.pool['nh.clinical.patient']
+        activity_pool = self.pool['nh.activity']
+        location_pool = self.pool['nh.clinical.location']
         fake.seed(next_seed())
         placement_activity = activity_pool.browse(cr, uid, placement_activity_id)
         available_bed_location_ids = location_pool.get_available_location_ids(cr, uid, ['bed'])
@@ -191,7 +191,7 @@ class demo(orm.AbstractModel):
     def complete_ews(self, cr, uid, ews_activity_id):
         res = {}
         data = {}
-        activity_pool = self.pool['t4.activity']
+        activity_pool = self.pool['nh.activity']
         fake.seed(next_seed())
         data = {
                 'respiration_rate': fake.random_int(min=10, max=23),
@@ -211,8 +211,8 @@ class demo(orm.AbstractModel):
 
     def adt_patient_discharge(self, cr, uid, patient_id):
         res = {}
-        activity_pool = self.pool['t4.activity']
-        discharge_pool = self.pool['t4.clinical.patient.discharge']
+        activity_pool = self.pool['nh.activity']
+        discharge_pool = self.pool['nh.clinical.patient.discharge']
         discharge_activity_id = discharge_pool.create_activity(cr, uid, {}, {'patient_id': patient_id})
         discharge_complete_res = activity_pool.complete(cr, uid, discharge_activity_id)
         res.update(discharge_complete_res)
@@ -222,7 +222,7 @@ class demo(orm.AbstractModel):
         user_pool = self.pool['res.users']
         imd_pool = self.pool['ir.model.data']
         fake.seed(next_seed())
-        adt_group = imd_pool.get_object(cr, uid, "t4clinical_base", "group_t4clinical_adt")   
+        adt_group = imd_pool.get_object(cr, uid, "nh_clinical_base", "group_nhc_adt")
         name = fake.first_name() 
         data = {
             'name': name,
@@ -238,7 +238,7 @@ class demo(orm.AbstractModel):
         user_pool = self.pool['res.users']
         imd_pool = self.pool['ir.model.data']
         fake.seed(next_seed())
-        nurse_group = imd_pool.get_object(cr, uid, "t4clinical_base", "group_t4clinical_nurse")   
+        nurse_group = imd_pool.get_object(cr, uid, "nh_clinical_base", "group_nhc_nurse")
         name = fake.first_name() 
         data = {
             'name': name,
@@ -261,20 +261,20 @@ class demo(orm.AbstractModel):
         BED_QTY = 2
         BED_PER_WARD = 2
         
-        api_pool = self.pool['t4.clinical.api']
-        ews_pool = self.pool['t4.clinical.patient.observation.ews']
-        register_pool = self.pool['t4.clinical.adt.patient.register']
-        admit_pool = self.pool['t4.clinical.adt.patient.admit']
-        activity_pool = self.pool['t4.activity']
-        placement_pool = self.pool['t4.clinical.patient.placement']
-        discharge_pool = self.pool['t4.clinical.patient.discharge']
-        spell_pool = self.pool['t4.clinical.spell']
-        location_pool = self.pool['t4.clinical.location']
+        api_pool = self.pool['nh.clinical.api']
+        ews_pool = self.pool['nh.clinical.patient.observation.ews']
+        register_pool = self.pool['nh.clinical.adt.patient.register']
+        admit_pool = self.pool['nh.clinical.adt.patient.admit']
+        activity_pool = self.pool['nh.activity']
+        placement_pool = self.pool['nh.clinical.patient.placement']
+        discharge_pool = self.pool['nh.clinical.patient.discharge']
+        spell_pool = self.pool['nh.clinical.spell']
+        location_pool = self.pool['nh.clinical.location']
         user_pool = self.pool['res.users']    
-        patient_pool = self.pool['t4.clinical.patient']
-        pos_pool = self.pool['t4.clinical.pos']
+        patient_pool = self.pool['nh.clinical.patient']
+        pos_pool = self.pool['nh.clinical.pos']
         imd_pool = self.pool['ir.model.data']
-        adt_user = imd_pool.get_object(cr, uid, "t4clinical_demo", "demo_user_adt_uhg")   
+        adt_user = imd_pool.get_object(cr, uid, "nh_clinical_demo", "demo_user_adt_uhg")
         
         # Create POS
         pos_id = self.create_pos(cr, uid)
@@ -306,7 +306,7 @@ class demo(orm.AbstractModel):
        
         # Admit Patients
         admit_res = [self.adt_patient_admit(cr, adt_user.id, patient_id, ward_location_ids) for patient_id in patient_ids[:ADMIT_QTY]]
-        placement_activity_ids = [res['t4.clinical.patient.placement'] for res in admit_res[:ADMIT_QTY]]
+        placement_activity_ids = [res['nh.clinical.patient.placement'] for res in admit_res[:ADMIT_QTY]]
         pp(admit_res)
         
         #Complete Placements
@@ -316,8 +316,8 @@ class demo(orm.AbstractModel):
         # EWS
         def ews_ids():
             """ Generator """  
-            spell_activity_ids = [a['t4.clinical.spell'] for a in admit_res]
-            ews_domain = [['data_model','=','t4.clinical.patient.observation.ews'], 
+            spell_activity_ids = [a['nh.clinical.spell'] for a in admit_res]
+            ews_domain = [['data_model','=','nh.clinical.patient.observation.ews'], 
                           ['state','in',['new','scheduled']],
                           ['parent_id','in',spell_activity_ids]]
             for i in range(1, EWS_QTY): 
