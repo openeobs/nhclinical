@@ -289,7 +289,7 @@ class nh_clinical_demo_env(orm.Model):
         user_pool = self.pool['res.users']
         env = self.browse(cr, SUPERUSER_ID, env_id)
         assert env.pos_id, "POS is not created/set in the env id=%s" % env_id
-        group = imd_pool.get_object(cr, uid, "nh_clinical_base", "group_nhc_ward_manager")
+        group = imd_pool.get_object(cr, uid, "nh_clinical", "group_nhc_ward_manager")
         location_ids = location_pool.search(cr, uid, [['usage','=','ward'],['pos_id','=',env.pos_id.id]])
         user_ids = []
         for i in range(env.ward_manager_user_qty):
@@ -316,7 +316,7 @@ class nh_clinical_demo_env(orm.Model):
         user_pool = self.pool['res.users']
         env = self.browse(cr, SUPERUSER_ID, env_id)
         assert env.pos_id, "POS is not created/set in the env id=%s" % env_id
-        group = imd_pool.get_object(cr, uid, "nh_clinical_base", "group_nhc_nurse")
+        group = imd_pool.get_object(cr, uid, "nh_clinical", "group_nhc_nurse")
         location_ids = location_pool.search(cr, uid, [['usage','=','ward'],['pos_id','=',env.pos_id.id]])
         user_ids = []
         for i in range(env.nurse_user_qty):
@@ -339,7 +339,7 @@ class nh_clinical_demo_env(orm.Model):
         user_pool = self.pool['res.users']
         env = self.browse(cr, SUPERUSER_ID, env_id)
         assert env.pos_id, "POS is not created/set in the env id=%s" % env_id
-        group = imd_pool.get_object(cr, uid, "nh_clinical_base", "group_nhc_adt")
+        group = imd_pool.get_object(cr, uid, "nh_clinical", "group_nhc_adt")
         user_ids = []
         for i in range(env.adt_user_qty):
             data = {

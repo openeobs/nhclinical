@@ -129,7 +129,7 @@ class BaseTest(SingleTransactionCase):
 
     def create_adt_user(self, pos_id):
         fake.seed(next_seed())
-        adt_group = imd_pool.get_object(cr, uid, "nh_clinical_base", "group_nhc_adt")
+        adt_group = imd_pool.get_object(cr, uid, "nh_clinical", "group_nhc_adt")
         pos = pos_pool.browse(cr, uid, pos_id) 
         data = self.data_adt_user({'pos_id': pos_id})
         user_id = user_pool.create(cr, uid, data)
@@ -207,7 +207,7 @@ class BaseTest(SingleTransactionCase):
     
     def data_adt_user(self, data={}):
         fake.seed(next_seed())
-        adt_group = imd_pool.get_object(cr, uid, "nh_clinical_base", "group_nhc_adt")
+        adt_group = imd_pool.get_object(cr, uid, "nh_clinical", "group_nhc_adt")
         pos = pos_pool.browse(cr, uid, pos_id) 
         res = {
             'name': data.get('name') or "ADT user for %s" % pos.name,
@@ -245,7 +245,7 @@ class BaseTest(SingleTransactionCase):
     
     def data_nurse_user(self, location_ids, data={}):
         fake.seed(next_seed())
-        nurse_group = imd_pool.get_object(cr, uid, "nh_clinical_base", "group_nhc_nurse")
+        nurse_group = imd_pool.get_object(cr, uid, "nh_clinical", "group_nhc_nurse")
         name = fake.first_name()
         res = {
             'name': data.get('name') or "Nurse %s" % name,

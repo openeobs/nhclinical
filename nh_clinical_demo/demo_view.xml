@@ -5,8 +5,8 @@
         <menuitem name="Demo Wizards"
                   sequence="99"
                   id="menu_nhui_left_demo"
-                  parent="nh_clinical_base.menu_nh_clinical"
-                  groups="nh_clinical_base.group_nhc_ward_manager,nh_clinical_base.group_nhc_hca,nh_clinical_base.group_nhc_doctor,nh_clinical_base.group_nhc_dev,base.user_root"/>
+                  parent="nh_clinical.menu_nh_clinical"
+                  groups="nh_clinical.group_nhc_ward_manager,nh_clinical.group_nhc_hca,nh_clinical.group_nhc_doctor,nh_clinical.group_nhc_dev,base.user_root"/>
 
     
          <record model="ir.ui.view" id="view_nhc_demo_register_form">
@@ -44,7 +44,7 @@
                   id="menu_demo_register"
                   parent="menu_nhui_left_demo"
                   action="action_nhc_demo_register"
-                  groups="nh_clinical_base.group_nhc_ward_manager,nh_clinical_base.group_nhc_dev,base.user_root"/>    
+                  groups="nh_clinical.group_nhc_ward_manager,nh_clinical.group_nhc_dev,base.user_root"/>    
 
 
          <record model="ir.ui.view" id="view_nhc_demo_discharge_form">
@@ -77,7 +77,7 @@
                   id="menu_demo_discharge"
                   parent="menu_nhui_left_demo"
                   action="action_nhc_demo_discharge"
-                  groups="nh_clinical_base.group_nhc_ward_manager,nh_clinical_base.group_nhc_dev,base.user_root"/>
+                  groups="nh_clinical.group_nhc_ward_manager,nh_clinical.group_nhc_dev,base.user_root"/>
 
 
 
@@ -117,7 +117,7 @@
                   id="menu_demo_register_place"
                   parent="menu_nhui_left_demo"
                   action="action_nhc_demo_placement"
-                  groups="nh_clinical_base.group_nhc_ward_manager,nh_clinical_base.group_nhc_dev,base.user_root"/>
+                  groups="nh_clinical.group_nhc_ward_manager,nh_clinical.group_nhc_dev,base.user_root"/>
                   
                   
          <record model="ir.ui.view" id="view_nhc_demo_user_form">
@@ -150,7 +150,7 @@
                   id="menu_demo_user"
                   parent="menu_nhui_left_demo"
                   action="action_nhc_demo_user"
-                  groups="nh_clinical_base.group_nhc_ward_manager,nh_clinical_base.group_nhc_dev,base.user_root"/>              
+                  groups="nh_clinical.group_nhc_ward_manager,nh_clinical.group_nhc_dev,base.user_root"/>              
 
          <record model="ir.ui.view" id="view_nhc_demo_location_form">
             <field name="name">nh.clinical.demo.location.form</field>
@@ -180,6 +180,6 @@
                   id="menu_demo_location"
                   parent="menu_nhui_left_demo"
                   action="action_nhc_demo_location"
-                  groups="nh_clinical_base.group_nhc_ward_manager,nh_clinical_base.group_nhc_dev,base.user_root"/> 
+                  groups="nh_clinical.group_nhc_ward_manager,nh_clinical.group_nhc_dev,base.user_root"/> 
 	</data>
 </openerp>

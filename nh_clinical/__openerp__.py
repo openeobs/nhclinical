@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 {
-    'name': 'NH Clinical Improved',
+    'name': 'NH Clinical Core',
     'version': '0.1',
     'category': 'Clinical',
     'license': 'AGPL-3',

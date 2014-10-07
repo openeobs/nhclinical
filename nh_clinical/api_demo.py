@@ -664,7 +664,7 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
     
     def user_hca(self, cr, uid, values={}):
         imd_pool = self.pool['ir.model.data']
-        group = imd_pool.get_object(cr, uid, "nh_clinical_base", "group_nhc_hca")
+        group = imd_pool.get_object(cr, uid, "nh_clinical", "group_nhc_hca")
         v = self._user_base(cr, uid)
         v.update({'groups_id': [(4, group.id)]})  
         v.update(values)
@@ -672,7 +672,7 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
 
     def user_nurse(self, cr, uid, values={}):
         imd_pool = self.pool['ir.model.data']
-        group = imd_pool.get_object(cr, uid, "nh_clinical_base", "group_nhc_nurse")
+        group = imd_pool.get_object(cr, uid, "nh_clinical", "group_nhc_nurse")
         v = self._user_base(cr, uid)
         v.update({'groups_id': [(4, group.id)]})  
         v.update(values)
@@ -680,7 +680,7 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
 
     def user_ward_manager(self, cr, uid, values={}):
         imd_pool = self.pool['ir.model.data']
-        group = imd_pool.get_object(cr, uid, "nh_clinical_base", "group_nhc_ward_manager")
+        group = imd_pool.get_object(cr, uid, "nh_clinical", "group_nhc_ward_manager")
         v = self._user_base(cr, uid)
         v.update({'groups_id': [(4, group.id)]})  
         v.update(values)
@@ -688,7 +688,7 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
 
     def user_doctor(self, cr, uid, values={}):
         imd_pool = self.pool['ir.model.data']
-        group = imd_pool.get_object(cr, uid, "nh_clinical_base", "group_nhc_doctor")
+        group = imd_pool.get_object(cr, uid, "nh_clinical", "group_nhc_doctor")
         v = self._user_base(cr, uid)
         v.update({'groups_id': [(4, group.id)]})  
         v.update(values)
@@ -696,7 +696,7 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
 
     def user_adt(self, cr, uid, values={}):
         imd_pool = self.pool['ir.model.data']
-        group = imd_pool.get_object(cr, uid, "nh_clinical_base", "group_nhc_adt")
+        group = imd_pool.get_object(cr, uid, "nh_clinical", "group_nhc_adt")
         v = self._user_base(cr, uid)
         v.update({'groups_id': [(4, group.id)]})  
         if 'pos_id' not in values:

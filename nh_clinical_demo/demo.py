@@ -222,7 +222,7 @@ class demo(orm.AbstractModel):
         user_pool = self.pool['res.users']
         imd_pool = self.pool['ir.model.data']
         fake.seed(next_seed())
-        adt_group = imd_pool.get_object(cr, uid, "nh_clinical_base", "group_nhc_adt")
+        adt_group = imd_pool.get_object(cr, uid, "nh_clinical", "group_nhc_adt")
         name = fake.first_name() 
         data = {
             'name': name,
@@ -238,7 +238,7 @@ class demo(orm.AbstractModel):
         user_pool = self.pool['res.users']
         imd_pool = self.pool['ir.model.data']
         fake.seed(next_seed())
-        nurse_group = imd_pool.get_object(cr, uid, "nh_clinical_base", "group_nhc_nurse")
+        nurse_group = imd_pool.get_object(cr, uid, "nh_clinical", "group_nhc_nurse")
         name = fake.first_name() 
         data = {
             'name': name,

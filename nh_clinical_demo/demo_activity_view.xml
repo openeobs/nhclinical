@@ -5,8 +5,8 @@
         <menuitem name="Demo Activity Data"
                   sequence="100"
                   id="menu_demo_activity_data"
-                  parent="nh_clinical_base.menu_nh_clinical"
-                  groups="nh_clinical_base.group_nhc_ward_manager,nh_clinical_base.group_nhc_hca,nh_clinical_base.group_nhc_doctor,nh_clinical_base.group_nhc_dev,base.user_root"/>
+                  parent="nh_clinical.menu_nh_clinical"
+                  groups="nh_clinical.group_nhc_ward_manager,nh_clinical.group_nhc_hca,nh_clinical.group_nhc_doctor,nh_clinical.group_nhc_dev,base.user_root"/>
 
     
          <record model="ir.ui.view" id="view_nhc_demo_adt_patient_register_tree">
@@ -54,7 +54,7 @@
                   id="menu_demo_adt_patient_register"
                   parent="menu_demo_activity_data"
                   action="action_nhc_demo_adt_patient_register"
-                  groups="nh_clinical_base.group_nhc_ward_manager,nh_clinical_base.group_nhc_dev,base.user_root"/>    
+                  groups="nh_clinical.group_nhc_ward_manager,nh_clinical.group_nhc_dev,base.user_root"/>    
                   
          <record model="ir.ui.view" id="view_nhc_demo_adt_patient_admit_tree">
             <field name="name">view_nhc_demo_adt_patient_admit_tree</field>
@@ -107,7 +107,7 @@
                   id="menu_demo_adt_patient_admit"
                   parent="menu_demo_activity_data"
                   action="action_nhc_demo_adt_patient_admit"
-                  groups="nh_clinical_base.group_nhc_ward_manager,nh_clinical_base.group_nhc_dev,base.user_root"/>    
+                  groups="nh_clinical.group_nhc_ward_manager,nh_clinical.group_nhc_dev,base.user_root"/>    
                   
          <record model="ir.ui.view" id="view_nhc_demo_adt_patient_discharge_tree">
             <field name="name">view_nhc_demo_adt_patient_discharge_tree</field>
@@ -144,7 +144,7 @@
                   id="menu_demo_adt_patient_discharge"
                   parent="menu_demo_activity_data"
                   action="action_nhc_demo_adt_patient_discharge"
-                  groups="nh_clinical_base.group_nhc_ward_manager,nh_clinical_base.group_nhc_dev,base.user_root"/>                           
+                  groups="nh_clinical.group_nhc_ward_manager,nh_clinical.group_nhc_dev,base.user_root"/>                           
 
          <record model="ir.ui.view" id="view_nhc_demo_patient_admission_tree">
             <field name="name">view_nhc_demo_patient_admission_tree</field>
@@ -183,7 +183,7 @@
                   id="menu_demo_patient_admission"
                   parent="menu_demo_activity_data"
                   action="action_nhc_demo_patient_admission"
-                  groups="nh_clinical_base.group_nhc_ward_manager,nh_clinical_base.group_nhc_dev,base.user_root"/>   
+                  groups="nh_clinical.group_nhc_ward_manager,nh_clinical.group_nhc_dev,base.user_root"/>   
                   
  
           <record model="ir.ui.view" id="view_nhc_demo_spell_tree">
@@ -221,7 +221,7 @@
                   id="menu_demo_spell"
                   parent="menu_demo_activity_data"
                   action="action_nhc_demo_spell"
-                  groups="nh_clinical_base.group_nhc_ward_manager,nh_clinical_base.group_nhc_dev,base.user_root"/>           
+                  groups="nh_clinical.group_nhc_ward_manager,nh_clinical.group_nhc_dev,base.user_root"/>           
     
 	</data>
 </openerp>
