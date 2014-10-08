@@ -232,7 +232,7 @@ class nh_clinical_api_demo(orm.AbstractModel):
 
         for wid in ward_ids:
             code = location_pool.read(cr, uid, wid, ['code'])['code']
-            wmuid = user_pool.search(cr, uid, [('location_ids', 'in', [wid]), ('groups_id.name', 'in', ['T4 Clinical Ward Manager Group'])])
+            wmuid = user_pool.search(cr, uid, [('location_ids', 'in', [wid]), ('groups_id.name', 'in', ['NH Clinical Ward Manager Group'])])
             wmuid = uid if not wmuid else wmuid[0]
             placement_activity_ids = activity_pool.search(cr, uid, [
                 ('data_model', '=', 'nh.clinical.patient.placement'),
@@ -251,7 +251,7 @@ class nh_clinical_api_demo(orm.AbstractModel):
                     ('data_model', '=', 'nh.clinical.patient.observation.ews'),
                     ('state', 'not in', ['completed', 'cancelled']), ('location_id', 'child_of', wid)])
             for ews in activity_pool.browse(cr, uid, ews_activity_ids):
-                nuid = user_pool.search(cr, uid, [('location_ids', 'in', [ews.location_id.id]), ('groups_id.name', 'in', ['T4 Clinical Nurse Group'])])
+                nuid = user_pool.search(cr, uid, [('location_ids', 'in', [ews.location_id.id]), ('groups_id.name', 'in', ['NH Clinical Nurse Group'])])
                 nuid = uid if not nuid else nuid[0]
                 api.assign(cr, uid, ews.id, nuid)
                 api.submit_complete(cr, nuid, ews.id, self.demo_data(cr, uid, 'nh.clinical.patient.observation.ews'))

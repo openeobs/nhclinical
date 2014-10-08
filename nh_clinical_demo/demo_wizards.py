@@ -86,7 +86,7 @@ class nh_clinical_demo_user(orm.TransientModel):
         'name': fields.char('Name', size=256),
         'login': fields.char('Login', size=256),
         'password': fields.char('Password', size=256),
-        'groups_id': fields.many2many('res.groups', relation='wiz_user_group_rel', string='Groups', domain=[['name','like','T4 Clinical%%']]),
+        'groups_id': fields.many2many('res.groups', relation='wiz_user_group_rel', string='Groups', domain=[['name','like','NH Clinical%%']]),
         'pos_id': fields.many2one('nh.clinical.pos', 'POS', required=True),
         'location_ids': fields.many2many('nh.clinical.location', relation='wiz_user_location_rel', string='POS'),
     } 
