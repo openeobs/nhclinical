@@ -99,9 +99,6 @@ class nh_activity(orm.Model):
                                'handler_model': handler_model, 'handler_method': handler_method,
                                'when': when}
         if h not in self._handlers: self._handlers.append(h)
-    
-    def _find_handlers(self, trigger_model, trigger_method):
-        res = [h for h in self._handlers if h['trigger_model'] == trigger_model and h['trigger_method'] == trigger_method]
         
     def _get_data_type_selection(self, cr, uid, context=None):
 
