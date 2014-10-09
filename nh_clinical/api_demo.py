@@ -884,17 +884,22 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         fake = self.next_seed_fake()
         pos_id = 'pos_id' in values and values.pop('pos_id') or False
         
-        #patients = self.get_activity_free_patients(cr, uid, env_id,['nh.clinical.patient.observation.ews'],['new','scheduled','started'])
+        respiration_rate = [fake.random_int(min=12, max=20)]*900+[fake.random_int(min=9, max=11)]*50+[fake.random_int(min=21, max=24)]*40+[fake.random_int(min=6, max=8)]*5+[fake.random_int(min=25, max=28)]*5
+        o2 = [fake.random_int(min=96, max=100)]*900+[fake.random_int(min=94, max=95)]*50+[fake.random_int(min=92, max=93)]*40+[fake.random_int(min=75, max=91)]*10
+        o2_flag = [0]*800+[1]*200
+        bt = [fake.random_int(min=361, max=380)]*900+[fake.random_int(min=351, max=360)]*25+[fake.random_int(min=381, max=390)]*25+[fake.random_int(min=391, max=420)]*40+[fake.random_int(min=340, max=350)]*10
+        bps = fake.random_element(array=[fake.random_int(min=111, max=219)]*900+[fake.random_int(min=101, max=110)]*50+[fake.random_int(min=91, max=100)]*40+[fake.random_int(min=85, max=90)]*5+[fake.random_int(min=220, max=225)]*5)
+        pr = [fake.random_int(min=51, max=90)]*900+[fake.random_int(min=41, max=50)]*25+[fake.random_int(min=91, max=110)]*25+[fake.random_int(min=111, max=130)]*40+[fake.random_int(min=20, max=40)]*5+[fake.random_int(min=131, max=150)]*5
+        avpu = ['A']*850+['V']*50+['P']*50+['U']*50
         v = {
-            'respiration_rate': fake.random_int(min=5, max=34),
-            'indirect_oxymetry_spo2': fake.random_int(min=85, max=100),
-            'body_temperature': float(fake.random_int(min=350, max=391))/10.0 ,
-            'blood_pressure_systolic': fake.random_int(min=65, max=206),
-            'pulse_rate': fake.random_int(min=35, max=136),
-            'avpu_text': fake.random_element(('A', 'V', 'P', 'U')),
-            'oxygen_administration_flag': fake.random_element((True, False)),
-            'blood_pressure_diastolic': fake.random_int(min=35, max=176),
-            #'patient_id': patients and fake.random_element(patients).id or False
+            'respiration_rate': respiration_rate,
+            'indirect_oxymetry_spo2': o2,
+            'body_temperature': bt,
+            'blood_pressure_systolic': bps,
+            'pulse_rate': pr,
+            'avpu_text': avpu,
+            'oxygen_administration_flag': o2_flag,
+            'blood_pressure_diastolic': bps-fake.random_int(min=10, max=45),
         }
         v.update(values) # in case the flag passed in values
         if v['oxygen_administration_flag']:
