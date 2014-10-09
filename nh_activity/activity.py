@@ -30,37 +30,55 @@ def except_if(test=True, cap="Exception!", msg="Message is not defined..."):
     if test:
         raise orm.except_orm(cap, msg)
 
+class Event(object):
+    def __init__(self, **kwargs):
+        self.model = kwargs.get('model', None)
+        self.method = kwargs.get('method', None)
+        self.activity =kwargs.get('activity', None)
+        self.data = kwargs.get('data', None)
+        self.args = kwargs.get('args', [])
+        self.kwargs  = kwargs.get('kwargs', {})
+    
+    def __repr__(self):
+        res = "%s::%s()" % (self.model, self.method)
+        return res
+
 
 def data_model_event(callback=None):
     def decorator(f):
         def wrapper(*args, **kwargs):
             self, cr, uid, activity_id = args[:4]
-            activity_id = isinstance(activity_id, (list, tuple)) and activity_id[0] or activity_id
-            # if not activity_id:
-            #                 import pdb; pdb.set_trace()
             assert isinstance(activity_id, (int, long)) and activity_id > 0, \
                 "activity_id must be INT or LONG and > 0, found type='%s', value=%s, f='%s'" \
                 % (type(activity_id), activity_id, f)
-            args_list = list(args)
-            args_list[3] = activity_id
-            args = tuple(args_list)
-            context = kwargs.get('context') or {}
-            #             ctx = context.copy()
-            #             ctx.update({'api_callback': True})
-            activity = self.browse(cr, uid, activity_id, context)
-            model_pool = self.pool.get(activity.data_model)
-            res = False
-            f(*args, **kwargs)
-            if model_pool and callback:
-                res = eval("model_pool.%s(*args[1:], **kwargs)" % callback)
-            else:
-                _logger.error("@data_model_event() skipping call. data_model='%s', args='%s', kwargs='%s'"
-                              % (model_pool.data_model, args, kwargs))
+            activity = self.browse(cr, uid, activity_id)
+            data_model = self.pool[activity.data_model]
+            
+            handlers = [h for h in self._handlers
+                         if h['trigger_model'] == activity.data_model and h['trigger_method'] == f.__name__]
+            
+            if handlers: # run before handlers
+                event = Event(model=data_model, method=f.__name__, activity=activity, 
+                              data=activity.data_ref, args=args, kwargs=kwargs)
+                [eval("self.pool['%s'].%s(cr, uid[1], args[2], event)" % (h['handler_model'], h['handler_method']))
+                  for h in handlers if h['when'] == 'before']
+            
+            f(*args, **kwargs) # FIXME: should we execute this f at all?
+            res = eval("data_model.%s(*args[1:], **kwargs)" % f.__name__)
+            
+            if handlers: # run after handlers
+                activity = self.browse(cr, uid, activity_id)
+                event = Event(model=data_model, method=f.__name__, activity=activity, 
+                              data=activity.data_ref, args=args, kwargs=kwargs)
+                [eval("self.pool['%s'].%s(cr, uid, event)" % (h['handler_model'], h['handler_method']))
+                    for h in handlers if h['when'] == 'after']
             return res
 
         return wrapper
 
     return decorator
+
+
 
 
 class nh_activity(orm.Model):
@@ -69,13 +87,22 @@ class nh_activity(orm.Model):
 
     _name = 'nh.activity'
     _rec_name = 'summary'
-    # _inherit = ['mail.thread']
 
     _states = [('new', 'new'), ('planned', 'Planned'), ('scheduled', 'Scheduled'),
                ('started', 'Started'), ('completed', 'Completed'), ('cancelled', 'Cancelled'),
                ('suspended', 'Suspended'), ('aborted', 'Aborted'), ('expired', 'Expired')]
+    
+    _handlers = []
 
-
+    def _register_handler(self, trigger_model, trigger_method, handler_model, handler_method, when='after'):
+        h = {'trigger_model': trigger_model, 'trigger_method': trigger_method,
+                               'handler_model': handler_model, 'handler_method': handler_method,
+                               'when': when}
+        if h not in self._handlers: self._handlers.append(h)
+    
+    def _find_handlers(self, trigger_model, trigger_method):
+        res = [h for h in self._handlers if h['trigger_model'] == trigger_model and h['trigger_method'] == trigger_method]
+        
     def _get_data_type_selection(self, cr, uid, context=None):
 
         res = [(model_name, model._description) for model_name, model in self.pool.models.items()
@@ -337,6 +364,24 @@ class nh_activity_data(orm.AbstractModel):
     _cancel_view_xmlid = None
     _form_description = None
     
+#     _handlers = [
+#         {'handler_model': _name, 
+#          'handler_method': 'handler_complete', 
+#          'trigger_model': _name, 
+#          'trigger_method': 'complete'},
+#                  
+#         {'handler_model': _name, 
+#          'handler_method': 'handler_create_activity', 
+#          'trigger_model': 'nh.clinical.patient.move', 
+#          'trigger_method': 'complete'},
+#     ]
+#     
+#     def handler_complete(self, cr, uid, event):
+#         print "Handler Conplete"
+#         
+#     def handler_create_activity(self, cr, uid, event):
+#         print "Handler Create Activity"
+            
     def is_action_allowed(self, state, action):
         return action in self._transitions[state]
     
@@ -351,6 +396,10 @@ class nh_activity_data(orm.AbstractModel):
 
     _order = 'id desc'
 
+
+    def handle_ews_complete(self, crr, uid, event): # test. to be removed
+        print "handle_ews_complete event: %s" % event
+        
     def create(self, cr, uid, vals, context=None):
         rec_id = super(nh_activity_data, self).create(cr, uid, vals, context)
         return rec_id

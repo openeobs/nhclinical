@@ -41,7 +41,31 @@ class ActivityTest(common.SingleTransactionCase):
         imd_pool = self.registry('ir.model.data')
         
         super(ActivityTest, self).setUp()
+
+    def test_event_handlers(self):
+        test_pool = self.registry('test.activity.data.model')
+        activity_pool = self.registry('nh.activity')
+        activity_id = self.create_activity('nh.activity.data')
         
+        activity_pool._register_handler('nh.activity.data', 'complete', 'test.activity.data.model', 'handle_data_complete')
+        activity_pool._register_handler('nh.activity.data', 'start', 'test.activity.data.model', 'handle_data_start')        
+        
+        assert not test_pool._start_handler_event
+        assert not test_pool._complete_handler_event
+        
+        self.start(activity_id)
+        self.complete(activity_id)
+        
+        assert test_pool._start_handler_event
+        assert test_pool._start_handler_event.model._name == 'nh.activity.data'
+        assert test_pool._start_handler_event.method == 'start'
+        assert test_pool._start_handler_event.activity.data_model == 'nh.activity.data'
+        
+        assert test_pool._complete_handler_event
+        assert test_pool._complete_handler_event.model._name == 'nh.activity.data'
+        assert test_pool._complete_handler_event.method == 'complete'
+        assert test_pool._complete_handler_event.activity.data_model == 'nh.activity.data'
+               
     def test_activity(self):
         self.assertTrue( test_pool._name == 'test.activity.data.model', 'test model not found')
         self.assertTrue( 'field1' in test_pool._columns.keys(), 'field1 not found in test model')
@@ -58,7 +82,6 @@ class ActivityTest(common.SingleTransactionCase):
         _logger.warn("Testing 'create_activity' method...")
         self.assertTrue(activity_id, 'activity_id is None')
         self.assertTrue(activity.data_model == model, 'wrong data model')
-        self.assertTrue(activity.data_ref.activity_id.id == activity_id, 'data.activity.id != activity_id')
         self.assertTrue(activity.state == 'new', 'state != new')
         return activity_id
     
@@ -97,13 +120,17 @@ class ActivityTest(common.SingleTransactionCase):
                 state_method = state_method_map[state]
                 if hasattr(self, state_method):
                     #import pdb; pdb.set_trace()
-                    self.assertTrue(eval("self.%s(activity_id, **kwargs)" % state_method), "Test failed for state_method %s" % state_method)
+                    try:
+                        eval("self.%s(activity_id, **kwargs)" % state_method)
+                    except:
+                        assert False, "Test failed for state_method %s" % state_method
                     for method in model_pool._transitions[state]: 
                         if hasattr(self, method):
                             savepoint_name = self.savepoint_create()
-                            res = eval("self.%s(activity_id, **kwargs)" % method)                          
-                            self.assertTrue(res, "Test failed for method '%s' in state '%s'" % (method,state))
-                            # test is_action_allowed
+                            try:
+                                eval("self.%s(activity_id, **kwargs)" % method)    
+                            except:                      
+                                assert False, "Test failed for method '%s' in state '%s'" % (method, state)
                             self.assertTrue((model_pool.is_action_allowed(state, method)), 
                                             "wrong result from is_action_allowed, method '%s' state '%s'" % (method, state))                              
                             self.savepoint_rollback(savepoint_name)

@@ -9,6 +9,31 @@ class test_activity_data_model(orm.Model):
         'field1': fields.text('Field1')
         
     }
+    
+        
+    def __init__(self, pool, cr):
+        activity_model = pool['nh.activity']
+
+        super(test_activity_data_model, self).__init__(pool, cr)
+    
+    _start_handler_event = False
+    _complete_handler_event = False
+    def handle_data_complete(self, cr, uid, event):
+        self._complete_handler_event = event
+
+    def handle_data_start(self, cr, uid, event):
+        self._start_handler_event = event
+        
+#     def _register_hook(self, cr):
+#         uid = 1
+#         print "Post-LOAD TEST:"
+#         activity_model = self.pool['nh.activity']
+#         data_model = self.pool['nh.activity.data']
+#         activity_id = data_model.create_activity(cr, uid, {}, {})
+#         activity_model.start(cr, uid, activity_id)
+#         activity_model.complete(cr, uid, activity_id)
+#         import pdb; pdb.set_trace()
+        
 
 # class res_partner_mail(orm.Model):
 #     # for some reason 'notification_email_send' getting removed from values in the middle of user.create() 
