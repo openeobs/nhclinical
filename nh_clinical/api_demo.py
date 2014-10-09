@@ -892,13 +892,13 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         pr = [fake.random_int(min=51, max=90)]*900+[fake.random_int(min=41, max=50)]*25+[fake.random_int(min=91, max=110)]*25+[fake.random_int(min=111, max=130)]*40+[fake.random_int(min=20, max=40)]*5+[fake.random_int(min=131, max=150)]*5
         avpu = ['A']*850+['V']*50+['P']*50+['U']*50
         v = {
-            'respiration_rate': respiration_rate,
-            'indirect_oxymetry_spo2': o2,
-            'body_temperature': bt,
+            'respiration_rate': fake.random_element(array=respiration_rate),
+            'indirect_oxymetry_spo2': fake.random_element(array=o2),
+            'body_temperature': float(fake.random_element(array=bt))/10.0,
             'blood_pressure_systolic': bps,
-            'pulse_rate': pr,
-            'avpu_text': avpu,
-            'oxygen_administration_flag': o2_flag,
+            'pulse_rate': fake.random_element(array=pr),
+            'avpu_text': fake.random_element(array=avpu),
+            'oxygen_administration_flag': fake.random_element(array=o2_flag),
             'blood_pressure_diastolic': bps-fake.random_int(min=10, max=45),
         }
         v.update(values) # in case the flag passed in values
