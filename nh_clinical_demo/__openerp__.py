@@ -8,7 +8,7 @@
     'description': """    """,
     'author': 'Neova Health',
     'website': 'http://www.neovahealth.co.uk/',
-    'depends': ['nh_observations', 'nh_clinical_api'],
+    'depends': ['nh_eobs'],
     'data': [ 'demo_view.xml','demo_activity_view.xml'],
     'application': True,
     'installable': True,

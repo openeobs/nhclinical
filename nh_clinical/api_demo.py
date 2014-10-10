@@ -232,7 +232,7 @@ class nh_clinical_api_demo(orm.AbstractModel):
 
         for wid in ward_ids:
             code = location_pool.read(cr, uid, wid, ['code'])['code']
-            wmuid = user_pool.search(cr, uid, [('location_ids', 'in', [wid]), ('groups_id.name', 'in', ['T4 Clinical Ward Manager Group'])])
+            wmuid = user_pool.search(cr, uid, [('location_ids', 'in', [wid]), ('groups_id.name', 'in', ['NH Clinical Ward Manager Group'])])
             wmuid = uid if not wmuid else wmuid[0]
             placement_activity_ids = activity_pool.search(cr, uid, [
                 ('data_model', '=', 'nh.clinical.patient.placement'),
@@ -253,7 +253,7 @@ class nh_clinical_api_demo(orm.AbstractModel):
                     ('data_model', '=', 'nh.clinical.patient.observation.ews'),
                     ('state', 'not in', ['completed', 'cancelled']), ('location_id', 'child_of', wid)])
             for ews in activity_pool.browse(cr, uid, ews_activity_ids):
-                nuid = user_pool.search(cr, uid, [('location_ids', 'in', [ews.location_id.id]), ('groups_id.name', 'in', ['T4 Clinical Nurse Group'])])
+                nuid = user_pool.search(cr, uid, [('location_ids', 'in', [ews.location_id.id]), ('groups_id.name', 'in', ['NH Clinical Nurse Group'])])
                 nuid = uid if not nuid else nuid[0]
                 api.assign(cr, uid, ews.id, nuid)
                 api.submit_complete(cr, nuid, ews.id, self.demo_data(cr, uid, 'nh.clinical.patient.observation.ews'))
@@ -886,17 +886,22 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         fake = self.next_seed_fake()
         pos_id = 'pos_id' in values and values.pop('pos_id') or False
         
-        #patients = self.get_activity_free_patients(cr, uid, env_id,['nh.clinical.patient.observation.ews'],['new','scheduled','started'])
+        respiration_rate = [fake.random_int(min=12, max=20)]*900+[fake.random_int(min=9, max=11)]*50+[fake.random_int(min=21, max=24)]*40+[fake.random_int(min=6, max=8)]*5+[fake.random_int(min=25, max=28)]*5
+        o2 = [fake.random_int(min=96, max=100)]*900+[fake.random_int(min=94, max=95)]*50+[fake.random_int(min=92, max=93)]*40+[fake.random_int(min=75, max=91)]*10
+        o2_flag = [0]*800+[1]*200
+        bt = [fake.random_int(min=361, max=380)]*900+[fake.random_int(min=351, max=360)]*25+[fake.random_int(min=381, max=390)]*25+[fake.random_int(min=391, max=420)]*40+[fake.random_int(min=340, max=350)]*10
+        bps = fake.random_element([fake.random_int(min=111, max=219)]*900+[fake.random_int(min=101, max=110)]*50+[fake.random_int(min=91, max=100)]*40+[fake.random_int(min=85, max=90)]*5+[fake.random_int(min=220, max=225)]*5)
+        pr = [fake.random_int(min=51, max=90)]*900+[fake.random_int(min=41, max=50)]*25+[fake.random_int(min=91, max=110)]*25+[fake.random_int(min=111, max=130)]*40+[fake.random_int(min=20, max=40)]*5+[fake.random_int(min=131, max=150)]*5
+        avpu = ['A']*850+['V']*50+['P']*50+['U']*50
         v = {
-            'respiration_rate': fake.random_int(min=5, max=34),
-            'indirect_oxymetry_spo2': fake.random_int(min=85, max=100),
-            'body_temperature': float(fake.random_int(min=350, max=391))/10.0 ,
-            'blood_pressure_systolic': fake.random_int(min=65, max=206),
-            'pulse_rate': fake.random_int(min=35, max=136),
-            'avpu_text': fake.random_element(('A', 'V', 'P', 'U')),
-            'oxygen_administration_flag': fake.random_element((True, False)),
-            'blood_pressure_diastolic': fake.random_int(min=35, max=176),
-            #'patient_id': patients and fake.random_element(patients).id or False
+            'respiration_rate': fake.random_element(respiration_rate),
+            'indirect_oxymetry_spo2': fake.random_element(o2),
+            'body_temperature': float(fake.random_element(bt))/10.0,
+            'blood_pressure_systolic': bps,
+            'pulse_rate': fake.random_element(pr),
+            'avpu_text': fake.random_element(avpu),
+            'oxygen_administration_flag': fake.random_element(o2_flag),
+            'blood_pressure_diastolic': bps-fake.random_int(min=10, max=45),
         }
         v.update(values) # in case the flag passed in values
         if v['oxygen_administration_flag']:
