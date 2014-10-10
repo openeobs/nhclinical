@@ -237,6 +237,8 @@ class nh_clinical_api_demo(orm.AbstractModel):
             placement_activity_ids = activity_pool.search(cr, uid, [
                 ('data_model', '=', 'nh.clinical.patient.placement'),
                 ('state', 'not in', ['completed', 'cancelled']), ('user_ids', 'in', [wmuid])])
+            if not placement_activity_ids:
+                continue
             for i in range(patient_placement_count):
                 placement_activity_id = fake.random_element(placement_activity_ids)
                 bed_location_id = fake.random_element(bed_ids[code])
