@@ -87,7 +87,7 @@ class nh_clinical_api_demo(orm.AbstractModel):
 
     def demo_data_loaded(self, cr, uid):
         imd = self.pool['ir.model.data']
-        ids = imd.search(cr, uid, [['module','=','nh_clinical'],['name','=', 'nhc_def_conf_pos_hospital'], ['model','=','nh_clinical_pos']])
+        ids = imd.search(cr, uid, [['name','=', 'nhc_def_conf_pos_hospital']])
         return bool(ids)
 
     def build_uat_env(self, cr, uid, pos=1, ward='A', wm='winifred', nurse='norah', patients=8, placements=4, ews=1,
@@ -95,6 +95,10 @@ class nh_clinical_api_demo(orm.AbstractModel):
         """
         Creates UAT environment in the provided ward. Adds patients and observations
         """
+        # pos_id is not always 1
+        pos = self.pool['ir.model.data'].get_object(cr, uid, 'nh_eobs_default', 'nhc_def_conf_pos_hospital')
+        pos = pos.id
+        
         api = self.pool['nh.clinical.api']
         user_pool = self.pool['res.users']
         location_pool = self.pool['nh.clinical.location']
