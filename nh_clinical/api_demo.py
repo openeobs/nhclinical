@@ -400,7 +400,7 @@ class nh_clinical_api_demo(orm.AbstractModel):
     
     def greenford_ews(self, cr, uid, bed_codes=[], ews_count=3):
         api = self.pool['nh.clinical.api']
-        imd_ids = api.search(cr, uid, 'ir.model.data', [['model','=','nh.clinical.pos'], ['name','=','nhc_def_conf_pos_hospital']])
+        imd_ids = api.search(cr, uid, 'ir.model.data', [['model','=','nh.clinical.pos'], ['name','ilike','%hospital%']])
         pos = api.read(cr, uid, 'ir.model.data', imd_ids, ['res_id'])
         if not pos:
             print "POS with xmlid='nhc_def_conf_pos_hospital' is not found. Exiting..."
