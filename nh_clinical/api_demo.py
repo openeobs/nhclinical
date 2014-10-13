@@ -85,6 +85,11 @@ class nh_clinical_api_demo(orm.AbstractModel):
 #                                                   data_models=['nh.clinical.patient.placement'],
 #                                                   creator_ids=[admission_activity_id]).keys()[0] 
 
+    def demo_data_loaded(self, cr, uid):
+        imd = self.pool['ir.model.data']
+        ids = imd.search(cr, uid, [['module','=','nh_clinical'],['name','=', 'nhc_def_conf_pos_hospital'], ['model','=','nh_clinical_pos']])
+        return bool(ids)
+
     def build_uat_env(self, cr, uid, pos=1, ward='A', wm='winifred', nurse='norah', patients=8, placements=4, ews=1,
                       context=None):
         """

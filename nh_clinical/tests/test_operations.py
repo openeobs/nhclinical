@@ -47,6 +47,7 @@ class test_operations(common.SingleTransactionCase):
             'patient_qty': 0,
         }       
         env_id = env_pool.create(cr, uid, config)
+        env_pool.build(cr, uid, env_id)
         env = env_pool.browse(cr, uid, env_id)
         adt_user_id = env_pool.get_adt_user_ids(cr, uid, env_id)[0]
         register_activity = env_pool.create_complete(cr, adt_user_id, env_id,'nh.clinical.adt.patient.register')

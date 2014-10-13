@@ -412,9 +412,10 @@ class nh_clinical_adt_patient_merge(orm.Model):
         from_id = from_id[0]
         into_id = into_id[0]
         # compare and combine data. may need new cursor to have the update in one transaction
+#         import pdb; pdb.set_trace()
         for model_name in self.pool.models.keys():
             model_pool = self.pool[model_name]
-            if model_name.startswith("nh.clinical") and 'patient_id' in model_pool._columns.keys() and model_name != self._name and model_name != 'nh.clinical.notification' and model_name != 'nh.clinical.patient.observation':
+            if model_name.startswith("nh.clinical") and model_pool._auto and 'patient_id' in model_pool._columns.keys() and model_name != self._name and model_name != 'nh.clinical.notification' and model_name != 'nh.clinical.patient.observation':
                 ids = model_pool.search(cr, uid, [('patient_id', '=', from_id)], context=context)
                 if ids:
                     model_pool.write(cr, uid, ids, {'patient_id': into_id}, context=context)

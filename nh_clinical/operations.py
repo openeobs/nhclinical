@@ -127,7 +127,7 @@ class nh_clinical_patient_placement(orm.Model):
     _complete_view_xmlid = "view_patient_placement_complete"
     _cancel_view_xmlid = "view_patient_placement_form"
 
-    _POLICY = {'activities': [{'model': 'nh.clinical.patient.observation.ews', 'type': 'recurring'}]}
+    _POLICY = {}
 
     _columns = {
         'suggested_location_id': fields.many2one('nh.clinical.location', 'Suggested Location', required=True),
@@ -179,7 +179,6 @@ class nh_clinical_patient_placement(orm.Model):
         activity_pool = self.pool['nh.activity']
         api_pool = self.pool['nh.clinical.api']
         move_pool = self.pool['nh.clinical.patient.move']
-        ews_pool = self.pool['nh.clinical.patient.observation.ews']
         placement_activity = activity_pool.browse(cr, uid, activity_id, context)
         except_if(not placement_activity.data_ref.location_id,
                   msg="Location is not set, placement can't be completed! activity.id = %s" % placement_activity.id)
@@ -200,7 +199,7 @@ class nh_clinical_patient_placement(orm.Model):
         activity_pool.complete(cr, SUPERUSER_ID, move_activity_id)
         activity_pool.submit(cr, SUPERUSER_ID, spell_activity_id, {'location_id': placement_activity.data_ref.location_id.id})
         # trigger placement policy activities
-        for trigger_activity in self._POLICY['activities']:
+        for trigger_activity in self._POLICY.get('activities', []):
             pool = self.pool[trigger_activity['model']]
             ta_activity_id = pool.create_activity(cr, SUPERUSER_ID, {
                 'parent_id': spell_activity_id,
