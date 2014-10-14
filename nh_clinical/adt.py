@@ -484,6 +484,17 @@ class nh_clinical_adt_patient_update(orm.Model):
             del vals_copy['patient_identifier']
         patient_id = patient_pool.search(cr, uid, patient_domain, context=context)
         except_if(not patient_id, msg="Patient doesn't exist! Data: %s" % patient_domain)
+        if vals_copy.get('title'):
+            title_pool = self.pool['res.partner.title']
+            titles = title_pool.read(cr, uid, title_pool.search(cr, uid, [], context=context), ['id', 'name'], context=context)
+            title_id = False
+            for t in titles:
+                if t['name'].replace('.', '').lower() == vals_copy.get('title').replace('.', '').lower():
+                    title_id = t['id']
+                    break
+            if not title_id:
+                title_id = title_pool.create(cr, uid, {'name': vals_copy.get('title')})
+            vals_copy.update({'title': title_id})
         res = patient_pool.write(cr, uid, patient_id, vals_copy, context=context)
         vals_copy.update({'patient_id': patient_id[0], 'other_identifier': hospital_number, 'patient_identifier': nhs_number})
         super(nh_clinical_adt_patient_update, self).submit(cr, uid, activity_id, vals_copy, context)
