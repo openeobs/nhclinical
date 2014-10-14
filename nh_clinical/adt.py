@@ -43,6 +43,17 @@ class nh_clinical_adt_patient_register(orm.Model):
         patient_domain = [(k,'=',v) for k,v in vals_copy.iteritems()]
         patient_id = patient_pool.search(cr, uid, patient_domain)
         except_if(patient_id, msg="Patient already exists! Data: %s" % vals_copy)
+        if vals_copy.get('title'):
+            title_pool = self.pool['res.partner.title']
+            titles = title_pool.read(cr, uid, title_pool.search(cr, uid, [], context=context), ['id', 'name'], context=context)
+            title_id = False
+            for t in titles:
+                if t['name'].replace('.', '').lower() == vals_copy.get('title').replace('.', '').lower():
+                    title_id = t['id']
+                    break
+            if not title_id:
+                title_id = title_pool.create(cr, uid, {'name': vals_copy.get('title')})
+            vals_copy.update({'title': title_id})
         patient_id = patient_pool.create(cr, uid, vals_copy, context)
         vals_copy.update({'patient_id': patient_id, 'pos_id': user.pos_id.id})
         super(nh_clinical_adt_patient_register, self).submit(cr, uid, activity_id, vals_copy, context)
