@@ -48,30 +48,17 @@
             <field name="category_id" ref="module_category_nhc"/>
             <field name="implied_ids" eval="[(4, ref('group_nhc_base'))]"/>            
         </record>
+        <record id="group_nhc_kiosk" model="res.groups">
+            <field name="name">NH Clinical Kiosk Group</field>
+            <field name="category_id" ref="module_category_nhc"/>
+            <field name="implied_ids" eval="[(4, ref('group_nhc_base'))]"/>
+        </record>
         
  <!-- Users -->    
          <record model="res.users" id="base.user_root">
             <field name="groups_id" eval="[ (4, ref('group_nhc_dev')),
 	            							(4, ref('group_nhc_admin')),
 	            							 (4, ref('base.group_no_one'))]"/>
-        </record>   
-        <record id="nhc_admin" model="res.users">
-            <field name="name">nhadmin</field>
-            <field name="login">a</field>
-            <field name="password">a</field>
-            <field name="groups_id" eval="[(4, ref('group_nhc_admin'))]"/> 			       
-        </record>
-        <record id="nhc_secretary" model="res.users">
-            <field name="name">nhsecretary</field>
-            <field name="login">secretary</field>
-            <field name="password">secretary</field>
-            <field name="groups_id" eval="[(4, ref('group_nhc_admin'))]"/>
-        </record>
-        <record id="nhc_doctor" model="res.users">
-            <field name="name">nhdoctor</field>
-            <field name="login">doctor</field>
-            <field name="password">doctor</field>
-            <field name="groups_id" eval="[(4, ref('group_nhc_doctor'))]"/>
         </record>
                 
 <!-- Record Rules -->
