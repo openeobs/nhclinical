@@ -284,6 +284,7 @@ class nh_clinical_patient_admission(orm.Model):
         'suggested_location_id': fields.many2one('nh.clinical.location', 'Suggested Location'),
         'location_id': fields.related('activity_id','location_id', type='many2one', relation='nh.clinical.location', string='Location'),
         'start_date': fields.datetime("Admission Start Date"),
+        'code': fields.text('Code')
     }
 
 
@@ -314,6 +315,7 @@ class nh_clinical_patient_admission(orm.Model):
            {'patient_id': admission.patient_id.id,
             'location_id': admission.location_id.id,
             'pos_id': admission.pos_id.id,
+            'code': admission.code,
             'start_date': admission.start_date},
            context=None)
         # copy doctors

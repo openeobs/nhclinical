@@ -180,6 +180,7 @@ class nh_clinical_adt_patient_admit(orm.Model):
                                        {'pos_id': admit_activity.data_ref.suggested_location_id.pos_id.id,
                                         'patient_id': admit_activity.patient_id.id,
                                         'suggested_location_id': admit_activity.data_ref.suggested_location_id.id,
+                                        'code': admit_activity.data_ref.code,
                                         'start_date': admit_activity.data_ref.start_date})
         spell_activity = [a for a in admission_activity.created_ids if a.data_model == 'nh.clinical.spell'][0]
         api_pool.write_activity(cr, SUPERUSER_ID, activity_id, {'parent_id': spell_activity.id})
