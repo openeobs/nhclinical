@@ -119,6 +119,38 @@
             <field eval="'nh.clinical.spell'" name="code"/>
             <field name="prefix">SPELL/%(year)s/</field>
         </record>
+
+        <!--Device Types-->
+
+        <!-- Device Types -->
+        <record model="nh.clinical.device.type" id="nhc_device_type_catheter">
+            <field name="name">Catheter</field>
+            <field name="flow_direction">both</field>
+        </record>
+        <record model="nh.clinical.device.type" id="nhc_device_type_enteric">
+            <field name="name">Enteric</field>
+            <field name="flow_direction">both</field>
+        </record>
+        <record model="nh.clinical.device.type" id="nhc_device_type_stoma">
+            <field name="name">Stoma</field>
+            <field name="flow_direction">out</field>
+        </record>
+        <record model="nh.clinical.device.type" id="nhc_device_type_surgical">
+            <field name="name">Surgical</field>
+            <field name="flow_direction">out</field>
+        </record>
+        <record model="nh.clinical.device.type" id="nhc_device_type_urinary">
+            <field name="name">Urinary</field>
+            <field name="flow_direction">out</field>
+        </record>
+        <record model="nh.clinical.device.type" id="nhc_device_type_vascular">
+            <field name="name">Vascular</field>
+            <field name="flow_direction">in</field>
+        </record>
+        <record model="nh.clinical.device.type" id="nhc_device_type_o2">
+            <field name="name">Supplemental O2</field>
+            <field name="flow_direction">none</field>
+        </record>
         
 	</data>
 </openerp>
