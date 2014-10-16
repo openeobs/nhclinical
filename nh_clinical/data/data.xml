@@ -27,11 +27,6 @@
             <field name="category_id" ref="module_category_nhc"/>
             <field name="implied_ids" eval="[(6, False, [ref('group_nhc_base')])]"/>
         </record>
-        <record id="group_nhc_doctor" model="res.groups">
-            <field name="name">NH Clinical Doctor Group</field>
-            <field name="category_id" ref="module_category_nhc"/>
-            <field name="implied_ids" eval="[(4, ref('group_nhc_base'))]"/>            
-        </record>        
         <record id="group_nhc_admin" model="res.groups">
             <field name="name">NH Clinical Admin Group</field>
             <field name="category_id" ref="module_category_nhc"/>
@@ -52,6 +47,41 @@
             <field name="name">NH Clinical Kiosk Group</field>
             <field name="category_id" ref="module_category_nhc"/>
             <field name="implied_ids" eval="[(4, ref('group_nhc_base'))]"/>
+        </record>
+        <record id="group_nhc_receptionist" model="res.groups">
+            <field name="name">NH Clinical Receptionist Group</field>
+            <field name="category_id" ref="module_category_nhc"/>
+            <field name="implied_ids" eval="[(4, ref('group_nhc_base'))]"/>
+        </record>
+        <record id="group_nhc_bed_manager" model="res.groups">
+            <field name="name">NH Clinical Bed Manager Group</field>
+            <field name="category_id" ref="module_category_nhc"/>
+            <field name="implied_ids" eval="[(4, ref('group_nhc_base'))]"/>
+        </record>
+        <record id="group_nhc_registrar" model="res.groups">
+            <field name="name">NH Clinical Registrar Group</field>
+            <field name="category_id" ref="module_category_nhc"/>
+            <field name="implied_ids" eval="[(4, ref('group_nhc_base'))]"/>
+        </record>
+        <record id="group_nhc_consultant" model="res.groups">
+            <field name="name">NH Clinical Consultant Group</field>
+            <field name="category_id" ref="module_category_nhc"/>
+            <field name="implied_ids" eval="[(4, ref('group_nhc_base'))]"/>
+        </record>
+        <record id="group_nhc_senior_doctor" model="res.groups">
+            <field name="name">NH Clinical Senior Doctor Group</field>
+            <field name="category_id" ref="module_category_nhc"/>
+            <field name="implied_ids" eval="[(6, False, [ref('group_nhc_registrar'),ref('group_nhc_consultant')])]"/>
+        </record>
+        <record id="group_nhc_junior_doctor" model="res.groups">
+            <field name="name">NH Clinical Junior Doctor Group</field>
+            <field name="category_id" ref="module_category_nhc"/>
+            <field name="implied_ids" eval="[(4, ref('group_nhc_base'))]"/>
+        </record>
+        <record id="group_nhc_doctor" model="res.groups">
+            <field name="name">NH Clinical Doctor Group</field>
+            <field name="category_id" ref="module_category_nhc"/>
+            <field name="implied_ids" eval="[(6, False, [ref('group_nhc_senior_doctor'),ref('group_nhc_junior_doctor')])]"/>
         </record>
         
  <!-- Users -->    
@@ -90,7 +120,6 @@
         </record>
         <record id="employee_category_nhc_ward_manager" model="hr.employee.category">
             <field name="name">Ward Manager</field>
-           
         </record>
 
         <!--Cancellation Reasons-->
