@@ -127,8 +127,6 @@ class nh_clinical_patient_placement(orm.Model):
     _complete_view_xmlid = "view_patient_placement_complete"
     _cancel_view_xmlid = "view_patient_placement_form"
 
-    _POLICY = {}
-
     _columns = {
         'suggested_location_id': fields.many2one('nh.clinical.location', 'Suggested Location', required=True),
         'location_id': fields.many2one('nh.clinical.location', 'Destination Location'),
@@ -199,29 +197,8 @@ class nh_clinical_patient_placement(orm.Model):
         activity_pool.complete(cr, SUPERUSER_ID, move_activity_id)
         activity_pool.submit(cr, SUPERUSER_ID, spell_activity_id, {'location_id': placement_activity.data_ref.location_id.id})
         # trigger placement policy activities
-        for trigger_activity in self._POLICY.get('activities', []):
-            pool = self.pool[trigger_activity['model']]
-            ta_activity_id = pool.create_activity(cr, SUPERUSER_ID, {
-                'parent_id': spell_activity_id,
-                'creator_id': activity_id
-            }, {
-                'patient_id': placement_activity.data_ref.patient_id.id
-            }, context=context)
-            if trigger_activity['type'] == 'recurring':
-                frequency = activity_pool.browse(cr, SUPERUSER_ID, ta_activity_id, context=context).data_ref.frequency
-                date_schedule = (dt.now()+td(minutes=frequency)).strftime(DTF)
-            else:
-                date_schedule = dt.now().replace(minute=0, second=0, microsecond=0)
-            if trigger_activity['type'] == 'start':
-                activity_pool.start(cr, SUPERUSER_ID, ta_activity_id, context=context)
-            elif trigger_activity['type'] == 'complete':
-                if trigger_activity.get('data'):
-                    activity_pool.submit(cr, SUPERUSER_ID, ta_activity_id, trigger_activity['data'], context=context)
-                activity_pool.complete(cr, SUPERUSER_ID, ta_activity_id, context=context)
-            else:
-                activity_pool.schedule(cr, SUPERUSER_ID, ta_activity_id, date_schedule, context=context)
+        self.trigger_policy(cr, uid, activity_id, location_id=placement_activity.data_ref.location_id.id, context=context)
         return res
-
 
     def submit(self, cr, uid, activity_id, vals, context=None):
         if vals.get('location_id'):
@@ -339,15 +316,6 @@ class nh_clinical_patient_admission(orm.Model):
             context)
         res[move_pool._name] = move_activity_id
         activity_pool.complete(cr, SUPERUSER_ID, move_activity_id, context)
-        # patient placement
-        placement_pool = self.pool['nh.clinical.patient.placement']
-
-        placement_activity_id = placement_pool.create_activity(cr, SUPERUSER_ID,
-           {'parent_id': spell_activity_id, 'date_deadline': (dt.now()+td(minutes=5)).strftime(DTF),
-            'creator_id': activity_id},
-           {'patient_id': admission.patient_id.id,
-            'suggested_location_id': admission.suggested_location_id.id},
-           context)
-        res[placement_pool._name] = placement_activity_id
-
+        # trigger admission policy activities
+        self.trigger_policy(cr, uid, activity_id, location_id=admission.suggested_location_id.id, context=context)
         return res

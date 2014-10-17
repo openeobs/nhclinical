@@ -106,7 +106,25 @@ class res_groups(orm.Model):
                 user_ids.extend([u.id for u in  group.users])
             api.update_activity_users(cr, uid, user_ids)
         return res
-    
+
+
+class nh_clinical_context(orm.Model):
+    """ Clinical Context, tells us whether a specific policy would be applicable or not to the model.
+        i.e. a Location may be in an 'observation loop' context so patients located in it should trigger policies related
+            to that context but not trigger policies related to a different context.
+    """
+    _name = 'nh.clinical.context'
+    _columns = {
+        'name': fields.char('Name', size=100, required=True, select=True),
+        'models': fields.text('Applicable Models')
+        #This should be formatted as a python list of the applicable models for the context
+    }
+
+    def check_model(self, cr, uid, ids, model, context=None):
+        for c in self.browse(cr, uid, ids, context=context):
+                if model not in eval(c.models):
+                    raise osv.except_osv('Error!', model + ' not applicable for context: %s' % c.name)
+        return True
 
 
 class nh_clinical_location(orm.Model):
@@ -342,7 +360,8 @@ class nh_clinical_location(orm.Model):
         'related_hcas': fields.function(_get_hcas, type='integer', string="Number of related HCAs"),
         'related_nurses': fields.function(_get_nurses, type='integer', string="Number of related Nurses"),
         'related_patients': fields.function(_get_related_patients, type='integer', string="Number of related Patients"),
-        'related_patients_childs': fields.function(_get_related_patients_childs, type='integer', string="Number of related Patients from child locations")
+        'related_patients_childs': fields.function(_get_related_patients_childs, type='integer', string="Number of related Patients from child locations"),
+        'context_ids': fields.many2many('nh.clinical.context', 'nh_location_context_rel', 'location_id', 'context_id', string='Related Clinical Contexts')
     }
 
     _defaults = {
@@ -375,6 +394,16 @@ class nh_clinical_location(orm.Model):
         if location.active and not location.is_available:
             raise osv.except_osv('Error!', "Can't deactivate a location that is being used.")
         return self.write(cr, uid, location.id, data, context=context)
+
+    def create(self, cr, uid, vals, context=None):
+        if 'context_ids' in vals:
+            self.pool['nh.clinical.context'].check_model(cr, uid, vals['context_ids'], self._name, context=context)
+        return super(nh_clinical_location, self).create(cr, uid, vals, context=context)
+
+    def write(self, cr, uid, ids, vals, context=None):
+        if 'context_ids' in vals:
+            self.pool['nh.clinical.context'].check_model(cr, uid, vals['context_ids'], self._name, context=context)
+        return super(nh_clinical_location, self).write(cr, uid, ids, vals, context=context)
     
 
 

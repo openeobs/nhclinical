@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from openerp.osv import orm, fields, osv
-from datetime import datetime as dt
+from datetime import datetime as dt, timedelta as td
 from dateutil.relativedelta import relativedelta as rd
 from openerp import SUPERUSER_ID
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
@@ -58,7 +58,9 @@ class nh_activity_data(orm.AbstractModel):
         'started': ['complete', 'cancel', 'submit', 'assign', 'unassign'],
         'completed': ['cancel'],
         'cancelled': []
-    }      
+    }
+    _POLICY = {}
+
     def update_activity(self, cr, uid, activity_id, context=None):
         api = self.pool['nh.clinical.api']
         activity = api.browse(cr, uid, 'nh.activity', activity_id, context)
@@ -195,7 +197,57 @@ class nh_activity_data(orm.AbstractModel):
         #print "ACTIVITY DATA get_activity_user_ids user_ids: %s " % user_ids
         return user_ids
 
-
+    def trigger_policy(self, cr, uid, activity_id, location_id=None, context=None):
+        """
+        triggers the list of activities in the _POLICY['activities'] list.
+        location_id [optional]. Required for context checking.
+        - Every element in the list is a dictionary that contain the following keys:
+            model: name of the data_model of the activity that is going to be triggered
+            context: name of the context if the activity is only triggered in a specific context
+            type: start, schedule, complete or recurring. Will do different actions with the created activity.
+            data: data to submit.
+            create_data: data to add on creation. Dictionary that contains the following structure:
+                key: value
+                being key the name of the attribute where we want to store the value and value the place to browse it from
+                the current activity. i.e. 'location_id': 'data_ref.location_id.id' will add vals {'location_id': activity.data_ref.location_id.id}
+        """
+        activity_pool = self.pool['nh.activity']
+        api_pool = self.pool['nh.clinical.api']
+        if self._POLICY.get('activities', []):
+            activity = activity_pool.browse(cr, uid, activity_id, context)
+            spell_activity_id = api_pool.get_patient_spell_activity_id(cr, SUPERUSER_ID, activity.data_ref.patient_id.id, context=context)
+        else:
+            return True
+        for trigger_activity in self._POLICY.get('activities', []):
+            pool = self.pool[trigger_activity['model']]
+            if trigger_activity.get('context') and location_id:
+                location = self.pool['nh.clinical.location'].browse(cr, uid, location_id, context=context)
+                if not any([c.name == trigger_activity.get('context') for c in location.context_ids]):
+                    continue
+            data = {
+                'patient_id': activity.data_ref.patient_id.id
+            }
+            if trigger_activity.get('create_data'):
+                for key in trigger_activity['create_data'].keys():
+                    data[key] = eval('activity.'+trigger_activity['create_data'][key])
+            ta_activity_id = pool.create_activity(cr, SUPERUSER_ID, {
+                'parent_id': spell_activity_id,
+                'creator_id': activity_id
+            }, data, context=context)
+            if trigger_activity['type'] == 'recurring':
+                frequency = activity_pool.browse(cr, SUPERUSER_ID, ta_activity_id, context=context).data_ref.frequency
+                date_schedule = (dt.now()+td(minutes=frequency)).strftime(DTF)
+            else:
+                date_schedule = dt.now().replace(minute=0, second=0, microsecond=0)
+            if trigger_activity['type'] == 'start':
+                activity_pool.start(cr, SUPERUSER_ID, ta_activity_id, context=context)
+            elif trigger_activity['type'] == 'complete':
+                if trigger_activity.get('data'):
+                    activity_pool.submit(cr, SUPERUSER_ID, ta_activity_id, trigger_activity['data'], context=context)
+                activity_pool.complete(cr, SUPERUSER_ID, ta_activity_id, context=context)
+            else:
+                activity_pool.schedule(cr, SUPERUSER_ID, ta_activity_id, date_schedule, context=context)
+        return True
 
 
 class nh_clinical_activity_access(orm.Model):    
