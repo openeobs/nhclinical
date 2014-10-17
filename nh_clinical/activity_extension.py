@@ -224,6 +224,8 @@ class nh_activity_data(orm.AbstractModel):
                 location = self.pool['nh.clinical.location'].browse(cr, uid, location_id, context=context)
                 if not any([c.name == trigger_activity.get('context') for c in location.context_ids]):
                     continue
+            if trigger_activity.get('cancel_others'):
+                api_pool.cancel_open_activities(cr, uid, spell_activity_id, pool._name, context=context)
             data = {
                 'patient_id': activity.data_ref.patient_id.id
             }
