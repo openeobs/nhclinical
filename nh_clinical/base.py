@@ -122,8 +122,8 @@ class nh_clinical_context(orm.Model):
 
     def check_model(self, cr, uid, ids, model, context=None):
         for c in self.browse(cr, uid, ids, context=context):
-                if model not in eval(c.models):
-                    raise osv.except_osv('Error!', model + ' not applicable for context: %s' % c.name)
+            if model not in eval(c.models):
+                raise osv.except_osv('Error!', model + ' not applicable for context: %s' % c.name)
         return True
 
 
@@ -397,12 +397,28 @@ class nh_clinical_location(orm.Model):
 
     def create(self, cr, uid, vals, context=None):
         if 'context_ids' in vals:
-            self.pool['nh.clinical.context'].check_model(cr, uid, vals['context_ids'], self._name, context=context)
+            cids = vals['context_ids'][0]
+            if isinstance(cids, list):
+                if cids[0] == 4:
+                    cids = [c[1] for c in cids]
+                elif cids[0] == 6:
+                    cids = cids[2]
+            else:
+                cids = vals['context_ids']
+            self.pool['nh.clinical.context'].check_model(cr, uid, cids, self._name, context=context)
         return super(nh_clinical_location, self).create(cr, uid, vals, context=context)
 
     def write(self, cr, uid, ids, vals, context=None):
         if 'context_ids' in vals:
-            self.pool['nh.clinical.context'].check_model(cr, uid, vals['context_ids'], self._name, context=context)
+            cids = vals['context_ids'][0]
+            if isinstance(cids, list):
+                if cids[0] == 4:
+                    cids = [c[1] for c in cids]
+                elif cids[0] == 6:
+                    cids = cids[2]
+            else:
+                cids = vals['context_ids']
+            self.pool['nh.clinical.context'].check_model(cr, uid, cids, self._name, context=context)
         return super(nh_clinical_location, self).write(cr, uid, ids, vals, context=context)
     
 
