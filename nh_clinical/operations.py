@@ -17,7 +17,7 @@ class nh_clinical_patient_move(orm.Model):
     _complete_view_xmlid = "view_patient_move_form"
     _cancel_view_xmlid = "view_patient_move_form"
     _columns = {
-        'location_id': fields.many2one('nh.clinical.location', 'Destination Location', required=True),
+        'location_id': fields.many2one('nh.clinical.location', 'Destination Location'),
         'patient_id': fields.many2one('nh.clinical.patient', 'Patient', required=True),
         'reason': fields.text('Reason'),
         'from_location_id': fields.many2one('nh.clinical.location', 'Source Location'),
@@ -35,6 +35,7 @@ class nh_clinical_patient_move(orm.Model):
         activity_pool = self.pool['nh.activity']
         patient_pool = self.pool['nh.clinical.patient']
         activity = activity_pool.browse(cr, uid, activity_id, context)
+        except_if(not activity.location_id, 'There is no destination location!')
         sql = """
             select location_id from nh_activity
             where data_model = 'nh.clinical.patient.move' and state = 'completed' and patient_id = %s

@@ -233,6 +233,7 @@ class nh_activity_data(orm.AbstractModel):
                 for key in trigger_activity['create_data'].keys():
                     data[key] = eval('activity.'+trigger_activity['create_data'][key])
             ta_activity_id = pool.create_activity(cr, SUPERUSER_ID, {
+                'patient_id': activity.patient_id.id,
                 'parent_id': spell_activity_id,
                 'creator_id': activity_id
             }, data, context=context)
