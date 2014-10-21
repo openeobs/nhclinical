@@ -375,6 +375,14 @@ class nh_clinical_api_demo(orm.AbstractModel):
             return admission_activity_id
         else:    
             return api.browse(cr, uid, 'nh.activity', admission_activity_id)
+
+    def _find_ward(self, location_browse):
+        if location_browse.usage == 'ward':
+            return location_browse.code
+        elif location_browse.parent_id:
+            return self._find_ward(location_browse.parent_id)
+        else:
+            return False
         
     def register_admit_place(self, cr, uid, bed_location_id=None, register_values={}, admit_values={}, return_id=False):
         """
@@ -383,9 +391,11 @@ class nh_clinical_api_demo(orm.AbstractModel):
         Missing data will be generated
         """        
         api = self.pool['nh.clinical.api']
-        
         bed_location = api.browse(cr, uid, 'nh.clinical.location', bed_location_id)     
-        pos_id = bed_location.pos_id.id      
+        pos_id = bed_location.pos_id.id
+        ward_code = self._find_ward(bed_location)
+        if ward_code:
+            admit_values['location'] = ward_code
         admit_activity = self.register_admit(cr, uid, pos_id, register_values, admit_values)
         api.complete(cr, uid, admit_activity.id) 
         admission_activity_id = api.activity_map(cr, uid, 
@@ -394,8 +404,8 @@ class nh_clinical_api_demo(orm.AbstractModel):
                         
         placement_activity_id = api.activity_map(cr, uid, 
                                                   data_models=['nh.clinical.patient.placement'],
-                                                  creator_ids=[admission_activity_id]).keys()[0]   
-        
+                                                  creator_ids=[admission_activity_id]).keys()[0]
+
         api.submit_complete(cr, uid, placement_activity_id, {'location_id': bed_location_id})  
         if return_id:
             return placement_activity_id
