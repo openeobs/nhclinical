@@ -48,6 +48,8 @@ def data_model_event(callback=None):
     def decorator(f):
         def wrapper(*args, **kwargs):
             self, cr, uid, activity_id = args[:4]
+            if isinstance(activity_id, list) and len(activity_id) == 1:
+                activity_id = activity_id[0]
             assert isinstance(activity_id, (int, long)) and activity_id > 0, \
                 "activity_id must be INT or LONG and > 0, found type='%s', value=%s, f='%s'" \
                 % (type(activity_id), activity_id, f)
@@ -325,6 +327,8 @@ class nh_activity(orm.Model):
 
     @data_model_event(callback="complete")
     def complete(self, cr, uid, activity_id, context=None):
+        if isinstance(activity_id, list) and len(activity_id) == 1:
+            activity_id = activity_id[0]
         assert isinstance(activity_id, (int, long)), "activity_id must be int or long, found to be %s" % type(
             activity_id)
         return {}
@@ -422,9 +426,10 @@ class nh_activity_data(orm.AbstractModel):
 
     def complete_ui(self, cr, uid, ids, context=None):
         if context.get('active_id'):
+            active_id = context['active_id']
             activity_pool = self.pool['nh.activity']
-            activity_pool.write(cr, uid, context['active_id'], {'data_ref': "%s,%s" % (self._name, str(ids[0]))})
-            activity = activity_pool.browse(cr, uid, context['active_id'], context)
+            activity_pool.write(cr, uid, active_id, {'data_ref': "%s,%s" % (self._name, str(ids[0]))})
+            activity = activity_pool.browse(cr, uid, active_id, context)
             activity_pool.update_activity(cr, SUPERUSER_ID, activity.id, context)
             activity_pool.complete(cr, uid, activity.id, context)
             _logger.debug("activity '%s', activity.id=%s data completed via UI" % (activity.data_model, activity.id))
@@ -489,6 +494,8 @@ class nh_activity_data(orm.AbstractModel):
         return {}
 
     def complete(self, cr, uid, activity_id, context=None):
+        if isinstance(activity_id, list) and len(activity_id) == 1:
+            activity_id = activity_id[0]
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context)
         except_if(not self.is_action_allowed(activity.state, 'complete'),
