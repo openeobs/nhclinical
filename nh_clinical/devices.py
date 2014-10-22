@@ -8,34 +8,74 @@ from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
 from openerp import SUPERUSER_ID
 _logger = logging.getLogger(__name__)
 
+class nh_clinical_device_category(orm.Model):
+    _name = 'nh.clinical.device.category'
+
+    _columns = {
+        'name': fields.char("Device Category", size=200),
+        'flow_direction': fields.selection([('none', 'None'), ('in', 'In'), ('out', 'Out'), ('both', 'Both')], 'Flow Direction')
+    }
+
+
+class nh_clinical_device_type(orm.Model):
+    _name = 'nh.clinical.device.type'
+    _columns = {
+        'category_id': fields.many2one('nh.clinical.device.category', "Device Category"),
+        'name': fields.char('Name', size=100)
+    }
+
+
+class nh_clinical_device(orm.Model):
+    _name = 'nh.clinical.device'
+    _columns = {
+        'type_id': fields.many2one('nh.clinical.device.type', "Device Type"),
+        'category_id': fields.related('type_id', 'category_id', type='many2one', relation='nh.clinical.device.category', string='Category'),
+        'serial_number': fields.char('Serial Number', size=200),
+        'is_available': fields.boolean('Is Available?'),
+    }
+
+    _defaults = {
+        'is_available': True
+    }
+
+    def name_get(self, cr, uid, ids, context):
+        res = []
+        for device in self.browse(cr, uid, ids, context):
+            res.append((device.id, "%s/%s" % (device.type_id.name, device.serial_number)))
+        return res
+
+
 class nh_clinical_device_session(orm.Model):
     _name = 'nh.clinical.device.session'
     _description = 'Device Session'
     _inherit = ['nh.activity.data']
     _rec_name = 'device_id'
     _columns = {
-        'device_id': fields.many2one('nh.clinical.device', 'Device', required=True),
+        'device_type_id': fields.many2one('nh.clinical.device.type', 'Device Type', required=True),
+        'device_id': fields.many2one('nh.clinical.device', 'Device'),
         'patient_id': fields.many2one('nh.clinical.patient', 'Patient', required=True),
     }
     
     def name_get(self, cr, uid, ids, context):
         res = []
         for session in self.browse(cr, uid, ids, context):
-            res.append((session.id, "%s/%s" % (session.patient_id.full_name, session.device_id.type_id.name)))
+            res.append((session.id, "%s/%s" % (session.patient_id.full_name, session.device_type_id.category_id.name)))
         return res
     
     def start(self, cr, uid, activity_id, context=None):
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context)
-        device_pool = self.pool['nh.clinical.device']
-        device_pool.write(cr, uid, activity.data_ref.device_id.id, {'is_available': False})
+        if activity.data_ref.device_id:
+            device_pool = self.pool['nh.clinical.device']
+            device_pool.write(cr, uid, activity.data_ref.device_id.id, {'is_available': False})
         super(nh_clinical_device_session, self).start(cr, uid, activity_id, context)
         
     def complete(self, cr, uid, activity_id, context=None):
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context)
-        device_pool = self.pool['nh.clinical.device']
-        device_pool.write(cr, uid, activity.data_ref.device_id.id, {'is_available': True})
+        if activity.data_ref.device_id:
+            device_pool = self.pool['nh.clinical.device']
+            device_pool.write(cr, uid, activity.data_ref.device_id.id, {'is_available': True})
         super(nh_clinical_device_session, self).complete(cr, uid, activity_id, context)        
         
     
@@ -44,7 +84,8 @@ class nh_clinical_device_connect(orm.Model):
     _inherit = ['nh.activity.data']
     _description = 'Connect Device'
     _columns = {
-        'device_id': fields.many2one('nh.clinical.device', 'Device', required=True),
+        'device_type_id': fields.many2one('nh.clinical.device.type', 'Device Type', required=True),
+        'device_id': fields.many2one('nh.clinical.device', 'Device'),
         'patient_id': fields.many2one('nh.clinical.patient', 'Patient', required=True),
     }
 
@@ -57,7 +98,9 @@ class nh_clinical_device_connect(orm.Model):
         except_if(not spell_activity_id, msg="No started spell found for patient_id=%s" % activity.patient_id.id)
         session_activity_id = device_session_pool.create_activity(cr, uid, 
                                             {'creator_id': activity_id, 'parent_id': spell_activity_id},
-                                            {'patient_id': activity.patient_id.id, 'device_id': activity.device_id.id})
+                                            {'patient_id': activity.patient_id.id,
+                                             'device_type_id': activity.device_type_id.id,
+                                             'device_id': activity.device_id.id if activity.device_id else False})
         activity_pool.start(cr, uid, session_activity_id)
         return super(nh_clinical_device_connect, self).complete(cr, SUPERUSER_ID, activity_id, context)
 
@@ -66,18 +109,19 @@ class nh_clinical_device_disconnect(orm.Model):
     _inherit = ['nh.activity.data']
     _description = 'Disconnect Device'
     _columns = {
-        'device_id': fields.many2one('nh.clinical.device', 'Device', required=True),
+        'device_type_id': fields.many2one('nh.clinical.device.type', 'Device Type', required=True),
+        'device_id': fields.many2one('nh.clinical.device', 'Device'),
         'patient_id': fields.many2one('nh.clinical.patient', 'Patient', required=True),
     }
+
     def complete(self, cr, uid, activity_id, context=None):
         activity_pool = self.pool['nh.activity']
         api_pool = self.pool['nh.clinical.api']
-        device_session_pool = self.pool['nh.clinical.device.session']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
         spell_activity_id = api_pool.get_patient_spell_activity_id(cr, uid, activity.patient_id.id)
         except_if(not spell_activity_id, msg="No started spell found for patient_id=%s" % activity.patient_id.id)
-        session_activity_id = api_pool.get_device_session_activity_id(cr, uid, activity.device_id.id)
-        except_if(not session_activity_id, msg="No started session found for device_id=%s" % activity.device_id.id)
+        session_activity_id = api_pool.get_device_session_activity_id(cr, uid, activity.device_type_id.id)
+        except_if(not session_activity_id, msg="No started session found for device_type_id=%s" % activity.device_type_id.id)
         activity_pool.complete(cr, uid, session_activity_id)
         return super(nh_clinical_device_disconnect, self).complete(cr, SUPERUSER_ID, activity_id, context)
 

@@ -518,7 +518,7 @@ with
 
     def activity_map(self, cr, uid, activity_ids=[], creator_ids=[],
                        pos_ids=[], location_ids=[], patient_ids=[],
-                       device_ids=[], data_models=[], states=[]):
+                       device_ids=[], data_models=[], states=[], device_type_ids=[]):
         """
         Arguments and Return Parameters may be extended at later stages
         Returns:
@@ -545,6 +545,7 @@ with
         if location_ids: where_list.append("location_id in (%s)" % ','.join([str(int(id)) for id in location_ids])) 
         if patient_ids: where_list.append("patient_id in (%s)" % ','.join([str(int(id)) for id in patient_ids]))
         if device_ids: where_list.append("device_id in (%s)" % ','.join([str(int(id)) for id in device_ids]))
+        if device_type_ids: where_list.append("device_type_id in (%s)" % ','.join([str(int(id)) for id in device_type_ids]))
         if data_models: where_list.append("data_model in ('%s')" % "','".join(data_models))
         if states: where_list.append("state in ('%s')" % "','".join(states))
         where_clause = where_list and "where %s" % " and ".join(where_list) or ""
@@ -710,17 +711,17 @@ with
             return False
         return self.pool['nh.activity'].browse(cr, uid, spell_activity_id, context)
     
-    def get_device_session_activity_id(self, cr, uid, device_id, context=None):
+    def get_device_session_activity_id(self, cr, uid, device_type_id, context=None):
         api = self.pool['nh.clinical.api']
-        domain = {'device_ids': [device_id],
+        domain = {'device_type_ids': [device_type_id],
                   'states': ['started'],
                   'data_models': ['nh.clinical.device.session']}
         session_activity_id = api.activity_map(cr, uid, **domain).keys()
         if not session_activity_id:
             return False
         if len(session_activity_id) > 1:
-            _logger.warn("For device_id=%s found more than 1 started device session activity_ids: %s " 
-                         % (device_id, session_activity_id))
+            _logger.warn("For device_type_id=%s found more than 1 started device session activity_ids: %s "
+                         % (device_type_id, session_activity_id))
         return session_activity_id[0]
 
         

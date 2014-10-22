@@ -21,31 +21,6 @@ class nh_clinical_res_partner(orm.Model):
     }
 
 
-class nh_clinical_device_type(orm.Model):
-    _name = 'nh.clinical.device.type'
-
-    _columns = {
-        'name': fields.text("Device Type"),
-        'flow_direction': fields.selection([('none', 'None'), ('in', 'In'), ('out', 'Out'), ('both', 'Both')], 'Flow Direction')
-    }  
-    
-
-
-class nh_clinical_device(orm.Model):
-    _name = 'nh.clinical.device'
-    _columns = {
-        'type_id': fields.many2one('nh.clinical.device.type', "Device Type"),
-        'name': fields.char('Name', size=100),
-        'is_available': fields.boolean('Is Available?'),
-    }
-    
-    _defaults = {
-        'is_available': True
-    }
-
-
-
-
 class nh_clinical_pos(orm.Model):
     """ Clinical point of service """
     _name = 'nh.clinical.pos' 

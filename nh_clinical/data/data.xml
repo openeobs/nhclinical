@@ -149,222 +149,222 @@
             <field name="prefix">SPELL/%(year)s/</field>
         </record>
 
-        <!-- Device Types -->
-        <record model="nh.clinical.device.type" id="nhc_device_type_catheter">
+        <!-- Device Categories -->
+        <record model="nh.clinical.device.category" id="nhc_device_category_catheter">
             <field name="name">Catheter</field>
             <field name="flow_direction">both</field>
         </record>
-        <record model="nh.clinical.device.type" id="nhc_device_type_enteric">
+        <record model="nh.clinical.device.category" id="nhc_device_category_enteric">
             <field name="name">Enteric</field>
             <field name="flow_direction">both</field>
         </record>
-        <record model="nh.clinical.device.type" id="nhc_device_type_stoma">
+        <record model="nh.clinical.device.category" id="nhc_device_category_stoma">
             <field name="name">Stoma</field>
             <field name="flow_direction">out</field>
         </record>
-        <record model="nh.clinical.device.type" id="nhc_device_type_surgical">
+        <record model="nh.clinical.device.category" id="nhc_device_category_surgical">
             <field name="name">Surgical</field>
             <field name="flow_direction">out</field>
         </record>
-        <record model="nh.clinical.device.type" id="nhc_device_type_urinary">
+        <record model="nh.clinical.device.category" id="nhc_device_category_urinary">
             <field name="name">Urinary</field>
             <field name="flow_direction">out</field>
         </record>
-        <record model="nh.clinical.device.type" id="nhc_device_type_vascular">
+        <record model="nh.clinical.device.category" id="nhc_device_category_vascular">
             <field name="name">Vascular</field>
             <field name="flow_direction">in</field>
         </record>
-        <record model="nh.clinical.device.type" id="nhc_device_type_o2">
+        <record model="nh.clinical.device.category" id="nhc_device_category_o2">
             <field name="name">Supplemental O2</field>
             <field name="flow_direction">none</field>
         </record>
         
-        <!-- Devices -->
-        <record model="nh.clinical.device" id="nhc_device_hickman_catheter">
+        <!-- Device Types -->
+        <record model="nh.clinical.device.type" id="nhc_device_type_hickman_catheter">
             <field name="name">Hickman Catheter</field>
-            <field name="type_id" ref="nhc_device_type_catheter"/>
+            <field name="category_id" ref="nhc_device_category_catheter"/>
         </record>
-        <record model="nh.clinical.device" id="nhc_device_pigtail_catheter">
+        <record model="nh.clinical.device.type" id="nhc_device_type_pigtail_catheter">
             <field name="name">Pigtail Catheter</field>
-            <field name="type_id" ref="nhc_device_type_catheter"/>
+            <field name="category_id" ref="nhc_device_category_catheter"/>
         </record>
-        <record model="nh.clinical.device" id="nhc_device_robinson_catheter">
+        <record model="nh.clinical.device.type" id="nhc_device_type_robinson_catheter">
             <field name="name">Robinson Catheter</field>
-            <field name="type_id" ref="nhc_device_type_catheter"/>
+            <field name="category_id" ref="nhc_device_category_catheter"/>
         </record>
-        <record model="nh.clinical.device" id="nhc_device_subclavian_catheter">
+        <record model="nh.clinical.device.type" id="nhc_device_type_subclavian_catheter">
             <field name="name">Subclavian Catheter</field>
-            <field name="type_id" ref="nhc_device_type_catheter"/>
+            <field name="category_id" ref="nhc_device_category_catheter"/>
         </record>
-        <record model="nh.clinical.device" id="nhc_device_swan_ganz_catheter">
+        <record model="nh.clinical.device.type" id="nhc_device_type_swan_ganz_catheter">
             <field name="name">Swan-Ganz Catheter</field>
-            <field name="type_id" ref="nhc_device_type_catheter"/>
+            <field name="category_id" ref="nhc_device_category_catheter"/>
         </record>
-        <record model="nh.clinical.device" id="nhc_device_transhepatic_biliary_catheter">
+        <record model="nh.clinical.device.type" id="nhc_device_type_transhepatic_biliary_catheter">
             <field name="name">Transhepatic Biliary Catheter</field>
-            <field name="type_id" ref="nhc_device_type_catheter"/>
+            <field name="category_id" ref="nhc_device_category_catheter"/>
         </record>
 
-        <record model="nh.clinical.device" id="nhc_device_gastrostomy">
+        <record model="nh.clinical.device.type" id="nhc_device_type_gastrostomy">
             <field name="name">Gastrostomy</field>
-            <field name="type_id" ref="nhc_device_type_enteric"/>
+            <field name="category_id" ref="nhc_device_category_enteric"/>
         </record>
-        <record model="nh.clinical.device" id="nhc_device_jejunostomy">
+        <record model="nh.clinical.device.type" id="nhc_device_type_jejunostomy">
             <field name="name">Jejunostomy</field>
-            <field name="type_id" ref="nhc_device_type_enteric"/>
+            <field name="category_id" ref="nhc_device_category_enteric"/>
         </record>
-        <record model="nh.clinical.device" id="nhc_device_nasogastric_tube">
+        <record model="nh.clinical.device.type" id="nhc_device_type_nasogastric_tube">
             <field name="name">Nasogastric Tube</field>
-            <field name="type_id" ref="nhc_device_type_enteric"/>
+            <field name="category_id" ref="nhc_device_category_enteric"/>
         </record>
 
-        <record model="nh.clinical.device" id="nhc_device_colostomy">
+        <record model="nh.clinical.device.type" id="nhc_device_type_colostomy">
             <field name="name">Colostomy</field>
-            <field name="type_id" ref="nhc_device_type_stoma"/>
+            <field name="category_id" ref="nhc_device_category_stoma"/>
         </record>
-        <record model="nh.clinical.device" id="nhc_device_ileostomy">
+        <record model="nh.clinical.device.type" id="nhc_device_type_ileostomy">
             <field name="name">Ileostomy</field>
-            <field name="type_id" ref="nhc_device_type_stoma"/>
+            <field name="category_id" ref="nhc_device_category_stoma"/>
         </record>
 
-        <record model="nh.clinical.device" id="nhc_device_ascitic_drain">
+        <record model="nh.clinical.device.type" id="nhc_device_type_ascitic_drain">
             <field name="name">Ascitic Drain</field>
-            <field name="type_id" ref="nhc_device_type_surgical"/>
+            <field name="category_id" ref="nhc_device_category_surgical"/>
         </record>
-        <record model="nh.clinical.device" id="nhc_device_chest_drain_small_bore">
+        <record model="nh.clinical.device.type" id="nhc_device_type_chest_drain_small_bore">
             <field name="name">Chest Drain (Small Bore)</field>
-            <field name="type_id" ref="nhc_device_type_surgical"/>
+            <field name="category_id" ref="nhc_device_category_surgical"/>
         </record>
-        <record model="nh.clinical.device" id="nhc_device_chest_drain_large_bore">
+        <record model="nh.clinical.device.type" id="nhc_device_type_chest_drain_large_bore">
             <field name="name">Chest Drain (Large Bore)</field>
-            <field name="type_id" ref="nhc_device_type_surgical"/>
+            <field name="category_id" ref="nhc_device_category_surgical"/>
         </record>
-        <record model="nh.clinical.device" id="nhc_device_corrugated_drain">
+        <record model="nh.clinical.device.type" id="nhc_device_type_corrugated_drain">
             <field name="name">Corrugated Drain</field>
-            <field name="type_id" ref="nhc_device_type_surgical"/>
+            <field name="category_id" ref="nhc_device_category_surgical"/>
         </record>
-        <record model="nh.clinical.device" id="nhc_device_csf_drain">
+        <record model="nh.clinical.device.type" id="nhc_device_type_csf_drain">
             <field name="name">CSF Drain</field>
-            <field name="type_id" ref="nhc_device_type_surgical"/>
+            <field name="category_id" ref="nhc_device_category_surgical"/>
         </record>
-        <record model="nh.clinical.device" id="nhc_device_pericardial_drain">
+        <record model="nh.clinical.device.type" id="nhc_device_type_pericardial_drain">
             <field name="name">Pericardial Drain</field>
-            <field name="type_id" ref="nhc_device_type_surgical"/>
+            <field name="category_id" ref="nhc_device_category_surgical"/>
         </record>
-        <record model="nh.clinical.device" id="nhc_device_pigtail_drain">
+        <record model="nh.clinical.device.type" id="nhc_device_type_pigtail_drain">
             <field name="name">Pigtail Drain</field>
-            <field name="type_id" ref="nhc_device_type_surgical"/>
+            <field name="category_id" ref="nhc_device_category_surgical"/>
         </record>
-        <record model="nh.clinical.device" id="nhc_device_wallace_drain">
+        <record model="nh.clinical.device.type" id="nhc_device_type_wallace_drain">
             <field name="name">Wallace Drain</field>
-            <field name="type_id" ref="nhc_device_type_surgical"/>
+            <field name="category_id" ref="nhc_device_category_surgical"/>
         </record>
 
-        <record model="nh.clinical.device" id="nhc_device_condom_catheter">
+        <record model="nh.clinical.device.type" id="nhc_device_type_condom_catheter">
             <field name="name">Condom Catheter</field>
-            <field name="type_id" ref="nhc_device_type_urinary"/>
+            <field name="category_id" ref="nhc_device_category_urinary"/>
         </record>
-        <record model="nh.clinical.device" id="nhc_device_cystostomy">
+        <record model="nh.clinical.device.type" id="nhc_device_type_cystostomy">
             <field name="name">Cystostomy</field>
-            <field name="type_id" ref="nhc_device_type_urinary"/>
+            <field name="category_id" ref="nhc_device_category_urinary"/>
         </record>
-        <record model="nh.clinical.device" id="nhc_device_female_catheter">
+        <record model="nh.clinical.device.type" id="nhc_device_type_female_catheter">
             <field name="name">Female Catheter</field>
-            <field name="type_id" ref="nhc_device_type_urinary"/>
+            <field name="category_id" ref="nhc_device_category_urinary"/>
         </record>
-        <record model="nh.clinical.device" id="nhc_device_foley_catheter">
+        <record model="nh.clinical.device.type" id="nhc_device_type_foley_catheter">
             <field name="name">Foley Catheter</field>
-            <field name="type_id" ref="nhc_device_type_urinary"/>
+            <field name="category_id" ref="nhc_device_category_urinary"/>
         </record>
-        <record model="nh.clinical.device" id="nhc_device_irrigation_catheter">
+        <record model="nh.clinical.device.type" id="nhc_device_type_irrigation_catheter">
             <field name="name">Irrigation Catheter</field>
-            <field name="type_id" ref="nhc_device_type_urinary"/>
+            <field name="category_id" ref="nhc_device_category_urinary"/>
         </record>
-        <record model="nh.clinical.device" id="nhc_device_nephrostomy">
+        <record model="nh.clinical.device.type" id="nhc_device_type_nephrostomy">
             <field name="name">Nephrostomy</field>
-            <field name="type_id" ref="nhc_device_type_urinary"/>
+            <field name="category_id" ref="nhc_device_category_urinary"/>
         </record>
-        <record model="nh.clinical.device" id="nhc_device_silastic_catheter">
+        <record model="nh.clinical.device.type" id="nhc_device_type_silastic_catheter">
             <field name="name">Silastic Catheter</field>
-            <field name="type_id" ref="nhc_device_type_urinary"/>
+            <field name="category_id" ref="nhc_device_category_urinary"/>
         </record>
-        <record model="nh.clinical.device" id="nhc_device_suprapubic_catheter">
+        <record model="nh.clinical.device.type" id="nhc_device_type_suprapubic_catheter">
             <field name="name">Suprapubic Catheter</field>
-            <field name="type_id" ref="nhc_device_type_urinary"/>
+            <field name="category_id" ref="nhc_device_category_urinary"/>
         </record>
-        <record model="nh.clinical.device" id="nhc_device_transurethral_catheter">
+        <record model="nh.clinical.device.type" id="nhc_device_type_transurethral_catheter">
             <field name="name">Transurethral Catheter</field>
-            <field name="type_id" ref="nhc_device_type_urinary"/>
+            <field name="category_id" ref="nhc_device_category_urinary"/>
         </record>
-        <record model="nh.clinical.device" id="nhc_device_urostomy">
+        <record model="nh.clinical.device.type" id="nhc_device_type_urostomy">
             <field name="name">Urostomy</field>
-            <field name="type_id" ref="nhc_device_type_urinary"/>
+            <field name="category_id" ref="nhc_device_category_urinary"/>
         </record>
 
-        <record model="nh.clinical.device" id="nhc_device_internal_jugular_catheter">
+        <record model="nh.clinical.device.type" id="nhc_device_type_internal_jugular_catheter">
             <field name="name">Internal Jugular Catheter</field>
-            <field name="type_id" ref="nhc_device_type_vascular"/>
+            <field name="category_id" ref="nhc_device_category_vascular"/>
         </record>
-        <record model="nh.clinical.device" id="nhc_device_intravenous_catheter_venflon">
+        <record model="nh.clinical.device.type" id="nhc_device_type_intravenous_catheter_venflon">
             <field name="name">Intravenous Catheter (Venflon)</field>
-            <field name="type_id" ref="nhc_device_type_vascular"/>
+            <field name="category_id" ref="nhc_device_category_vascular"/>
         </record>
-        <record model="nh.clinical.device" id="nhc_device_tunneled_cvc_jugular">
+        <record model="nh.clinical.device.type" id="nhc_device_type_tunneled_cvc_jugular">
             <field name="name">Tunneled CVC (Jugular)</field>
-            <field name="type_id" ref="nhc_device_type_vascular"/>
+            <field name="category_id" ref="nhc_device_category_vascular"/>
         </record>
-        <record model="nh.clinical.device" id="nhc_device_subclavian">
+        <record model="nh.clinical.device.type" id="nhc_device_type_subclavian">
             <field name="name">Tunneled CVC (Subclavian)</field>
-            <field name="type_id" ref="nhc_device_type_vascular"/>
+            <field name="category_id" ref="nhc_device_category_vascular"/>
         </record>
-        <record model="nh.clinical.device" id="nhc_device_haemocath">
+        <record model="nh.clinical.device.type" id="nhc_device_type_haemocath">
             <field name="name">Haemocath</field>
-            <field name="type_id" ref="nhc_device_type_vascular"/>
+            <field name="category_id" ref="nhc_device_category_vascular"/>
         </record>
-        <record model="nh.clinical.device" id="nhc_device_subcutaneous_catheter_butterfly">
+        <record model="nh.clinical.device.type" id="nhc_device_type_subcutaneous_catheter_butterfly">
             <field name="name">Subcutaneous Catheter (Butterfly)</field>
-            <field name="type_id" ref="nhc_device_type_vascular"/>
+            <field name="category_id" ref="nhc_device_category_vascular"/>
         </record>
 
-        <record model="nh.clinical.device" id="nhc_device_nasal_cannula">
+        <record model="nh.clinical.device.type" id="nhc_device_type_nasal_cannula">
             <field name="name">Nasal Cannula</field>
-            <field name="type_id" ref="nhc_device_type_o2"/>
+            <field name="category_id" ref="nhc_device_category_o2"/>
         </record>
-        <record model="nh.clinical.device" id="nhc_device_simple_mask">
+        <record model="nh.clinical.device.type" id="nhc_device_type_simple_mask">
             <field name="name">Simple Mask</field>
-            <field name="type_id" ref="nhc_device_type_o2"/>
+            <field name="category_id" ref="nhc_device_category_o2"/>
         </record>
-        <record model="nh.clinical.device" id="nhc_device_with_reservoir">
+        <record model="nh.clinical.device.type" id="nhc_device_type_with_reservoir">
             <field name="name">With Reservoir</field>
-            <field name="type_id" ref="nhc_device_type_o2"/>
+            <field name="category_id" ref="nhc_device_category_o2"/>
         </record>
-        <record model="nh.clinical.device" id="nhc_device_aerosol_neb">
+        <record model="nh.clinical.device.type" id="nhc_device_type_aerosol_neb">
             <field name="name">Aerosol/Neb</field>
-            <field name="type_id" ref="nhc_device_type_o2"/>
+            <field name="category_id" ref="nhc_device_category_o2"/>
         </record>
-        <record model="nh.clinical.device" id="nhc_device_venturi_mask">
+        <record model="nh.clinical.device.type" id="nhc_device_type_venturi_mask">
             <field name="name">Venturi Mask</field>
-            <field name="type_id" ref="nhc_device_type_o2"/>
+            <field name="category_id" ref="nhc_device_category_o2"/>
         </record>
-        <record model="nh.clinical.device" id="nhc_device_humidified_sytem">
+        <record model="nh.clinical.device.type" id="nhc_device_type_humidified_sytem">
             <field name="name">Humidified System</field>
-            <field name="type_id" ref="nhc_device_type_o2"/>
+            <field name="category_id" ref="nhc_device_category_o2"/>
         </record>
-        <record model="nh.clinical.device" id="nhc_device_tracheostomy">
+        <record model="nh.clinical.device.type" id="nhc_device_type_tracheostomy">
             <field name="name">Tracheostomy</field>
-            <field name="type_id" ref="nhc_device_type_o2"/>
+            <field name="category_id" ref="nhc_device_category_o2"/>
         </record>
-        <record model="nh.clinical.device" id="nhc_device_intubated">
+        <record model="nh.clinical.device.type" id="nhc_device_type_intubated">
             <field name="name">Intubated</field>
-            <field name="type_id" ref="nhc_device_type_o2"/>
+            <field name="category_id" ref="nhc_device_category_o2"/>
         </record>
-        <record model="nh.clinical.device" id="nhc_device_cpap">
+        <record model="nh.clinical.device.type" id="nhc_device_type_cpap">
             <field name="name">CPAP</field>
-            <field name="type_id" ref="nhc_device_type_o2"/>
+            <field name="category_id" ref="nhc_device_category_o2"/>
         </record>
-        <record model="nh.clinical.device" id="nhc_device_niv_bipap">
+        <record model="nh.clinical.device.type" id="nhc_device_type_niv_bipap">
             <field name="name">NIV BiPAP</field>
-            <field name="type_id" ref="nhc_device_type_o2"/>
+            <field name="category_id" ref="nhc_device_category_o2"/>
         </record>
         
 	</data>
