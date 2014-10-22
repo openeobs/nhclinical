@@ -59,7 +59,7 @@ class nh_clinical_device_session(orm.Model):
     def name_get(self, cr, uid, ids, context):
         res = []
         for session in self.browse(cr, uid, ids, context):
-            res.append((session.id, "%s/%s" % (session.patient_id.full_name, session.device_type_id.category_id.name)))
+            res.append((session.id, "%s/%s" % (session.patient_id.full_name, session.device_type_id.name)))
         return res
     
     def start(self, cr, uid, activity_id, context=None):
