@@ -321,6 +321,7 @@ class nh_clinical_adt_patient_transfer(orm.Model):
         'location': fields.text('Location'),
         'from_location_id': fields.many2one('nh.clinical.location', 'Origin Location'),
         'location_id': fields.many2one('nh.clinical.location', 'Transfer Location'),
+        'patient_id': fields.related('activity_id', 'patient_id', string='Patient', type='many2one', relation='nh.clinical.patient')
     }
     
     def submit(self, cr, uid, activity_id, vals, context=None):
