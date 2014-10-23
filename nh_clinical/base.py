@@ -149,7 +149,7 @@ class nh_clinical_location(orm.Model):
         res = {}
         patient_pool = self.pool['nh.clinical.patient']
         for lid in ids:
-            res[lid] = patient_pool.search(cr, uid, [('current_location_id', '=', lid)], context=context)
+            res[lid] = patient_pool.search(cr, uid, [('current_location_id', 'child_of', lid)], context=context)
         return res
 
     def _get_hca_ids(self, cr, uid, ids, field, args, context=None):
@@ -325,7 +325,7 @@ class nh_clinical_location(orm.Model):
                                                'nh.activity': (_placement2location_id, ['state'], 20)
                                         }),
         'patient_capacity': fields.integer('Patient Capacity'),
-        'patient_ids': fields.function(_get_patient_ids, type='one2many', relation='nh.clinical.patient', string="Location Patients"),
+        'patient_ids': fields.function(_get_patient_ids, type='many2many', relation='nh.clinical.patient', string="Patients"),
         'user_ids': fields.many2many('res.users', 'user_location_rel', 'location_id', 'user_id', 'Responsible Users'),
         # aux fields for the view, worth having a SQL model instead?
         'assigned_hca_ids': fields.function(_get_hca_ids, type='many2many', relation='res.users', string="Assigned HCAs"),
