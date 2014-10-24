@@ -41,7 +41,7 @@ class nh_clinical_api_demo(orm.AbstractModel):
     def create(self, cr, uid, model, values_method=None, values={}, context=None):
         model_pool = self.pool[model]
         v = self.demo_data(cr, uid, model, values_method, values)
-        _logger.info("Creating DEMO resource '%s', values: %s" % (model, v))
+        _logger.debug("Creating DEMO resource '%s', values: %s" % (model, v))
         res_id = model_pool.create(cr, uid, v, context)
         return res_id
     
@@ -61,7 +61,7 @@ class nh_clinical_api_demo(orm.AbstractModel):
         model_pool = self.pool[model]
         #print "create activity data_values: %s" % data_values
         v = self.demo_data(cr, uid, model, values_method, data_values)
-        _logger.info("Creating DEMO resource '%s', values: %s" % (model, v))
+        _logger.debug("Creating DEMO resource '%s', values: %s" % (model, v))
         activity_id = model_pool.create_activity(cr, uid, activity_values, v, context)
         return activity_id
     
@@ -150,7 +150,7 @@ class nh_clinical_api_demo(orm.AbstractModel):
         return True
 
     def build_unit_test_env(self, cr, uid, wards=None, bed_count=2, patient_admit_count=2, patient_placement_count=1,
-                            ews_count=1, weight_count=0, blood_sugar_count=0, height_count=0, o2target_count=0,
+                            ews_count=1, context=False, weight_count=0, blood_sugar_count=0, height_count=0, o2target_count=0,
                             users=None):
         """
         Create a default unit test environment for basic unit tests.
@@ -188,19 +188,24 @@ class nh_clinical_api_demo(orm.AbstractModel):
         api = self.pool['nh.clinical.api']
         activity_pool = self.pool['nh.activity']
         location_pool = self.pool['nh.clinical.location']
+        context_pool = self.pool['nh.clinical.context']
         user_pool = self.pool['res.users']
         pos_id = self.create(cr, uid, 'nh.clinical.pos')
         pos_location_id = location_pool.search(cr, uid, [('pos_id', '=', pos_id)])[0]
 
         adt_uid = self.create(cr, uid, 'res.users', 'user_adt', {'pos_id': pos_id})
 
+        if context:
+            context_ids = context_pool.search(cr, uid, [['name', '=', context]])
+            context = [[6, False, context_ids]] if context_ids else False
+
         # LOCATIONS
-        ward_ids = [self.create(cr, uid, 'nh.clinical.location', 'location_ward', {'parent_id': pos_location_id, 'name': 'Ward '+w, 'code': w}) for w in wards]
+        ward_ids = [self.create(cr, uid, 'nh.clinical.location', 'location_ward', {'context_ids': context, 'parent_id': pos_location_id, 'name': 'Ward '+w, 'code': w}) for w in wards]
         i = 0
         bed_ids = {}
         bed_codes = {}
         for wid in ward_ids:
-            bed_ids[wards[i]] = [self.create(cr, uid, 'nh.clinical.location', 'location_bed', {'parent_id': wid, 'name': 'Bed '+str(n), 'code': wards[i]+str(n)}) for n in range(bed_count)]
+            bed_ids[wards[i]] = [self.create(cr, uid, 'nh.clinical.location', 'location_bed', {'context_ids': context, 'parent_id': wid, 'name': 'Bed '+str(n), 'code': wards[i]+str(n)}) for n in range(bed_count)]
             bed_codes[wards[i]] = [wards[i]+str(n) for n in range(bed_count)]
             i += 1
 
@@ -822,15 +827,31 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
             v.update({'lot_discharge_id': api_demo.create(cr, uid, 'nh.clinical.location', 'location_discharge')})
    
         v.update(values)     
-        return v    
+        return v
+
+    #### device.category ####
+    def device_category(self, cr, uid, values={}):
+        fake = self.next_seed_fake()
+        flow_directions = dict(self.pool['nh.clinical.device.category']._columns['flow_direction'].selection).keys()
+        v = {
+            'name': "DEVICE_CATEGORY_"+str(fake.random_int(min=100, max=999)),
+            'flow_direction': fake.random_element(flow_directions),
+        }
+        return v
     
     #### device.type ####
     def device_type(self, cr, uid, values={}):
         fake = self.next_seed_fake()
-        flow_directions = dict(self.pool['nh.clinical.device.type']._columns['flow_direction'].selection).keys()
+        if not 'category_id' in values:
+            category_id = fake.random_element(self.pool['nh.clinical.device.category'].search(cr, uid, []))
+            if not category_id:
+                api_demo = self.pool['nh.clinical.api.demo']
+                category_id = api_demo.create(cr, uid, 'nh.clinical.device.category')
+        else:
+            category_id = values['category_id']
         v = {
             'name': "DEVICE_TYPE_"+str(fake.random_int(min=100, max=999)),
-            'flow_direction': fake.random_element(flow_directions),
+            'category_id': category_id,
         }
         return v  
     
@@ -845,6 +866,7 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         else:
             type_id = values['type_id']
         v = {
+            'serial_number': "DEVICE_"+str(fake.random_int(min=1000, max=9999)),
             'type_id': type_id
         }
         v.update(values)

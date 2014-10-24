@@ -74,6 +74,7 @@ class test_operations(common.SingleTransactionCase):
         cr, uid = self.cr, self.uid
         api = self.registry('nh.clinical.api')
         api_demo = self.registry('nh.clinical.api.demo')
+        context = self.registry('nh.clinical.context')
         print "TEST SWAP BEDS"
         pos_id = api_demo.create(cr, uid, 'nh.clinical.pos') 
         ward_id = api_demo.create(cr, uid, 'nh.clinical.location', 'location_ward', {'pos_id': pos_id})
