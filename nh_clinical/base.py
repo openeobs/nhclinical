@@ -370,6 +370,13 @@ class nh_clinical_location(orm.Model):
             raise osv.except_osv('Error!', "Can't deactivate a location that is being used.")
         return self.write(cr, uid, location.id, data, context=context)
 
+    def find_nearest_location_id(self, cr, uid, location_id, usage='ward', context=None):
+        location = self.browse(cr, uid, location_id, context=context)
+        if location.usage == usage:
+            return location.id
+        else:
+            return self.find_nearest_location_id(cr, uid, location.parent_id.id, usage=usage, context=context)
+
     def create(self, cr, uid, vals, context=None):
         if 'context_ids' in vals:
             cids = vals['context_ids'][0]

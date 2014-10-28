@@ -48,7 +48,7 @@ class BaseTest(SingleTransactionCase):
     def create_activity(self, cr, uid, data_model, vals_activity={}, vals_data={}, context=None):
         model_pool = self.registry(data_model)
         activity_id = model_pool.create_activity(cr, uid, vals_activity, vals_data, context)
-        _logger.info("Activity created id=%s, data_model=%s\n vals_activity: %s\n vals_data: %s" 
+        _logger.debug("Activity created id=%s, data_model=%s\n vals_activity: %s\n vals_data: %s" 
                      % (activity_id, data_model, vals_activity, vals_data))
         activity = activity_pool.browse(cr, uid, activity_id)
 
@@ -83,7 +83,7 @@ class BaseTest(SingleTransactionCase):
         """
 
         global pos_id, ward_location_ids, bed_location_ids, adt_user_id, nurse_user_ids
-        _logger.info("Executing create_environment()")
+        _logger.debug("Executing create_environment()")
         # Create POS
         pos_id = self.create_pos()
         pos = pos_pool.browse(cr, uid, pos_id)
@@ -124,7 +124,7 @@ class BaseTest(SingleTransactionCase):
     def create_nurse_user(self, location_ids):
         data = self.data_nurse_user(location_ids)
         user_id = user_pool.create(cr, uid, data)
-        _logger.info("Nurse user created id=%s\n data: %s" % (user_id, data))
+        _logger.debug("Nurse user created id=%s\n data: %s" % (user_id, data))
         return user_id  
 
     def create_adt_user(self, pos_id):
@@ -133,26 +133,26 @@ class BaseTest(SingleTransactionCase):
         pos = pos_pool.browse(cr, uid, pos_id) 
         data = self.data_adt_user({'pos_id': pos_id})
         user_id = user_pool.create(cr, uid, data)
-        _logger.info("ADT user created id=%s\n data: %s" % (user_id, data))
+        _logger.debug("ADT user created id=%s\n data: %s" % (user_id, data))
         return user_id
 
     def create_bed(self, parent_id):
         data = self.data_bed_location(parent_id)
         location_id = location_pool.create(cr, uid, data)
-        _logger.info("Bed location created id=%s\n data: %s" % (location_id, data))
+        _logger.debug("Bed location created id=%s\n data: %s" % (location_id, data))
         return location_id
         
     def create_ward(self, parent_id):
         data = self.data_ward_location(parent_id)
         location_id = location_pool.create(cr, uid, data)
-        _logger.info("Ward location created id=%s\n data: %s" % (location_id, data))
+        _logger.debug("Ward location created id=%s\n data: %s" % (location_id, data))
         return location_id        
     
     def create_pos(self):
         fake.seed(next_seed())
         data = self.data_pos()
         pos_id = pos_pool.create(cr, uid, data)
-        _logger.info("POS created id=%s\n data: %s" % (pos_id, data))
+        _logger.debug("POS created id=%s\n data: %s" % (pos_id, data))
 #         from pprint import pprint as pp
 #         location_ids = location_pool.search(cr, uid, [['id','>',25]])
 #         records = location_pool.read(cr, uid, location_ids, 
@@ -163,29 +163,29 @@ class BaseTest(SingleTransactionCase):
     def create_pos_location(self):
         data = self.data_pos_location()
         location_id = location_pool.create(cr, uid, data)
-        _logger.info("POS location created id=%s\n data: %s" % (location_id, data))
+        _logger.debug("POS location created id=%s\n data: %s" % (location_id, data))
         return location_id 
     
     def create_admission_location(self, parent_id=None):
         data = self.data_admission_location(parent_id and {'parent_id': parent_id} or {})
         location_id = location_pool.create(cr, uid, data)
-        _logger.info("Admission location created id=%s\n data: %s" % (location_id, data))
+        _logger.debug("Admission location created id=%s\n data: %s" % (location_id, data))
         return location_id     
     
     def create_discharge_location(self, parent_id=None):
         data = self.data_discharge_location(parent_id and {'parent_id': parent_id} or {})
         location_id = location_pool.create(cr, uid, data)
-        _logger.info("Discharge location created id=%s\n data: %s" % (location_id, data))
+        _logger.debug("Discharge location created id=%s\n data: %s" % (location_id, data))
         return location_id 
 
     def create_device_type(self, data={}):
         device_type_id = device_type_pool.create(cr, uid, self.data_device_type())
-        _logger.info("Device type created id=%s" % (device_type_id))
+        _logger.debug("Device type created id=%s" % (device_type_id))
         return device_type_id
     
     def create_device(self, data={}):
         device_id = device_pool.create(cr, uid, self.data_device())
-        _logger.info("Device created id=%s" % (device_id))
+        _logger.debug("Device created id=%s" % (device_id))
         return device_id
 
     def data_patient(self, data={}):

@@ -59,7 +59,7 @@ class nh_activity_data(orm.AbstractModel):
         'completed': ['cancel'],
         'cancelled': []
     }
-    _POLICY = {}
+    _POLICY = {'activities': []}
 
     def update_activity(self, cr, uid, activity_id, context=None):
         api = self.pool['nh.clinical.api']
