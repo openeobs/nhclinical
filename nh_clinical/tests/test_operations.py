@@ -1,15 +1,8 @@
 from openerp.tests import common
 from datetime import datetime as dt
-from dateutil.relativedelta import relativedelta as rd
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
-from pprint import pprint as pp
 
-from openerp import tools
-from openerp.osv import orm, fields, osv
-from openerp.addons.nh_clinical.tests.test_base import BaseTest
-from openerp.tools import config 
-import logging        
-from pprint import pprint as pp
+import logging
 _logger = logging.getLogger(__name__)
 
 from faker import Faker
@@ -25,76 +18,166 @@ def next_seed():
 
 class test_operations(common.SingleTransactionCase):
     @classmethod
-    def tearDownClass(cls):
-        if config['test_commit']:
-            cls.cr.commit()
-            print "COMMIT"
-        else:
-            cls.cr.rollback()
-            print "ROLLBACK"
-        cls.cr.close()
-        
-    def setUp(self):
-        super(test_operations, self).setUp()
-        
+    def setUpClass(cls):
+        super(test_operations, cls).setUpClass()
+        cr, uid = cls.cr, cls.uid
 
-    def test_placement(self):
-        #return
+        cls.users_pool = cls.registry('res.users')
+        cls.groups_pool = cls.registry('res.groups')
+        cls.partner_pool = cls.registry('res.partner')
+        cls.activity_pool = cls.registry('nh.activity')
+        cls.patient_pool = cls.registry('nh.clinical.patient')
+        cls.location_pool = cls.registry('nh.clinical.location')
+        cls.pos_pool = cls.registry('nh.clinical.pos')
+        cls.spell_pool = cls.registry('nh.clinical.spell')
+        # OPERATIONS DATA MODELS
+        cls.placement_pool = cls.registry('nh.clinical.patient.placement')
+        cls.move_pool = cls.registry('nh.clinical.patient.move')
+        cls.swap_pool = cls.registry('nh.clinical.patient.swap_beds')
+
+        cls.apidemo = cls.registry('nh.clinical.api.demo')
+
+        cls.apidemo.build_unit_test_env(cr, uid, bed_count=4, patient_count=4)
+
+        cls.wu_id = cls.location_pool.search(cr, uid, [('code', '=', 'U')])[0]
+        cls.wt_id = cls.location_pool.search(cr, uid, [('code', '=', 'T')])[0]
+        cls.pos_id = cls.location_pool.read(cr, uid, cls.wu_id, ['pos_id'])['pos_id'][0]
+        cls.pos_location_id = cls.pos_pool.read(cr, uid, cls.pos_id, ['location_id'])['location_id'][0]
+
+        cls.wmu_id = cls.users_pool.search(cr, uid, [('login', '=', 'WMU')])[0]
+        cls.wmt_id = cls.users_pool.search(cr, uid, [('login', '=', 'WMT')])[0]
+        cls.nu_id = cls.users_pool.search(cr, uid, [('login', '=', 'NU')])[0]
+        cls.nt_id = cls.users_pool.search(cr, uid, [('login', '=', 'NT')])[0]
+        cls.adt_id = cls.users_pool.search(cr, uid, [('groups_id.name', 'in', ['NH Clinical ADT Group']), ('pos_id', '=', cls.pos_id)])[0]
+        
+    def test_Placement_SwapBeds_and_Move(self):
         cr, uid = self.cr, self.uid
-        env_pool = self.registry('nh.clinical.demo.env')
-        api = self.registry('nh.clinical.api')
-        config = {
-            'patient_qty': 0,
-        }       
-        env_id = env_pool.create(cr, uid, config)
-        env_pool.build(cr, uid, env_id)
-        env = env_pool.browse(cr, uid, env_id)
-        adt_user_id = env_pool.get_adt_user_ids(cr, uid, env_id)[0]
-        register_activity = env_pool.create_complete(cr, adt_user_id, env_id,'nh.clinical.adt.patient.register')
-        admit_data = env_pool.fake_data(cr, uid, env_id, 'nh.clinical.adt.patient.admit')
-        admit_data['other_identifier'] = register_activity.data_ref.other_identifier
-        admit_activity = env_pool.create_complete(cr, adt_user_id, env_id,'nh.clinical.adt.patient.admit', {}, admit_data)
-        # test admission
-        admission_activity = [a for a in admit_activity.created_ids if a.data_model == 'nh.clinical.patient.admission']
-        assert len(admission_activity) == 1, "Created admission activity: %s" % admission_activity
-        admission_activity = admission_activity[0]
-        assert admission_activity.state == 'completed'
-        #test placement        
-        placement_activity = [a for a in admission_activity.created_ids if a.data_model == 'nh.clinical.patient.placement']
-        assert len(placement_activity) == 1, "Created patient.placement activity: %s" % placement_activity    
-        placement_activity = placement_activity[0]
-        assert placement_activity.state == 'new'   
-        assert placement_activity.pos_id.id == register_activity.pos_id.id
-        assert placement_activity.patient_id.id == register_activity.patient_id.id
-        assert placement_activity.data_ref.patient_id.id == placement_activity.patient_id.id
-        assert placement_activity.data_ref.suggested_location_id
-        assert placement_activity.location_id.id == placement_activity.data_ref.suggested_location_id.id
+        patient_ids = self.patient_pool.search(cr, uid, [])
+        patient_id = fake.random_element(patient_ids)
+        patient2_id = fake.random_element(patient_ids)
+        while patient2_id == patient_id:
+            patient2_id = fake.random_element(patient_ids)
+        code = str(fake.random_int(min=1000001, max=9999999))
+        spell_data = {
+            'patient_id': patient_id,
+            'pos_id': self.pos_id,
+            'code': code,
+            'start_date': dt.now().strftime(DTF)}
+        spell2_data = {
+            'patient_id': patient2_id,
+            'pos_id': self.pos_id,
+            'code': str(fake.random_int(min=100001, max=999999)),
+            'start_date': dt.now().strftime(DTF)}
+        spell_activity_id = self.spell_pool.create_activity(cr, uid, {}, spell_data)
+        spell2_activity_id = self.spell_pool.create_activity(cr, uid, {}, spell2_data)
+        self.activity_pool.start(cr, uid, spell_activity_id)
+        self.activity_pool.start(cr, uid, spell2_activity_id)
         
-    def test_swap_beds(self):
-        cr, uid = self.cr, self.uid
-        api = self.registry('nh.clinical.api')
-        api_demo = self.registry('nh.clinical.api.demo')
-        context = self.registry('nh.clinical.context')
-        print "TEST SWAP BEDS"
-        pos_id = api_demo.create(cr, uid, 'nh.clinical.pos') 
-        ward_id = api_demo.create(cr, uid, 'nh.clinical.location', 'location_ward', {'pos_id': pos_id})
-        bed1_id = api_demo.create(cr, uid, 'nh.clinical.location', 'location_bed', {'parent_id': ward_id}) 
-        bed2_id = api_demo.create(cr, uid, 'nh.clinical.location', 'location_bed', {'parent_id': ward_id})
-        placement_activity1 = api_demo.register_admit_place(cr, uid, bed1_id)
-        placement_activity2 = api_demo.register_admit_place(cr, uid, bed2_id)
-        swap_activity = api.create_complete(cr, uid, 'nh.clinical.patient.swap_beds', {},
-                                            {'location1_id': bed1_id, 'location2_id': bed2_id})
-        patient1 = api.browse(cr, uid, 'nh.clinical.patient', placement_activity1.patient_id.id)
-        patient2 = api.browse(cr, uid, 'nh.clinical.patient', placement_activity2.patient_id.id)
-        assert patient1.current_location_id.id == bed2_id
-        assert patient2.current_location_id.id == bed1_id
+        # Patient Placement
+        placement_data = {
+            'suggested_location_id': self.wu_id,
+            'patient_id': patient_id
+        }
+        placement2_data = {
+            'suggested_location_id': self.wu_id,
+            'patient_id': patient2_id
+        }
+        location_id = self.location_pool.browse(cr, uid, self.wu_id).child_ids[0].id
+        location2_id = self.location_pool.browse(cr, uid, self.wu_id).child_ids[1].id
+        placement_activity_id = self.placement_pool.create_activity(cr, uid, {'pos_id': self.pos_id}, placement_data)
+        placement2_activity_id = self.placement_pool.create_activity(cr, uid, {'pos_id': self.pos_id}, placement2_data)
+        self.activity_pool.submit(cr, self.wmu_id, placement_activity_id, {'location_id': location_id})
+        self.activity_pool.submit(cr, self.wmu_id, placement2_activity_id, {'location_id': location2_id})
+        check_placement = self.activity_pool.browse(cr, uid, placement_activity_id)
         
+        # test placement activity submitted data
+        self.assertTrue(check_placement.data_ref.patient_id.id == patient_id, msg="Patient Placement: Patient id was not submitted correctly")
+        self.assertTrue(check_placement.data_ref.suggested_location_id.id == self.wu_id, msg="Patient Placement: Suggested location was not submitted correctly")
+        self.assertTrue(check_placement.data_ref.location_id.id == location_id, msg="Patient Placement: Location id was not submitted correctly")
         
+        # Complete Patient Placement
+        self.activity_pool.complete(cr, self.wmu_id, placement_activity_id)
+        self.activity_pool.complete(cr, self.wmu_id, placement2_activity_id)
+        check_placement = self.activity_pool.browse(cr, uid, placement_activity_id)
+        self.assertTrue(check_placement.state == 'completed', msg="Patient Placement not completed successfully")
+        self.assertTrue(check_placement.date_terminated, msg="Patient Placement Completed: Date terminated not registered")
+        # test spell data
+        check_spell = self.activity_pool.browse(cr, uid, spell_activity_id)
+        self.assertTrue(check_spell.data_ref.location_id.id == location_id, msg= "Patient Placement Completed: Spell location not registered correctly")
+        # test patient data
+        check_patient = self.patient_pool.browse(cr, uid, patient_id)
+        self.assertTrue(check_patient.current_location_id.id == location_id, msg= "Patient Placement Completed: Patient current location not registered correctly")
+
+        # Swap Beds
+        beds_data = {
+            'location1_id': location_id,
+            'location2_id': location2_id
+        }
+        swap_activity_id = self.swap_pool.create_activity(cr, uid, {}, beds_data)
+        self.activity_pool.submit(cr, uid, swap_activity_id, {})
+        check_swap = self.activity_pool.browse(cr, uid, swap_activity_id)
+
+        # test swap activity submitted data
+        self.assertTrue(check_swap.data_ref.location1_id.id == location_id, msg="Swap Beds: Location id was not submitted correctly")
+        self.assertTrue(check_swap.data_ref.location2_id.id == location2_id, msg="Swap Beds: 2nd Location id was not submitted correctly")
+
+        # Complete Swap Beds
+        self.activity_pool.complete(cr, uid, swap_activity_id)
+        check_swap = self.activity_pool.browse(cr, uid, swap_activity_id)
+        self.assertTrue(check_swap.state == 'completed', msg="Swap Beds not completed successfully")
+        self.assertTrue(check_swap.date_terminated, msg="Swap Beds Completed: Date terminated not registered")
+        # test spell data
+        check_spell = self.activity_pool.browse(cr, uid, spell_activity_id)
+        self.assertTrue(check_spell.data_ref.location_id.id == location2_id, msg= "Swap Beds Completed: Spell location not updated correctly")
+        check_spell = self.activity_pool.browse(cr, uid, spell2_activity_id)
+        self.assertTrue(check_spell.data_ref.location_id.id == location_id, msg= "Swap Beds Completed: 2nd Spell location not updated correctly")
+        # test patient data
+        check_patient = self.patient_pool.browse(cr, uid, patient_id)
+        self.assertTrue(check_patient.current_location_id.id == location2_id, msg= "Swap Beds Completed: Patient current location not updated correctly")
+        check_patient = self.patient_pool.browse(cr, uid, patient2_id)
+        self.assertTrue(check_patient.current_location_id.id == location_id, msg= "Swap Beds Completed: 2nd Patient current location not updated correctly")
+
+        # Patient Move
+        location_id = self.location_pool.browse(cr, uid, self.wt_id).child_ids[0].id
+        move_data = {
+            'location_id': location_id,
+            'patient_id': patient_id
+        }
+        move_activity_id = self.move_pool.create_activity(cr, uid, {'parent_id': spell_activity_id}, move_data)
+        self.activity_pool.submit(cr, uid, move_activity_id, {})
+        check_move = self.activity_pool.browse(cr, uid, move_activity_id)
         
+        # test move activity submitted data
+        self.assertTrue(check_move.data_ref.patient_id.id == patient_id, msg="Patient Move: Patient id was not submitted correctly")
+        self.assertTrue(check_move.data_ref.location_id.id == location_id, msg="Patient Move: Location id was not submitted correctly")
         
-        
-        
-        
-        
-        
-        
+        # Complete Patient Move
+        self.activity_pool.complete(cr, uid, move_activity_id)
+        check_move = self.activity_pool.browse(cr, uid, move_activity_id)
+        self.assertTrue(check_move.state == 'completed', msg="Patient Move not completed successfully")
+        self.assertTrue(check_move.date_terminated, msg="Patient Move Completed: Date terminated not registered")
+        # test spell data
+        check_spell = self.activity_pool.browse(cr, uid, spell_activity_id)
+        self.assertTrue(check_spell.data_ref.location_id.id != location_id, msg= "Patient Move Completed: Spell location unexpectedly updated")
+        # test patient data
+        check_patient = self.patient_pool.browse(cr, uid, patient_id)
+        self.assertTrue(check_patient.current_location_id.id == location_id, msg= "Patient Move Completed: Patient current location not registered correctly")
+
+    # def test_swap_beds(self):
+    #     cr, uid = self.cr, self.uid
+    #     api = self.registry('nh.clinical.api')
+    #     api_demo = self.registry('nh.clinical.api.demo')
+    #     context = self.registry('nh.clinical.context')
+    #     print "TEST SWAP BEDS"
+    #     pos_id = api_demo.create(cr, uid, 'nh.clinical.pos')
+    #     ward_id = api_demo.create(cr, uid, 'nh.clinical.location', 'location_ward', {'pos_id': pos_id})
+    #     bed1_id = api_demo.create(cr, uid, 'nh.clinical.location', 'location_bed', {'parent_id': ward_id})
+    #     bed2_id = api_demo.create(cr, uid, 'nh.clinical.location', 'location_bed', {'parent_id': ward_id})
+    #     placement_activity1 = api_demo.register_admit_place(cr, uid, bed1_id)
+    #     placement_activity2 = api_demo.register_admit_place(cr, uid, bed2_id)
+    #     swap_activity = api.create_complete(cr, uid, 'nh.clinical.patient.swap_beds', {},
+    #                                         {'location1_id': bed1_id, 'location2_id': bed2_id})
+    #     patient1 = api.browse(cr, uid, 'nh.clinical.patient', placement_activity1.patient_id.id)
+    #     patient2 = api.browse(cr, uid, 'nh.clinical.patient', placement_activity2.patient_id.id)
+    #     assert patient1.current_location_id.id == bed2_id
+    #     assert patient2.current_location_id.id == bed1_id

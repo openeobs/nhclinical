@@ -115,6 +115,7 @@ class nh_clinical_patient_swap_beds(orm.Model):
                              'suggested_location_id': locations[location2_id]['parent_id']})
         api.submit(cr, uid, spell1_activity_id, {'location_id': location2_id})
         api.submit(cr, uid, spell2_activity_id, {'location_id': location1_id})
+        return super(nh_clinical_patient_swap_beds, self).complete(cr, uid, activity_id, context)
 
 
 
