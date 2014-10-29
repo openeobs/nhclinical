@@ -380,7 +380,6 @@ class nh_clinical_api_demo(orm.AbstractModel):
             beds = api.location_map(cr, uid, pos_ids=[pos_id], usages=['bed'])
         else:
             beds = api.location_map(cr, uid, codes=bed_codes)
-#         import pdb; pdb.set_trace()
         #setting up admin as a nurse
 
         imd_ids = api.search(cr, uid, 'ir.model.data', [['model','=','res.groups'], ['name','=','group_nhc_nurse']])
@@ -509,7 +508,6 @@ class nh_clinical_api_demo(orm.AbstractModel):
                                                   
 
         
-        #import pdb; pdb.set_trace()
         for i in range(patient_placement_count):
             placement_activity_id = fake.random_element(temp_placement_activity_ids)
             bed_location_id = fake.random_element(temp_bed_ids)
@@ -521,8 +519,7 @@ class nh_clinical_api_demo(orm.AbstractModel):
                                           data_models=['nh.clinical.patient.observation.ews'],
                                           pos_ids=[pos_id],
                                           states=['new', 'scheduled']).values()
-        #import pdb; pdb.set_trace()
-        
+
         nurse_uid = fake.random_element(nurse_ids)
         #EWS
         for i in range(ews_count):
@@ -841,7 +838,6 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         fake = self.next_seed_fake()
         api =self.pool['nh.clinical.api']
         api_demo = self.pool['nh.clinical.api.demo']
-        #import pdb; pdb.set_trace()
         v = {}
         # if 'other_identifier' not passed register new patient and use it's data
         pos_id = 'pos_id' in values and values.pop('pos_id') or False

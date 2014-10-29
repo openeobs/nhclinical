@@ -284,7 +284,6 @@ class nh_clinical_adt_patient_cancel_admit(orm.Model):
         next_level_activity_ids.extend([child.id for child in admit_activity.child_ids])
         next_level_activity_ids.extend([created.id for created in admit_activity.created_ids])
         activity_ids.extend(next_level_activity_ids)
-        #import pdb; pdb.set_trace()
         while next_level_activity_ids:
             for activity in activity_pool.browse(cr, uid, next_level_activity_ids):
                 next_level_activity_ids = [child.id for child in activity.child_ids]

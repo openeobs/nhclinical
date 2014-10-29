@@ -112,7 +112,6 @@ class nh_clinical_location(orm.Model):
     def _location2pos_id(self, cr, uid, ids, field, args, context=None):
         res = {}
         pos_pool = self.pool['nh.clinical.pos']
-        #import pdb; pdb.set_trace()
         for location in self.browse(cr, uid, ids, context):
             pos_location_id = self.search(cr, uid, [['parent_id','=',False],['child_ids','child_of',location.id]])
             pos_location_id = pos_location_id and pos_location_id[0] or False

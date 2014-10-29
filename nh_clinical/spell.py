@@ -90,8 +90,6 @@ class nh_clinical_spell(orm.Model):
 
     def create(self, cr, uid, vals, context=None):
         current_spell_id = self.search(cr, uid, [('patient_id','=',vals['patient_id']),('state','in',['started'])], context)
-#         if current_spell_id:
-#             import pdb; pdb.set_trace()
         if current_spell_id:
             res = current_spell_id[0]
             _logger.warn("Started spell already exists! Current spell ID=%s returned." % current_spell_id[0])
@@ -135,7 +133,6 @@ class nh_clinical_spell(orm.Model):
             group by activity_id               
                 """ % activity_id
         cr.execute(sql)
-        #import pdb; pdb.set_trace()
         res = cr.dictfetchone()
         user_ids = list(res and set(res['user_ids']) or [])
         return user_ids

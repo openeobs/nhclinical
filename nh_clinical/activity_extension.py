@@ -162,7 +162,6 @@ class nh_activity_data(orm.AbstractModel):
 
     def get_activity_patient_id(self, cr, uid, activity_id, context=None):
         patient_id = False
-        # import pdb; pdb.set_trace()
         data = self.browse_domain(cr, uid, [('activity_id', '=', activity_id)])[0]
         if 'patient_id' in self._columns.keys():
             patient_id = data.patient_id and data.patient_id.id or False
@@ -191,7 +190,6 @@ class nh_activity_data(orm.AbstractModel):
                 group by activity_id                
                 """.format(activity_id=activity_id)
         cr.execute(sql)
-        #import pdb; pdb.set_trace()
         res = cr.dictfetchone()
         user_ids = list(res and set(res['user_ids']) or [])
         #print "ACTIVITY DATA get_activity_user_ids user_ids: %s " % user_ids

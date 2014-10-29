@@ -20,7 +20,6 @@ class test_base_nhdemo(SingleTransactionCase):
             cls.cr.rollback()
             print "ROLLBACK"
         cls.cr.close()
-        #import pdb; pdb.set_trace()
 
     def setUp(self):
         global cr, uid

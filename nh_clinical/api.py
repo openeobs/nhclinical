@@ -364,7 +364,6 @@ with
              select * from map %s""" % (recently_transfered_interval, where_clause)
         cr.execute(sql)
         res = {r['id']: r for r in cr.dictfetchall()}
-        #import pdb; pdb.set_trace()
         return res
 
     def get_adt_users(self, cr, uid, pos_ids=[], return_id=False):
