@@ -710,18 +710,19 @@ with
             return False
         return self.pool['nh.activity'].browse(cr, uid, spell_activity_id, context)
     
-    def get_device_session_activity_id(self, cr, uid, device_type_id, context=None):
-        api = self.pool['nh.clinical.api']
-        domain = {'device_type_ids': [device_type_id],
-                  'states': ['started'],
-                  'data_models': ['nh.clinical.device.session']}
-        session_activity_id = api.activity_map(cr, uid, **domain).keys()
-        if not session_activity_id:
+    def get_device_session_activity_id(self, cr, uid, patient_id, device_type_id, context=None):
+        session_pool = self.pool['nh.clinical.device.session']
+        domain = [
+            ['patient_id', '=', patient_id],
+            ['device_type_id', '=', device_type_id],
+            ['activity_id.state', '=', 'started']]
+        session_id = session_pool.search(cr, uid, domain, context=context)
+        if not session_id:
             return False
-        if len(session_activity_id) > 1:
-            _logger.warn("For device_type_id=%s found more than 1 started device session activity_ids: %s "
-                         % (device_type_id, session_activity_id))
-        return session_activity_id[0]
+        if len(session_id) > 1:
+            _logger.warn("For device_type_id=%s found more than 1 started device session activity_ids"
+                         % device_type_id)
+        return session_pool.browse(cr, uid, session_id[0], context=context).activity_id.id
 
         
     def update_activity_users(self, cr, uid, user_ids=[]):
