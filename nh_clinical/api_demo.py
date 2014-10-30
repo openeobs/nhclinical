@@ -291,6 +291,7 @@ class nh_clinical_api_demo(orm.AbstractModel):
         Registers and admits patient to POS. Missing data will be generated
         """
         api = self.pool['nh.clinical.api']
+        activity_pool = self.pool['nh.activity']
         # ensure pos_id is set
         if not pos_id:
             pos_ids = self.pool['nh.clinical.pos'].search(cr, uid, [])
@@ -300,6 +301,7 @@ class nh_clinical_api_demo(orm.AbstractModel):
                 raise orm.except_orm('POS not found!', 'pos_id was not passed and existing POS is not found.')         
         adt_uid = self.get_adt_user(cr, uid, pos_id)
         reg_activity_id = self.create_activity(cr, adt_uid, 'nh.clinical.adt.patient.register', None, {}, register_values)
+        activity_pool.complete(cr, adt_uid, reg_activity_id)
         reg_data = api.get_activity_data(cr, uid, reg_activity_id)
         
         admit_data = {
@@ -838,11 +840,13 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         fake = self.next_seed_fake()
         api =self.pool['nh.clinical.api']
         api_demo = self.pool['nh.clinical.api.demo']
+        activity_pool = self.pool['nh.activity']
         v = {}
         # if 'other_identifier' not passed register new patient and use it's data
         pos_id = 'pos_id' in values and values.pop('pos_id') or False
         if 'other_identifier' not in values:
             reg_activity_id = api_demo.create_activity(cr, uid, 'nh.clinical.adt.patient.register')
+            activity_pool.complete(cr, uid, reg_activity_id)
             reg_data = api.get_activity_data(cr, uid, reg_activity_id)
             v.update({'other_identifier': reg_data['other_identifier']})
             pos_id = reg_data['pos_id']
