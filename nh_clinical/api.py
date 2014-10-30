@@ -287,7 +287,7 @@ class nh_clinical_api(orm.AbstractModel):
         where_list = []
         if patient_ids: where_list.append("id in (%s)" % ','.join([str(int(id)) for id in patient_ids]))
         if pos_ids: where_list.append("pos_id in (%s)" % ','.join([str(int(id)) for id in pos_ids]))
-        if location_ids: where_list.append("location_id in (%s)" % ','.join([str(int(id)) for id in location_ids]))
+        if location_ids: where_list.append("current_location_id in (%s)" % ','.join([str(int(id)) for id in location_ids]))
         if parent_location_ids: where_list.append("parent_location_ids && array[%s]" % ','.join([str(int(id)) for id in parent_location_ids]))
         where_clause = where_list and "where %s" % " and ".join(where_list) or ""
         sql = """
@@ -346,6 +346,7 @@ with
             patient.other_identifier,
             patient.gender,
             patient.dob::text,
+            patient.current_location_id,
             extract(year from age(now(), patient.dob)) as age,
             move_activity.location_id,
             location_hierarchy.parent_ids as parent_location_ids,
@@ -358,7 +359,7 @@ with
         left join spell_activity previous_spell_activity on previous_spell_activity.patient_id = patient.id and previous_spell_activity.state != 'started'
         left join move_activity on move_activity.patient_id = patient.id and move_activity.rank = 1 and move_activity.parent_ids && array[spell_activity.max_id]
         left join nh_clinical_pos pos on pos.id = move_activity.pos_id
-        left join location_hierarchy on location_hierarchy.id = move_activity.location_id
+        left join location_hierarchy on location_hierarchy.id = patient.current_location_id
     )
 
              select * from map %s""" % (recently_transfered_interval, where_clause)
