@@ -34,7 +34,7 @@ class TestInternalAPI(common.SingleTransactionCase):
 
         cls.apidemo = cls.registry('nh.clinical.api.demo')
 
-        cls.apidemo.build_unit_test_env(cr, uid, bed_count=4, patient_count=4)
+        cls.patient_ids = cls.apidemo.build_unit_test_env(cr, uid, bed_count=4, patient_count=4)
 
         cls.wu_id = cls.location_pool.search(cr, uid, [('code', '=', 'U')])[0]
         cls.wt_id = cls.location_pool.search(cr, uid, [('code', '=', 'T')])[0]
@@ -47,11 +47,10 @@ class TestInternalAPI(common.SingleTransactionCase):
         cls.nt_id = cls.users_pool.search(cr, uid, [('login', '=', 'NT')])[0]
         cls.adt_id = cls.users_pool.search(cr, uid, [('groups_id.name', 'in', ['NH Clinical ADT Group']), ('pos_id', '=', cls.pos_id)])[0]
 
-        patient_ids = cls.patient_pool.search(cr, uid, [])
-        patient_id = fake.random_element(patient_ids)
-        patient2_id = fake.random_element(patient_ids)
+        patient_id = fake.random_element(cls.patient_ids)
+        patient2_id = fake.random_element(cls.patient_ids)
         while patient2_id == patient_id:
-            patient2_id = fake.random_element(patient_ids)
+            patient2_id = fake.random_element(cls.patient_ids)
         code = str(fake.random_int(min=1000001, max=9999999))
         code2 = str(fake.random_int(min=100001, max=999999))
         spell_data = {
@@ -102,7 +101,7 @@ class TestInternalAPI(common.SingleTransactionCase):
 
     def test_api_patient_map(self):
         cr, uid = self.cr, self.uid
-        patient_ids = self.patient_pool.search(cr, uid, [])
+        patient_ids = self.patient_ids
         self.patient_pool.write(cr, uid, patient_ids, {'current_location_id': self.pos_location_id})
         patients = self.api_pool.patient_map(cr, uid, location_ids=[self.pos_location_id])
         self.assertTrue(len(patients) == 4, msg="API patient_map did not find patients by Location ID")
@@ -140,7 +139,7 @@ class TestInternalAPI(common.SingleTransactionCase):
         args = {
             'pos_ids': [self.pos_id],
             'data_models': ['nh.clinical.spell'],
-            'patient_ids': self.patient_pool.search(cr, uid, []),
+            'patient_ids': self.patient_ids,
             'location_ids': self.location_pool.search(cr, uid, [['parent_id', '=', self.pos_location_id]]),
             'states': ['started', 'completed', 'scheduled'],
         }

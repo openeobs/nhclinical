@@ -40,7 +40,7 @@ class TestDevices(common.SingleTransactionCase):
 
         cls.apidemo = cls.registry('nh.clinical.api.demo')
 
-        cls.apidemo.build_unit_test_env(cr, uid, bed_count=4, patient_count=4)
+        cls.patient_ids = cls.apidemo.build_unit_test_env(cr, uid, bed_count=4, patient_count=4)
 
         cls.wu_id = cls.location_pool.search(cr, uid, [('code', '=', 'U')])[0]
         cls.wt_id = cls.location_pool.search(cr, uid, [('code', '=', 'T')])[0]
@@ -56,8 +56,7 @@ class TestDevices(common.SingleTransactionCase):
     def test_device_Connect_Session_and_Disconnect(self):
         cr, uid = self.cr, self.uid
 
-        patient_ids = self.patient_pool.search(cr, uid, [])
-        patient_id = fake.random_element(patient_ids)
+        patient_id = fake.random_element(self.patient_ids)
         code = str(fake.random_int(min=1000001, max=9999999))
         spell_data = {
             'patient_id': patient_id,

@@ -37,7 +37,7 @@ class test_operations(common.SingleTransactionCase):
 
         cls.apidemo = cls.registry('nh.clinical.api.demo')
 
-        cls.apidemo.build_unit_test_env(cr, uid, bed_count=4, patient_count=4)
+        cls.patient_ids = cls.apidemo.build_unit_test_env(cr, uid, bed_count=4, patient_count=4)
 
         cls.wu_id = cls.location_pool.search(cr, uid, [('code', '=', 'U')])[0]
         cls.wt_id = cls.location_pool.search(cr, uid, [('code', '=', 'T')])[0]
@@ -52,7 +52,7 @@ class test_operations(common.SingleTransactionCase):
         
     def test_Placement_SwapBeds_and_Move(self):
         cr, uid = self.cr, self.uid
-        patient_ids = self.patient_pool.search(cr, uid, [])
+        patient_ids = self.patient_ids
         patient_id = fake.random_element(patient_ids)
         patient2_id = fake.random_element(patient_ids)
         while patient2_id == patient_id:
@@ -162,22 +162,3 @@ class test_operations(common.SingleTransactionCase):
         # test patient data
         check_patient = self.patient_pool.browse(cr, uid, patient_id)
         self.assertTrue(check_patient.current_location_id.id == location_id, msg= "Patient Move Completed: Patient current location not registered correctly")
-
-    # def test_swap_beds(self):
-    #     cr, uid = self.cr, self.uid
-    #     api = self.registry('nh.clinical.api')
-    #     api_demo = self.registry('nh.clinical.api.demo')
-    #     context = self.registry('nh.clinical.context')
-    #     print "TEST SWAP BEDS"
-    #     pos_id = api_demo.create(cr, uid, 'nh.clinical.pos')
-    #     ward_id = api_demo.create(cr, uid, 'nh.clinical.location', 'location_ward', {'pos_id': pos_id})
-    #     bed1_id = api_demo.create(cr, uid, 'nh.clinical.location', 'location_bed', {'parent_id': ward_id})
-    #     bed2_id = api_demo.create(cr, uid, 'nh.clinical.location', 'location_bed', {'parent_id': ward_id})
-    #     placement_activity1 = api_demo.register_admit_place(cr, uid, bed1_id)
-    #     placement_activity2 = api_demo.register_admit_place(cr, uid, bed2_id)
-    #     swap_activity = api.create_complete(cr, uid, 'nh.clinical.patient.swap_beds', {},
-    #                                         {'location1_id': bed1_id, 'location2_id': bed2_id})
-    #     patient1 = api.browse(cr, uid, 'nh.clinical.patient', placement_activity1.patient_id.id)
-    #     patient2 = api.browse(cr, uid, 'nh.clinical.patient', placement_activity2.patient_id.id)
-    #     assert patient1.current_location_id.id == bed2_id
-    #     assert patient2.current_location_id.id == bed1_id

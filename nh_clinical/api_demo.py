@@ -219,11 +219,11 @@ class nh_clinical_api_demo(orm.AbstractModel):
 
         self.create(cr, uid, 'res.users', 'user_adt', {'name': 'ADT', 'login': 'unittestadt', 'pos_id': pos_id})
 
+        patient_ids = []
         for i in range(patient_count):
-            patient_ids = []
             patient_ids.append(self.create(cr, uid, 'nh.clinical.patient', 'patient', {}))
 
-        return True
+        return patient_ids
         
     def get_available_bed(self, cr, uid, location_ids=[], pos_id=None):
         """

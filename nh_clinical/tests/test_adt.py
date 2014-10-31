@@ -46,7 +46,7 @@ class test_adt(common.SingleTransactionCase):
         
         cls.apidemo = cls.registry('nh.clinical.api.demo')
 
-        cls.apidemo.build_unit_test_env(cr, uid)
+        cls.patient_ids = cls.apidemo.build_unit_test_env(cr, uid)
 
         cls.wu_id = cls.location_pool.search(cr, uid, [('code', '=', 'U')])[0]
         cls.wt_id = cls.location_pool.search(cr, uid, [('code', '=', 'T')])[0]
@@ -184,7 +184,7 @@ class test_adt(common.SingleTransactionCase):
         cr, uid = self.cr, self.uid
         # edge cases MISSING (try/except)
         fake.seed(next_seed())        
-        patient_id = fake.random_element(self.patient_pool.search(cr, uid, []))
+        patient_id = fake.random_element(self.patient_ids)
         other_identifier = self.patient_pool.browse(cr, uid, patient_id).other_identifier
         code = str(fake.random_int(min=1000001, max=9999999))
         start_date = dt.now().strftime(dtf)
