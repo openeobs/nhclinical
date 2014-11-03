@@ -88,7 +88,6 @@ class nh_clinical_demo_env(orm.Model):
             # Operations
             'nh.clinical.patient.placement': 'data_placement',              
         }
-        #import pdb; pdb.set_trace()
         res = None
         if method_map.get(model) and hasattr(nh_clinical_demo_env, method_map[model]):
             res = eval("self.%s(cr, uid, env_id, data=data_copy)" % method_map[model])  
@@ -185,18 +184,17 @@ class nh_clinical_demo_env(orm.Model):
             return activity_pool.browse(cr, uid, activity_id)
     
     def create_complete(self, cr, uid, env_id, data_model, activity_vals={}, data_vals={}, no_fake=False, return_id=False):
-        #import pdb; pdb.set_trace()
-        print "activity_vals before fake: %s" %  activity_vals
-        print "dvals before fake: %s" %  data_vals        
-        print "create_complete.data_model: %s" % data_model
+        _logger.debug("activity_vals before fake: %s" %  activity_vals)
+        _logger.debug("dvals before fake: %s" %  data_vals)
+        _logger.debug("create_complete.data_model: %s" % data_model)
         if not no_fake:
             dvals = self.fake_data(cr, uid, env_id, data_model, data_vals)
         else:
             dvals = data_vals.copy()
         data_pool = self.pool[data_model]
         activity_pool = self.pool['nh.activity']
-        print "activity_vals: %s" %  activity_vals
-        print "dvals: %s" %  dvals
+        _logger.debug("activity_vals: %s" %  activity_vals)
+        _logger.debug("dvals: %s" %  dvals)
         
         activity_id = data_pool.create_activity(cr, uid, activity_vals, dvals)
         activity_pool.complete(cr, uid, activity_id)       
@@ -223,7 +221,6 @@ class nh_clinical_demo_env(orm.Model):
         if not no_fake:
             activity = activity_pool.browse(cr, uid, activity_id)
             vals = self.fake_data(cr, uid, env_id, activity.data_model, vals)
-        #import pdb; pdb.set_trace()
         activity_pool.submit(cr, uid, activity_id, vals)
         activity_pool.complete(cr, uid, activity_id)
         if return_id:
@@ -235,7 +232,7 @@ class nh_clinical_demo_env(orm.Model):
 #         env_id = super(nh_clinical_demo_env, self).create(cr, uid, vals, context)
 #         data = self.read(cr, uid, env_id, [])
 #         self.build(cr, uid, env_id)
-#         _logger.info("Env created id=%s data: %s" % (env_id, data))
+#         _logger.debug("Env created id=%s data: %s" % (env_id, data))
 #         return env_id
         
     def build(self, cr, uid, env_id, return_id=False):
@@ -259,26 +256,6 @@ class nh_clinical_demo_env(orm.Model):
         else:
             return self.browse(cr, uid, env_id)
 
-        
-    
-#     def build_patients(self, cr, uid, env_id):
-#         fake.seed(next_seed())
-#         env = self.browse(cr, SUPERUSER_ID, env_id)
-#         assert env.pos_id, "POS is not created/set in the env id=%s" % env_id
-#         activity_pool = self.pool['nh.activity']
-#         api_pool = self.pool['nh.clinical.api']
-#         register_pool = self.pool['nh.clinical.adt.patient.register']
-#         admit_pool = self.pool['nh.clinical.adt.patient.admit']
-#         #import pdb; pdb.set_trace()
-#         adt_user_id = self.get_adt_user_ids(cr, uid, env_id)[0]
-#         for i in range(env.patient_qty):
-#             register_activity = self.create_complete(cr, adt_user_id, env_id, 'nh.clinical.adt.patient.register')
-#             admit_data = {'other_identifier': register_activity.data_ref.other_identifier}
-#             admit_activity = self.create_complete(cr, adt_user_id, env_id, 'nh.clinical.adt.patient.admit', data_vals=admit_data)
-#             placement_activity = self.get_activities(cr, uid, env_id, domain=[['data_model','=','nh.clinical.patient.placement'],['date_terminated','=',False]])[0]
-#             self.submit_complete(cr, adt_user_id, env_id, placement_activity.id) 
-            
-
     def build_bed_locations(self, cr, uid, env_id):
         env = self.browse(cr, SUPERUSER_ID, env_id)
         assert env.pos_id, "POS is not created/set in the env id=%s" % env_id
@@ -288,7 +265,7 @@ class nh_clinical_demo_env(orm.Model):
         for i in range(env.bed_qty): 
             d = self.fake_data(cr, uid, env_id, 'nh.clinical.location.bed') 
             location_ids.append(location_pool.create(cr, uid, d)) 
-            _logger.info("Bed location created id=%s data: %s" % (location_ids[-1], d))
+            _logger.debug("Bed location created id=%s data: %s" % (location_ids[-1], d))
         return location_pool.browse(cr, uid, location_ids)
     
     def build_ward_locations(self, cr, uid, env_id):
@@ -300,7 +277,7 @@ class nh_clinical_demo_env(orm.Model):
         for i in range(env.ward_qty): 
             d = self.fake_data(cr, uid, env_id, 'nh.clinical.location.ward') 
             location_ids.append(location_pool.create(cr, uid, d)) 
-            _logger.info("Ward location created id=%s data: %s" % (location_ids[-1], d))
+            _logger.debug("Ward location created id=%s data: %s" % (location_ids[-1], d))
         return location_pool.browse(cr, uid, location_ids)
     
     def build_ward_manager_users(self, cr, uid, env_id):
@@ -327,7 +304,7 @@ class nh_clinical_demo_env(orm.Model):
             }  
             user_id = user_pool.create(cr, uid, data)  
             user_ids.append(user_id)
-            _logger.info("Ward Manager user created id=%s data: %s" % (user_id, data))
+            _logger.debug("Ward Manager user created id=%s data: %s" % (user_id, data))
         return user_ids
  
     def build_nurse_users(self, cr, uid, env_id):
@@ -354,7 +331,7 @@ class nh_clinical_demo_env(orm.Model):
             }  
             user_id = user_pool.create(cr, uid, data)  
             user_ids.append(user_id)
-            _logger.info("Nurse user created id=%s data: %s" % (user_id, data))
+            _logger.debug("Nurse user created id=%s data: %s" % (user_id, data))
         return user_ids
 
     def build_adt_users(self, cr, uid, env_id):
@@ -375,7 +352,7 @@ class nh_clinical_demo_env(orm.Model):
             }  
             user_id = user_pool.create(cr, uid, data)  
             user_ids.append(user_id)
-            _logger.info("ADT user created id=%s data: %s" % (user_id, data))
+            _logger.debug("ADT user created id=%s data: %s" % (user_id, data))
         return user_ids
         
         # POS Location    
@@ -387,15 +364,15 @@ class nh_clinical_demo_env(orm.Model):
         # POS Location
         d = self.fake_data(cr, uid, env_id, 'nh.clinical.location.pos')
         pos_location_id = location_pool.create(cr, uid, d)
-        _logger.info("POS location created id=%s data: %s" % (pos_location_id, d))
+        _logger.debug("POS location created id=%s data: %s" % (pos_location_id, d))
         # POS Admission Lot
         d = self.fake_data(cr, uid, env_id, 'nh.clinical.location.admission', {'parent_id': pos_location_id})
         lot_admission_id = location_pool.create(cr, uid, d)
-        _logger.info("Admission location created id=%s data: %s" % (lot_admission_id, d))
+        _logger.debug("Admission location created id=%s data: %s" % (lot_admission_id, d))
         # POS Discharge Lot
         d = self.fake_data(cr, uid, env_id, 'nh.clinical.location.discharge', {'parent_id': pos_location_id})  
         lot_discharge_id = location_pool.create(cr, uid, d)       
-        _logger.info("Discharge location created id=%s data: %s" % (lot_discharge_id, d)) 
+        _logger.debug("Discharge location created id=%s data: %s" % (lot_discharge_id, d)) 
         # POS
         d = self.fake_data(cr, uid, env_id, 'nh.clinical.pos',
                             {
@@ -404,9 +381,9 @@ class nh_clinical_demo_env(orm.Model):
                             'lot_discharge_id': lot_discharge_id,
                             })   
         pos_id = pos_pool.create(cr, uid, d)
-        _logger.info("POS created id=%s data: %s" % (pos_id, d))
+        _logger.debug("POS created id=%s data: %s" % (pos_id, d))
         self.write(cr, uid, env_id, {'pos_id': pos_id})
-        _logger.info("Env updated pos_id=%s" % (pos_id))
+        _logger.debug("Env updated pos_id=%s" % (pos_id))
         return pos_id 
     
 #######################################################
@@ -477,8 +454,6 @@ class nh_clinical_demo_env(orm.Model):
         reg_patient_ids = self.get_patient_ids(cr, uid, env_id)
         admit_patient_ids = self.get_patient_ids(cr, uid, env_id, 'nh.clinical.adt.patient.admit')
         patient_ids = list(set(reg_patient_ids) - set(admit_patient_ids))
-#         if not patient_ids:
-#             import pdb; pdb.set_trace()
         assert patient_ids, "No patients left to admit!"
         patients = patient_pool.browse(cr, uid, patient_ids)
         locations = self.pool['nh.clinical.api'].get_locations(cr, uid, pos_ids=[env.pos_id.id], usages=['ward'], available_range=[0,999])
@@ -519,8 +494,6 @@ class nh_clinical_demo_env(orm.Model):
         
 
     def data_observation_ews(self, cr, uid, env_id, activity_id=None, data={}):
-        
-        #import pdb; pdb.set_trace()
         fake.seed(next_seed())
         patients = self.get_activity_free_patients(cr, uid, env_id,['nh.clinical.patient.observation.ews'],['new','scheduled','started'])
         d = {
@@ -612,14 +585,11 @@ class nh_clinical_demo_env(orm.Model):
     
     def data_placement(self, cr, uid, env_id, activity_id=None, data={}):
         fake.seed(next_seed())
-        #import pdb; pdb.set_trace()
         d = {
              'location_id': self.random_available_location(cr, uid, env_id).id
         }
         if not d['location_id']:
             _logger.warn("No available locations left!")
-            #import pdb; pdb.set_trace()
-            #self.random_available_location(cr, uid, env_id)
         d.update(data)
         return d
 
@@ -661,30 +631,18 @@ class nh_clinical_demo_env(orm.Model):
         ids = user_pool.search(cr, uid, [['groups_id','in',adt_group.id],['pos_id','=',env.pos_id.id]])
         return ids
 
-    
     def create(self, cr, uid, vals={},context=None):
         env_id = super(nh_clinical_demo_env, self).create(cr, uid, vals, context)
         #env_id = isinstance(env_id, (int, long)) and env_id or env_id.id
         data = self.read(cr, uid, env_id, [])
-        _logger.info("Env created id=%s data: %s" % (env_id, data))
-        #import pdb; pdb.set_trace()
+        _logger.debug("Env created id=%s data: %s" % (env_id, data))
         return env_id
-        
-#     def build(self, cr, uid, env_id, return_id=False):
 
-    
-
- 
-    
     def build_patients(self, cr, uid, env_id):
         fake.seed(next_seed())
         env = self.browse(cr, SUPERUSER_ID, env_id)
         assert env.pos_id, "POS is not created/set in the env id=%s" % env_id
-        activity_pool = self.pool['nh.activity']
         api = self.pool['nh.clinical.api']
-        register_pool = self.pool['nh.clinical.adt.patient.register']
-        admit_pool = self.pool['nh.clinical.adt.patient.admit']
-        #import pdb; pdb.set_trace()
         adt_user_id = self.get_adt_user_ids(cr, uid, env_id)[0]
         for i in range(env.patient_qty):
             register_activity = self.create_complete(cr, adt_user_id, env_id, 'nh.clinical.adt.patient.register', {}, {})

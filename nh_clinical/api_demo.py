@@ -1,13 +1,6 @@
-from openerp.tests import common
-from datetime import datetime as dt
-from dateutil.relativedelta import relativedelta as rd
-from openerp import tools
-from openerp.tools import config
-from openerp.osv import orm, fields, osv
-from pprint import pprint as pp
+from openerp.osv import orm
 from openerp import SUPERUSER_ID
 import logging
-from pprint import pprint as pp
 from openerp.addons.nh_activity.activity import except_if
 _logger = logging.getLogger(__name__)
 
@@ -41,7 +34,7 @@ class nh_clinical_api_demo(orm.AbstractModel):
     def create(self, cr, uid, model, values_method=None, values={}, context=None):
         model_pool = self.pool[model]
         v = self.demo_data(cr, uid, model, values_method, values)
-        _logger.info("Creating DEMO resource '%s', values: %s" % (model, v))
+        _logger.debug("Creating DEMO resource '%s', values: %s" % (model, v))
         res_id = model_pool.create(cr, uid, v, context)
         return res_id
     
@@ -61,7 +54,7 @@ class nh_clinical_api_demo(orm.AbstractModel):
         model_pool = self.pool[model]
         #print "create activity data_values: %s" % data_values
         v = self.demo_data(cr, uid, model, values_method, data_values)
-        _logger.info("Creating DEMO resource '%s', values: %s" % (model, v))
+        _logger.debug("Creating DEMO resource '%s', values: %s" % (model, v))
         activity_id = model_pool.create_activity(cr, uid, activity_values, v, context)
         return activity_id
     
@@ -149,18 +142,15 @@ class nh_clinical_api_demo(orm.AbstractModel):
 
         return True
 
-    def build_unit_test_env(self, cr, uid, wards=None, bed_count=2, patient_admit_count=2, patient_placement_count=1,
-                            ews_count=1, weight_count=0, blood_sugar_count=0, height_count=0, o2target_count=0,
-                            users=None):
+    def build_unit_test_env(self, cr, uid, wards=None, bed_count=2, patient_count=2, users=None):
         """
         Create a default unit test environment for basic unit tests.
             2 WARDS - U and T
             2 beds per ward - U01, U02, T01, T02
             2 patients admitted per ward
             1 patient placed in bed per ward
-            1 ews observation taken per patient
         The environment is customizable, the wards parameter must be a list of ward codes. All the other parameters are
-        the number of beds, patients, placements and observations we want.
+        the number of beds, patients and placements we want.
 
         users parameter expects a dictionary with the following format:
             {
@@ -182,17 +172,9 @@ class nh_clinical_api_demo(orm.AbstractModel):
         """
         if not wards:
             wards = ['U', 'T']
-        assert patient_admit_count >= patient_placement_count
-        assert bed_count >= patient_placement_count
-        fake = self.next_seed_fake()
-        api = self.pool['nh.clinical.api']
-        activity_pool = self.pool['nh.activity']
         location_pool = self.pool['nh.clinical.location']
-        user_pool = self.pool['res.users']
         pos_id = self.create(cr, uid, 'nh.clinical.pos')
         pos_location_id = location_pool.search(cr, uid, [('pos_id', '=', pos_id)])[0]
-
-        adt_uid = self.create(cr, uid, 'res.users', 'user_adt', {'pos_id': pos_id})
 
         # LOCATIONS
         ward_ids = [self.create(cr, uid, 'nh.clinical.location', 'location_ward', {'parent_id': pos_location_id, 'name': 'Ward '+w, 'code': w}) for w in wards]
@@ -216,59 +198,32 @@ class nh_clinical_api_demo(orm.AbstractModel):
             for wm in users['ward_managers'].keys():
                 wid = location_pool.search(cr, uid, [('code', '=', users['ward_managers'][wm][1])])
                 wm_ids[wm] = self.create(cr, uid, 'res.users', 'user_ward_manager', {'name': wm, 'login': users['ward_managers'][wm][0], 'location_ids': [[6, False, wid]]})
-        
+
         if users.get('nurses'):
             n_ids = {}
             for n in users['nurses'].keys():
                 lids = location_pool.search(cr, uid, [('code', 'in', users['nurses'][n][1])])
                 n_ids[n] = self.create(cr, uid, 'res.users', 'user_nurse', {'name': n, 'login': users['nurses'][n][0], 'location_ids': [[6, False, lids]]})
-                
+
         if users.get('hcas'):
             h_ids = {}
             for h in users['hcas'].keys():
                 lids = location_pool.search(cr, uid, [('code', 'in', users['hcas'][h][1])])
                 h_ids[h] = self.create(cr, uid, 'res.users', 'user_hca', {'name': h, 'login': users['hcas'][h][0], 'location_ids': [[6, False, lids]]})
-                
+
         if users.get('doctors'):
             d_ids = {}
             for d in users['doctors'].keys():
                 lids = location_pool.search(cr, uid, [('code', 'in', users['doctors'][d][1])])
                 d_ids[d] = self.create(cr, uid, 'res.users', 'user_doctor', {'name': d, 'login': users['doctors'][d][0], 'location_ids': [[6, False, lids]]})
 
-        for wcode in wards:
-            admit_activity_ids = [self.create_activity(cr, adt_uid, 'nh.clinical.adt.patient.admit', None, {}, {'location': wcode}) for i in range(patient_admit_count)]
-            [api.complete(cr, adt_uid, id) for id in admit_activity_ids]
+        self.create(cr, uid, 'res.users', 'user_adt', {'name': 'ADT', 'login': 'unittestadt', 'pos_id': pos_id})
 
-        for wid in ward_ids:
-            code = location_pool.read(cr, uid, wid, ['code'])['code']
-            wmuid = user_pool.search(cr, uid, [('location_ids', 'in', [wid]), ('groups_id.name', 'in', ['NH Clinical Ward Manager Group'])])
-            wmuid = uid if not wmuid else wmuid[0]
-            placement_activity_ids = activity_pool.search(cr, uid, [
-                ('data_model', '=', 'nh.clinical.patient.placement'),
-                ('state', 'not in', ['completed', 'cancelled']), ('user_ids', 'in', [wmuid])])
-            if not placement_activity_ids:
-                continue
-            for i in range(patient_placement_count):
-                placement_activity_id = fake.random_element(placement_activity_ids)
-                bed_location_id = fake.random_element(bed_ids[code])
-                api.submit_complete(cr, wmuid, placement_activity_id, {'location_id': bed_location_id})
-                placement_activity_ids.remove(placement_activity_id)
-                bed_ids[code].remove(bed_location_id)
+        patient_ids = []
+        for i in range(patient_count):
+            patient_ids.append(self.create(cr, uid, 'nh.clinical.patient', 'patient', {}))
 
-        for i in range(ews_count):
-            ews_activity_ids = []
-            for wid in ward_ids:
-                ews_activity_ids += activity_pool.search(cr, uid, [
-                    ('data_model', '=', 'nh.clinical.patient.observation.ews'),
-                    ('state', 'not in', ['completed', 'cancelled']), ('location_id', 'child_of', wid)])
-            for ews in activity_pool.browse(cr, uid, ews_activity_ids):
-                nuid = user_pool.search(cr, uid, [('location_ids', 'in', [ews.location_id.id]), ('groups_id.name', 'in', ['NH Clinical Nurse Group'])])
-                nuid = uid if not nuid else nuid[0]
-                api.assign(cr, uid, ews.id, nuid)
-                api.submit_complete(cr, nuid, ews.id, self.demo_data(cr, uid, 'nh.clinical.patient.observation.ews'))
-
-        return True
-
+        return patient_ids
         
     def get_available_bed(self, cr, uid, location_ids=[], pos_id=None):
         """
@@ -336,6 +291,7 @@ class nh_clinical_api_demo(orm.AbstractModel):
         Registers and admits patient to POS. Missing data will be generated
         """
         api = self.pool['nh.clinical.api']
+        activity_pool = self.pool['nh.activity']
         # ensure pos_id is set
         if not pos_id:
             pos_ids = self.pool['nh.clinical.pos'].search(cr, uid, [])
@@ -345,6 +301,7 @@ class nh_clinical_api_demo(orm.AbstractModel):
                 raise orm.except_orm('POS not found!', 'pos_id was not passed and existing POS is not found.')         
         adt_uid = self.get_adt_user(cr, uid, pos_id)
         reg_activity_id = self.create_activity(cr, adt_uid, 'nh.clinical.adt.patient.register', None, {}, register_values)
+        activity_pool.complete(cr, adt_uid, reg_activity_id)
         reg_data = api.get_activity_data(cr, uid, reg_activity_id)
         
         admit_data = {
@@ -425,7 +382,6 @@ class nh_clinical_api_demo(orm.AbstractModel):
             beds = api.location_map(cr, uid, pos_ids=[pos_id], usages=['bed'])
         else:
             beds = api.location_map(cr, uid, codes=bed_codes)
-#         import pdb; pdb.set_trace()
         #setting up admin as a nurse
 
         imd_ids = api.search(cr, uid, 'ir.model.data', [['model','=','res.groups'], ['name','=','group_nhc_nurse']])
@@ -554,7 +510,6 @@ class nh_clinical_api_demo(orm.AbstractModel):
                                                   
 
         
-        #import pdb; pdb.set_trace()
         for i in range(patient_placement_count):
             placement_activity_id = fake.random_element(temp_placement_activity_ids)
             bed_location_id = fake.random_element(temp_bed_ids)
@@ -566,8 +521,7 @@ class nh_clinical_api_demo(orm.AbstractModel):
                                           data_models=['nh.clinical.patient.observation.ews'],
                                           pos_ids=[pos_id],
                                           states=['new', 'scheduled']).values()
-        #import pdb; pdb.set_trace()
-        
+
         nurse_uid = fake.random_element(nurse_ids)
         #EWS
         for i in range(ews_count):
@@ -822,15 +776,31 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
             v.update({'lot_discharge_id': api_demo.create(cr, uid, 'nh.clinical.location', 'location_discharge')})
    
         v.update(values)     
-        return v    
+        return v
+
+    #### device.category ####
+    def device_category(self, cr, uid, values={}):
+        fake = self.next_seed_fake()
+        flow_directions = dict(self.pool['nh.clinical.device.category']._columns['flow_direction'].selection).keys()
+        v = {
+            'name': "DEVICE_CATEGORY_"+str(fake.random_int(min=100, max=999)),
+            'flow_direction': fake.random_element(flow_directions),
+        }
+        return v
     
     #### device.type ####
     def device_type(self, cr, uid, values={}):
         fake = self.next_seed_fake()
-        flow_directions = dict(self.pool['nh.clinical.device.type']._columns['flow_direction'].selection).keys()
+        if not 'category_id' in values:
+            category_id = fake.random_element(self.pool['nh.clinical.device.category'].search(cr, uid, []))
+            if not category_id:
+                api_demo = self.pool['nh.clinical.api.demo']
+                category_id = api_demo.create(cr, uid, 'nh.clinical.device.category')
+        else:
+            category_id = values['category_id']
         v = {
             'name': "DEVICE_TYPE_"+str(fake.random_int(min=100, max=999)),
-            'flow_direction': fake.random_element(flow_directions),
+            'category_id': category_id,
         }
         return v  
     
@@ -845,6 +815,7 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         else:
             type_id = values['type_id']
         v = {
+            'serial_number': "DEVICE_"+str(fake.random_int(min=1000, max=9999)),
             'type_id': type_id
         }
         v.update(values)
@@ -869,12 +840,13 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         fake = self.next_seed_fake()
         api =self.pool['nh.clinical.api']
         api_demo = self.pool['nh.clinical.api.demo']
-        #import pdb; pdb.set_trace()
+        activity_pool = self.pool['nh.activity']
         v = {}
         # if 'other_identifier' not passed register new patient and use it's data
         pos_id = 'pos_id' in values and values.pop('pos_id') or False
         if 'other_identifier' not in values:
             reg_activity_id = api_demo.create_activity(cr, uid, 'nh.clinical.adt.patient.register')
+            activity_pool.complete(cr, uid, reg_activity_id)
             reg_data = api.get_activity_data(cr, uid, reg_activity_id)
             v.update({'other_identifier': reg_data['other_identifier']})
             pos_id = reg_data['pos_id']

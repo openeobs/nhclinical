@@ -21,31 +21,6 @@ class nh_clinical_res_partner(orm.Model):
     }
 
 
-class nh_clinical_device_type(orm.Model):
-    _name = 'nh.clinical.device.type'
-
-    _columns = {
-        'name': fields.text("Device Type"),
-        'flow_direction': fields.selection([('none', 'None'), ('in', 'In'), ('out', 'Out'), ('both', 'Both')], 'Flow Direction')
-    }  
-    
-
-
-class nh_clinical_device(orm.Model):
-    _name = 'nh.clinical.device'
-    _columns = {
-        'type_id': fields.many2one('nh.clinical.device.type', "Device Type"),
-        'name': fields.char('Name', size=100),
-        'is_available': fields.boolean('Is Available?'),
-    }
-    
-    _defaults = {
-        'is_available': True
-    }
-
-
-
-
 class nh_clinical_pos(orm.Model):
     """ Clinical point of service """
     _name = 'nh.clinical.pos' 
@@ -137,7 +112,6 @@ class nh_clinical_location(orm.Model):
     def _location2pos_id(self, cr, uid, ids, field, args, context=None):
         res = {}
         pos_pool = self.pool['nh.clinical.pos']
-        #import pdb; pdb.set_trace()
         for location in self.browse(cr, uid, ids, context):
             pos_location_id = self.search(cr, uid, [['parent_id','=',False],['child_ids','child_of',location.id]])
             pos_location_id = pos_location_id and pos_location_id[0] or False
@@ -174,7 +148,7 @@ class nh_clinical_location(orm.Model):
         res = {}
         patient_pool = self.pool['nh.clinical.patient']
         for lid in ids:
-            res[lid] = patient_pool.search(cr, uid, [('current_location_id', '=', lid)], context=context)
+            res[lid] = patient_pool.search(cr, uid, [('current_location_id', 'child_of', lid)], context=context)
         return res
 
     def _get_hca_ids(self, cr, uid, ids, field, args, context=None):
@@ -350,7 +324,7 @@ class nh_clinical_location(orm.Model):
                                                'nh.activity': (_placement2location_id, ['state'], 20)
                                         }),
         'patient_capacity': fields.integer('Patient Capacity'),
-        'patient_ids': fields.function(_get_patient_ids, type='one2many', relation='nh.clinical.patient', string="Location Patients"),
+        'patient_ids': fields.function(_get_patient_ids, type='many2many', relation='nh.clinical.patient', string="Patients"),
         'user_ids': fields.many2many('res.users', 'user_location_rel', 'location_id', 'user_id', 'Responsible Users'),
         # aux fields for the view, worth having a SQL model instead?
         'assigned_hca_ids': fields.function(_get_hca_ids, type='many2many', relation='res.users', string="Assigned HCAs"),
@@ -394,6 +368,13 @@ class nh_clinical_location(orm.Model):
         if location.active and not location.is_available:
             raise osv.except_osv('Error!', "Can't deactivate a location that is being used.")
         return self.write(cr, uid, location.id, data, context=context)
+
+    def find_nearest_location_id(self, cr, uid, location_id, usage='ward', context=None):
+        location = self.browse(cr, uid, location_id, context=context)
+        if location.usage == usage:
+            return location.id
+        else:
+            return self.find_nearest_location_id(cr, uid, location.parent_id.id, usage=usage, context=context)
 
     def create(self, cr, uid, vals, context=None):
         if 'context_ids' in vals:

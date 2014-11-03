@@ -287,7 +287,7 @@ class nh_clinical_api(orm.AbstractModel):
         where_list = []
         if patient_ids: where_list.append("id in (%s)" % ','.join([str(int(id)) for id in patient_ids]))
         if pos_ids: where_list.append("pos_id in (%s)" % ','.join([str(int(id)) for id in pos_ids]))
-        if location_ids: where_list.append("location_id in (%s)" % ','.join([str(int(id)) for id in location_ids]))
+        if location_ids: where_list.append("current_location_id in (%s)" % ','.join([str(int(id)) for id in location_ids]))
         if parent_location_ids: where_list.append("parent_location_ids && array[%s]" % ','.join([str(int(id)) for id in parent_location_ids]))
         where_clause = where_list and "where %s" % " and ".join(where_list) or ""
         sql = """
@@ -346,6 +346,7 @@ with
             patient.other_identifier,
             patient.gender,
             patient.dob::text,
+            patient.current_location_id,
             extract(year from age(now(), patient.dob)) as age,
             move_activity.location_id,
             location_hierarchy.parent_ids as parent_location_ids,
@@ -358,13 +359,12 @@ with
         left join spell_activity previous_spell_activity on previous_spell_activity.patient_id = patient.id and previous_spell_activity.state != 'started'
         left join move_activity on move_activity.patient_id = patient.id and move_activity.rank = 1 and move_activity.parent_ids && array[spell_activity.max_id]
         left join nh_clinical_pos pos on pos.id = move_activity.pos_id
-        left join location_hierarchy on location_hierarchy.id = move_activity.location_id
+        left join location_hierarchy on location_hierarchy.id = patient.current_location_id
     )
 
              select * from map %s""" % (recently_transfered_interval, where_clause)
         cr.execute(sql)
         res = {r['id']: r for r in cr.dictfetchall()}
-        #import pdb; pdb.set_trace()
         return res
 
     def get_adt_users(self, cr, uid, pos_ids=[], return_id=False):
@@ -518,7 +518,7 @@ with
 
     def activity_map(self, cr, uid, activity_ids=[], creator_ids=[],
                        pos_ids=[], location_ids=[], patient_ids=[],
-                       device_ids=[], data_models=[], states=[]):
+                       device_ids=[], data_models=[], states=[], device_type_ids=[]):
         """
         Arguments and Return Parameters may be extended at later stages
         Returns:
@@ -545,6 +545,7 @@ with
         if location_ids: where_list.append("location_id in (%s)" % ','.join([str(int(id)) for id in location_ids])) 
         if patient_ids: where_list.append("patient_id in (%s)" % ','.join([str(int(id)) for id in patient_ids]))
         if device_ids: where_list.append("device_id in (%s)" % ','.join([str(int(id)) for id in device_ids]))
+        if device_type_ids: where_list.append("device_type_id in (%s)" % ','.join([str(int(id)) for id in device_type_ids]))
         if data_models: where_list.append("data_model in ('%s')" % "','".join(data_models))
         if states: where_list.append("state in ('%s')" % "','".join(states))
         where_clause = where_list and "where %s" % " and ".join(where_list) or ""
@@ -710,18 +711,19 @@ with
             return False
         return self.pool['nh.activity'].browse(cr, uid, spell_activity_id, context)
     
-    def get_device_session_activity_id(self, cr, uid, device_id, context=None):
-        api = self.pool['nh.clinical.api']
-        domain = {'device_ids': [device_id],
-                  'states': ['started'],
-                  'data_models': ['nh.clinical.device.session']}
-        session_activity_id = api.activity_map(cr, uid, **domain).keys()
-        if not session_activity_id:
+    def get_device_session_activity_id(self, cr, uid, patient_id, device_type_id, context=None):
+        session_pool = self.pool['nh.clinical.device.session']
+        domain = [
+            ['patient_id', '=', patient_id],
+            ['device_type_id', '=', device_type_id],
+            ['activity_id.state', '=', 'started']]
+        session_id = session_pool.search(cr, uid, domain, context=context)
+        if not session_id:
             return False
-        if len(session_activity_id) > 1:
-            _logger.warn("For device_id=%s found more than 1 started device session activity_ids: %s " 
-                         % (device_id, session_activity_id))
-        return session_activity_id[0]
+        if len(session_id) > 1:
+            _logger.warn("For device_type_id=%s found more than 1 started device session activity_ids"
+                         % device_type_id)
+        return session_pool.browse(cr, uid, session_id[0], context=context).activity_id.id
 
         
     def update_activity_users(self, cr, uid, user_ids=[]):

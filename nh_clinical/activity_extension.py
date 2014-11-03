@@ -41,7 +41,7 @@ class nh_activity(orm.Model):
         # identification
         'user_ids': fields.many2many('res.users', 'activity_user_rel', 'activity_id', 'user_id', 'Users', readonly=True),
         'patient_id': fields.many2one('nh.clinical.patient', 'Patient', readonly=True),
-        'device_id': fields.many2one('nh.clinical.device', 'Device', readonly=True),
+        # 'device_id': fields.many2one('nh.clinical.device', 'Device', readonly=True),
         'location_id': fields.many2one('nh.clinical.location', 'Location', readonly=True),
         'pos_id': fields.many2one('nh.clinical.pos', 'POS', readonly=True),
         'spell_activity_id': fields.many2one('nh.activity', 'Spell Activity', readonly=True),
@@ -59,7 +59,7 @@ class nh_activity_data(orm.AbstractModel):
         'completed': ['cancel'],
         'cancelled': []
     }
-    _POLICY = {}
+    _POLICY = {'activities': []}
 
     def update_activity(self, cr, uid, activity_id, context=None):
         api = self.pool['nh.clinical.api']
@@ -74,7 +74,7 @@ class nh_activity_data(orm.AbstractModel):
             activity_vals.update({'patient_id': patient_id})
 
         activity_vals.update({'location_id': location_id,
-                              'device_id': device_id,
+                              # 'device_id': device_id,
                               'pos_id': pos_id})
         api.write(cr, uid, 'nh.activity', activity_id, activity_vals)
         activities = api.activity_map(cr, uid, pos_ids=[pos_id], patient_ids=[patient_id],
@@ -157,12 +157,11 @@ class nh_activity_data(orm.AbstractModel):
             location_id = data.activity_id.spell_activity_id and data.activity_id.spell_activity_id.location_id.id or False
         if not location_id:
             location_id = data.activity_id.parent_id and data.activity_id.parent_id.location_id.id or False
-        print "location_id: %s" % location_id
+        # print "location_id: %s" % location_id
         return location_id
 
     def get_activity_patient_id(self, cr, uid, activity_id, context=None):
         patient_id = False
-        # import pdb; pdb.set_trace()
         data = self.browse_domain(cr, uid, [('activity_id', '=', activity_id)])[0]
         if 'patient_id' in self._columns.keys():
             patient_id = data.patient_id and data.patient_id.id or False
@@ -191,7 +190,6 @@ class nh_activity_data(orm.AbstractModel):
                 group by activity_id                
                 """.format(activity_id=activity_id)
         cr.execute(sql)
-        #import pdb; pdb.set_trace()
         res = cr.dictfetchone()
         user_ids = list(res and set(res['user_ids']) or [])
         #print "ACTIVITY DATA get_activity_user_ids user_ids: %s " % user_ids

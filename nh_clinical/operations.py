@@ -26,7 +26,6 @@ class nh_clinical_patient_move(orm.Model):
 
     def name_get(self, cr, uid, ids, context=None):
         res = []
-        #import pdb; pdb.set_trace()
         for move in self.browse(cr, uid, ids, context):
             res.append( [move.id, "%s to %s" % ("patient", "location")] )
         return res
@@ -43,7 +42,6 @@ class nh_clinical_patient_move(orm.Model):
         """ % activity.patient_id.id or 0
         cr.execute(sql)
         res = cr.fetchone()
-#         import pdb; pdb.set_trace()
         from_location_id = res and res[0] or False
         self.write(cr, uid, activity.data_ref.id, {'from_location_id': from_location_id})
         patient_pool.write(cr, uid, activity.data_ref.patient_id.id, {'current_location_id': activity.data_ref.location_id.id}, context)
@@ -115,6 +113,7 @@ class nh_clinical_patient_swap_beds(orm.Model):
                              'suggested_location_id': locations[location2_id]['parent_id']})
         api.submit(cr, uid, spell1_activity_id, {'location_id': location2_id})
         api.submit(cr, uid, spell2_activity_id, {'location_id': location1_id})
+        return super(nh_clinical_patient_swap_beds, self).complete(cr, uid, activity_id, context)
 
 
 
@@ -236,7 +235,6 @@ class nh_clinical_patient_discharge(orm.Model):
         activity = activity_pool.browse(cr, SUPERUSER_ID, activity_id, context)
         spell_activity = api_pool.get_patient_spell_activity_browse(cr, uid, activity.data_ref.patient_id.id, context=context)
         except_if(not spell_activity, msg="Patient id=%s has no started spell!" % activity.patient_id.id)
-        #import pdb; pdb.set_trace()
         # move
         move_pool = self.pool['nh.clinical.patient.move']
         move_activity_id = move_pool.create_activity(cr, uid,
@@ -269,7 +267,6 @@ class nh_clinical_patient_admission(orm.Model):
     def get_activity_location_id(self, cr, uid, activity_id, context=None):
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context)
-        #import pdb; pdb.set_trace()
         location_id = activity.data_ref.pos_id.lot_admission_id.id #or activity.data_ref.pos_id.location_id.id
         return location_id
 
@@ -277,7 +274,6 @@ class nh_clinical_patient_admission(orm.Model):
     def complete(self, cr, uid, activity_id, context=None):
         res = {}
         super(nh_clinical_patient_admission, self).complete(cr, uid, activity_id, context)
-        #import pdb; pdb.set_trace()
         api_pool = self.pool['nh.clinical.api']
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, SUPERUSER_ID, activity_id, context)
@@ -297,7 +293,6 @@ class nh_clinical_patient_admission(orm.Model):
             'start_date': admission.start_date},
            context=None)
         # copy doctors
-        #import pdb; pdb.set_trace()
         if activity.creator_id.data_model == "nh.clinical.adt.patient.admit":
             doctor_data = {
                            'con_doctor_ids': [[4, d.id] for d in activity.creator_id.data_ref.con_doctor_ids],
