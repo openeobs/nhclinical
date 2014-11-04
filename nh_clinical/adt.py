@@ -415,12 +415,12 @@ class nh_clinical_adt_patient_transfer(orm.Model):
             domain = [('state', '=', 'completed'),
                       ('patient_id', '=', patient_id),
                       ('data_model', 'in', ['nh.clinical.adt.patient.admit', 'nh.clinical.adt.spell.update',
-                                            'nh.clinical.adt.patient.transfer', 'nh.clinical.adt.cancel_transfer'])]
+                                            'nh.clinical.adt.patient.transfer', 'nh.clinical.adt.patient.cancel_transfer'])]
             op_activity_ids = activity_pool.search(cr, uid, domain, order='date_terminated desc', context=context)
             latest_op = activity_pool.browse(cr, uid, op_activity_ids[0], context=context)
             if latest_op.data_model in ['nh.clinical.adt.patient.admit', 'nh.clinical.adt.spell.update']:
                 last_location_id = latest_op.data_ref.suggested_location_id.id
-            elif latest_op.data_model == 'nh.clinical.adt.canel_transfer':
+            elif latest_op.data_model == 'nh.clinical.adt.patient.cancel_transfer':
                 last_location_id = latest_op.data_ref.last_location_id.id
             else:
                 last_location_id = latest_op.data_ref.location_id.id
@@ -724,12 +724,12 @@ class nh_clinical_adt_patient_cancel_discharge(orm.Model):
             domain = [('state', '=', 'completed'),
                       ('patient_id', '=', patient_id),
                       ('data_model', 'in', ['nh.clinical.adt.patient.admit', 'nh.clinical.adt.spell.update',
-                                            'nh.clinical.adt.patient.transfer', 'nh.clinical.adt.cancel_transfer'])]
+                                            'nh.clinical.adt.patient.transfer', 'nh.clinical.adt.patient.cancel_transfer'])]
             op_activity_ids = activity_pool.search(cr, uid, domain, order='date_terminated desc', context=context)
             latest_op = activity_pool.browse(cr, uid, op_activity_ids[0], context=context)
             if latest_op.data_model in ['nh.clinical.adt.patient.admit', 'nh.clinical.adt.spell.update']:
                 last_location_id = latest_op.data_ref.suggested_location_id.id
-            elif latest_op.data_model == 'nh.clinical.adt.canel_transfer':
+            elif latest_op.data_model == 'nh.clinical.adt.patient.cancel_transfer':
                 last_location_id = latest_op.data_ref.last_location_id.id
             else:
                 last_location_id = latest_op.data_ref.location_id.id
