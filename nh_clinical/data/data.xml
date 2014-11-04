@@ -135,6 +135,14 @@
             <field name="name">Cancelled by System</field>
             <field name="system" eval="True"/>
         </record>
+        <record id="nhc_cancel_reason_4" model="nh.cancel.reason">
+            <field name="name">Already Done</field>
+            <field name="system" eval="False"/>
+        </record>
+        <record id="nhc_cancel_reason_5" model="nh.cancel.reason">
+            <field name="name">No need to do this task</field>
+            <field name="system" eval="False"/>
+        </record>
 
         <!--Sequences-->
 
