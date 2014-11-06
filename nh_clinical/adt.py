@@ -438,7 +438,7 @@ class nh_clinical_adt_patient_transfer(orm.Model):
         # patient move
         spell_activity_id = api_pool.get_patient_spell_activity_id(cr, SUPERUSER_ID, transfer_activity.patient_id.id, context=context)
         except_if(not spell_activity_id, msg="Spell not found!")
-        move_activity_id = move_pool.create_activity(cr, SUPERUSER_ID,{
+        move_activity_id = move_pool.create_activity(cr, SUPERUSER_ID, {
             'parent_id': spell_activity_id,
             'creator_id': activity_id
         }, {
