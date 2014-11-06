@@ -406,7 +406,7 @@ class nh_clinical_adt_patient_transfer(orm.Model):
         domain = [('data_model', '=', 'nh.clinical.patient.move'),
                   ('state', '=', 'completed'),
                   ('patient_id', '=', patient_id)]
-        move_activity_ids = activity_pool.search(cr, uid, domain, order='date_terminated desc', context=context)
+        move_activity_ids = activity_pool.search(cr, uid, domain, order='date_terminated desc, sequence desc', context=context)
         move_activity = activity_pool.browse(cr, uid, move_activity_ids[0], context=context)
         vals_copy = vals.copy()
         if move_activity.location_id.type == 'poc':
@@ -416,7 +416,7 @@ class nh_clinical_adt_patient_transfer(orm.Model):
                       ('patient_id', '=', patient_id),
                       ('data_model', 'in', ['nh.clinical.adt.patient.admit', 'nh.clinical.adt.spell.update',
                                             'nh.clinical.adt.patient.transfer', 'nh.clinical.adt.patient.cancel_transfer'])]
-            op_activity_ids = activity_pool.search(cr, uid, domain, order='date_terminated desc', context=context)
+            op_activity_ids = activity_pool.search(cr, uid, domain, order='date_terminated desc, sequence desc', context=context)
             latest_op = activity_pool.browse(cr, uid, op_activity_ids[0], context=context)
             if latest_op.data_model in ['nh.clinical.adt.patient.admit', 'nh.clinical.adt.spell.update']:
                 last_location_id = latest_op.data_ref.suggested_location_id.id
@@ -715,7 +715,7 @@ class nh_clinical_adt_patient_cancel_discharge(orm.Model):
         domain = [('data_model', '=', 'nh.clinical.patient.move'),
                   ('state', '=', 'completed'),
                   ('patient_id', '=', patient_id)]
-        move_activity_ids = activity_pool.search(cr, uid, domain, order='date_terminated desc', context=context)
+        move_activity_ids = activity_pool.search(cr, uid, domain, order='date_terminated desc, sequence desc', context=context)
         move_activity = activity_pool.browse(cr, uid, move_activity_ids[1], context=context)
         vals_copy = vals.copy()
         if move_activity.location_id.type == 'poc':
@@ -725,7 +725,7 @@ class nh_clinical_adt_patient_cancel_discharge(orm.Model):
                       ('patient_id', '=', patient_id),
                       ('data_model', 'in', ['nh.clinical.adt.patient.admit', 'nh.clinical.adt.spell.update',
                                             'nh.clinical.adt.patient.transfer', 'nh.clinical.adt.patient.cancel_transfer'])]
-            op_activity_ids = activity_pool.search(cr, uid, domain, order='date_terminated desc', context=context)
+            op_activity_ids = activity_pool.search(cr, uid, domain, order='date_terminated desc, sequence desc', context=context)
             latest_op = activity_pool.browse(cr, uid, op_activity_ids[0], context=context)
             if latest_op.data_model in ['nh.clinical.adt.patient.admit', 'nh.clinical.adt.spell.update']:
                 last_location_id = latest_op.data_ref.suggested_location_id.id
@@ -754,7 +754,7 @@ class nh_clinical_adt_patient_cancel_discharge(orm.Model):
         domain = [('data_model', '=', 'nh.clinical.adt.patient.discharge'),
                   ('state', '=', 'completed'),
                   ('patient_id', '=', cancel_activity.data_ref.patient_id.id)]
-        last_discharge_activity_id = activity_pool.search(cr, uid, domain, order='date_terminated desc', context=context)
+        last_discharge_activity_id = activity_pool.search(cr, uid, domain, order='date_terminated desc, sequence desc', context=context)
         except_if(not last_discharge_activity_id, msg='Patient was not discharged!')
         spell_activity_id = api_pool.activity_map(cr, uid, patient_ids=[patient_id],
                                                   data_models=['nh.clinical.spell'], states=['completed']).keys()[0]
@@ -818,7 +818,7 @@ class nh_clinical_adt_patient_cancel_transfer(orm.Model):
         domain = [('data_model', '=', 'nh.clinical.adt.patient.transfer'),
                   ('state', '=', 'completed'),
                   ('patient_id', '=', patient_id)]
-        transfer_activity_ids = activity_pool.search(cr, uid, domain, order='date_terminated desc', context=context)
+        transfer_activity_ids = activity_pool.search(cr, uid, domain, order='date_terminated desc, sequence desc', context=context)
         except_if(not transfer_activity_ids, msg='Patient was not transfered!')
         transfer_activity = activity_pool.browse(cr, uid, transfer_activity_ids[0], context=context)
         vals_copy = vals.copy()

@@ -503,7 +503,6 @@ with
                     pos_id,
                     location_id,
                     patient_id,
-                    device_id,
                     data_model,
                     state,
                     rank() over (partition by {partition_by} order by {partition_order}) as rank
