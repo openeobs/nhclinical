@@ -46,20 +46,24 @@ class nh_clinical_spell(orm.Model):
                     where now() at time zone 'UTC' - move_activity.date_terminated < interval '1d'
                         and spell_activity.state = 'started'
                     group by spell_id, spell_activity.id
+                ),
+                user_locations as (
+                    select
+                        user_id,
+                        array_agg(location_id) as location_ids
+                    from user_location_rel
+                    group by user_id
                 )
             select
                 stl.activity_id,
                 stl.spell_id,
-                array_agg(ulr.user_id) as user_ids
-            from user_location_rel ulr
-            inner join res_groups_users_rel gur on ulr.user_id = gur.uid
-            inner join ir_model_access access on access.group_id = gur.gid and access.perm_responsibility = true
-            inner join ir_model model on model.id = access.model_id and model.model = 'nh.clinical.spell'
-            inner join parent_location on parent_location.location_id = ulr.location_id
-            inner join spell_transferred_locations stl on stl.location_ids && parent_location.ids
+                array_agg(ul.user_id) as user_ids
+            from spell_transferred_locations stl
+            inner join parent_location on stl.location_ids && parent_location.ids
+            left join user_locations ul on ul.location_ids && parent_location.ids
             where stl.spell_id in (%s)
-            group by activity_id, stl.spell_id        
-        """ % ",".join(map(str,ids))
+            group by activity_id, stl.spell_id
+        """ % ",".join(map(str, ids))
         cr.execute(sql)
         rows = cr.dictfetchall()
         [res.update({row['spell_id']: list(set(row['user_ids']))}) for row in rows]
