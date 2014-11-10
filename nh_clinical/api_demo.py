@@ -142,7 +142,7 @@ class nh_clinical_api_demo(orm.AbstractModel):
 
         return True
 
-    def build_unit_test_env(self, cr, uid, wards=None, bed_count=2, patient_count=2, users=None):
+    def build_unit_test_env1(self, cr, uid, wards=None, bed_count=2, patient_count=2, users=None):
         """
         Create a default unit test environment for basic unit tests.
             2 WARDS - U and T
@@ -659,7 +659,39 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         v = self._user_base(cr, uid)
         v.update({'groups_id': [(4, group.id)]})  
         v.update(values)
-        return v 
+        return v
+
+    def user_receptionist(self, cr, uid, values={}):
+        imd_pool = self.pool['ir.model.data']
+        group = imd_pool.get_object(cr, uid, "nh_clinical", "group_nhc_receptionist")
+        v = self._user_base(cr, uid)
+        v.update({'groups_id': [(4, group.id)]})
+        v.update(values)
+        return v
+
+    def user_junior_doctor(self, cr, uid, values={}):
+        imd_pool = self.pool['ir.model.data']
+        group = imd_pool.get_object(cr, uid, "nh_clinical", "group_nhc_junior_doctor")
+        v = self._user_base(cr, uid)
+        v.update({'groups_id': [(4, group.id)]})
+        v.update(values)
+        return v
+
+    def user_registrar(self, cr, uid, values={}):
+        imd_pool = self.pool['ir.model.data']
+        group = imd_pool.get_object(cr, uid, "nh_clinical", "group_nhc_registrar")
+        v = self._user_base(cr, uid)
+        v.update({'groups_id': [(4, group.id)]})
+        v.update(values)
+        return v
+
+    def user_consultant(self, cr, uid, values={}):
+        imd_pool = self.pool['ir.model.data']
+        group = imd_pool.get_object(cr, uid, "nh_clinical", "group_nhc_consultant")
+        v = self._user_base(cr, uid)
+        v.update({'groups_id': [(4, group.id)]})
+        v.update(values)
+        return v
 
     def user_doctor(self, cr, uid, values={}):
         imd_pool = self.pool['ir.model.data']

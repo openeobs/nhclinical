@@ -46,7 +46,7 @@ class test_adt(common.SingleTransactionCase):
         
         cls.apidemo = cls.registry('nh.clinical.api.demo')
 
-        cls.patient_ids = cls.apidemo.build_unit_test_env(cr, uid)
+        cls.patient_ids = cls.apidemo.build_unit_test_env1(cr, uid)
 
         cls.wu_id = cls.location_pool.search(cr, uid, [('code', '=', 'U')])[0]
         cls.wt_id = cls.location_pool.search(cr, uid, [('code', '=', 'T')])[0]
