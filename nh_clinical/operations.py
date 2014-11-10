@@ -67,6 +67,7 @@ class nh_clinical_patient_swap_beds(orm.Model):
     # consider 'move policies'
     def complete(self, cr, uid, activity_id, context=None):
         api = self.pool['nh.clinical.api']
+        swap_activity_id = activity_id
         activity = api.browse(cr, uid, 'nh.activity', activity_id)
         location1_id = activity.data_ref.location1_id.id
         location2_id = activity.data_ref.location2_id.id
@@ -113,7 +114,7 @@ class nh_clinical_patient_swap_beds(orm.Model):
                              'suggested_location_id': locations[location2_id]['parent_id']})
         api.submit(cr, uid, spell1_activity_id, {'location_id': location2_id})
         api.submit(cr, uid, spell2_activity_id, {'location_id': location1_id})
-        return super(nh_clinical_patient_swap_beds, self).complete(cr, uid, activity_id, context)
+        return super(nh_clinical_patient_swap_beds, self).complete(cr, uid, swap_activity_id, context)
 
 
 
