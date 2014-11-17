@@ -47,7 +47,14 @@ class nh_activity(orm.Model):
         'spell_activity_id': fields.many2one('nh.activity', 'Spell Activity', readonly=True),
         'cancel_reason_id': fields.many2one('nh.cancel.reason', 'Cancellation Reason')
     }
-    
+
+    def write(self, cr, uid, ids, vals, context=None):
+        res = super(nh_activity, self).write(cr, uid, ids, vals, context=context)
+        if 'location_id' in vals:
+            location_pool = self.pool['nh.clinical.location']
+            location = location_pool.read(cr, uid, vals['location_id'], ['user_ids'], context=context)
+            self.write(cr, uid, ids, {'user_ids': [[6, False, location['user_ids']]]}, context=context)
+        return res
  
     
 class nh_activity_data(orm.AbstractModel):
