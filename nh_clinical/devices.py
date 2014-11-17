@@ -52,8 +52,12 @@ class nh_clinical_device_session(orm.Model):
     _rec_name = 'device_id'
     _columns = {
         'device_type_id': fields.many2one('nh.clinical.device.type', 'Device Type', required=True),
+        'device_category_id': fields.related('device_type_id', 'category_id', type='many2one', relation='nh.clinical.device.category', string='Device Category'),
         'device_id': fields.many2one('nh.clinical.device', 'Device'),
+        'location': fields.char('Location', size=50),
         'patient_id': fields.many2one('nh.clinical.patient', 'Patient', required=True),
+        'removal_reason': fields.char('Removal reason', size=100),
+        'planned': fields.selection((('planned', 'Planned'), ('unplanned', 'Unplanned')), 'Planned?')
     }
     
     def name_get(self, cr, uid, ids, context):
