@@ -421,7 +421,7 @@ class nh_clinical_patient(osv.Model):
 
     def _get_name(self, cr, uid, ids, fn, args, context=None):
         result = dict.fromkeys(ids, False)
-        for r in self.read(cr, uid, ids, ['family_name', 'given_name', 'middle_name'], context=context):
+        for r in self.read(cr, uid, ids, ['family_name', 'given_name', 'middle_names'], context=context):
             #TODO This needs to be manipulable depending on locale
             result[r['id']] = self._get_fullname(r)
         return result

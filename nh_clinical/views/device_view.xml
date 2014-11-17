@@ -161,7 +161,7 @@
         <record model="ir.actions.act_window" id="action_device_category" >
             <field name="name">nh.clinical.device_category</field>
             <field name="res_model">nh.clinical.device.category</field>
-            <field name="view_category">form</field>
+            <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
             <field name="search_view_id" ref="view_device_category_search"/>
         </record>
