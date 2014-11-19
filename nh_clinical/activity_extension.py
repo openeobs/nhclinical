@@ -53,7 +53,8 @@ class nh_activity(orm.Model):
         if 'location_id' in vals:
             location_pool = self.pool['nh.clinical.location']
             location = location_pool.read(cr, uid, vals['location_id'], ['user_ids'], context=context)
-            self.write(cr, uid, ids, {'user_ids': [[6, False, location['user_ids']]]}, context=context)
+            if location:
+                self.write(cr, uid, ids, {'user_ids': [[6, False, location['user_ids']]]}, context=context)
         return res
  
     
