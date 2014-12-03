@@ -43,6 +43,7 @@ class nh_activity(orm.Model):
         'patient_id': fields.many2one('nh.clinical.patient', 'Patient', readonly=True),
         # 'device_id': fields.many2one('nh.clinical.device', 'Device', readonly=True),
         'location_id': fields.many2one('nh.clinical.location', 'Location', readonly=True),
+        'location_name': fields.related('location_id', 'full_name', type='char', size=150, string='Location Name'),
         'pos_id': fields.many2one('nh.clinical.pos', 'POS', readonly=True),
         'spell_activity_id': fields.many2one('nh.activity', 'Spell Activity', readonly=True),
         'cancel_reason_id': fields.many2one('nh.cancel.reason', 'Cancellation Reason')

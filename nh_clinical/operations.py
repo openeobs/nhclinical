@@ -18,10 +18,10 @@ class nh_clinical_patient_move(orm.Model):
     _cancel_view_xmlid = "view_patient_move_form"
     _columns = {
         'location_id': fields.many2one('nh.clinical.location', 'Destination Location'),
+        'location_name': fields.related('location_id', 'full_name', type='char', size=150, string='Destination Location'),
         'patient_id': fields.many2one('nh.clinical.patient', 'Patient', required=True),
         'reason': fields.text('Reason'),
         'from_location_id': fields.many2one('nh.clinical.location', 'Source Location'),
-
     }
 
     def name_get(self, cr, uid, ids, context=None):

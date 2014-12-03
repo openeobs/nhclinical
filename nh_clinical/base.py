@@ -300,11 +300,37 @@ class nh_clinical_location(orm.Model):
         """ % ",".join(map(str, ids))
         cr.execute(sql)
         [res.update({row['location_id']: row['path']}) for row in cr.dictfetchall()]        
-        return res        
+        return res
+
+    def _get_name(self, cr, uid, ids, field, args, context=None):
+        result = dict.fromkeys(ids, False)
+        for id in ids:
+            location = self.browse(cr, uid, id, context=context)
+            if location.usage == 'ward':
+                result[id] = location.name
+            else:
+                parent_id = self._get_closest_parent_id(cr, uid, id, 'ward', context=context)
+                if parent_id:
+                    parent = self.browse(cr, uid, parent_id, context=context)
+                else:
+                    parent = False
+                result[id] = '{0} [{1}]'.format(location.name, parent.name) if parent else location.name
+        return result
+
+    def _get_closest_parent_id(self, cr, uid, id, usage, context=None):
+        location = self.browse(cr, uid, id, context=context)
+        if not location.parent_id:
+            return False
+        elif location.parent_id.usage == usage:
+            return location.parent_id.id
+        else:
+
+            return self._get_closest_parent_id(cr, uid, location.parent_id.id, usage, context=context)
         
         
     _columns = {
         'name': fields.char('Location', size=100, required=True, select=True),
+        'full_name': fields.function(_get_name, type='char', size=150, string='Full Name'),
         'code': fields.char('Code', size=256),
         'parent_id': fields.many2one('nh.clinical.location', 'Parent Location'),
         'child_ids': fields.one2many('nh.clinical.location', 'parent_id', 'Child Locations'),
@@ -401,7 +427,6 @@ class nh_clinical_location(orm.Model):
                 cids = vals['context_ids']
             self.pool['nh.clinical.context'].check_model(cr, uid, cids, self._name, context=context)
         return super(nh_clinical_location, self).write(cr, uid, ids, vals, context=context)
-    
 
 
 class nh_clinical_patient(osv.Model):
