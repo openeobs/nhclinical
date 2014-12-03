@@ -34,6 +34,8 @@ class nh_clinical_pos(orm.Model):
         'lot_discharge_id': fields.many2one('nh.clinical.location', 'Discharge Location'),
     }
 
+    _sql_constraints = [('pos_code_uniq', 'unique(code)', 'The code for a location must be unique!')]
+
 
 class res_company(orm.Model):
     _name = 'res.company'
