@@ -50,6 +50,8 @@ class nh_activity(orm.Model):
     }
 
     def write(self, cr, uid, ids, vals, context=None):
+        if not vals:
+            vals = {}
         res = super(nh_activity, self).write(cr, uid, ids, vals, context=context)
         if 'location_id' in vals:
             location_pool = self.pool['nh.clinical.location']
