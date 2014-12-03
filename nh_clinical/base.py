@@ -371,6 +371,8 @@ class nh_clinical_location(orm.Model):
         'patient_capacity': 1
     }
 
+    _sql_constraints = [('location_code_uniq', 'unique(code)', 'The code for a location must be unique!')]
+
     def get_location_activity_ids(self, cr, uid, location_id, context=None):
         """
         """
