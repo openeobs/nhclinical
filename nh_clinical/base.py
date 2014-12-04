@@ -9,7 +9,7 @@ class ir_model_access(orm.Model):
     _inherit = 'ir.model.access'
     _columns = {
         'perm_responsibility': fields.boolean('NH Clinical Activity Responsibility'),
-    }
+        }
 
 
 class nh_clinical_res_partner(orm.Model):
@@ -18,21 +18,21 @@ class nh_clinical_res_partner(orm.Model):
     _columns = {
         'doctor': fields.boolean('Doctor', help="Check this box if this contact is a Doctor"),
         'code': fields.char('Code', size=256),
-    }
+        }
 
 
 class nh_clinical_pos(orm.Model):
     """ Clinical point of service """
-    _name = 'nh.clinical.pos' 
-     
+    _name = 'nh.clinical.pos'
+
     _columns = {
         'name': fields.char('Point of Service', size=100, required=True, select=True),
         'code': fields.char('Code', size=256),
-        'location_id': fields.many2one('nh.clinical.location', 'POS Location', required=True), 
+        'location_id': fields.many2one('nh.clinical.location', 'POS Location', required=True),
         'company_id': fields.many2one('res.company', 'Company'),
         'lot_admission_id': fields.many2one('nh.clinical.location', 'Admission Location'),
         'lot_discharge_id': fields.many2one('nh.clinical.location', 'Discharge Location'),
-    }
+        }
 
     _sql_constraints = [('pos_code_uniq', 'unique(code)', 'The code for a location must be unique!')]
 
@@ -42,8 +42,8 @@ class res_company(orm.Model):
     _inherit = 'res.company'
     _columns = {
         'pos_ids': fields.one2many('nh.clinical.pos', 'company_id', 'Points of Service'),
-    }
-    
+        }
+
 
 class res_users(orm.Model):
     _name = 'res.users'
@@ -51,7 +51,7 @@ class res_users(orm.Model):
     _columns = {
         'pos_id': fields.many2one('nh.clinical.pos', 'POS'),
         'location_ids': fields.many2many('nh.clinical.location', 'user_location_rel', 'user_id', 'location_id', 'Parent Locations of Responsibility'),
-    }
+        }
 
     def get_all_responsibility_location_ids(self, cr, uid, user_id, context=None):
         location_pool = self.pool['nh.clinical.location']
@@ -59,9 +59,9 @@ class res_users(orm.Model):
         for user_location_id in self.browse(cr, uid, user_id, context).location_ids:
             location_ids.extend( location_pool.search(cr, uid, [['id', 'child_of', user_location_id.id]]) )
         return location_ids
-    
-    
-    
+
+
+
     def write(self, cr, uid, ids, values, context=None):
         res = super(res_users, self).write(cr, uid, ids, values, context)
         if values.get('location_ids') or values.get('groups_id'):
@@ -73,7 +73,7 @@ class res_users(orm.Model):
 class res_groups(orm.Model):
     _name = 'res.groups'
     _inherit = 'res.groups'
-    
+
     def write(self, cr, uid, ids, values, context=None):
         res = super(res_groups, self).write(cr, uid, ids, values, context)
         if values.get('users'):
@@ -110,7 +110,7 @@ class nh_clinical_location(orm.Model):
     _name = 'nh.clinical.location'
     _types = [('poc', 'Point of Care'), ('structural', 'Structural'), ('virtual', 'Virtual'), ('pos', 'POS')]
     _usages = [('bed', 'Bed'), ('bay', 'Bay'),('ward', 'Ward'), ('room', 'Room'),('department', 'Department'), ('hospital', 'Hospital')]
-    
+
     def _location2pos_id(self, cr, uid, ids, field, args, context=None):
         res = {}
         pos_pool = self.pool['nh.clinical.pos']
@@ -122,25 +122,25 @@ class nh_clinical_location(orm.Model):
             if not pos_id:
                 _logger.warning("pos_id not found for location '%s', id=%s" % (location.code, location.id))
         return res
-    
+
     def _pos2location_id(self, cr, uid, ids, context=None):
         res = []
         for pos in self.browse(cr, uid, ids, context):
             res.extend(self.pool['nh.clinical.location'].search(cr, uid, [['id','child_of',pos.location_id.id]]))
-        return res          
- 
+        return res
+
     def _is_available(self, cr, uid, ids, field, args, context=None):
         res = {}
         available_location_ids = self.get_available_location_ids(cr, uid, context=context)
         for location in self.browse(cr, uid, ids, context):
             res[location.id] = location.id in available_location_ids
         return res
-    
+
     def _placement2location_id(self, cr, uid, ids, context=None):
         sql = """
             select distinct m.location_id from nh_activity a
             inner join nh_clinical_patient_move m on a.data_model = 'nh.clinical.patient.move' and m.activity_id = a.id
-            where a.state = 'completed'     
+            where a.state = 'completed'
         """
         cr.execute(sql)
         res = [rec['location_id'] for rec in cr.dictfetchall()]
@@ -234,102 +234,104 @@ class nh_clinical_location(orm.Model):
                 sum += len(child.patient_ids)
             res[loc.id] = sum
         return res
-    
+
     def _get_parent_ids(self, cr, uid, ids, field, args, context=None):
         res = {location_id: False for location_id in ids}
         sql = """
-        with 
+        with
             recursive route(level, path, parent_id, id) as (
-                    select 0 as level, id::text, parent_id, id 
-                    from nh_clinical_location 
+                    select 0 as level, id::text, parent_id, id
+                    from nh_clinical_location
                     where parent_id is null
                 union
-                    select level + 1, path||','||location.id, location.parent_id, location.id 
-                    from nh_clinical_location location 
-                    join route on location.parent_id = route.id 
-            ), 
-            map as( 
-                select 
-                    route.id as location_id, 
-                    ('{'||path||'}')::int[] as parent_ids 
+                    select level + 1, path||','||location.id, location.parent_id, location.id
+                    from nh_clinical_location location
+                    join route on location.parent_id = route.id
+            ),
+            map as(
+                select
+                    route.id as location_id,
+                    ('{'||path||'}')::int[] as parent_ids
                 from route
                 order by path
             )
-            select 
-                location_id, 
-                parent_ids[1:array_length(parent_ids, 1)-1] as parent_ids 
+            select
+                location_id,
+                parent_ids[1:array_length(parent_ids, 1)-1] as parent_ids
             from map
-            where location_id in (%s) 
+            where location_id in (%s)
         """ % ",".join(map(str, ids))
         cr.execute(sql)
-        [res.update({row['location_id']: row['parent_ids']}) for row in cr.dictfetchall()]        
+        [res.update({row['location_id']: row['parent_ids']}) for row in cr.dictfetchall()]
         return res
-    
+
     def _parent_ids_search(self, cr, uid, obj, name, args, domain=None, context=None):
         arg1, op, arg2 = args[0]
         arg2 = isinstance(arg2, (list, tuple)) and arg2 or [arg2]
         all_ids = self.search(cr, uid, [])
         child_parent_map = self._get_parent_ids(cr, uid, all_ids, 'parent_ids', None)
         location_ids = [k for k, v in child_parent_map.items() if set(v or []) & set(arg2 or [])]
-        return [('id', 'in', location_ids)]       
-    
+        return [('id', 'in', location_ids)]
+
     def _get_path(self, cr, uid, ids, field, args, context=None):
         res = {location_id: False for location_id in ids}
         sql = """
-        with 
+        with
             recursive route(level, path, parent_id, id, code) as (
                     select 0 as level, code::text, parent_id, id, code::text
-                    from nh_clinical_location 
+                    from nh_clinical_location
                     where parent_id is null
                 union
                     select level + 1, path||','||location.code::text, location.parent_id, location.id, location.code::text
-                    from nh_clinical_location location 
-                    join route on location.parent_id = route.id 
-            ), 
-            map as( 
+                    from nh_clinical_location location
+                    join route on location.parent_id = route.id
+            ),
+            map as(
                 select
                     level,
-                    route.id as location_id, 
-                    ('{'||path||'}')::text[] as path 
+                    route.id as location_id,
+                    ('{'||path||'}')::text[] as path
                 from route
                 order by path
             )
-            select 
-                location_id, 
-                '/'||array_to_string(path[1:array_length(path, 1)-1], '/') as path 
+            select
+                location_id,
+                '/'||array_to_string(path[1:array_length(path, 1)-1], '/') as path
             from map
-            where location_id in (%s) 
+            where location_id in (%s)
         """ % ",".join(map(str, ids))
         cr.execute(sql)
-        [res.update({row['location_id']: row['path']}) for row in cr.dictfetchall()]        
+        [res.update({row['location_id']: row['path']}) for row in cr.dictfetchall()]
         return res
 
     def _get_name(self, cr, uid, ids, field, args, context=None):
         result = dict.fromkeys(ids, False)
         for id in ids:
-            location = self.browse(cr, uid, id, context=context)
-            if location.usage == 'ward':
-                result[id] = location.name
+            location = self.read(cr, uid, id, ['usage', 'name'], context=context)
+            if location['usage'] == 'ward':
+                result[id] = location['name']
             else:
                 parent_id = self._get_closest_parent_id(cr, uid, id, 'ward', context=context)
                 if parent_id:
-                    parent = self.browse(cr, uid, parent_id, context=context)
+                    parent = self.read(cr, uid, parent_id, ['name'], context=context)
                 else:
                     parent = False
-                result[id] = '{0} [{1}]'.format(location.name, parent.name) if parent else location.name
+                result[id] = '{0} [{1}]'.format(location['name'], parent['name']) if parent else location['name']
         return result
 
     def _get_closest_parent_id(self, cr, uid, id, usage, context=None):
-        location = self.browse(cr, uid, id, context=context)
-        if not location.parent_id:
+        location = self.read(cr, uid, id, ['parent_id'], context=context)
+        if not location['parent_id']:
             return False
-        elif location.parent_id.usage == usage:
-            return location.parent_id.id
+        else:
+            parent = self.read(cr, uid, location['parent_id'][0], ['usage'], context=context)
+        if parent['usage'] == usage:
+            return parent['id']
         else:
 
-            return self._get_closest_parent_id(cr, uid, location.parent_id.id, usage, context=context)
-        
-        
+            return self._get_closest_parent_id(cr, uid, parent['id'], usage, context=context)
+
+
     _columns = {
         'name': fields.char('Location', size=100, required=True, select=True),
         'full_name': fields.function(_get_name, type='char', size=150, string='Full Name'),
@@ -342,14 +344,14 @@ class nh_clinical_location(orm.Model):
         'usage': fields.selection(_usages, 'Location Usage'),
         'active': fields.boolean('Active'),
         'pos_id': fields.function(_location2pos_id, type='many2one', relation='nh.clinical.pos', string='POS', store={
-                                  'nh.clinical.location': (lambda s, cr, uid, ids, c: s.search(cr, uid, [['id','child_of',ids]]), ['parent_id'], 10),
-                                  'nh.clinical.pos': (_pos2location_id, ['location_id'], 5),
-                                    }),
+            'nh.clinical.location': (lambda s, cr, uid, ids, c: s.search(cr, uid, [['id','child_of',ids]]), ['parent_id'], 10),
+            'nh.clinical.pos': (_pos2location_id, ['location_id'], 5),
+            }),
         'company_id': fields.related('pos_id', 'company_id', type='many2one', relation='res.company', string='Company'),
-        'is_available': fields.function(_is_available, type='boolean', string='Is Available?', 
+        'is_available': fields.function(_is_available, type='boolean', string='Is Available?',
                                         store={
-                                               'nh.clinical.location': (lambda self, cr, uid, ids, c: ids, [], 10),
-                                               'nh.activity': (_placement2location_id, ['state'], 20)
+                                            'nh.clinical.location': (lambda self, cr, uid, ids, c: ids, [], 10),
+                                            'nh.activity': (_placement2location_id, ['state'], 20)
                                         }),
         'patient_capacity': fields.integer('Patient Capacity'),
         'patient_ids': fields.function(_get_patient_ids, type='many2many', relation='nh.clinical.patient', string="Patients"),
@@ -376,7 +378,7 @@ class nh_clinical_location(orm.Model):
     def get_location_activity_ids(self, cr, uid, location_id, context=None):
         """
         """
-        location_models = [model for model_name, model in self.pool.models.items() 
+        location_models = [model for model_name, model in self.pool.models.items()
                            if 'location_id' in model._columns.keys()
                            and model._columns['location_id']._obj == 'nh.clinical.location']
         activity_ids = []
@@ -387,9 +389,9 @@ class nh_clinical_location(orm.Model):
         return activity_ids
 
     def get_available_location_ids(self, cr, uid, usages=[], location_id=None, context=None):
-        api_pool = self.pool['nh.clinical.api']  
+        api_pool = self.pool['nh.clinical.api']
         res = api_pool.location_map(cr, uid, location_ids=[], types=[], usages=[], codes=[],
-                                          occupied_range=[], capacity_range=[], available_range=[1,1]).keys()
+                                    occupied_range=[], capacity_range=[], available_range=[1,1]).keys()
         return res
 
     def activate_deactivate(self, cr, uid, location_id, context=None):
@@ -456,7 +458,7 @@ class nh_clinical_patient(osv.Model):
         return result
 
     _columns = {
-        'current_location_id': fields.many2one('nh.clinical.location', 'Current Location'),    
+        'current_location_id': fields.many2one('nh.clinical.location', 'Current Location'),
         'partner_id': fields.many2one('res.partner', 'Partner', required=True, ondelete='restrict'),
         'dob': fields.datetime('Date Of Birth'),  # Partner birthdate is NOT a date.
         'sex': fields.char('Sex', size=1),
@@ -470,20 +472,20 @@ class nh_clinical_patient(osv.Model):
         'middle_names': fields.char('Middle Name(s)', size=200),
         'family_name': fields.char('Family Name', size=200, select=True),
         'full_name': fields.function(_get_name, type='text', string="Full Name"),
-    }
+        }
 
     _defaults = {
         'active': True,
         'name': 'unknown'
     }
-    
+
     def create(self, cr, uid, vals, context=None):
         if not vals.get('name'):
             vals.update({'name': self._get_fullname(vals)})
         rec_id = super(nh_clinical_patient, self).create(cr, uid, vals, context)
         return rec_id
 
-    
+
 class mail_message(osv.Model):
     _name = 'mail.message'
     _inherit = 'mail.message'
@@ -496,5 +498,4 @@ class mail_message(osv.Model):
             return '%s <%s>' % (this.name, this.email)
         else:
             return '%s <%s>' % (this.name, 'No email')
-
 
