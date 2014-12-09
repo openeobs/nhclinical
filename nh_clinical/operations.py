@@ -259,7 +259,7 @@ class nh_clinical_patient_admission(orm.Model):
         'patient_id': fields.many2one('nh.clinical.patient', 'Patient', required=True),
         'pos_id': fields.many2one('nh.clinical.pos', 'POS', required=True),
         'suggested_location_id': fields.many2one('nh.clinical.location', 'Suggested Location'),
-        'location_id': fields.related('activity_id','location_id', type='many2one', relation='nh.clinical.location', string='Location'),
+        'location_id': fields.related('activity_id', 'location_id', type='many2one', relation='nh.clinical.location', string='Location'),
         'start_date': fields.datetime("Admission Start Date"),
         'code': fields.text('Code')
     }
@@ -304,15 +304,16 @@ class nh_clinical_patient_admission(orm.Model):
         res[spell_pool._name] = spell_activity_id
         activity_pool.start(cr, SUPERUSER_ID, spell_activity_id, context)
         activity_pool.write(cr, SUPERUSER_ID, admission.activity_id.id, {'parent_id': spell_activity_id}, context)
-        # patient move to lot_admission !!If lot_admission isn't set access rights to see the activity will need to be set to pos.location i.e. all locations in the pos
+
         move_pool = self.pool['nh.clinical.patient.move']
         move_activity_id = move_pool.create_activity(cr, SUPERUSER_ID,
             {'parent_id': spell_activity_id, 'creator_id': activity_id},
             {'patient_id': admission.patient_id.id,
-             'location_id': activity.pos_id.lot_admission_id.id},
+             'location_id': admission.suggested_location_id.id},
             context)
         res[move_pool._name] = move_activity_id
         activity_pool.complete(cr, SUPERUSER_ID, move_activity_id, context)
+        activity_pool.submit(cr, SUPERUSER_ID, spell_activity_id, {'location_id': admission.suggested_location_id.id})
         # trigger admission policy activities
         self.trigger_policy(cr, uid, activity_id, location_id=admission.suggested_location_id.id, context=context)
         return res
