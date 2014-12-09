@@ -2,6 +2,8 @@
 
 from openerp.osv import orm, fields
 import logging
+from datetime import datetime as dt
+from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as dtf
 _logger = logging.getLogger(__name__)
 
 
@@ -84,6 +86,7 @@ class nh_clinical_spell(orm.Model):
         'pos_id': fields.many2one('nh.clinical.pos', 'Placement Location', required=True),
         'code': fields.text("Code"),
         'start_date': fields.datetime("ADT Start Date"),
+        'move_date': fields.datetime("Last Movement Date"),
         'ref_doctor_ids': fields.many2many('res.partner', 'ref_doctor_spell_rel', 'spell_id', 'doctor_id', "Referring Doctors"),
         'con_doctor_ids': fields.many2many('res.partner', 'con_doctor_spell_rel', 'spell_id', 'doctor_id', "Consulting Doctors"),  
         'transfered_user_ids': fields.function(_get_transfered_user_ids, fnct_search=_transfered_user_ids_search, type='many2many', relation='res.users', string="Recently Transfered Access"),      
@@ -100,6 +103,11 @@ class nh_clinical_spell(orm.Model):
         else:        
             res = super(nh_clinical_spell, self).create(cr, uid, vals, context)
         return res
+
+    def write(self, cr, uid, ids, vals, context=None):
+        if 'location_id' in vals:
+            vals['move_date'] = dt.now().strftime(dtf)
+        return super(nh_clinical_spell, self).write(cr, uid, ids, vals, context=context)
 
     def get_activity_user_ids(self, cr, uid, activity_id, context=None):
         cr.execute("select location_id from nh_activity where id = %s" % activity_id)
@@ -140,5 +148,3 @@ class nh_clinical_spell(orm.Model):
         res = cr.dictfetchone()
         user_ids = list(res and set(res['user_ids']) or [])
         return user_ids
-    
-    
