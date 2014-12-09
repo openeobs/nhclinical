@@ -856,15 +856,16 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
 ######### activity types ###########        
     def adt_register(self, cr, uid, values={}):
         fake = self.next_seed_fake()
-        gender = fake.random_element(['M','F'])
+        gender = fake.random_element(['M', 'F'])
         v = {
-                'family_name': fake.last_name(),
-                'given_name': fake.first_name(),
-                'other_identifier': str(fake.random_int(min=1000001, max=9999999)),
-                'dob': fake.date_time_between(start_date="-80y", end_date="-10y").strftime("%Y-%m-%d %H:%M:%S"),
-                'gender': gender,
-                'sex': gender,
-                }
+            'family_name': fake.last_name(),
+            'given_name': fake.first_name(),
+            'other_identifier': str(fake.random_int(min=1000001, max=9999999)),
+            'patient_identifier': str(fake.random_int(min=1000000000, max=9999999999)),
+            'dob': fake.date_time_between(start_date="-80y", end_date="-10y").strftime("%Y-%m-%d %H:%M:%S"),
+            'gender': gender,
+            'sex': gender,
+        }
         v.update(values)
         return v
     
