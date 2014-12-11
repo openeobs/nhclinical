@@ -2,7 +2,7 @@ from openerp.osv import orm, fields
 from openerp.addons.nh_activity.activity import except_if
 import logging
 from datetime import datetime as dt, timedelta as td
-from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
+from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as dtf
 from openerp import SUPERUSER_ID
 _logger = logging.getLogger(__name__)
 
@@ -22,7 +22,10 @@ class nh_clinical_patient_move(orm.Model):
         'patient_id': fields.many2one('nh.clinical.patient', 'Patient', required=True),
         'reason': fields.text('Reason'),
         'from_location_id': fields.many2one('nh.clinical.location', 'Source Location'),
+        'out_date': fields.datetime('Transferred Out Date')
     }
+
+    _order = 'id desc'
 
     def name_get(self, cr, uid, ids, context=None):
         res = []
@@ -35,15 +38,23 @@ class nh_clinical_patient_move(orm.Model):
         patient_pool = self.pool['nh.clinical.patient']
         activity = activity_pool.browse(cr, uid, activity_id, context)
         except_if(not activity.location_id, 'There is no destination location!')
-        sql = """
-            select location_id from nh_activity
-            where data_model = 'nh.clinical.patient.move' and state = 'completed' and patient_id = %s
-            order by sequence desc limit 1
-        """ % activity.patient_id.id or 0
-        cr.execute(sql)
-        res = cr.fetchone()
-        from_location_id = res and res[0] or False
-        self.write(cr, uid, activity.data_ref.id, {'from_location_id': from_location_id})
+        last_movement_id = activity_pool.search(cr, uid, [
+            ['data_model', '=', 'nh.clinical.patient.move'],
+            ['state', '=', 'completed'],
+            ['patient_id', '=', activity.patient_id.id]], order='sequence desc', context=context)
+        last_movement_id = last_movement_id[0] if last_movement_id else False
+        last_movement = activity_pool.browse(cr, uid, last_movement_id, context=context) if last_movement_id else False
+        # sql = """
+        #     select location_id from nh_activity
+        #     where data_model = 'nh.clinical.patient.move' and state = 'completed' and patient_id = %s
+        #     order by sequence desc limit 1
+        # """ % activity.patient_id.id or 0
+        # cr.execute(sql)
+        # res = cr.fetchone()
+        # from_location_id = res and res[0] or False
+        if last_movement:
+            self.write(cr, uid, last_movement.data_ref.id, {'out_date': dt.now().strftime(dtf)}, context=context)
+        self.write(cr, uid, activity.data_ref.id, {'from_location_id': last_movement.location_id.id if last_movement else False})
         patient_pool.write(cr, uid, activity.data_ref.patient_id.id, {'current_location_id': activity.data_ref.location_id.id}, context)
         super(nh_clinical_patient_move, self).complete(cr, uid, activity_id, context)
         return {}
