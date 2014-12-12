@@ -526,6 +526,7 @@ class nh_activity_data(orm.AbstractModel):
                   msg="activity of type '%s' can not be unassigned in state '%s'" % (
                   activity.data_model, activity.state))
         except_if(not activity.user_id, msg="activity is not assigned yet!")
+        except_if(uid != activity.user_id.id, msg="only the activity owner can unassign it!")
         activity_pool.write(cr, uid, activity_id, {'user_id': False}, context)
         _logger.debug("activity '%s', activity.id=%s unassigned" % (activity.data_model, activity.id))
         return {}
