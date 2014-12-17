@@ -485,14 +485,6 @@ class nh_clinical_patient(osv.Model):
         rec_id = super(nh_clinical_patient, self).create(cr, uid, vals, context)
         return rec_id
 
-    def read(self, cr, uid, ids, fields=None, context=None, load='_classic_read'):
-        res = super(nh_clinical_patient, self).read(cr, uid, ids, fields=fields, context=context, load=load)
-        if not fields or 'patient_identifier' in fields:
-            for r in res:
-                if len(r['patient_identifier']) == 10:
-                    r['patient_identifier'] = r['patient_identifier'][0:3] + ' ' + r['patient_identifier'][3:6] + ' ' + r['patient_identifier'][6:10]
-        return res
-
 
 class mail_message(osv.Model):
     _name = 'mail.message'
