@@ -8,7 +8,7 @@
     'description': """    """,
     'author': 'Neova Health',
     'website': 'http://www.neovahealth.co.uk/',
-    'depends': ['mail', 'nh_base'],
+    'depends': ['mail', 'nh_odoo_fixes'],
     'data': [
              'views/activity_view.xml',           
              'security/ir.model.access.csv'],
