@@ -408,7 +408,7 @@ class nh_clinical_adt_patient_transfer(orm.Model):
             'creator_id': activity_id
         }, {
             'patient_id': transfer_activity.patient_id.id,
-            'location_id': transfer_activity.data_ref.location_id.pos_id.lot_admission_id.id},
+            'location_id': transfer_activity.data_ref.location_id.id},
             context=context)
         res[move_pool._name] = move_activity_id
         activity_pool.complete(cr, SUPERUSER_ID, move_activity_id, context)
@@ -646,7 +646,7 @@ class nh_clinical_adt_spell_update(orm.Model):
         move_activity_id = move_pool.create_activity(cr, SUPERUSER_ID,
             {'parent_id': spell_activity_id, 'creator_id': activity_id},
             {'patient_id': update_activity.data_ref.patient_id.id,
-             'location_id': update_activity.data_ref.pos_id.lot_admission_id.id},
+             'location_id': update_activity.data_ref.suggested_location_id.id},
             context=context)
         res[move_pool._name] = move_activity_id
         activity_pool.complete(cr, SUPERUSER_ID, move_activity_id, context)
@@ -738,7 +738,7 @@ class nh_clinical_adt_patient_cancel_discharge(orm.Model):
                 move_activity_id = move_pool.create_activity(cr, SUPERUSER_ID,
                     {'parent_id': spell_activity_id, 'creator_id': activity_id},
                     {'patient_id': cancel_activity.data_ref.patient_id.id,
-                     'location_id': cancel_activity.data_ref.last_location_id.pos_id.lot_admission_id.id},
+                     'location_id': cancel_activity.data_ref.last_location_id.id},
                     context=context)
                 res[move_pool._name] = move_activity_id
                 activity_pool.complete(cr, SUPERUSER_ID, move_activity_id, context)
@@ -748,7 +748,7 @@ class nh_clinical_adt_patient_cancel_discharge(orm.Model):
             move_activity_id = move_pool.create_activity(cr, SUPERUSER_ID,
                 {'parent_id': spell_activity_id, 'creator_id': activity_id},
                 {'patient_id': cancel_activity.data_ref.patient_id.id,
-                 'location_id': cancel_activity.data_ref.last_location_id.pos_id.lot_admission_id.id},
+                 'location_id': cancel_activity.data_ref.last_location_id.id},
                 context=context)
             res[move_pool._name] = move_activity_id
             activity_pool.complete(cr, SUPERUSER_ID, move_activity_id, context)
@@ -807,7 +807,7 @@ class nh_clinical_adt_patient_cancel_transfer(orm.Model):
             'creator_id': activity_id
         }, {
             'patient_id': cancel_activity.data_ref.patient_id.id,
-            'location_id': cancel_activity.data_ref.last_location_id.pos_id.lot_admission_id.id},
+            'location_id': cancel_activity.data_ref.last_location_id.id},
             context=context)
         res[move_pool._name] = move_activity_id
         activity_pool.complete(cr, SUPERUSER_ID, move_activity_id, context)

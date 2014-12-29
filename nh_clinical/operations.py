@@ -47,6 +47,7 @@ class nh_clinical_patient_move(orm.Model):
         last_movement = activity_pool.browse(cr, uid, last_movement_id, context=context) if last_movement_id else False
         self.write(cr, uid, activity.data_ref.id, {'from_location_id': last_movement.data_ref.location_id.id if last_movement else False})
         patient_pool.write(cr, uid, activity.data_ref.patient_id.id, {'current_location_id': activity.data_ref.location_id.id}, context)
+        activity_pool.write(cr, uid, activity.parent_id.id, {'location_id': activity.data_ref.location_id.id}, context)
 
         update_out_date_movement_ids = []
         last_bed_movement_id = self.search(cr, uid, [
