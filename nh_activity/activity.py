@@ -214,7 +214,16 @@ class nh_activity(orm.Model):
             _logger.debug("Sequence set to: %s" % sequence)    
         res = super(nh_activity, self).write(cr, uid, ids, vals, context)
         return res
-    
+
+    def get_recursive_created_ids(self, cr, uid, activity_id, context=None):
+        activity = self.browse(cr, uid, activity_id, context=context)
+        if not activity.created_ids:
+            return [activity_id]
+        else:
+            created_ids = [activity_id]
+            for created in activity.created_ids:
+                created_ids += self.get_recursive_created_ids(cr, uid, created.id, context=context)
+            return created_ids
     
     def activity_rank_map(self, cr, uid, 
                         partition_by="user_id", where=None, 
