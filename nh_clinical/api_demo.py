@@ -369,12 +369,12 @@ class nh_clinical_api_demo(orm.AbstractModel):
         else:           
             return api.browse(cr, uid, 'nh.activity', placement_activity_id)     
     
-    def greenford_ews(self, cr, uid, bed_codes=[], ews_count=3):
+    def submit_ews_observations(self, cr, uid, bed_codes=[], ews_count=3):
         api = self.pool['nh.clinical.api']
-        imd_ids = api.search(cr, uid, 'ir.model.data', [['model','=','nh.clinical.pos'], ['name','ilike','%hospital%']])
+        imd_ids = api.search(cr, uid, 'ir.model.data', [['model', '=', 'nh.clinical.pos'], ['name', 'ilike', '%hospital%']])
         pos = api.read(cr, uid, 'ir.model.data', imd_ids, ['res_id'])
         if not pos:
-            print "POS with xmlid='nhc_def_conf_pos_hospital' is not found. Exiting..."
+            print "POS hospital is not found. Exiting..."
             exit(1) 
         pos_id = pos[0]['res_id']    
         print bed_codes
@@ -384,7 +384,7 @@ class nh_clinical_api_demo(orm.AbstractModel):
             beds = api.location_map(cr, uid, codes=bed_codes)
         #setting up admin as a nurse
 
-        imd_ids = api.search(cr, uid, 'ir.model.data', [['model','=','res.groups'], ['name','=','group_nhc_nurse']])
+        imd_ids = api.search(cr, uid, 'ir.model.data', [['model', '=', 'res.groups'], ['name', '=', 'group_nhc_nurse']])
         nurse_group_id = api.read(cr, uid, 'ir.model.data', imd_ids[0], ['res_id'])['res_id']        
         api.write(cr, uid, 'res.users', SUPERUSER_ID, {'groups_id': [(4, nurse_group_id)]})
         nurse_uid = SUPERUSER_ID        
