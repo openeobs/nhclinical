@@ -390,10 +390,10 @@ class nh_clinical_api_demo(orm.AbstractModel):
         nurse_uid = SUPERUSER_ID        
         for bed_id, bed_data in beds.items():
             if not bed_data['patient_ids']:
-                print "Patient is not placed into bed '%s'. Skipping..." % bed_data['code']
+                # Patient is not placed into bed. Skipping...
+                continue
             else:
                 patient_id = bed_data['patient_ids'][0]
-                print "Patient id: %s placed into bed '%s'. Applying EWS..." % (patient_id, bed_data['code']) 
                 ews_activities = api.activity_map(cr, uid,
                                                   data_models=['nh.clinical.patient.observation.ews'],
                                                   patient_ids=[patient_id],
@@ -403,7 +403,6 @@ class nh_clinical_api_demo(orm.AbstractModel):
                     for ews in ews_activities:
                         api.assign(cr, uid, ews['id'], nurse_uid)
                         api.submit_complete(cr, nurse_uid, ews['id'], self.demo_data(cr, uid, 'nh.clinical.patient.observation.ews'))
-                        #api.unassign(cr, uid, ews['id'])
                     ews_activities = api.activity_map(cr, uid, 
                                                   data_models=['nh.clinical.patient.observation.ews'],
                                                   patient_ids=[patient_id],
