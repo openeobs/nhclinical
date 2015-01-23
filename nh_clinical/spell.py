@@ -14,7 +14,7 @@ class nh_clinical_spell(orm.Model):
     
     _rec_name = 'code'
     
-    def _get_transfered_user_ids(self, cr, uid, ids, field, arg, context=None):   
+    def _get_transferred_user_ids(self, cr, uid, ids, field, arg, context=None):   
         res = {spell_id: False for spell_id in ids} 
         sql = """
             with 
@@ -71,11 +71,11 @@ class nh_clinical_spell(orm.Model):
         [res.update({row['spell_id']: list(set(row['user_ids']))}) for row in rows]
         return res
     
-    def _transfered_user_ids_search(self, cr, uid, obj, name, args, domain=None, context=None):
+    def _transferred_user_ids_search(self, cr, uid, obj, name, args, domain=None, context=None):
         arg1, op, arg2 = args[0]
         arg2 = isinstance(arg2, (list, tuple)) and arg2 or [arg2]
         all_ids = self.search(cr, uid, [])
-        spell_user_map = self._get_transfered_user_ids(cr, uid, all_ids, 'transfered_user_ids', None)
+        spell_user_map = self._get_transferred_user_ids(cr, uid, all_ids, 'transferred_user_ids', None)
         spell_ids = [k for k, v in spell_user_map.items() if set(v or []) & set(arg2 or [])]
         
         return [('id', 'in', spell_ids)]   
@@ -89,11 +89,11 @@ class nh_clinical_spell(orm.Model):
         'move_date': fields.datetime("Last Movement Date"),
         'ref_doctor_ids': fields.many2many('res.partner', 'ref_doctor_spell_rel', 'spell_id', 'doctor_id', "Referring Doctors"),
         'con_doctor_ids': fields.many2many('res.partner', 'con_doctor_spell_rel', 'spell_id', 'doctor_id', "Consulting Doctors"),  
-        'transfered_user_ids': fields.function(_get_transfered_user_ids, fnct_search=_transfered_user_ids_search, type='many2many', relation='res.users', string="Recently Transfered Access"),      
+        'transferred_user_ids': fields.function(_get_transferred_user_ids, fnct_search=_transferred_user_ids_search, type='many2many', relation='res.users', string="Recently Transfered Access"),      
     }
     _defaults = {
-         'code': lambda s, cr, uid, c: s.pool['ir.sequence'].next_by_code(cr, uid, 'nh.clinical.spell', context=c),
-     }
+        'code': lambda s, cr, uid, c: s.pool['ir.sequence'].next_by_code(cr, uid, 'nh.clinical.spell', context=c),
+    }
 
     def create(self, cr, uid, vals, context=None):
         current_spell_id = self.search(cr, uid, [('patient_id','=',vals['patient_id']),('state','in',['started'])], context)

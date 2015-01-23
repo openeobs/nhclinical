@@ -472,7 +472,7 @@ class nh_clinical_patient(osv.Model):
         'middle_names': fields.char('Middle Name(s)', size=200),
         'family_name': fields.char('Family Name', size=200, select=True),
         'full_name': fields.function(_get_name, type='text', string="Full Name"),
-        }
+    }
 
     _defaults = {
         'active': True,
