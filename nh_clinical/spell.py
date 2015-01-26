@@ -96,7 +96,8 @@ class nh_clinical_spell(orm.Model):
     }
 
     def create(self, cr, uid, vals, context=None):
-        current_spell_id = self.search(cr, uid, [('patient_id','=',vals['patient_id']),('state','in',['started'])], context)
+        current_spell_id = self.search(cr, uid, [['patient_id', '=', vals['patient_id']],
+                                                 ['state', '=', 'started']], context=context)
         if current_spell_id:
             res = current_spell_id[0]
             _logger.warn("Started spell already exists! Current spell ID=%s returned." % current_spell_id[0])

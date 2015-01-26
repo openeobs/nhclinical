@@ -223,7 +223,7 @@ class nh_activity_data(orm.AbstractModel):
         activity_pool = self.pool['nh.activity']
         api_pool = self.pool['nh.clinical.api']
         if self._POLICY.get('activities', []):
-            activity = activity_pool.browse(cr, uid, activity_id, context)
+            activity = activity_pool.browse(cr, SUPERUSER_ID, activity_id, context)
             spell_activity_id = api_pool.get_patient_spell_activity_id(cr, SUPERUSER_ID, activity.data_ref.patient_id.id, context=context)
         else:
             return True
