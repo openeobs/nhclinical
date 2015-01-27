@@ -499,3 +499,19 @@ class mail_message(osv.Model):
         else:
             return '%s <%s>' % (this.name, 'No email')
 
+
+class nh_clinical_specialty(orm.Model):
+
+    _name = 'nh.clinical.specialty'
+    _description = 'A Clinical Specialty'
+
+    _specialty_groups = [
+        ['surgical', 'Surgical Specialties'], ['medical', 'Medical Specialties'], ['psychiatry', 'Psychiatry'],
+        ['radiology', 'Radiology'], ['pathology', 'Pathology'], ['other', 'Other']]
+
+    _columns = {
+        'name': fields.char('Main Specialty Title', size=150),
+        'code': fields.integer('Code'),
+        'group': fields.selection(_specialty_groups, 'Specialty Group')
+    }
+
