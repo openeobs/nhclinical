@@ -443,6 +443,17 @@ class nh_clinical_patient(osv.Model):
 
     _inherits = {'res.partner': 'partner_id'}
 
+    _gender = [['BOTH', 'Both'], ['F', 'Female'], ['I', 'Intermediate'],
+               ['M', 'Male'], ['NSP', 'Not Specified'], ['U', 'Unknown']]
+    _ethnicity = [
+        ['A', 'White - British'], ['B', 'White - Irish'], ['C', 'White - Other background'],
+        ['D', 'Mixed - White and Black Caribbean'], ['E', 'Mixed - White and Black African'],
+        ['F', 'Mixed - White and Asian'], ['G', 'Mixed - Other background'], ['H', 'Asian - Indian'],
+        ['J', 'Asian - Pakistani'], ['K', 'Asian - Bangladeshi'], ['L', 'Asian - Other background'],
+        ['M', 'Black - Caribbean'], ['N', 'Black - African'], ['P', 'Black - Other background'], ['R', 'Chinese'],
+        ['S', 'Other ethnic group'], ['Z', 'Not stated']
+    ]
+
     def _get_fullname(self, vals):
 
         #TODO: Make this better and support comma dependency / format etc
@@ -461,9 +472,9 @@ class nh_clinical_patient(osv.Model):
         'current_location_id': fields.many2one('nh.clinical.location', 'Current Location'),
         'partner_id': fields.many2one('res.partner', 'Partner', required=True, ondelete='restrict'),
         'dob': fields.datetime('Date Of Birth'),  # Partner birthdate is NOT a date.
-        'sex': fields.char('Sex', size=1),
-        'gender': fields.char('Gender', size=1),
-        'ethnicity': fields.char('Ethnicity', size=20),
+        'sex': fields.selection(_gender, 'Sex'),
+        'gender': fields.selection(_gender, 'Gender'),
+        'ethnicity': fields.selection(_ethnicity, 'Ethnicity'),
         'patient_identifier': fields.char('Patient Identifier', size=100, select=True, help="NHS Number"),
         'other_identifier': fields.char('Other Identifier', size=100, required=True, select=True,
                                         help="Hospital Number"),
@@ -476,7 +487,9 @@ class nh_clinical_patient(osv.Model):
 
     _defaults = {
         'active': True,
-        'name': 'unknown'
+        'name': 'unknown',
+        'gender': 'NSP',
+        'ethnicity': 'Z'
     }
 
     def create(self, cr, uid, vals, context=None):
