@@ -468,6 +468,20 @@ class nh_clinical_patient(osv.Model):
             result[r['id']] = self._get_fullname(r)
         return result
 
+    def _check_hospital_number(self, cr, uid, hospital_number, context=None):
+        domain = [('other_identifier', '=', hospital_number)]
+        return self.search(cr, uid, domain, context=context)
+
+    def _check_nhs_number(self, cr, uid, nhs_number, data, context=None):
+        if not nhs_number:
+            return False
+        domain = [('patient_identifier', '=', nhs_number)]
+        patient_id = self.search(cr, uid, domain, context=context)
+        if patient_id:
+            return self.write(cr, uid, patient_id[0], data, context=context)
+        else:
+            return False
+
     _columns = {
         'current_location_id': fields.many2one('nh.clinical.location', 'Current Location'),
         'partner_id': fields.many2one('res.partner', 'Partner', required=True, ondelete='restrict'),
