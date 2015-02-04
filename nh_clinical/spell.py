@@ -75,7 +75,7 @@ class nh_clinical_spell(orm.Model):
     
     def _transferred_user_ids_search(self, cr, uid, obj, name, args, domain=None, context=None):
         arg1, op, arg2 = args[0]
-        arg2 = isinstance(arg2, (list, tuple)) and arg2 or [arg2]
+        arg2 = arg2 if isinstance(arg2, (list, tuple)) else [arg2]
         all_ids = self.search(cr, uid, [])
         spell_user_map = self._get_transferred_user_ids(cr, uid, all_ids, 'transferred_user_ids', None)
         spell_ids = [k for k, v in spell_user_map.items() if set(v or []) & set(arg2 or [])]

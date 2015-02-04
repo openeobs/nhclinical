@@ -24,8 +24,7 @@ class nh_clinical_patient_move(orm.Model):
         'location_name': fields.related('location_id', 'full_name', type='char', size=150, string='Destination Location'),
         'patient_id': fields.many2one('nh.clinical.patient', 'Patient', required=True),
         'reason': fields.text('Reason'),
-        'from_location_id': fields.many2one('nh.clinical.location', 'Source Location'),
-        'out_date': fields.datetime('Transferred Out Date')
+        'from_location_id': fields.many2one('nh.clinical.location', 'Source Location')
     }
 
     _order = 'id desc'
@@ -49,49 +48,9 @@ class nh_clinical_patient_move(orm.Model):
         last_movement_id = last_movement_id[0] if last_movement_id else False
         last_movement = activity_pool.browse(cr, uid, last_movement_id, context=context) if last_movement_id else False
         self.write(cr, uid, activity.data_ref.id, {'from_location_id': last_movement.data_ref.location_id.id if last_movement else False})
+        # FIXME having both current_location_id in PATIENT and location_id in SPELL seems redundant.
         patient_pool.write(cr, uid, activity.data_ref.patient_id.id, {'current_location_id': activity.data_ref.location_id.id}, context)
         activity_pool.write(cr, uid, activity.parent_id.id, {'location_id': activity.data_ref.location_id.id}, context)
-
-        update_out_date_movement_ids = []
-
-        #FIXME: THIS CALLS EVERY SINGLE ACTIVITY
-        last_bed_movement_id = self.search(cr, uid, [
-            ['location_id', '!=', activity.data_ref.location_id.id],
-            ['location_id.usage', '=', 'bed'],
-            ['activity_id.patient_id', '=', activity.patient_id.id],
-            ['activity_id.state', '=', 'completed'],
-            ['out_date', '=', False]
-        ], context=context)
-        update_out_date_movement_ids += last_bed_movement_id
-        if activity.data_ref.location_id.usage != 'bed':
-            last_room_movement_id = self.search(cr, uid, [
-                ['location_id', '!=', activity.data_ref.location_id.id],
-                ['location_id.usage', '=', 'room'],
-                ['activity_id.patient_id', '=', activity.patient_id.id],
-                ['activity_id.state', '=', 'completed'],
-                ['out_date', '=', False]
-            ], context=context)
-            update_out_date_movement_ids += last_room_movement_id
-        if activity.data_ref.location_id.usage == 'bay' or activity.data_ref.location_id.usage == 'ward':
-            last_bay_movement_id = self.search(cr, uid, [
-                ['location_id', '!=', activity.data_ref.location_id.id],
-                ['location_id.usage', '=', 'bay'],
-                ['activity_id.patient_id', '=', activity.patient_id.id],
-                ['activity_id.state', '=', 'completed'],
-                ['out_date', '=', False]
-            ], context=context)
-            update_out_date_movement_ids += last_bay_movement_id
-        if activity.data_ref.location_id.usage == 'ward':
-            last_ward_movement_id = self.search(cr, uid, [
-                ['location_id', '!=', activity.data_ref.location_id.id],
-                ['location_id.usage', '=', 'ward'],
-                ['activity_id.patient_id', '=', activity.patient_id.id],
-                ['activity_id.state', '=', 'completed'],
-                ['out_date', '=', False]
-            ], context=context)
-            update_out_date_movement_ids += last_ward_movement_id
-        if update_out_date_movement_ids:
-            self.write(cr, uid, update_out_date_movement_ids, {'out_date': dt.now().strftime(dtf)}, context=context)
         super(nh_clinical_patient_move, self).complete(cr, uid, activity_id, context)
         return {}
 
