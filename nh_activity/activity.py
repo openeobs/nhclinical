@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 from openerp.osv import orm, fields, osv
 from datetime import datetime as dt
-from dateutil.relativedelta import relativedelta as rd
 from openerp import SUPERUSER_ID
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
-import psycopg2
-import logging
 
+import logging
 _logger = logging.getLogger(__name__)
 
 
@@ -51,6 +49,7 @@ def data_model_event(callback=None):
                   for h in handlers if h['when'] == 'before']
             
             f(*args, **kwargs) # FIXME: should we execute this f at all?
+            print 'RUNNING FUNCTION: %s' % ("%s.%s(*args[1:], **kwargs)" % (data_model, f.__name__))
             res = eval("data_model.%s(*args[1:], **kwargs)" % f.__name__)
             
             if handlers: # run after handlers
