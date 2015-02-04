@@ -1,22 +1,19 @@
 from openerp.tests import common
-from datetime import datetime as dt
-from dateutil.relativedelta import relativedelta as rd
-from openerp import tools
-from openerp.tools import config 
-from openerp.osv import orm, fields, osv
+from openerp.tools import config
 
 import logging        
-from pprint import pprint as pp
+
 _logger = logging.getLogger(__name__)
 
 from faker import Faker
 fake = Faker()
 seed = fake.random_int(min=0, max=9999999)
+
+
 def next_seed():
     global seed
     seed += 1
     return seed
-
 
 
 class ActivityTest(common.SingleTransactionCase):
@@ -290,8 +287,7 @@ class ActivityTest(common.SingleTransactionCase):
             activity = activity_pool.browse(cr, uid, activity_id)
             self.assertTrue(activity.state == 'started', "activity.state != started ")
             self.assertTrue(activity.date_started, "activity.date_started is none ")
-            #import pdb; pdb.set_trace()
-        return res            
+        return res
 
     def complete(self, activity_id, **kwargs):
         res = False
@@ -305,8 +301,7 @@ class ActivityTest(common.SingleTransactionCase):
             activity = activity_pool.browse(cr, uid, activity_id)
             self.assertTrue(activity.state == 'completed', "activity.state != completed ")
             self.assertTrue(activity.date_terminated, "activity.date_terminated is none ")
-            #import pdb; pdb.set_trace()
-        return res             
+        return res
             
     def cancel(self, activity_id, **kwargs):
         res = False
@@ -320,8 +315,7 @@ class ActivityTest(common.SingleTransactionCase):
             activity = activity_pool.browse(cr, uid, activity_id)
             self.assertTrue(activity.state == 'cancelled', "activity.state != cancelled ")
             self.assertTrue(activity.date_terminated, "activity.date_terminated is none ")
-            #import pdb; pdb.set_trace()
-        return res              
+        return res
             
             
 

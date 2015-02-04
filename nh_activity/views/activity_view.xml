@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
-
             <record model="ir.ui.view" id="view_nh_activity_search">
                 <field name="name">NH Clinical activity Search View</field>
                 <field name="model">nh.activity</field>
@@ -40,18 +39,12 @@
                        <field name="date_started" />
                        <field name="date_terminated" />
 					   <field name="state" />
-					   
-					   <field name="is_schedule_allowed" invisible="1"/>
-					   <field name="is_start_allowed" invisible="1"/>
-					   <field name="is_submit_allowed" invisible="1"/>
-					   <field name="is_complete_allowed" invisible="1"/>
-					   <field name="is_cancel_allowed" invisible="1"/>
 
-               			<button name="schedule_act_window" type="object" string="Schedule" attrs="{'invisible': [('is_schedule_allowed','=',False)]}"/>
-               			<button name="start_act_window" type="object" string="Start" attrs="{'invisible': [('is_start_allowed','=',False)]}"/>
-           				<button name="submit_act_window" type="object" string="Submit" attrs="{'invisible': [('is_submit_allowed','=',False)]}"/>
-           				<button name="complete_act_window" type="object" string="Complete" attrs="{'invisible': [('is_complete_allowed','=',False)]}"/>
-           				<button name="cancel_act_window" type="object" string="Cancel" attrs="{'invisible': [('is_cancel_allowed','=',False)]}"/>   					   
+               			<button name="schedule_act_window" type="object" string="Schedule"/>
+               			<button name="start_act_window" type="object" string="Start"/>
+           				<button name="submit_act_window" type="object" string="Submit"/>
+           				<button name="complete_act_window" type="object" string="Complete"/>
+           				<button name="cancel_act_window" type="object" string="Cancel"/>
                     </tree>
                 </field>
             </record>              
@@ -61,19 +54,13 @@
                 <field name="arch" type="xml">
                     <form string="NH Clinical activity Form View" version="7.0">
                       <header>        
-					   <field name="is_schedule_allowed" invisible="1"/>
-					   <field name="is_start_allowed" invisible="1"/>
-					   <field name="is_submit_allowed" invisible="1"/>
-					   <field name="is_complete_allowed" invisible="1"/>
-					   <field name="is_cancel_allowed" invisible="1"/>
-
-               			<button name="schedule_act_window" type="object" string="Schedule" attrs="{'invisible': [('is_schedule_allowed','=',False)]}"/>
-               			<button name="start_act_window" type="object" string="Start" attrs="{'invisible': [('is_start_allowed','=',False)]}"/>
-           				<button name="submit_act_window" type="object" string="Submit" attrs="{'invisible': [('is_submit_allowed','=',False)]}"/>
-           				<button name="complete_act_window" type="object" string="Complete" attrs="{'invisible': [('is_complete_allowed','=',False)]}"/>
-           				<button name="cancel_act_window" type="object" string="Cancel" attrs="{'invisible': [('is_cancel_allowed','=',False)]}"/>     
+               			<button name="schedule_act_window" type="object" string="Schedule"/>
+               			<button name="start_act_window" type="object" string="Start"/>
+           				<button name="submit_act_window" type="object" string="Submit"/>
+           				<button name="complete_act_window" type="object" string="Complete"/>
+           				<button name="cancel_act_window" type="object" string="Cancel"/>
 							
-                    		<field name="state" widget="statusbar" statusbar_visible="draft,scheduled,started,completed,cancelled"/>
+                    		<field name="state" widget="statusbar" statusbar_visible="draft,started,completed,cancelled"/>
                       </header>
                       <sheet>
                       	    <group string="activity">

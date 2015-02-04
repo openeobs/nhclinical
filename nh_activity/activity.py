@@ -10,25 +10,10 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-def browse_domain(self, cr, uid, domain, limit=None, order=None, context=None):
-    ids = self.search(cr, uid, domain, limit=limit, order=order, context=context)
-    return self.browse(cr, uid, ids, context)
-
-
-orm.Model.browse_domain = browse_domain
-
-
-def read_domain(self, cr, uid, domain, fields=[], context=None):
-    ids = self.search(cr, uid, domain, context=context)
-    return self.read(cr, uid, ids, fields, context)
-
-
-orm.Model.read_domain = read_domain
-
-
 def except_if(test=True, cap="Exception!", msg="Message is not defined..."):
     if test:
         raise orm.except_orm(cap, msg)
+
 
 class Event(object):
     def __init__(self, **kwargs):
@@ -325,8 +310,8 @@ class nh_activity_data(orm.AbstractModel):
         return super(nh_activity_data, self).create(cr, uid, vals, context)
 
     def create_activity(self, cr, uid, vals_activity={}, vals_data={}, context=None):
-        assert isinstance(vals_activity, dict), "vals_activity must be a dict, found %" % type(vals_activity)
-        assert isinstance(vals_data, dict), "vals_data must be a dict, found %" % type(vals_data)
+        assert isinstance(vals_activity, dict), 'vals_activity must be a dict, found {}'.format(type(vals_activity))
+        assert isinstance(vals_data, dict), 'vals_data must be a dict, found {}'.format(type(vals_data))
         activity_pool = self.pool['nh.activity']
         vals_activity.update({'data_model': self._name})
         new_activity_id = activity_pool.create(cr, uid, vals_activity, context)
