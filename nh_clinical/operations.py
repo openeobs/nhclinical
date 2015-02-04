@@ -53,6 +53,8 @@ class nh_clinical_patient_move(orm.Model):
         activity_pool.write(cr, uid, activity.parent_id.id, {'location_id': activity.data_ref.location_id.id}, context)
 
         update_out_date_movement_ids = []
+
+        #FIXME: THIS CALLS EVERY SINGLE ACTIVITY
         last_bed_movement_id = self.search(cr, uid, [
             ['location_id', '!=', activity.data_ref.location_id.id],
             ['location_id.usage', '=', 'bed'],

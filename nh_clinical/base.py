@@ -14,31 +14,6 @@ class ir_model_access(orm.Model):
         }
 
 
-class nh_clinical_res_partner(orm.Model):
-    _inherit = 'res.partner'
-
-    _columns = {
-        'doctor': fields.boolean('Doctor', help="Check this box if this contact is a Doctor"),
-        'code': fields.char('Code', size=256),
-        }
-
-
-class nh_clinical_pos(orm.Model):
-    """ Clinical point of service """
-    _name = 'nh.clinical.pos'
-
-    _columns = {
-        'name': fields.char('Point of Service', size=100, required=True, select=True),
-        'code': fields.char('Code', size=256),
-        'location_id': fields.many2one('nh.clinical.location', 'POS Location', required=True),
-        'company_id': fields.many2one('res.company', 'Company'),
-        'lot_admission_id': fields.many2one('nh.clinical.location', 'Admission Location'),
-        'lot_discharge_id': fields.many2one('nh.clinical.location', 'Discharge Location'),
-        }
-
-    _sql_constraints = [('pos_code_uniq', 'unique(code)', 'The code for a location must be unique!')]
-
-
 class res_company(orm.Model):
     _name = 'res.company'
     _inherit = 'res.company'
@@ -47,13 +22,40 @@ class res_company(orm.Model):
         }
 
 
+class res_partner(orm.Model):
+    _name = 'res.partner'
+    _inherit = 'res.partner'
+
+    _columns = {
+        'doctor': fields.boolean('Doctor', help="Check this box if this contact is a Doctor"),
+        'code': fields.char('Code', size=256),
+    }
+
+    _defaults = {
+        'notify_email': lambda *args: 'none'
+    }
+
+    def create(self, cr, user, vals, context=None):
+        res_id = super(res_partner, self).create(cr, user, vals,
+                                                 context=dict(context or {}, mail_create_nosubscribe=True))
+        return res_id
+
+
 class res_users(orm.Model):
     _name = 'res.users'
     _inherit = 'res.users'
     _columns = {
         'pos_id': fields.many2one('nh.clinical.pos', 'POS'),
-        'location_ids': fields.many2many('nh.clinical.location', 'user_location_rel', 'user_id', 'location_id', 'Parent Locations of Responsibility'),
+        'location_ids': fields.many2many('nh.clinical.location',
+                                         'user_location_rel',
+                                         'user_id',
+                                         'location_id',
+                                         'Parent Locations of Responsibility'),
         }
+
+    def create(self, cr, user, vals, context=None):
+        return super(res_users, self).create(cr, user, vals,
+                                             context=dict(context or {}, mail_create_nosubscribe=True))
 
     def get_all_responsibility_location_ids(self, cr, uid, user_id, context=None):
         location_pool = self.pool['nh.clinical.location']
@@ -61,8 +63,6 @@ class res_users(orm.Model):
         for user_location_id in self.browse(cr, uid, user_id, context).location_ids:
             location_ids.extend( location_pool.search(cr, uid, [['id', 'child_of', user_location_id.id]]) )
         return location_ids
-
-
 
     def write(self, cr, uid, ids, values, context=None):
         res = super(res_users, self).write(cr, uid, ids, values, context)
@@ -82,9 +82,25 @@ class res_groups(orm.Model):
             api = self.pool['nh.clinical.api']
             user_ids = []
             for group in self.browse(cr, uid, isinstance(ids, (list, tuple)) and ids or [ids]):
-                user_ids.extend([u.id for u in  group.users])
+                user_ids.extend([u.id for u in group.users])
             api.update_activity_users(cr, uid, user_ids)
         return res
+
+
+class nh_clinical_pos(orm.Model):
+    """ Clinical point of service """
+    _name = 'nh.clinical.pos'
+
+    _columns = {
+        'name': fields.char('Point of Service', size=100, required=True, select=True),
+        'code': fields.char('Code', size=256),
+        'location_id': fields.many2one('nh.clinical.location', 'POS Location', required=True),
+        'company_id': fields.many2one('res.company', 'Company'),
+        'lot_admission_id': fields.many2one('nh.clinical.location', 'Admission Location'),
+        'lot_discharge_id': fields.many2one('nh.clinical.location', 'Discharge Location'),
+        }
+
+    _sql_constraints = [('pos_code_uniq', 'unique(code)', 'The code for a location must be unique!')]
 
 
 class nh_clinical_context(orm.Model):
@@ -508,10 +524,11 @@ class nh_clinical_patient(osv.Model):
     def create(self, cr, uid, vals, context=None):
         if not vals.get('name'):
             vals.update({'name': self._get_fullname(vals)})
-        rec_id = super(nh_clinical_patient, self).create(cr, uid, vals, context)
-        return rec_id
+        return super(nh_clinical_patient, self).create(cr, uid, vals,
+                                                       context=dict(context or {}, mail_create_nosubscribe=True))
 
 
+#FIXME: This is here to prevent mail message from complaining when creating a user
 class mail_message(osv.Model):
     _name = 'mail.message'
     _inherit = 'mail.message'

@@ -129,7 +129,10 @@ class nh_clinical_adt_patient_admit(orm.Model):
         res = {}
         api_pool = self.pool['nh.clinical.api']
         user = self.pool['res.users'].browse(cr, uid, uid, context)
-        except_if(not user.pos_id or not user.pos_id.location_id, msg="POS location is not set for user.login = %s!" % user.login)
+
+        if not user.pos_id or not user.pos_id.location_id:
+            raise orm.except_orm('Exception!', msg="POS location is not set for user.login = %s!" % user.login)
+
         # location validation
         suggested_location = api_pool.get_locations(cr, SUPERUSER_ID, codes=[vals['location']], pos_ids=[user.pos_id.id])
         if not suggested_location:
@@ -148,6 +151,7 @@ class nh_clinical_adt_patient_admit(orm.Model):
         patient_pool = self.pool['nh.clinical.patient']
         patient_id = patient_pool.search(cr, SUPERUSER_ID, [('other_identifier', '=', vals['other_identifier'])])
         except_if(not patient_id, msg="Patient not found!")
+
         if len(patient_id) > 1:
             _logger.warn("More than one patient found with 'other_identifier' = %s! Passed patient_id = %s" 
                                     % (vals['other_identifier'], patient_id[0]))
@@ -185,7 +189,7 @@ class nh_clinical_adt_patient_admit(orm.Model):
                 ref_doctor_ids and vals_copy.update({'ref_doctor_ids': [[4, id] for id in ref_doctor_ids]})
                 con_doctor_ids and vals_copy.update({'con_doctor_ids': [[4, id] for id in con_doctor_ids]})
             except:
-                _logger.warn("Can't evaluate 'doctors': %s" % (vals['doctors']))   
+                _logger.warn("Can't evaluate 'doctors': %s" % (vals['doctors']))
         super(nh_clinical_adt_patient_admit, self).submit(cr, uid, activity_id, vals_copy, context)
         return res 
 
@@ -348,7 +352,6 @@ class nh_clinical_adt_patient_transfer(orm.Model):
         other_identifier and domain.append(('other_identifier', '=', other_identifier))
         patient_identifier and domain.append(('patient_identifier', '=', patient_identifier))
         domain = domain and ['|']*(len(domain)-1) + domain
-        print "transfer domain: ", domain
         patient_id = patient_pool.search(cr, uid, domain)
         except_if(not patient_id, msg="Patient not found!")
 
