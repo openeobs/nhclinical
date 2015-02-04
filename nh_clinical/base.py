@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-import logging
-
 from openerp.osv import orm, fields, osv
 from openerp import SUPERUSER_ID
 
+import logging
 _logger = logging.getLogger(__name__)
 
 
@@ -13,24 +12,13 @@ class ir_model_access(orm.Model):
         'perm_responsibility': fields.boolean('NH Clinical Activity Responsibility'),
         }
 
-
-class res_company(orm.Model):
-    _name = 'res.company'
-    _inherit = 'res.company'
-    _columns = {
-        'pos_ids': fields.one2many('nh.clinical.pos', 'company_id', 'Points of Service'),
-        }
-
-
+# Note - This must go before res_company otherwise a new database will not find the new columns
 class res_partner(orm.Model):
-    _name = 'res.partner'
     _inherit = 'res.partner'
-
     _columns = {
         'doctor': fields.boolean('Doctor', help="Check this box if this contact is a Doctor"),
         'code': fields.char('Code', size=256),
     }
-
     _defaults = {
         'notify_email': lambda *args: 'none'
     }
@@ -39,6 +27,14 @@ class res_partner(orm.Model):
         res_id = super(res_partner, self).create(cr, user, vals,
                                                  context=dict(context or {}, mail_create_nosubscribe=True))
         return res_id
+
+
+class res_company(orm.Model):
+    _name = 'res.company'
+    _inherit = 'res.company'
+    _columns = {
+        'pos_ids': fields.one2many('nh.clinical.pos', 'company_id', 'Points of Service'),
+    }
 
 
 class res_users(orm.Model):
@@ -571,4 +567,3 @@ class nh_clinical_specialty(orm.Model):
         'code': fields.integer('Code'),
         'group': fields.selection(_specialty_groups, 'Specialty Group')
     }
-
