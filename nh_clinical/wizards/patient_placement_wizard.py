@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from openerp.osv import orm, fields, osv
-from openerp.addons.nh_activity.activity import except_if
-import logging        
-_logger = logging.getLogger(__name__)
+import logging
 
+from openerp.osv import orm, fields
+
+
+_logger = logging.getLogger(__name__)
 
 
 class nh_clinical_patient_placement_wizard(orm.TransientModel):
@@ -13,7 +14,6 @@ class nh_clinical_patient_placement_wizard(orm.TransientModel):
         'placement_ids': fields.many2many('nh.clinical.patient.placement', 'placement_wiz_rel', 'placement_id', 'wiz_id', 'Placements'),
         'recent_placement_ids': fields.many2many('nh.clinical.patient.placement', 'recent_placement_wiz_rel', 'placement_id', 'wiz_id', 'Recent Placements'),
     }
-    
     
     def _get_placement_ids(self, cr, uid, context=None):
         domain=[('state','in',['draft','scheduled','started'])]
@@ -28,9 +28,9 @@ class nh_clinical_patient_placement_wizard(orm.TransientModel):
         return placement_ids    
     
     _defaults = {
-         'placement_ids': _get_placement_ids,
-         'recent_placement_ids': _get_recent_placement_ids,
-     }
+        'placement_ids': _get_placement_ids,
+        'recent_placement_ids': _get_recent_placement_ids,
+    }
     
     def apply(self, cr, uid, ids, context=None):
         activity_pool = self.pool['nh.activity']
@@ -44,11 +44,10 @@ class nh_clinical_patient_placement_wizard(orm.TransientModel):
                                   'recent_placement_ids': [(6,0,self._get_recent_placement_ids(cr, uid))]})
         
         aw = {'type': 'ir.actions.act_window',
-            'res_model': self._name,
-            'res_id': ids[0],
-            'view_type': "form",
-            'view_mode': "form",
-            'target': "inline",
-            
-            }
+              'res_model': self._name,
+              'res_id': ids[0],
+              'view_type': "form",
+              'view_mode': "form",
+              'target': "inline",
+              }
         return aw

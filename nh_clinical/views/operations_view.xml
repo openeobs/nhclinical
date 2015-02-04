@@ -12,9 +12,8 @@
                 </form>
             </field>
         </record>
+
         <!-- PLACEMENT VIEWS  -->
-
-
         <record model="ir.ui.view" id="view_patient_placement_complete">
             <field name="name">Patient Placement</field>
             <field name="model">nh.clinical.patient.placement</field>
@@ -29,8 +28,6 @@
                 </form>
             </field>
         </record>
-
-
         <record model="ir.ui.view" id="view_patient_placement_search">
             <field name="name">Patient Placement Search View</field>
             <field name="model">nh.clinical.patient.placement</field>

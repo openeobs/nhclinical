@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
-from openerp.osv import orm, fields, osv
 from datetime import datetime as dt, timedelta as td
-from dateutil.relativedelta import relativedelta as rd
-from openerp import SUPERUSER_ID
-from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
-import psycopg2
 import logging
 
+from openerp.osv import orm, fields
+from openerp import SUPERUSER_ID
+from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
+
 _logger = logging.getLogger(__name__)
+
 
 def list2sqlstr(lst):
     res = []
@@ -20,6 +20,7 @@ def list2sqlstr(lst):
         elif l is None:
             res.append("0")
     return ",".join(res)
+
 
 class nh_cancel_reason(orm.Model):
     """cancellation reason
@@ -109,8 +110,10 @@ class nh_activity_data(orm.AbstractModel):
         _logger.debug("Calculating pos_id for activity.id=%s" % (activity_id))        
         pos_id = False
         api_pool = self.pool['nh.clinical.api']
-        data = self.browse_domain(cr, uid, [('activity_id', '=', activity_id)])[0]
-        # 10
+
+        data_ids = self.search(cr, uid, [('activity_id', '=', activity_id)])
+        data = self.browse(cr, uid, data_ids, context)[0]
+
         if 'pos_id' in self._columns.keys():
             pos_id = data.pos_id and data.pos_id.id or False
         if pos_id:
@@ -118,10 +121,7 @@ class nh_activity_data(orm.AbstractModel):
             return pos_id
         location_id = self.get_activity_location_id(cr, uid, activity_id)
         patient_id = self.get_activity_patient_id(cr, uid, activity_id)
-#         # 15
-#         if data.activity_id.parent_id:
-#             pos_id = data.activity_id.parent_id.pos_id.id
-        # 20
+
         if not location_id:
             patient_map = api_pool.patient_map(cr, uid, patient_ids=[patient_id]).get(patient_id)  
             location_id = patient_map and patient_map['location_id']
@@ -146,7 +146,9 @@ class nh_activity_data(orm.AbstractModel):
         """
         """
         device_id = False
-        data = self.browse_domain(cr, uid, [('activity_id', '=', activity_id)])[0]
+        data_ids = self.search(cr, uid, [('activity_id', '=', activity_id)])
+        data = self.browse(cr, uid, data_ids, context)[0]
+
         if 'device_id' in self._columns.keys():
             device_id = data.device_id and data.device_id.id or False
         return device_id
@@ -159,7 +161,9 @@ class nh_activity_data(orm.AbstractModel):
         2. 
         """
         location_id = False
-        data = self.browse_domain(cr, uid, [('activity_id', '=', activity_id)])[0]
+        data_ids = self.search(cr, uid, [('activity_id', '=', activity_id)])
+        data = self.browse(cr, uid, data_ids, context)[0]
+
         if 'location_id' in self._columns.keys():
             location_id = data.location_id and data.location_id.id or False
         if not location_id:
@@ -168,12 +172,13 @@ class nh_activity_data(orm.AbstractModel):
             location_id = data.activity_id.spell_activity_id and data.activity_id.spell_activity_id.location_id.id or False
         if not location_id:
             location_id = data.activity_id.parent_id and data.activity_id.parent_id.location_id.id or False
-        # print "location_id: %s" % location_id
         return location_id
 
     def get_activity_patient_id(self, cr, uid, activity_id, context=None):
         patient_id = False
-        data = self.browse_domain(cr, uid, [('activity_id', '=', activity_id)])[0]
+        data_ids = self.search(cr, uid, [('activity_id', '=', activity_id)])
+        data = self.browse(cr, uid, data_ids, context)[0]
+
         if 'patient_id' in self._columns.keys():
             patient_id = data.patient_id and data.patient_id.id or False
         return patient_id
@@ -203,7 +208,6 @@ class nh_activity_data(orm.AbstractModel):
         cr.execute(sql)
         res = cr.dictfetchone()
         user_ids = list(res and set(res['user_ids']) or [])
-        #print "ACTIVITY DATA get_activity_user_ids user_ids: %s " % user_ids
         return user_ids
 
     def trigger_policy(self, cr, uid, activity_id, location_id=None, context=None):
@@ -272,6 +276,7 @@ class nh_clinical_activity_access(orm.Model):
         'location_activity_ids_text': fields.text('Activity IDS Text'),
         'parent_location_activity_ids_text': fields.text('Parent Location Activity IDS Text'),      
                 }
+
     def init(self, cr):
          
         cr.execute("""  

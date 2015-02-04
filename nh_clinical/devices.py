@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from openerp.osv import orm, fields, osv
-from openerp.addons.nh_activity.activity import except_if
 import logging
-from datetime import datetime as dt, timedelta as td
-from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
+
+from openerp.osv import orm, fields
 from openerp import SUPERUSER_ID
+
+from openerp.addons.nh_activity.activity import except_if
+
 _logger = logging.getLogger(__name__)
 
 class nh_clinical_device_category(orm.Model):
@@ -158,4 +159,3 @@ class nh_clinical_device_observation(orm.Model):
         'device_id': fields.many2one('nh.clinical.device', 'Device', required=True),
         'patient_id': fields.many2one('nh.clinical.patient', 'Patient', required=True),
     }
-    

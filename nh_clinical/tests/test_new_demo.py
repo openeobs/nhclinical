@@ -1,12 +1,9 @@
-from openerp.tests.common import SingleTransactionCase
-from datetime import datetime as dt
-from dateutil.relativedelta import relativedelta as rd
-from openerp import tools
-from openerp.tools import config 
-from openerp.osv import orm, fields, osv
+import logging
 
-import logging        
-from pprint import pprint as pp
+from openerp.tests.common import SingleTransactionCase
+from openerp.tools import config
+
+
 _logger = logging.getLogger(__name__)
 
 
@@ -68,7 +65,3 @@ class test_base_nhdemo(SingleTransactionCase):
         api_demo = self.registry('nh.clinical.api.demo')
         api_demo.create(cr, uid, 'nh.clinical.device.type')
         api_demo.create(cr, uid, 'nh.clinical.device')   
-
-
-
-        

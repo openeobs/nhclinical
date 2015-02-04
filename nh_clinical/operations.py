@@ -1,9 +1,12 @@
-from openerp.osv import orm, fields
-from openerp.addons.nh_activity.activity import except_if
+from datetime import datetime as dt
 import logging
-from datetime import datetime as dt, timedelta as td
+
+from openerp.osv import orm, fields
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as dtf
 from openerp import SUPERUSER_ID
+
+from openerp.addons.nh_activity.activity import except_if
+
 _logger = logging.getLogger(__name__)
 
 
@@ -100,11 +103,8 @@ class nh_clinical_patient_swap_beds(orm.Model):
         'location2_id': fields.many2one('nh.clinical.location', 'Location 2', domain=[['usage','=','bed']], required=True),
     }
 
-
     # activity.location_id -> bed1, bed2 or closest common parent
     # cross-POS allowed? no
-
-
     # FIXME: implementation simple, but wrong
     # consider 'move policies'
     def complete(self, cr, uid, activity_id, context=None):
@@ -157,7 +157,6 @@ class nh_clinical_patient_swap_beds(orm.Model):
         api.submit(cr, uid, spell1_activity_id, {'location_id': location2_id})
         api.submit(cr, uid, spell2_activity_id, {'location_id': location1_id})
         return super(nh_clinical_patient_swap_beds, self).complete(cr, uid, swap_activity_id, context)
-
 
 
 class nh_clinical_patient_placement(orm.Model):
@@ -268,7 +267,6 @@ class nh_clinical_patient_discharge(orm.Model):
         patient_id = activity.data_ref.patient_id.id
         # discharge from current or permanent location ??
         location_id = self.pool['nh.clinical.api'].patient_map(cr, uid, patient_ids=[patient_id])[patient_id]['location_id']
-        #get_patient_current_location_id(cr, uid, patient_id, context)
         return location_id
 
     def complete(self, cr, uid, activity_id, context=None):
@@ -294,6 +292,7 @@ class nh_clinical_patient_discharge(orm.Model):
             activity_pool.write(cr, SUPERUSER_ID, spell_activity.id, {'date_terminated': activity.data_ref.discharge_date})
         return {}
 
+
 class nh_clinical_patient_admission(orm.Model):
     _name = 'nh.clinical.patient.admission'
     _inherit = ['nh.activity.data']
@@ -306,13 +305,11 @@ class nh_clinical_patient_admission(orm.Model):
         'code': fields.text('Code')
     }
 
-
     def get_activity_location_id(self, cr, uid, activity_id, context=None):
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context)
         location_id = activity.data_ref.pos_id.lot_admission_id.id #or activity.data_ref.pos_id.location_id.id
         return location_id
-
 
     def complete(self, cr, uid, activity_id, context=None):
         res = {}

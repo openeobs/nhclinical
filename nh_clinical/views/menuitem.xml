@@ -70,7 +70,6 @@
           	action=""
           	groups="group_nhc_base"/>
 
-
           <menuitem name="Patient Placement Activities"
           	id="menu_nhc_patient_placement_activity"
           	parent="menu_left_nhc_operation"

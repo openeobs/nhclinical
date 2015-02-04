@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
-from openerp.osv import orm, fields, osv
 import logging
+
+from openerp.osv import orm, fields, osv
 from openerp import SUPERUSER_ID
+
 _logger = logging.getLogger(__name__)
 
 
@@ -348,11 +350,7 @@ class nh_clinical_location(orm.Model):
             'nh.clinical.pos': (_pos2location_id, ['location_id'], 5),
             }),
         'company_id': fields.related('pos_id', 'company_id', type='many2one', relation='res.company', string='Company'),
-        'is_available': fields.function(_is_available, type='boolean', string='Is Available?',
-                                        store={
-                                            'nh.clinical.location': (lambda self, cr, uid, ids, c: ids, [], 10),
-                                            'nh.activity': (_placement2location_id, ['state'], 20)
-                                        }),
+        'is_available': fields.function(_is_available, type='boolean', string='Is Available?'),
         'patient_capacity': fields.integer('Patient Capacity'),
         'patient_ids': fields.function(_get_patient_ids, type='many2many', relation='nh.clinical.patient', string="Patients"),
         'user_ids': fields.many2many('res.users', 'user_location_rel', 'location_id', 'user_id', 'Responsible Users'),
@@ -383,7 +381,8 @@ class nh_clinical_location(orm.Model):
                            and model._columns['location_id']._obj == 'nh.clinical.location']
         activity_ids = []
         for m in location_models:
-            data = m.browse_domain(cr, uid, [('location_id','=',location_id)], context=context)
+            data_ids = m.search(cr, uid, [('location_id', '=', location_id)], context=context),
+            data = m.browse(cr, uid, data_ids, context)[0]
             data = data and data[0]
             data and data.activity_id and activity_ids.append(data.activity_id.id)
         return activity_ids

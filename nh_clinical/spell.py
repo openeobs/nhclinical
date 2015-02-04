@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from openerp.osv import orm, fields
-import logging
 from datetime import datetime as dt
-from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as dtf
+import logging
+
+from openerp.osv import orm, fields
+from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
+
 _logger = logging.getLogger(__name__)
 
 
@@ -107,7 +109,7 @@ class nh_clinical_spell(orm.Model):
 
     def write(self, cr, uid, ids, vals, context=None):
         if 'location_id' in vals:
-            vals['move_date'] = dt.now().strftime(dtf)
+            vals['move_date'] = dt.now().strftime(DTF)
         return super(nh_clinical_spell, self).write(cr, uid, ids, vals, context=context)
 
     def get_activity_user_ids(self, cr, uid, activity_id, context=None):

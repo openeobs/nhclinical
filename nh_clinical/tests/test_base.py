@@ -1,21 +1,21 @@
-from openerp.tests.common import SingleTransactionCase
-from datetime import datetime as dt
-from dateutil.relativedelta import relativedelta as rd
-from openerp import tools
-from openerp.tools import config 
-from openerp.osv import orm, fields, osv
+import logging
 
-import logging        
-from pprint import pprint as pp
+from openerp.tests.common import SingleTransactionCase
+from openerp.tools import config
+
+
 _logger = logging.getLogger(__name__)
 
 from faker import Faker
 fake = Faker()
 seed = fake.random_int(min=0, max=9999999)
+
+
 def next_seed():
     global seed
     seed += 1
     return seed
+
 
 class BaseTest(SingleTransactionCase):
     @classmethod
@@ -153,11 +153,6 @@ class BaseTest(SingleTransactionCase):
         data = self.data_pos()
         pos_id = pos_pool.create(cr, uid, data)
         _logger.debug("POS created id=%s\n data: %s" % (pos_id, data))
-#         from pprint import pprint as pp
-#         location_ids = location_pool.search(cr, uid, [['id','>',25]])
-#         records = location_pool.read(cr, uid, location_ids, 
-#                                      ['name', 'parent_id', 'pos_id'])
-#         pp(records)
         return pos_id
 
     def create_pos_location(self):
@@ -241,8 +236,7 @@ class BaseTest(SingleTransactionCase):
                'parent_id': parent_id
                }
         return res            
-    
-    
+
     def data_nurse_user(self, location_ids, data={}):
         fake.seed(next_seed())
         nurse_group = imd_pool.get_object(cr, uid, "nh_clinical", "group_nhc_nurse")
@@ -319,9 +313,3 @@ class BaseTest(SingleTransactionCase):
                'type_id': type_id
                }
         return res     
-    
-    
-    
-    
-    
-        

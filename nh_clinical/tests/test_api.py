@@ -1,8 +1,9 @@
-from openerp.tests import common
 from datetime import datetime as dt
+import logging
+
+from openerp.tests import common
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as dtf
 
-import logging
 _logger = logging.getLogger(__name__)
 
 from faker import Faker

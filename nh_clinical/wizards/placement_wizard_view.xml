@@ -37,8 +37,6 @@
                 <field name="view_type">form</field>
                 <field name="view_mode">form</field>
                 <field name="view_id" ref="view_patient_placement_wizard_form"/>
-<!--                 <field name="target">inline</field> -->
-            </record>         
-
+            </record>
     </data>
 </openerp>

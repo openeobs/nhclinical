@@ -1,12 +1,8 @@
-from openerp.tests.common import SingleTransactionCase
-from datetime import datetime as dt
-from dateutil.relativedelta import relativedelta as rd
-from openerp import tools
-from openerp.tools import config 
-from openerp.osv import orm, fields, osv
+import logging
 
-import logging        
-from pprint import pprint as pp
+from openerp.tests.common import SingleTransactionCase
+from openerp.tools import config
+
 _logger = logging.getLogger(__name__)
 
 
@@ -240,4 +236,3 @@ class test_user_activity_responsibility(SingleTransactionCase):
         self.group_add_user('group_nhc_nurse', ward_user_id)
         assert self.user_activity_resp(bed_user_id, ews_activity_id)
         assert not self.user_activity_resp(ward_user_id, ews_activity_id)        
-        

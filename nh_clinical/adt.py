@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from openerp.osv import orm, fields, osv
-from openerp.addons.nh_activity.activity import except_if
-from datetime import datetime as dt, timedelta as td
+from datetime import datetime as dt
+import logging
+
+from openerp.osv import orm, fields
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
 from openerp import SUPERUSER_ID
-import logging        
+
+from openerp.addons.nh_activity.activity import except_if
+
 _logger = logging.getLogger(__name__)
 
 
