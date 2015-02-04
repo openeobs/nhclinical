@@ -91,12 +91,12 @@ class ActivityTest(common.SingleTransactionCase):
         # transitions: new - schedule - start - complete - cancel
         # + submit, assign, unassign
         model_pool._transitions = {
-            'new': ['schedule', 'plan', 'start', 'complete', 'cancel', 'submit', 'assign', 'unassign', 'retrieve','validate'],
-            'planned': ['schedule', 'start', 'complete', 'cancel', 'submit', 'assign', 'unassign', 'retrieve', 'validate'],
-            'scheduled': ['start', 'complete', 'cancel', 'submit', 'assign', 'unassign', 'retrieve', 'validate'],
-            'started': ['complete', 'cancel', 'submit', 'assign', 'unassign', 'retrieve', 'validate'],
-            'completed': ['retrieve', 'validate'],
-            'cancelled': ['retrieve', 'validate']
+            'new': ['schedule', 'plan', 'start', 'complete', 'cancel', 'submit', 'assign', 'unassign', 'validate'],
+            'planned': ['schedule', 'start', 'complete', 'cancel', 'submit', 'assign', 'unassign', 'validate'],
+            'scheduled': ['start', 'complete', 'cancel', 'submit', 'assign', 'unassign', 'validate'],
+            'started': ['complete', 'cancel', 'submit', 'assign', 'unassign', 'validate'],
+            'completed': ['validate'],
+            'cancelled': ['validate']
         }
         # test from state = new
         state_method_map = {'new': 'new',
