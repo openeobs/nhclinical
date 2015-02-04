@@ -144,14 +144,14 @@ class nh_clinical_location(orm.Model):
     def _pos2location_id(self, cr, uid, ids, context=None):
         res = []
         for pos in self.browse(cr, uid, ids, context):
-            res.extend(self.pool['nh.clinical.location'].search(cr, uid, [['id','child_of',pos.location_id.id]]))
+            res.extend(self.pool['nh.clinical.location'].search(cr, uid, [['id', 'child_of', pos.location_id.id]]))
         return res
 
     def _is_available(self, cr, uid, ids, field, args, context=None):
         res = {}
         available_location_ids = self.get_available_location_ids(cr, uid, context=context)
-        for location in self.browse(cr, uid, ids, context):
-            res[location.id] = location.id in available_location_ids
+        for location_id in ids:
+            res[location_id] = location_id in available_location_ids
         return res
 
     def _placement2location_id(self, cr, uid, ids, context=None):
@@ -349,6 +349,20 @@ class nh_clinical_location(orm.Model):
 
             return self._get_closest_parent_id(cr, uid, parent['id'], usage, context=context)
 
+    def _is_available_search(self, cr, uid, obj, name, args, domain=None, context=None):
+        location_ids = []
+        for cond in args:
+            available_value = bool(cond[2])
+            if cond[1] not in ['=', '!=']:
+                continue
+            all_ids = self.search(cr, uid, [['usage', '=', 'bed']], context=context)
+            available_locations_map = self._is_available(cr, uid, all_ids, 'is_available', None, context=context)
+            if cond[1] == '=':
+                location_ids += [k for k, v in available_locations_map.items() if v == available_value]
+            else:
+                location_ids += [k for k, v in available_locations_map.items() if v != available_value]
+        return [('id', 'in', location_ids)]
+
 
     _columns = {
         'name': fields.char('Location', size=100, required=True, select=True),
@@ -366,7 +380,7 @@ class nh_clinical_location(orm.Model):
             'nh.clinical.pos': (_pos2location_id, ['location_id'], 5),
             }),
         'company_id': fields.related('pos_id', 'company_id', type='many2one', relation='res.company', string='Company'),
-        'is_available': fields.function(_is_available, type='boolean', string='Is Available?'),
+        'is_available': fields.function(_is_available, type='boolean', string='Is Available?', fnct_search=_is_available_search),
         'patient_capacity': fields.integer('Patient Capacity'),
         'patient_ids': fields.function(_get_patient_ids, type='many2many', relation='nh.clinical.patient', string="Patients"),
         'user_ids': fields.many2many('res.users', 'user_location_rel', 'location_id', 'user_id', 'Responsible Users'),
@@ -406,7 +420,7 @@ class nh_clinical_location(orm.Model):
     def get_available_location_ids(self, cr, uid, usages=[], location_id=None, context=None):
         api_pool = self.pool['nh.clinical.api']
         res = api_pool.location_map(cr, uid, location_ids=[], types=[], usages=[], codes=[],
-                                    occupied_range=[], capacity_range=[], available_range=[1,1]).keys()
+                                    occupied_range=[], capacity_range=[], available_range=[1, 1]).keys()
         return res
 
     def activate_deactivate(self, cr, uid, location_id, context=None):
