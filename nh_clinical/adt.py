@@ -197,7 +197,7 @@ class nh_clinical_adt_patient_admit(orm.Model):
         res = {}
         super(nh_clinical_adt_patient_admit, self).complete(cr, uid, activity_id, context)
         api_pool = self.pool['nh.clinical.api']
-        admit_activity = api_pool.get_activity(cr, uid, activity_id)        
+        admit_activity = api_pool.get_activity(cr, uid, activity_id)
         admission_activity = api_pool.create_complete(cr, SUPERUSER_ID, 'nh.clinical.patient.admission',
                                        {'creator_id': activity_id}, 
                                        # FIXME! pos_id should be taken from adt_user.pos_id
