@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from openerp.osv import orm, fields, osv
-from datetime import datetime as dt
+from datetime import datetime
 from openerp import SUPERUSER_ID
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
 
@@ -40,37 +40,32 @@ def data_model_event(callback=None):
             data_model = self.pool[activity.data_model]
             
             handlers = [h for h in self._handlers
-                         if h['trigger_model'] == activity.data_model and h['trigger_method'] == f.__name__]
+                        if h['trigger_model'] == activity.data_model and h['trigger_method'] == f.__name__]
             
-            if handlers: # run before handlers
+            if handlers:  # run before handlers
                 event = Event(model=data_model, method=f.__name__, activity=activity, 
                               data=activity.data_ref, args=args, kwargs=kwargs)
                 [eval("self.pool['%s'].%s(cr, uid[1], args[2], event)" % (h['handler_model'], h['handler_method']))
-                  for h in handlers if h['when'] == 'before']
+                    for h in handlers if h['when'] == 'before']
             
-            f(*args, **kwargs) # FIXME: should we execute this f at all?
-            print 'RUNNING FUNCTION: %s' % ("%s.%s(*args[1:], **kwargs)" % (data_model, f.__name__))
+            f(*args, **kwargs)  # FIXME: should we execute this f at all?
             res = eval("data_model.%s(*args[1:], **kwargs)" % f.__name__)
             
-            if handlers: # run after handlers
+            if handlers:  # run after handlers
                 activity = self.browse(cr, uid, activity_id)
                 event = Event(model=data_model, method=f.__name__, activity=activity, 
                               data=activity.data_ref, args=args, kwargs=kwargs)
                 [eval("self.pool['%s'].%s(cr, uid, event)" % (h['handler_model'], h['handler_method']))
                     for h in handlers if h['when'] == 'after']
+
             return res
-
         return wrapper
-
     return decorator
-
-
 
 
 class nh_activity(orm.Model):
     """ activity
     """
-
     _name = 'nh.activity'
     _rec_name = 'summary'
 
@@ -83,10 +78,9 @@ class nh_activity(orm.Model):
         h = {'trigger_model': trigger_model, 'trigger_method': trigger_method,
                                'handler_model': handler_model, 'handler_method': handler_method,
                                'when': when}
-        if h not in self._handlers: self._handlers.append(h)
+        if h not in self._handlers:self._handlers.append(h)
         
     def _get_data_type_selection(self, cr, uid, context=None):
-
         res = [(model_name, model._description) for model_name, model in self.pool.models.items()
                            if hasattr(model, '_description')]        
         return res
@@ -137,11 +131,19 @@ class nh_activity(orm.Model):
     }
 
     def create(self, cr, uid, vals, context=None):
-        except_if(not vals.get('data_model'), msg="data_model is not defined!")
+        if not vals.get('data_model'):
+            raise orm.except_orm('Exception!', msg="data_model is not defined!")
+
         data_model_pool = self.pool.get(vals['data_model'])
-        except_if(not data_model_pool, msg="data_model does not exist in the model pool!")
-        not vals.get('summary') and vals.update({'summary': data_model_pool._description})           
+
+        if not data_model_pool:
+            raise orm.except_orm('Exception!', msg="data_model does not exist in the model pool!")
+
+        if 'summary' not in vals:
+            vals.update({'summary': data_model_pool._description})
+
         activity_id = super(nh_activity, self).create(cr, uid, vals, context)
+
         _logger.debug("activity '%s' created, activity.id=%s" % (vals.get('data_model'), activity_id))
         return activity_id
 
@@ -150,9 +152,7 @@ class nh_activity(orm.Model):
             cr.execute("select coalesce(max(sequence), 0) from nh_activity")
             sequence = cr.fetchone()[0] + 1
             vals.update({'sequence': sequence})     
-            _logger.debug("Sequence set to: %s" % sequence)    
-        res = super(nh_activity, self).write(cr, uid, ids, vals, context)
-        return res
+        return super(nh_activity, self).write(cr, uid, ids, vals, context)
 
     def get_recursive_created_ids(self, cr, uid, activity_id, context=None):
         activity = self.browse(cr, uid, activity_id, context=context)
@@ -165,17 +165,17 @@ class nh_activity(orm.Model):
             return created_ids
     
     def activity_rank_map(self, cr, uid, 
-                        partition_by="user_id", where=None, 
-                        partition_order="id desc", 
-                        rank_order="desc", limit=None):
+                          partition_by="user_id", where=None,
+                          partition_order="id desc",
+                          rank_order="desc", limit=None):
         
         args = {
-                  "partition_by": partition_by,
-                  "where": where and "where %s" % where or "",
-                  "partition_order": partition_order,
-                  "rank_order": rank_order,
-                  "limit": limit and "limit %s" % limit or ""
-                }
+            "partition_by": partition_by,
+            "where": where and "where %s" % where or "",
+            "partition_order": partition_order,
+            "rank_order": rank_order,
+            "limit": limit and "limit %s" % limit or ""
+        }
         sql = """
             select 
                 id,
@@ -186,7 +186,7 @@ class nh_activity(orm.Model):
             %(limit)s
         """ % args
         cr.execute(sql)
-        res = {activity['rank']:activity['id'] for activity in cr.dictfetchall()}
+        res = {activity['rank']: activity['id'] for activity in cr.dictfetchall()}
         return res 
     # DATA API
 
@@ -228,13 +228,17 @@ class nh_activity(orm.Model):
     def schedule(self, cr, uid, activity_id, date_scheduled=None, context=None):
         assert isinstance(activity_id, (int, long)), "activity_id must be int or long, found to be %s" % type(
             activity_id)
+        #FIXME: Why is this carrying out checks but then doing nothing and returning nothing??
         if date_scheduled:
             date_formats = ['%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M', '%Y-%m-%d %H', '%Y-%m-%d']
             res = []
             for df in date_formats:
                 try:
-                    dt.strptime(date_scheduled, df)
-                except:
+                    # FIXME: Adding a check for datetime format.  We should add an assert to only allow what we want
+                    # through here though
+                    if not isinstance(date_scheduled, datetime):
+                        datetime.strptime(date_scheduled, df)
+                except ValueError:
                     res.append(False)
                 else:
                     res.append(True)
@@ -283,7 +287,7 @@ class nh_activity_data(orm.AbstractModel):
         'completed': ['cancel'],
         'cancelled': []
     }
-    _description = _name #"Activity Data Base Model"
+    _description = _name  #"Activity Data Base Model"
     _start_view_xmlid = None
     _schedule_view_xmlid = None
     _submit_view_xmlid = None
@@ -300,9 +304,9 @@ class nh_activity_data(orm.AbstractModel):
         'date_started': fields.related('activity_id', 'date_started', string='Start Time', type='datetime'),
         'date_terminated': fields.related('activity_id', 'date_terminated', string='Terminated Time', type='datetime'),
         'state': fields.related('activity_id', 'state', type='char', string='State', size=64),
-        'terminate_uid': fields.related('activity_id', 'terminate_uid', string='Completed By', type='many2one', relation='res.users')
+        'terminate_uid': fields.related('activity_id', 'terminate_uid', string='Completed By', type='many2one',
+                                        relation='res.users')
     }
-
     _order = 'id desc'
         
     def create(self, cr, uid, vals, context=None):
@@ -317,6 +321,17 @@ class nh_activity_data(orm.AbstractModel):
         if vals_data:
             activity_pool.submit(cr, uid, new_activity_id, vals_data, context)
         return new_activity_id
+
+    def _ui_window(self, cr, uid, ids, context=None):
+        active_id = context.get('active_id', False)
+        if active_id:
+            activity_pool = self.pool['nh.activity']
+            activity_pool.write(cr, uid, active_id, {'data_ref': "%s,%s" % (self._name, str(ids[0]))})
+            activity = activity_pool.browse(cr, uid, active_id, context)
+            activity_pool.update_activity(cr, SUPERUSER_ID, activity.id, context)
+            activity_pool.complete(cr, uid, activity.id, context)
+            _logger.debug("activity '%s', activity.id=%s data completed via UI" % (activity.data_model, activity.id))
+        return {'type': 'ir.actions.act_window_close'}
 
     def submit_ui(self, cr, uid, ids, context=None):
         if context.get('active_id'):
@@ -386,7 +401,7 @@ class nh_activity_data(orm.AbstractModel):
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
         if not self.is_action_allowed(activity.state, 'start'):
             osv.except_osv('Error!', "activity of type '%s' can not be started from state '%s'" % (activity.data_model, activity.state))
-        activity_pool.write(cr, uid, activity_id, {'state': 'started', 'date_started': dt.now().strftime(DTF)}, context=context)
+        activity_pool.write(cr, uid, activity_id, {'state': 'started', 'date_started': datetime.now().strftime(DTF)}, context=context)
         _logger.debug("activity '%s', activity.id=%s started" % (activity.data_model, activity.id))
         return True
 
@@ -399,7 +414,7 @@ class nh_activity_data(orm.AbstractModel):
             osv.except_osv('Error!', "activity of type '%s' can not be completed from state '%s'" % (activity.data_model, activity.state))
         activity_pool.write(cr, uid, activity.id, 
                             {'state': 'completed', 'terminate_uid': uid,
-                             'date_terminated': dt.now().strftime(DTF)}, context=context)
+                             'date_terminated': datetime.now().strftime(DTF)}, context=context)
         _logger.debug("activity '%s', activity.id=%s completed" % (activity.data_model, activity.id))
         return True
 
@@ -433,7 +448,7 @@ class nh_activity_data(orm.AbstractModel):
         if not self.is_action_allowed(activity.state, 'cancel'):
             osv.except_osv('Error!', "activity of type '%s' can not be cancelled in state '%s'" % (activity.data_model, activity.state))
         activity_pool.write(cr, uid, activity_id, {'state': 'cancelled', 
-                            'terminate_uid': uid, 'date_terminated': dt.now().strftime(DTF)}, context=context)
+                            'terminate_uid': uid, 'date_terminated': datetime.now().strftime(DTF)}, context=context)
         _logger.debug("activity '%s', activity.id=%s cancelled" % (activity.data_model, activity.id))
         return True
 
