@@ -29,26 +29,23 @@ class ActivityTest(common.SingleTransactionCase):
         
     def setUp(self):
         global cr, uid, seed
-        global user_pool, imd_pool, activity_pool, test_pool
 
         cr, uid = self.cr, self.uid
-        test_pool = self.registry('test.activity.data.model')      
-        activity_pool = self.registry('nh.activity')
-        user_pool = self.registry('res.users')
-        imd_pool = self.registry('ir.model.data')
-        
+        self.test_pool = self.registry('test.activity.data.model')
+        self.activity_pool = self.registry('nh.activity')
+
         super(ActivityTest, self).setUp()
 
     def test_event_handlers(self):
-        test_pool = self.registry('test.activity.data.model')
-        activity_pool = self.registry('nh.activity')
-        activity_id = self.create_activity('nh.activity.data')
+        # TODO: Complete refactor and checking of these tests.
+        test_pool, activity_pool = self.test_pool, self.activity_pool
+        activity_id = self._create_activity('nh.activity.data')
         
         activity_pool._register_handler('nh.activity.data', 'complete', 'test.activity.data.model', 'handle_data_complete')
         activity_pool._register_handler('nh.activity.data', 'start', 'test.activity.data.model', 'handle_data_start')        
         
-        assert not test_pool._start_handler_event
-        assert not test_pool._complete_handler_event
+        self.assertFalse(test_pool._start_handler_event, 'Test Activity Pool start handlers should be false')
+        self.assertFalse(test_pool._complete_handler_event, 'Test Activity Pool complete handlers should be false')
         
         self.start(activity_id)
         self.complete(activity_id)
@@ -63,26 +60,29 @@ class ActivityTest(common.SingleTransactionCase):
         assert test_pool._complete_handler_event.method == 'complete'
         assert test_pool._complete_handler_event.activity.data_model == 'nh.activity.data'
                
-    def test_activity(self):
-        self.assertTrue( test_pool._name == 'test.activity.data.model', 'test model not found')
-        self.assertTrue( 'field1' in test_pool._columns.keys(), 'field1 not found in test model')
+    def test_activity_name_fields_and_transitions(self):
+        test_pool, activity_pool = self.test_pool, self.activity_pool
+        self.assertTrue(test_pool._name == 'test.activity.data.model', 'test model not found')
+        self.assertTrue('field1' in test_pool._columns.keys(), 'field1 not found in test model')
         
-        activity_id = self.create_activity('test.activity.data.model', {}, {'field1': 'test1'})
+        activity_id = self._create_activity('test.activity.data.model', {}, {'field1': 'test1'})
         self.transitions_test(activity_id)
+        # TODO: What is the following for?
         res = activity_pool.activity_rank_map(cr, uid)
 #         print res
-        
-    def create_activity(self, model, activity_vals={}, data_vals={}):
-        model_pool = self.registry(model) 
+
+    def _create_activity(self, model, activity_vals={}, data_vals={}):
+        activity_pool = self.activity_pool
+        model_pool = self.registry(model)
         activity_id = model_pool.create_activity(cr, uid, activity_vals, data_vals)
         activity = activity_pool.browse(cr, uid, activity_id)
-        _logger.warn("Testing 'create_activity' method...")
         self.assertTrue(activity_id, 'activity_id is None')
         self.assertTrue(activity.data_model == model, 'wrong data model')
         self.assertTrue(activity.state == 'new', 'state != new')
         return activity_id
     
     def transitions_test(self, activity_id):
+        activity_pool = self.activity_pool
         activity = activity_pool.browse(cr, uid, activity_id)
         model_pool = self.registry(activity.data_model)
         # transitions: new - schedule - start - complete - cancel
@@ -116,7 +116,6 @@ class ActivityTest(common.SingleTransactionCase):
             for state in path:
                 state_method = state_method_map[state]
                 if hasattr(self, state_method):
-                    #import pdb; pdb.set_trace()
                     try:
                         eval("self.%s(activity_id, **kwargs)" % state_method)
                     except:
@@ -133,10 +132,12 @@ class ActivityTest(common.SingleTransactionCase):
                             self.savepoint_rollback(savepoint_name)
             self.savepoint_rollback(savepoint_name_path)                
 
-    def create_user(self, **kwargs):
+    def _create_user(self, **kwargs):
+        imd_pool = self.registry('ir.model.data')
+        user_pool = self.registry('res.users')
+
         fake.seed(next_seed())
         group = imd_pool.get_object(cr, uid, "base", "group_system")
-        #import pdb; pdb.set_trace()
         first_name = fake.first_name()
         last_name = fake.last_name()
         vals = {
@@ -144,12 +145,12 @@ class ActivityTest(common.SingleTransactionCase):
             'login': kwargs.get('login') or first_name.lower(),
             'password': kwargs.get('password') or first_name.lower(),
             'groups_id': kwargs.get('groups_id') or [(4, group.id)],
-
-        }  
+        }
         res = user_pool.create(cr, uid, vals)
         return res        
 
-    def unassign(self, activity_id, **kwargs):
+    def _unassign(self, activity_id, **kwargs):
+        activity_pool = self.activity_pool
         activity = activity_pool.browse(cr, uid, activity_id)
         if not activity.user_id:
             _logger.warn("Unassign: activity is not assigned, trying to assign...")
@@ -157,7 +158,7 @@ class ActivityTest(common.SingleTransactionCase):
             assert user_id, "user_id must be in kwargs"            
             model_pool = self.registry(activity.data_model)
             if 'assign' in model_pool._transitions[activity.state]:
-                retval = self.assign(activity_id, **kwargs)
+                retval = self._assign(activity_id, **kwargs)
                 _logger.warn("Unassign: back to 'unassign', 'assign' returned %s" % retval)
             else:
                 _logger.warn("Unassign: activity is not assigned and 'assign' is disabled for state '%s'. Returning positive result." % activity.state)
@@ -172,10 +173,10 @@ class ActivityTest(common.SingleTransactionCase):
             res = True
             activity = activity_pool.browse(cr, uid, activity_id)
             self.assertTrue(not activity.user_id, "activity.user_id is set ")
-            #import pdb; pdb.set_trace()
-        return res 
+        return res
 
-    def assign(self, activity_id, **kwargs):
+    def _assign(self, activity_id, **kwargs):
+        activity_pool = self.activity_pool
         res = False
         user_id = kwargs.get('user_id')
         assert user_id, "user_id must be in kwargs"
@@ -184,7 +185,7 @@ class ActivityTest(common.SingleTransactionCase):
             _logger.warn("Assign: activity is assigned, trying to unassign...")
             model_pool = self.registry(activity.data_model)
             if 'unassign' in model_pool._transitions[activity.state]:
-                retval = self.unassign(activity_id, **kwargs)
+                retval = self._unassign(activity_id, **kwargs)
                 _logger.warn("Assign: back to 'assign', 'unassign' returned %s" % retval)
             else:
                 _logger.warn("Assign: activity is assigned and 'unassign' is disabled for state '%s'. Returning positive result." % activity.state)
@@ -198,8 +199,7 @@ class ActivityTest(common.SingleTransactionCase):
             res = True
             activity = activity_pool.browse(cr, uid, activity_id)
             self.assertTrue(activity.user_id.id == user_id, "activity.user_id != user_id ")
-            #import pdb; pdb.set_trace()
-        return res          
+        return res
         
     def savepoint_create(self, name=None):
         next_seed()
@@ -224,6 +224,7 @@ class ActivityTest(common.SingleTransactionCase):
         return True   
 
     def submit(self, activity_id, **kwargs):
+        activity_pool = self.activity_pool
         res = False
         vals = kwargs.get('vals')
         assert vals, "'vals' must be passed in kwargs!"
@@ -251,12 +252,11 @@ class ActivityTest(common.SingleTransactionCase):
                 self.assertTrue(vals[field] == value or value is None, "activity.data_ref.field != vals[field]")
         return res 
 
-    
     def new(self, activity_id, **kwargs):
-        
         return True
     
     def schedule(self, activity_id, **kwargs):
+        activity_pool = self.activity_pool
         next_seed()
         date_scheduled = kwargs.get('date_scheduled') or fake.date_time_between(start_date="1d", end_date="3d").strftime("%Y-%m-%d %H:%M:%S")
         res = False
@@ -271,11 +271,11 @@ class ActivityTest(common.SingleTransactionCase):
             model_pool = self.registry(activity.data_model)
             self.assertTrue(activity.state == 'scheduled', "activity.state != scheduled ")
             self.assertTrue(activity.date_scheduled == date_scheduled, "activity.date_scheduled != date_scheduled ")
-
-
         return res
 
     def start(self, activity_id, **kwargs):
+        activity_pool = self.activity_pool
+
         res = False
         try:
             activity_pool.start(cr, uid, activity_id)
@@ -304,6 +304,7 @@ class ActivityTest(common.SingleTransactionCase):
         return res
             
     def cancel(self, activity_id, **kwargs):
+        activity_pool = self.activity_pool
         res = False
         try:
             activity_pool.cancel(cr, uid, activity_id)
@@ -316,7 +317,3 @@ class ActivityTest(common.SingleTransactionCase):
             self.assertTrue(activity.state == 'cancelled', "activity.state != cancelled ")
             self.assertTrue(activity.date_terminated, "activity.date_terminated is none ")
         return res
-            
-            
-
-        
