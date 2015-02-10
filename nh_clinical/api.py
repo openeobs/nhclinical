@@ -718,7 +718,7 @@ with
                 inner join ir_model_access access on access.group_id = gur.gid and access.perm_responsibility = true
                 inner join ir_model model on model.id = access.model_id
                 inner join nh_activity activity on model.model = activity.data_model 
-                            and activity.location_id = ulr.location_id
+                            and activity.location_id = ulr.location_id and activity.state not in ('completed','cancelled')
                 where not exists (select 1 from activity_user_rel where activity_id=activity.id and user_id=ulr.user_id )) pairs  
             {where_clause}
         """.format(where_clause=where_clause)
