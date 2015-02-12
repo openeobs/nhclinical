@@ -6,4 +6,5 @@ import spell
 import operations
 import adt
 import devices
-import wizards
+import userboard
+import wizard
