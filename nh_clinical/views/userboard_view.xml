@@ -67,17 +67,7 @@
                             <button name="responsibility_allocation" string="Responsibility Allocation" type="object"/>
                         </div>
                         <notebook>
-                            <page string="Roles">
-                                <group colspan="4" col="2">
-                                    <field name="hca"/>
-                                    <field name="nurse"/>
-                                    <field name="ward_manager"/>
-                                    <field name="doctor"/>
-                                    <field name="kiosk"/>
-                                    <field name="admin"/>
-                                </group>
-                            </page>
-                            <page string="Location responsibility">
+                            <page string="Location Responsibility">
                                 <field name="location_ids" readonly="1"/>
                             </page>
                         </notebook>
