@@ -431,7 +431,10 @@ class nh_clinical_location(orm.Model):
         if location.usage == usage:
             return location.id
         else:
-            return self.find_nearest_location_id(cr, uid, location.parent_id.id, usage=usage, context=context)
+            if not location.parent_id:
+                return False
+            else:
+                return self.find_nearest_location_id(cr, uid, location.parent_id.id, usage=usage, context=context)
 
     def create(self, cr, uid, vals, context=None):
         if 'context_ids' in vals:
