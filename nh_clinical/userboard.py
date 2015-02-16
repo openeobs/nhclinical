@@ -159,7 +159,7 @@ class nh_clinical_admin_userboard(orm.Model):
     _groups = {'hca': ['NH Clinical HCA Group'],
                'nurse': ['NH Clinical Nurse Group'],
                'ward_manager': ['NH Clinical Ward Manager Group', 'Contact Creation'],
-               'admin': ['NH Clinical Ward Manager Group', 'Contact Creation'],
+               'admin': ['NH Clinical Admin Group', 'Contact Creation'],
                'kiosk': ['NH Clinical Nurse Group'],
                'doctor': ['NH Clinical Doctor Group']}
 

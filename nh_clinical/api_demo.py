@@ -41,49 +41,16 @@ class nh_clinical_api_demo(orm.AbstractModel):
         res_id = model_pool.create(cr, uid, v, context)
         return res_id
     
-#     def get_activity_free_patient(self, cr, uid, pos_id, data_models, states, return_id=False):
-#         # random_observation_available_location
-#         fake.seed(next_seed())
-#         api = self.pool['nh.clinical.api']
-#              
-#         all_patient_ids = [a.patient_id.id for a in api.get_activities(cr, SUPERUSER_ID, 
-#                                 pos_ids=[pos_id], data_models=['nh.clinical.spell'], states=['started'])]
-#         used_patient_ids = [a.patient_id.id for a in api.get_activities(cr, SUPERUSER_ID, data_models=data_models, states=states)]
-#         patient_ids = list(set(all_patient_ids)-set(used_patient_ids))       
-#         
-#         return api.browse(cr, SUPERUSER_ID, 'nh.clinical.patient', patient_ids)
-    
     def create_activity(self, cr, uid, model, values_method=None, activity_values={}, data_values={}, context=None):
         model_pool = self.pool[model]
-        #print "create activity data_values: %s" % data_values
         v = self.demo_data(cr, uid, model, values_method, data_values)
         _logger.debug("Creating DEMO resource '%s', values: %s" % (model, v))
         activity_id = model_pool.create_activity(cr, uid, activity_values, v, context)
         return activity_id
-    
-#     def place_patient(self, cr, uid, patient_id, bed_location_id, register_values={}, admit_values={}):
-#         """
-#         Places a patient to a bed. Patient must be admitted to a ward.
-#         If patient not admitted, exception is raised.
-#         """
-#         api = self.pool['nh.clinical.api']
-#         api.activity_map(cr, uid, patient_ids=[patient_id], data_models=['nh.clinical.patient.'])
-#         
-#         bed_location = api.browse(cr, uid, 'nh.clinical.location', bed_location_id)     
-#         pos_id = bed_location.pos_id.id      
-#         admit_activity_id = self.register_admit(cr, uid, pos_id, register_values, admit_values)
-#           
-#         admission_activity_id = api.activity_map(cr, uid, 
-#                                                   data_models=['nh.clinical.patient.admission'],
-#                                                   creator_ids=[admit_activity_id]).keys()[0]
-#                         
-#         placement_activity_id = api.activity_map(cr, uid, 
-#                                                   data_models=['nh.clinical.patient.placement'],
-#                                                   creator_ids=[admission_activity_id]).keys()[0] 
 
     def demo_data_loaded(self, cr, uid):
         imd = self.pool['ir.model.data']
-        ids = imd.search(cr, uid, [['name','=', 'nhc_def_conf_pos_hospital']])
+        ids = imd.search(cr, uid, [['name', '=', 'nhc_def_conf_pos_hospital']])
         return bool(ids)
 
     def build_uat_env(self, cr, uid, pos=1, ward='A', wm='winifred', nurse='norah', patients=8, placements=4, ews=1,
