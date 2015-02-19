@@ -32,8 +32,9 @@ class nh_clinical_adt_patient_register(orm.Model):
         'given_name': fields.text('givenName'),
         'middle_names': fields.text('middleName'),  
         'dob': fields.datetime('DOB'),
-        'gender': fields.char('Gender', size=1),      
-        'sex': fields.char('Sex', size=1),
+        'gender': fields.char('Gender'),
+        'sex': fields.char('Sex'),
+        'ethnicity': fields.char('Ethnicity'),
         'title': fields.many2one('res.partner.title', 'Title')
     }
     
@@ -81,7 +82,8 @@ class nh_clinical_adt_patient_register(orm.Model):
             'middle_names': register_activity.data_ref.middle_names,
             'dob': register_activity.data_ref.dob,
             'gender': register_activity.data_ref.gender,
-            'sex': register_activity.data_ref.sex
+            'sex': register_activity.data_ref.sex,
+            'ethnicity': register_activity.data_ref.ethnicity
         }
         patient_id = patient_pool.create(cr, uid, vals, context)
         self.write(cr, uid, register_activity.data_ref.id, {'patient_id': patient_id}, context=context)
