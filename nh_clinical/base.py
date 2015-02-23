@@ -534,11 +534,17 @@ class nh_clinical_patient(osv.Model):
         'ethnicity': 'Z'
     }
 
+    _sql_constraints = [('hospital_number_uniq', 'unique(other_identifier)', 'The hospital number must be unique!'),
+                        ('nhs_number_uniq', 'unique(patient_identifier)', 'The nhs number must be unique!')]
+
     def create(self, cr, uid, vals, context=None):
         if not vals.get('name'):
             vals.update({'name': self._get_fullname(vals)})
         return super(nh_clinical_patient, self).create(cr, uid, vals,
                                                        context=dict(context or {}, mail_create_nosubscribe=True))
+
+    def unlink(self, cr, uid, ids, context=None):
+        return super(nh_clinical_patient, self).write(cr, uid, ids, {'active': False}, context=context)
 
 
 #FIXME: This is here to prevent mail message from complaining when creating a user

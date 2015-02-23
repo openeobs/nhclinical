@@ -6,10 +6,14 @@
                 <field name="model">nh.clinical.patient</field>
                 <field name="arch" type="xml">
                     <search string="patient Search View">
+                        <field name="given_name"/>
+                        <field name="middle_names"/>
                         <field name="family_name"/>
                         <field name="other_identifier"/>
+                        <field name="patient_identifier"/>
                         <group expand="1" string="Group By...">
-                          <filter name="name" string="Name" domain="[]" context="{'group_by':'name'}" help="Name"/>
+                            <filter name="ethnicity" string="Ethnicity" domain="[]" context="{'group_by':'ethnicity'}" help="Ethnicity"/>
+                            <filter name="gender" string="Gender" domain="[]" context="{'group_by':'gender'}" help="Gender"/>
                         </group>
                     </search>
                 </field>
@@ -36,15 +40,19 @@
                 <field name="model">nh.clinical.patient</field>
                 <field name="arch" type="xml">
                     <form string="patient Form View">
-                       <field name="given_name" />
-                       <field name="middle_names" />
-                       <field name="family_name" />
-                       <field name="dob" />
-                       <field name="sex" />
-                       <field name="gender" />
-                       <field name="ethnicity" />
-                       <field name="patient_identifier" />
-                       <field name="other_identifier" />                     
+                        <sheet>
+                            <group>
+                                <field name="given_name" />
+                                <field name="middle_names" />
+                                <field name="family_name" />
+                                <field name="dob" />
+                                <field name="sex" />
+                                <field name="gender" />
+                                <field name="ethnicity" />
+                                <field name="patient_identifier" />
+                                <field name="other_identifier" />
+                            </group>
+                        </sheet>
                     </form>
                 </field>
             </record>
