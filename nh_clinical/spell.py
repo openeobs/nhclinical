@@ -89,8 +89,8 @@ class nh_clinical_spell(orm.Model):
         'code': fields.text("Code"),
         'start_date': fields.datetime("ADT Start Date"),
         'move_date': fields.datetime("Last Movement Date"),
-        'ref_doctor_ids': fields.many2many('res.partner', 'ref_doctor_spell_rel', 'spell_id', 'doctor_id', "Referring Doctors"),
-        'con_doctor_ids': fields.many2many('res.partner', 'con_doctor_spell_rel', 'spell_id', 'doctor_id', "Consulting Doctors"),  
+        'ref_doctor_ids': fields.many2many('nh.clinical.doctor', 'ref_doctor_spell_rel', 'spell_id', 'doctor_id', "Referring Doctors"),
+        'con_doctor_ids': fields.many2many('nh.clinical.doctor', 'con_doctor_spell_rel', 'spell_id', 'doctor_id', "Consulting Doctors"),
         'transferred_user_ids': fields.function(_get_transferred_user_ids, fnct_search=_transferred_user_ids_search, type='many2many', relation='res.users', string="Recently Transfered Access"),      
     }
     _defaults = {

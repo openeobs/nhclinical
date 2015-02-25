@@ -24,9 +24,8 @@ class res_partner(orm.Model):
     }
 
     def create(self, cr, user, vals, context=None):
-        res_id = super(res_partner, self).create(cr, user, vals,
-                                                 context=dict(context or {}, mail_create_nosubscribe=True))
-        return res_id
+        return super(res_partner, self).create(cr, user, vals,
+                                               context=dict(context or {}, mail_create_nosubscribe=True))
 
 
 class res_company(orm.Model):
@@ -47,11 +46,14 @@ class res_users(orm.Model):
                                          'user_id',
                                          'location_id',
                                          'Parent Locations of Responsibility'),
-        }
+        'doctor_id': fields.many2one('nh.clinical.doctor', 'Related Doctor')
+    }
 
     def create(self, cr, user, vals, context=None):
-        return super(res_users, self).create(cr, user, vals,
-                                             context=dict(context or {}, mail_create_nosubscribe=True))
+        res = super(res_users, self).create(cr, user, vals, context=dict(context or {}, mail_create_nosubscribe=True))
+        if 'doctor_id' in vals:
+            self.pool['nh.clinical.doctor'].write(cr, user, vals['doctor_id'], {'user_id': res}, context=context)
+        return res
 
     def get_all_responsibility_location_ids(self, cr, uid, user_id, context=None):
         location_pool = self.pool['nh.clinical.location']
@@ -65,6 +67,8 @@ class res_users(orm.Model):
         if values.get('location_ids') or values.get('groups_id'):
             api = self.pool['nh.clinical.api']
             api.update_activity_users(cr, uid, ids)
+        if 'doctor_id' in values:
+            self.pool['nh.clinical.doctor'].write(cr, uid, values['doctor_id'], {'user_id': ids[0]}, context=context)
         return res
 
 
@@ -576,3 +580,33 @@ class nh_clinical_specialty(orm.Model):
         'code': fields.integer('Code'),
         'group': fields.selection(_specialty_groups, 'Specialty Group')
     }
+
+
+class nh_clinical_doctor(orm.Model):
+    _name = 'nh.clinical.doctor'
+    _inherits = {'res.partner': 'partner_id'}
+    _gender = [['BOTH', 'Both'], ['F', 'Female'], ['I', 'Intermediate'],
+               ['M', 'Male'], ['NSP', 'Not Specified'], ['U', 'Unknown']]
+    _columns = {
+        'partner_id': fields.many2one('res.partner', 'Partner', required=1, ondelete='restrict'),
+        'gender': fields.selection(_gender, 'Gender'),
+        'gmc': fields.char('GMC', size=10),
+        'specialty_id': fields.many2one('nh.clinical.specialty', 'Speciality'),
+        'code': fields.char('Regional Code', size=10),
+        'user_id': fields.many2one('res.users', 'User Account')
+    }
+    _defaults = {
+        'gender': 'U'
+    }
+
+    def create(self, cr, user, vals, context=None):
+        res = super(nh_clinical_doctor, self).create(cr, user, vals, context=dict(context or {}, mail_create_nosubscribe=True))
+        if 'user_id' in vals:
+            self.pool['res.users'].write(cr, user, vals['user_id'], {'doctor_id': res}, context=context)
+        return res
+
+    def write(self, cr, uid, ids, vals, context=None):
+        res = super(nh_clinical_doctor, self).write(cr, uid, ids, vals, context=context)
+        if 'user_id' in vals:
+            self.pool['res.users'].write(cr, uid, vals['user_id'], {'doctor_id': ids[0]}, context=context)
+        return res

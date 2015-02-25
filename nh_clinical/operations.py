@@ -296,9 +296,9 @@ class nh_clinical_patient_admission(orm.Model):
         # copy doctors
         if activity.creator_id.data_model == "nh.clinical.adt.patient.admit":
             doctor_data = {
-                           'con_doctor_ids': [[4, d.id] for d in activity.creator_id.data_ref.con_doctor_ids],
-                           'ref_doctor_ids': [[4, d.id] for d in activity.creator_id.data_ref.ref_doctor_ids]
-                           }
+                'con_doctor_ids': [[6, False, [d.id for d in activity.creator_id.data_ref.con_doctor_ids]]],
+                'ref_doctor_ids': [[6, False, [d.id for d in activity.creator_id.data_ref.ref_doctor_ids]]]
+            }
             activity_pool.submit(cr, uid, spell_activity_id, doctor_data, context)
 
         res[spell_pool._name] = spell_activity_id

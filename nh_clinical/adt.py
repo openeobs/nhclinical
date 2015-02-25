@@ -123,8 +123,8 @@ class nh_clinical_adt_patient_admit(orm.Model):
         'start_date': fields.datetime("ADT Start Date"), 
         'other_identifier': fields.text("Other Identifier"),
         'doctors': fields.text("Doctors"),
-        'ref_doctor_ids': fields.many2many('res.partner', 'ref_doctor_admit_rel', 'admit_id', 'doctor_id', "Referring Doctors"),
-        'con_doctor_ids': fields.many2many('res.partner', 'con_doctor_admit_rel', 'admit_id', 'doctor_id', "Consulting Doctors"),
+        'ref_doctor_ids': fields.many2many('nh.clinical.doctor', 'ref_doctor_admit_rel', 'admit_id', 'doctor_id', "Referring Doctors"),
+        'con_doctor_ids': fields.many2many('nh.clinical.doctor', 'con_doctor_admit_rel', 'admit_id', 'doctor_id', "Consulting Doctors"),
     }
 
     def submit(self, cr, uid, activity_id, vals, context=None):
@@ -166,30 +166,31 @@ class nh_clinical_adt_patient_admit(orm.Model):
                 doctors = eval(str(vals['doctors']))
                 ref_doctor_ids = []
                 con_doctor_ids = []
-                partner_pool = self.pool['res.partner'] 
+                doctor_pool = self.pool['nh.clinical.doctor']
                 for d in doctors:
-                    doctor_id = partner_pool.search(cr, uid, [['code','=',d['code']]])
+                    doctor_id = doctor_pool.search(cr, uid, [['code', '=', d.get('code')]], context=context)
                     if not doctor_id:
-                        if d['title']:
+                        title_id = False
+                        if d.get('title'):
                             d['title'] = d['title'].strip()
                             title_pool = self.pool['res.partner.title']
-                            title_id = title_pool.search(cr, uid, [['name','=',d['title']]])
-                            title_id = title_id and title_id[0] or title_pool.create(cr, uid, {'name': d['title']})
+                            title_id = title_pool.search(cr, uid, [['name', '=', d['title']]], context=context)
+                            title_id = title_id[0] if title_id else title_pool.create(cr, uid, {'name': d['title']}, context=context)
                         data = {
                                 'name': "%s, %s" % (d['family_name'], d['given_name']),
                                 'title': title_id,
-                                'code': d['code'],
-                                'doctor': True
+                                'code': d.get('code'),
+                                'gender': d.get('gender'),
+                                'gmc': d.get('gmc')
                                 }
-                        doctor_id = partner_pool.create(cr, uid, data)
+                        doctor_id = doctor_pool.create(cr, uid, data, context=context)
                     else:
-                        doctor_id > 1 and _logger.warn("More than one doctor found with code '%s' passed id=%s" 
-                                                       % (d['code'], doctor_id[0]))
+                        if doctor_id > 1:
+                            _logger.warn("More than one doctor found with code '%s' passed id=%s" % (d.get('code'), doctor_id[0]))
                         doctor_id = doctor_id[0]
-                    d['type'] == 'r' and ref_doctor_ids.append(doctor_id)
-                    d['type'] == 'c' and con_doctor_ids.append(doctor_id)
-                ref_doctor_ids and vals_copy.update({'ref_doctor_ids': [[4, id] for id in ref_doctor_ids]})
-                con_doctor_ids and vals_copy.update({'con_doctor_ids': [[4, id] for id in con_doctor_ids]})
+                    ref_doctor_ids.append(doctor_id) if d['type'] == 'r' else con_doctor_ids.append(doctor_id)
+                ref_doctor_ids and vals_copy.update({'ref_doctor_ids': [[6, False, ref_doctor_ids]]})
+                con_doctor_ids and vals_copy.update({'con_doctor_ids': [[6, False, con_doctor_ids]]})
             except:
                 _logger.warn("Can't evaluate 'doctors': %s" % (vals['doctors']))
         super(nh_clinical_adt_patient_admit, self).submit(cr, uid, activity_id, vals_copy, context)
@@ -325,6 +326,7 @@ class nh_clinical_adt_patient_discharge(orm.Model):
              'discharge_date': discharge_activity.data_ref.discharge_date}, context=context)
         activity_pool.complete(cr, SUPERUSER_ID, discharge_activity_id, context=context)
         return res 
+
 
 class nh_clinical_adt_patient_transfer(orm.Model):
     _name = 'nh.clinical.adt.patient.transfer'
@@ -556,19 +558,18 @@ class nh_clinical_adt_spell_update(orm.Model):
         'start_date': fields.datetime("ADT Start Date"),
         'other_identifier': fields.text("Other Identifier"),
         'doctors': fields.text("Doctors"),
-        'ref_doctor_ids': fields.many2many('res.partner', 'ref_doctor_update_rel', 'spell_update_id', 'doctor_id', "Referring Doctors"),
-        'con_doctor_ids': fields.many2many('res.partner', 'con_doctor_update_rel', 'spell_update_id', 'doctor_id', "Consulting Doctors")
+        'ref_doctor_ids': fields.many2many('nh.clinical.doctor', 'ref_doctor_update_rel', 'spell_update_id', 'doctor_id', "Referring Doctors"),
+        'con_doctor_ids': fields.many2many('nh.clinical.doctor', 'con_doctor_update_rel', 'spell_update_id', 'doctor_id', "Consulting Doctors")
     }
 
     def submit(self, cr, uid, activity_id, vals, context=None):
         res = {}
         user = self.pool['res.users'].browse(cr, uid, uid, context)
         except_if(not user.pos_id or not user.pos_id.location_id, msg="POS location is not set for user.login = %s!" % user.login)
+        vals_copy = vals.copy()
         # location validation
         location_pool = self.pool['nh.clinical.location']
-        suggested_location_id = location_pool.search(cr, SUPERUSER_ID,
-                                                    [('code','=',vals['location']),
-                                                     ('id','child_of',user.pos_id.location_id.id)])
+        suggested_location_id = location_pool.search(cr, SUPERUSER_ID, [('code', '=', vals['location']), ('id', 'child_of', user.pos_id.location_id.id)], context=context)
         if not suggested_location_id:
             _logger.warn("ADT suggested_location '%s' not found! Will automatically create one" % vals['location'])
             location_pool = self.pool['nh.clinical.location']
@@ -581,6 +582,7 @@ class nh_clinical_adt_spell_update(orm.Model):
             }, context=context)
         else:
             suggested_location_id = suggested_location_id[0]
+        vals_copy.update({'suggested_location_id': suggested_location_id})
         # patient validation
         patient_pool = self.pool['nh.clinical.patient']
         patient_id = patient_pool.search(cr, SUPERUSER_ID, [('other_identifier', '=', vals['other_identifier'])])
@@ -589,8 +591,6 @@ class nh_clinical_adt_spell_update(orm.Model):
             _logger.warn("More than one patient found with 'other_identifier' = %s! Passed patient_id = %s"
                                     % (vals['other_identifier'], patient_id[0]))
         patient_id = patient_id[0]
-        vals_copy = vals.copy()
-        vals_copy.update({'suggested_location_id': suggested_location_id})
         vals_copy.update({'patient_id': patient_id, 'pos_id': user.pos_id.id})
         # doctors
         if vals.get('doctors'):
@@ -598,37 +598,38 @@ class nh_clinical_adt_spell_update(orm.Model):
                 doctors = eval(str(vals['doctors']))
                 ref_doctor_ids = []
                 con_doctor_ids = []
-                partner_pool = self.pool['res.partner']
+                doctor_pool = self.pool['nh.clinical.doctor']
                 for d in doctors:
-                    doctor_id = partner_pool.search(cr, uid, [['code', '=', d['code']]])
+                    doctor_id = doctor_pool.search(cr, uid, [['code', '=', d.get('code')]], context=context)
                     if not doctor_id:
-                        if d['title']:
+                        title_id = False
+                        if d.get('title'):
                             d['title'] = d['title'].strip()
                             title_pool = self.pool['res.partner.title']
-                            title_id = title_pool.search(cr, uid, [['name', '=', d['title']]])
-                            title_id = title_id and title_id[0] or title_pool.create(cr, uid, {'name': d['title']})
+                            title_id = title_pool.search(cr, uid, [['name', '=', d['title']]], context=context)
+                            title_id = title_id[0] if title_id else title_pool.create(cr, uid, {'name': d['title']}, context=context)
                         data = {
                                 'name': "%s, %s" % (d['family_name'], d['given_name']),
                                 'title': title_id,
-                                'code': d['code'],
-                                'doctor': True
+                                'code': d.get('code'),
+                                'gender': d.get('gender'),
+                                'gmc': d.get('gmc')
                                 }
-                        doctor_id = partner_pool.create(cr, uid, data)
+                        doctor_id = doctor_pool.create(cr, uid, data, context=context)
                     else:
-                        doctor_id > 1 and _logger.warn("More than one doctor found with code '%s' passed id=%s"
-                                                       % (d['code'], doctor_id[0]))
+                        if doctor_id > 1:
+                            _logger.warn("More than one doctor found with code '%s' passed id=%s" % (d.get('code'), doctor_id[0]))
                         doctor_id = doctor_id[0]
-                    d['type'] == 'r' and ref_doctor_ids.append(doctor_id)
-                    d['type'] == 'c' and con_doctor_ids.append(doctor_id)
-                ref_doctor_ids and vals_copy.update({'ref_doctor_ids': [[4, id] for id in ref_doctor_ids]})
-                con_doctor_ids and vals_copy.update({'con_doctor_ids': [[4, id] for id in con_doctor_ids]})
+                    ref_doctor_ids.append(doctor_id) if d['type'] == 'r' else con_doctor_ids.append(doctor_id)
+                ref_doctor_ids and vals_copy.update({'ref_doctor_ids': [[6, False, ref_doctor_ids]]})
+                con_doctor_ids and vals_copy.update({'con_doctor_ids': [[6, False, con_doctor_ids]]})
             except:
                 _logger.warn("Can't evaluate 'doctors': %s" % (vals['doctors']))
         activity_pool = self.pool['nh.activity']
-        activity = activity_pool.browse(cr, uid, activity_id)
+        activity = activity_pool.browse(cr, uid, activity_id, context=context)
 
-        super(nh_clinical_adt_spell_update, self).submit(cr, uid, activity_id, vals_copy, context)
-        self.write(cr, uid, activity.data_ref.id, vals_copy)
+        super(nh_clinical_adt_spell_update, self).submit(cr, uid, activity_id, vals_copy, context=context)
+        self.write(cr, uid, activity.data_ref.id, vals_copy, context=context)
         return res
 
     def complete(self, cr, uid, activity_id, context=None):
@@ -641,8 +642,8 @@ class nh_clinical_adt_spell_update(orm.Model):
         except_if(not spell_activity_id, msg="Spell not found!")
         spell_activity = activity_pool.browse(cr, SUPERUSER_ID, spell_activity_id, context=context)
         data = {
-            'con_doctor_ids': [[6, 0,  [d.id for d in update_activity.data_ref.con_doctor_ids]]],
-            'ref_doctor_ids': [[6, 0, [d.id for d in update_activity.data_ref.ref_doctor_ids]]],
+            'con_doctor_ids': [[6, False, [d.id for d in update_activity.data_ref.con_doctor_ids]]],
+            'ref_doctor_ids': [[6, False, [d.id for d in update_activity.data_ref.ref_doctor_ids]]],
             'location_id': update_activity.data_ref.pos_id.lot_admission_id.id,
             'code': update_activity.data_ref.code,
             'start_date': update_activity.data_ref.start_date if update_activity.data_ref.start_date < spell_activity.data_ref.start_date else spell_activity.data_ref.start_date
