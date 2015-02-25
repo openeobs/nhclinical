@@ -534,8 +534,8 @@ class nh_clinical_patient(osv.Model):
         'ethnicity': 'Z'
     }
 
-    _sql_constraints = [('hospital_number_uniq', 'unique(other_identifier)', 'The hospital number must be unique!'),
-                        ('nhs_number_uniq', 'unique(patient_identifier)', 'The nhs number must be unique!')]
+    # _sql_constraints = [('hospital_number_uniq', 'unique(other_identifier)', 'The hospital number must be unique!'),
+    #                     ('nhs_number_uniq', 'unique(patient_identifier)', 'The nhs number must be unique!')]
 
     def create(self, cr, uid, vals, context=None):
         if not vals.get('name'):
