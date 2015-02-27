@@ -53,6 +53,33 @@ class nh_clinical_api_demo(orm.AbstractModel):
         ids = imd.search(cr, uid, [['name', '=', 'nhc_def_conf_pos_hospital']])
         return bool(ids)
 
+    def create_ward(self, cr, uid, name, parent_id, code=None, bed_count=0, policy_context=None, context=None):
+        location_pool = self.pool['nh.clinical.location']
+        res = {'bed_ids': []}
+        if policy_context:
+            context_pool = self.pool['nh.clinical.context']
+            context_ids = context_pool.search(cr, uid, [['name', '=', policy_context]], context=context)
+        if not code:
+            code = name
+        res['ward_id'] = location_pool.create(cr, uid, {
+            'parent_id': parent_id,
+            'name': name,
+            'code': code,
+            'type': 'structural',
+            'usage': 'ward',
+            'context_ids': [[6, False, context_ids]] if policy_context else False
+        }, context=context)
+        for bed in range(bed_count):
+            res['bed_ids'].append(location_pool.create(cr, uid, {
+                'parent_id': res['ward_id'],
+                'name': 'Bed '+str(bed),
+                'code': code+'B'+str(bed),
+                'type': 'structural',
+                'usage': 'bed',
+                'context_ids': [[6, False, context_ids]] if policy_context else False
+            }, context=context))
+        return res
+
     def build_uat_env(self, cr, uid, pos=1, ward='A', wm='winifred', nurse='norah', patients=8, placements=4, ews=1,
                       context=None):
         """
