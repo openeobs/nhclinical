@@ -54,6 +54,16 @@ class nh_clinical_api_demo(orm.AbstractModel):
         return bool(ids)
 
     def create_ward(self, cr, uid, name, parent_id, code=None, bed_count=0, policy_context=None, context=None):
+        """
+        Creates a new Ward Location
+        :param name: ward name (String) - Required
+        :param parent_id: id of the parent location (usually the Hospital) - Required
+        :param code: ward code, used to reference the ward in ADT operations. Defaults to name if not specified. (String)
+        :param bed_count: number of beds (child locations) that the ward is going to have. (Integer)
+        :param policy_context: name of the policy the ward is going to follow. i.e. 'eobs' (String)
+        :return: dictionary containing 'ward_id' and 'bed_ids'.
+                {'ward_id': Integer, 'bed_ids': [Integers]}
+        """
         location_pool = self.pool['nh.clinical.location']
         res = {'bed_ids': []}
         if policy_context:
@@ -78,6 +88,34 @@ class nh_clinical_api_demo(orm.AbstractModel):
                 'usage': 'bed',
                 'context_ids': [[6, False, context_ids]] if policy_context else False
             }, context=context))
+        return res
+
+    def create_user(self, cr, uid, name, login=None, password=None, groups=None, location_ids=None, context=None):
+        """
+        Creates a new User
+        :param name: name of the user (String) - Required
+        :param login: login username (String) Defaults to name if not specified.
+        :param password: user password (String) Defaults to login if not specified.
+        :param groups: list of group names the user is going to be in. (List of Strings)
+        :param location_ids: list of location ids the user is responsible for. (List of Integers)
+        :return: id of the new user. (Integer)
+        """
+        user_pool = self.pool['res.users']
+        group_pool = self.pool['res.groups']
+        groups = [] if not groups else groups
+        if 'NH Clinical Admin Group' in groups or 'NH Clinical Ward Manager Group' in groups:
+            groups.append('Contact Creation')
+        location_ids = [[6, False, []]] if not location_ids else [[6, False, location_ids]]
+        login = name if not login else login
+        password = login if not password else password
+        group_ids = group_pool.search(cr, uid, [['name', 'in', groups]], context=context)
+        res = user_pool.create(cr, uid, {
+            'name': name,
+            'login': login,
+            'groups_id': [[6, False, group_ids]],
+            'location_ids': location_ids
+        }, context=context)
+        user_pool.write(cr, res, res, {'password': password}, context=context)
         return res
 
     def build_uat_env(self, cr, uid, pos=1, ward='A', wm='winifred', nurse='norah', patients=8, placements=4, ews=1,

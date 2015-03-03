@@ -10,6 +10,7 @@ class TestDemoAPI(common.SingleTransactionCase):
         cr, uid = cls.cr, cls.uid
         cls.pos_pool = cls.registry('nh.clinical.pos')
         cls.location_pool = cls.registry('nh.clinical.location')
+        cls.user_pool = cls.registry('res.users')
         cls.apidemo = cls.registry('nh.clinical.api.demo')
 
         cls.pos_location_id = cls.location_pool.create(cr, uid, {
@@ -31,3 +32,13 @@ class TestDemoAPI(common.SingleTransactionCase):
         self.assertTrue(ward.parent_id.id == self.pos_location_id, msg="Ward parent not correct")
         self.assertTrue(len(result['bed_ids']) == 10, msg="Incorrect number of beds")
         self.assertTrue(len(ward.child_ids) == 10, msg="Incorrect number of beds")
+
+    def test_create_user(self):
+        cr, uid = self.cr, self.uid
+        result = self.apidemo.create_user(cr, uid, 'Test User Name', 'testlogin', 'testpassword', ['NH Clinical Ward Manager Group'], [self.pos_location_id])
+        user = self.user_pool.browse(cr, uid, result)
+        self.assertTrue(result, msg="User was not created")
+        self.assertTrue(user.name == 'Test User Name', msg="User name not correct")
+        self.assertTrue(user.login == 'testlogin', msg="User login not correct")
+        self.assertTrue(all([loc.id in [self.pos_location_id] for loc in user.location_ids]), msg="User locations not correct")
+        self.assertTrue(all([group.name in ['NH Clinical Base Group', 'NH Clinical Ward Manager Group', 'Contact Creation'] for group in user.groups_id]), msg="User groups not correct")
