@@ -26,6 +26,12 @@ class nh_clinical_userboard(orm.Model):
     _name = "nh.clinical.userboard"
     _inherits = {'res.users': 'user_id'}
     _auto = False
+    _groups = {'hca': ['NH Clinical HCA Group'],
+               'nurse': ['NH Clinical Nurse Group'],
+               'ward_manager': ['NH Clinical Ward Manager Group', 'Contact Creation'],
+               'admin': ['NH Clinical Admin Group', 'Contact Creation'],
+               'kiosk': ['NH Clinical Nurse Group'],
+               'doctor': ['NH Clinical Doctor Group']}
     _table = "nh_clinical_userboard"
     _columns = {
         'user_id': fields.many2one('res.users', 'User', required=1, ondelete='restrict'),
@@ -55,57 +61,38 @@ class nh_clinical_userboard(orm.Model):
     def create(self, cr, uid, vals, context=None):
         if not context:
             context = {}
-        hca = vals.get('hca')
-        nurse = vals.get('nurse')
-        ward_manager = vals.get('ward_manager')
-        doctor = vals.get('doctor')
-        check_groups = any([hca, nurse, ward_manager, doctor])
-        if not check_groups:
+        if not any([vals.get(g) for g in self._groups.keys()]):
             raise osv.except_osv('Error!', 'At least one role must be selected.')
         user_pool = self.pool['res.users']
         groups_pool = self.pool['res.groups']
         user_write_vals = {}
-        groups = []
         user_write_vals.update({'name': vals['name']})
         user_write_vals.update({'login': vals['login'], 'password': vals['login']})
-        if hca:
-            groups += groups_pool.search(cr, uid, [('name', '=', 'NH Clinical HCA Group')], context=context)
-        if nurse:
-            groups += groups_pool.search(cr, uid, [('name', '=', 'NH Clinical Nurse Group')], context=context)
-        if ward_manager:
-            groups += groups_pool.search(cr, uid, [('name', 'in', ['NH Clinical Ward Manager Group', 'Contact Creation'])], context=context)
-        if doctor:
-            groups += groups_pool.search(cr, uid, [('name', '=', 'NH Clinical Doctor Group')], context=context)
-        groups += groups_pool.search(cr, uid, [('name', '=', 'Employee')], context=context)
+        group_names = ['Employee']
+        for g in self._groups.keys():
+            if vals.get(g):
+                group_names += self._groups[g]
+        groups = groups_pool.search(cr, uid, [('name', 'in', group_names)], context=context)
         user_write_vals.update({'groups_id': [[6, False, groups]]})
         return user_pool.create(cr, uid, user_write_vals, context=context)
 
     def write(self, cr, uid, ids, vals, context=None):
         for user in self.browse(cr, uid, ids, context=context):
-            hca = vals.get('hca') if isinstance(vals.get('hca'), bool) else user.hca
-            nurse = vals.get('nurse') if isinstance(vals.get('nurse'), bool) else user.nurse
-            ward_manager = vals.get('ward_manager') if isinstance(vals.get('ward_manager'), bool) else user.ward_manager
-            doctor = vals.get('doctor') if isinstance(vals.get('doctor'), bool) else user.doctor
-            check_groups = any([hca, nurse, ward_manager, doctor])
-            if not check_groups:
+            if not any([vals.get(g) if isinstance(vals.get(g), bool) else eval('user.'+g) for g in self._groups.keys()]):
                 raise osv.except_osv('Error!', 'At least one role must be selected.')
             user_pool = self.pool['res.users']
             groups_pool = self.pool['res.groups']
             user_write_vals = {}
-            groups = []
             if vals.get('name'):
                 user_write_vals.update({'name': vals['name']})
             if vals.get('login'):
                 user_write_vals.update({'login': vals['login']})
-            if hca:
-                groups += groups_pool.search(cr, uid, [('name', '=', 'NH Clinical HCA Group')], context=context)
-            if nurse:
-                groups += groups_pool.search(cr, uid, [('name', '=', 'NH Clinical Nurse Group')], context=context)
-            if ward_manager:
-                groups += groups_pool.search(cr, uid, [('name', 'in', ['NH Clinical Ward Manager Group', 'Contact Creation'])], context=context)
-            if doctor:
-                groups += groups_pool.search(cr, uid, [('name', '=', 'NH Clinical Doctor Group')], context=context)
-            groups += groups_pool.search(cr, uid, [('name', '=', 'Employee')], context=context)
+            group_names = ['Employee']
+            for g in self._groups.keys():
+                check_g = vals.get(g) if isinstance(vals.get(g), bool) else eval('user.'+g)
+                if check_g:
+                    group_names += self._groups[g]
+            groups = groups_pool.search(cr, uid, [('name', 'in', group_names)], context=context)
             user_write_vals.update({'groups_id': [[6, False, groups]]})
             user_pool.write(cr, uid, [user.user_id.id], user_write_vals, context=context)
         return True
