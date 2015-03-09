@@ -20,6 +20,18 @@ class nh_clinical_adt(orm.Model):
 
 
 class nh_clinical_adt_patient_register(orm.Model):
+    """
+    Registers a new patient into the system.
+     patient_identifier: String - NHS Number
+     other_identifier: String - Hospital Number
+     given_name: String - First name
+     family_name: String - Last name
+     middle_names: String - Middle names
+     dob: String - Date of Birth, have to be in format '%Y-%m-%d %H:%M:%S'
+     gender: String - 'BOTH','F','I','M','NSP','U'
+     sex: String - Same values as gender.
+     ethnicity: String - Look at patient class for the list of allowed values.
+    """
     _name = 'nh.clinical.adt.patient.register'
     _inherit = ['nh.activity.data']   
     _description = 'ADT Patient Register'   
@@ -215,6 +227,9 @@ class nh_clinical_adt_patient_admit(orm.Model):
 
     
 class nh_clinical_adt_patient_cancel_admit(orm.Model):
+    """
+    Cancels the last admission of the patient. Cancels the current patient spell.
+    """
     _name = 'nh.clinical.adt.patient.cancel_admit'
     _inherit = ['nh.activity.data']  
     _description = 'ADT Cancel Patient Admit'    
@@ -276,6 +291,9 @@ class nh_clinical_adt_patient_cancel_admit(orm.Model):
 
 
 class nh_clinical_adt_patient_discharge(orm.Model):
+    """
+    Discharge a patient from the hospital. Completes the patient spell.
+    """
     _name = 'nh.clinical.adt.patient.discharge'
     _inherit = ['nh.activity.data']  
     _description = 'ADT Patient Discharge'
@@ -329,6 +347,10 @@ class nh_clinical_adt_patient_discharge(orm.Model):
 
 
 class nh_clinical_adt_patient_transfer(orm.Model):
+    """
+    Transfers a patient from a location to another location.
+    It will trigger admission policy in the destination location.
+    """
     _name = 'nh.clinical.adt.patient.transfer'
     _inherit = ['nh.activity.data']
     _description = 'ADT Patient Transfer'      
@@ -428,6 +450,9 @@ class nh_clinical_adt_patient_transfer(orm.Model):
         
 
 class nh_clinical_adt_patient_merge(orm.Model):
+    """
+    Merges a patient into another patient making the resulting patient own all activities.
+    """
     _name = 'nh.clinical.adt.patient.merge'
     _inherit = ['nh.activity.data'] 
     _description = 'ADT Patient Merge'
@@ -476,6 +501,9 @@ class nh_clinical_adt_patient_merge(orm.Model):
         
 
 class nh_clinical_adt_patient_update(orm.Model):
+    """
+    Update patient information.
+    """
     _name = 'nh.clinical.adt.patient.update'
     _inherit = ['nh.activity.data'] 
     _description = 'ADT Patient Update'     
@@ -545,7 +573,9 @@ class nh_clinical_adt_patient_update(orm.Model):
 
 
 class nh_clinical_adt_spell_update(orm.Model):
-
+    """
+    Update patient spell information.
+    """
     _name = 'nh.clinical.adt.spell.update'
     _inherit = ['nh.activity.data']
     _description = 'ADT Spell Update'
@@ -665,6 +695,10 @@ class nh_clinical_adt_spell_update(orm.Model):
 
 
 class nh_clinical_adt_patient_cancel_discharge(orm.Model):
+    """
+    Cancels the last patient discharge. The spell will be reopened. This will fail if the patient has already been
+    admitted again.
+    """
     _name = 'nh.clinical.adt.patient.cancel_discharge'
     _inherit = ['nh.activity.data']
     _description = 'ADT Cancel Patient Discharge'
@@ -769,6 +803,9 @@ class nh_clinical_adt_patient_cancel_discharge(orm.Model):
 
 
 class nh_clinical_adt_patient_cancel_transfer(orm.Model):
+    """
+    Cancels the last patient transfer. Effectively moving the patient back to the origin location.
+    """
     _name = 'nh.clinical.adt.patient.cancel_transfer'
     _inherit = ['nh.activity.data']
     _description = 'ADT Cancel Patient Transfer'

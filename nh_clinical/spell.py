@@ -10,6 +10,11 @@ _logger = logging.getLogger(__name__)
 
 
 class nh_clinical_spell(orm.Model):
+    """
+    A spell represents the time between a patient admission in the hospital and the patient discharge. It will be open
+    as long as the patient remains in the hospital and will be connected to every activity related to that patient
+    during this period of time.
+    """
     _name = 'nh.clinical.spell'
     _inherit = ['nh.activity.data']
     _description = "Spell / Visit"

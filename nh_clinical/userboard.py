@@ -20,6 +20,9 @@ class nh_change_password_wizard(osv.TransientModel):
     }
 
 class nh_clinical_userboard(orm.Model):
+    """
+    SQL View that shows the NH Clinical users and allows to assign roles and responsibilities to them.
+    """
     _name = "nh.clinical.userboard"
     _inherits = {'res.users': 'user_id'}
     _auto = False
@@ -151,6 +154,10 @@ class nh_clinical_userboard(orm.Model):
 
 
 class nh_clinical_admin_userboard(orm.Model):
+    """
+    SQL View that shows the NH Clinical users and allows to assign roles and responsibilities to them. Slightly different
+    functionality for the Admin user.
+    """
     _name = "nh.clinical.admin.userboard"
     _inherits = {'res.users': 'user_id'}
     _auto = False

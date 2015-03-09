@@ -10,6 +10,9 @@ from openerp.addons.nh_activity.activity import except_if
 _logger = logging.getLogger(__name__)
 
 class nh_clinical_device_category(orm.Model):
+    """
+    Represents a device category which groups several types into it.
+    """
     _name = 'nh.clinical.device.category'
 
     _columns = {
@@ -19,6 +22,9 @@ class nh_clinical_device_category(orm.Model):
 
 
 class nh_clinical_device_type(orm.Model):
+    """
+    Represents the specific device type of a device instance.
+    """
     _name = 'nh.clinical.device.type'
     _columns = {
         'category_id': fields.many2one('nh.clinical.device.category', "Device Category"),
@@ -27,6 +33,9 @@ class nh_clinical_device_type(orm.Model):
 
 
 class nh_clinical_device(orm.Model):
+    """
+    Represents a physical device instance.
+    """
     _name = 'nh.clinical.device'
     _columns = {
         'type_id': fields.many2one('nh.clinical.device.type', "Device Type"),
@@ -47,6 +56,9 @@ class nh_clinical_device(orm.Model):
 
 
 class nh_clinical_device_session(orm.Model):
+    """
+    Represents the usage of a device in a patient spell.
+    """
     _name = 'nh.clinical.device.session'
     _description = 'Device Session'
     _inherit = ['nh.activity.data']
@@ -85,6 +97,9 @@ class nh_clinical_device_session(orm.Model):
         
     
 class nh_clinical_device_connect(orm.Model):
+    """
+    Represents the action of connecting a device to a patient.
+    """
     _name = 'nh.clinical.device.connect'
     _inherit = ['nh.activity.data']
     _description = 'Connect Device'
@@ -119,7 +134,11 @@ class nh_clinical_device_connect(orm.Model):
         activity_pool.start(cr, uid, session_activity_id)
         return super(nh_clinical_device_connect, self).complete(cr, SUPERUSER_ID, activity_id, context)
 
+
 class nh_clinical_device_disconnect(orm.Model):
+    """
+    Represents the action of disconnecting a device from a patient.
+    """
     _name = 'nh.clinical.device.disconnect'
     _inherit = ['nh.activity.data']
     _description = 'Disconnect Device'

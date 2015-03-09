@@ -424,6 +424,10 @@ class nh_clinical_location(orm.Model):
         return res
 
     def activate_deactivate(self, cr, uid, location_id, context=None):
+        """
+        Activates the location if it's inactive. Deactivates it if it's active.
+        :return: True if successful
+        """
         location = self.browse(cr, uid, location_id[0], context=context)
         data = {'active': False} if location.active and location.is_available else {'active': True}
         if location.active and not location.is_available:
@@ -431,6 +435,11 @@ class nh_clinical_location(orm.Model):
         return self.write(cr, uid, location.id, data, context=context)
 
     def find_nearest_location_id(self, cr, uid, location_id, usage='ward', context=None):
+        """
+        Returns the closest location with the provided usage.
+        :param usage: String. Can be 'ward', 'bed', 'hospital'...
+        :return: Id of the found location. False if there is no location found.
+        """
         location = self.browse(cr, uid, location_id, context=context)
         if location.usage == usage:
             return location.id
@@ -468,7 +477,8 @@ class nh_clinical_location(orm.Model):
 
 
 class nh_clinical_patient(osv.Model):
-    """NHClinical Patient object, to store all the parameters of the Patient
+    """
+    NHClinical Patient object, to store all the parameters of the Patient
     """
     _name = 'nh.clinical.patient'
     _description = "A Patient"
