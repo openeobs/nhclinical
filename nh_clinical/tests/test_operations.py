@@ -35,6 +35,8 @@ class test_operations(common.SingleTransactionCase):
         cls.placement_pool = cls.registry('nh.clinical.patient.placement')
         cls.move_pool = cls.registry('nh.clinical.patient.move')
         cls.swap_pool = cls.registry('nh.clinical.patient.swap_beds')
+        cls.follow_pool = cls.registry('nh.clinical.patient.follow')
+        cls.unfollow_pool = cls.registry('nh.clinical.patient.unfollow')
 
         cls.apidemo = cls.registry('nh.clinical.api.demo')
 
@@ -163,3 +165,29 @@ class test_operations(common.SingleTransactionCase):
         # test patient data
         check_patient = self.patient_pool.browse(cr, uid, patient_id)
         self.assertTrue(check_patient.current_location_id.id == location_id, msg= "Patient Move Completed: Patient current location not registered correctly")
+
+    def test_patient_following(self):
+        cr, uid = self.cr, self.uid
+        patient_ids = self.patient_ids
+        patient_id = fake.random_element(patient_ids)
+        follow_activity_id = self.follow_pool.create_activity(cr, uid, {}, {'patient_ids': [[4, patient_id]], 'to_user_id': self.nt_id})
+        self.assertTrue(follow_activity_id, msg="Patient Follow: Create activity failed")
+        check_follow = self.activity_pool.browse(cr, uid, follow_activity_id)
+        self.assertTrue(patient_id in [patient.id for patient in check_follow.data_ref.patient_ids], msg="Patient Follow: Incorrect patient")
+        self.assertTrue(check_follow.data_ref.to_user_id.id == self.nt_id, msg="Patient Follow: Incorrect user followd")
+        check_user = self.users_pool.browse(cr, uid, self.nt_id)
+        self.assertTrue(patient_id not in [patient.id for patient in check_user.following_ids], msg="Patient Follow: The user is already following that patient")
+        self.activity_pool.complete(cr, uid, follow_activity_id)
+        check_user = self.users_pool.browse(cr, uid, self.nt_id)
+        self.assertTrue(patient_id in [patient.id for patient in check_user.following_ids], msg="Patient Follow: The user is not following that patient")
+
+        unfollow_activity_id = self.unfollow_pool.create_activity(cr, uid, {}, {'patient_ids': [[4, patient_id]], 'from_user_id': self.nt_id})
+        self.assertTrue(follow_activity_id, msg="Patient Unfollow: Create activity failed")
+        check_unfollow = self.activity_pool.browse(cr, uid, unfollow_activity_id)
+        self.assertTrue(patient_id in [patient.id for patient in check_unfollow.data_ref.patient_ids], msg="Patient Unfollow: Incorrect patient")
+        self.assertTrue(check_unfollow.data_ref.from_user_id.id == self.nt_id, msg="Patient Unfollow: Incorrect user")
+        check_user = self.users_pool.browse(cr, uid, self.nt_id)
+        self.assertTrue(patient_id in [patient.id for patient in check_user.following_ids], msg="Patient Unfollow: The user is not following that patient")
+        self.activity_pool.complete(cr, uid, unfollow_activity_id)
+        check_user = self.users_pool.browse(cr, uid, self.nt_id)
+        self.assertTrue(patient_id not in [patient.id for patient in check_user.following_ids], msg="Patient Unfollow: The user is still following that patient")

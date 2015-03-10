@@ -46,6 +46,11 @@ class res_users(orm.Model):
                                          'user_id',
                                          'location_id',
                                          'Parent Locations of Responsibility'),
+        'following_ids': fields.many2many('nh.clinical.patient',
+                                          'user_patient_rel',
+                                          'user_id',
+                                          'patient_id',
+                                          'Following Patients'),
         'doctor_id': fields.many2one('nh.clinical.doctor', 'Related Doctor')
     }
 

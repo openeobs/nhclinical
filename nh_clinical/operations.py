@@ -317,3 +317,41 @@ class nh_clinical_patient_admission(orm.Model):
         # trigger admission policy activities
         self.trigger_policy(cr, uid, activity_id, location_id=admission.suggested_location_id.id, context=context)
         return res
+
+
+class nh_clinical_patient_follow(orm.Model):
+    _name = 'nh.clinical.patient.follow'
+    _inherit = ['nh.activity.data']
+    _columns = {
+        'patient_ids': fields.many2many('nh.clinical.patient', 'follow_patient_rel', 'follow_id', 'patient_id', 'Patients to Follow', required=True),
+        'to_user_id': fields.many2one('res.users', 'Invited User', required=True)
+    }
+
+    def complete(self, cr, uid, activity_id, context=None):
+        super(nh_clinical_patient_follow, self).complete(cr, uid, activity_id, context)
+        activity_pool = self.pool['nh.activity']
+        user_pool = self.pool['res.users']
+        follow_activity = activity_pool.browse(cr, uid, activity_id, context=context)
+        following_ids = [[4, patient.id] for patient in follow_activity.data_ref.patient_ids]
+        res = user_pool.write(cr, uid, follow_activity.data_ref.to_user_id.id,
+                              {'following_ids': following_ids}, context=context)
+        return res
+
+
+class nh_clinical_patient_unfollow(orm.Model):
+    _name = 'nh.clinical.patient.unfollow'
+    _inherit = ['nh.activity.data']
+    _columns = {
+        'patient_ids': fields.many2many('nh.clinical.patient', 'unfollow_patient_rel', 'follow_id', 'patient_id', 'Patients to stop Following', required=True),
+        'from_user_id': fields.many2one('res.users', 'User', required=True)
+    }
+
+    def complete(self, cr, uid, activity_id, context=None):
+        super(nh_clinical_patient_unfollow, self).complete(cr, uid, activity_id, context)
+        activity_pool = self.pool['nh.activity']
+        user_pool = self.pool['res.users']
+        unfollow_activity = activity_pool.browse(cr, uid, activity_id, context=context)
+        unfollow_ids = [[3, patient.id] for patient in unfollow_activity.data_ref.patient_ids]
+        res = user_pool.write(cr, uid, unfollow_activity.data_ref.from_user_id.id,
+                              {'following_ids': unfollow_ids}, context=context)
+        return res
