@@ -156,7 +156,4 @@ class nh_clinical_spell(orm.Model):
         cr.execute(sql)
         res = cr.dictfetchone()
         user_ids = list(res and set(res['user_ids']) or [])
-        activity = activity_pool.browse(cr, uid, activity_id, context=context)
-        follower_ids = [user.id for user in activity.patient_id.follower_ids]
-        user_ids += follower_ids
-        return list(set(user_ids))
+        return user_ids

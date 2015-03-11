@@ -183,11 +183,10 @@ class test_operations(common.SingleTransactionCase):
         check_patient = self.patient_pool.browse(cr, uid, patient_id)
         self.assertTrue(self.nt_id in [user.id for user in check_patient.follower_ids], msg="Patient Follow: The user is not in the patient followers list")
 
-        unfollow_activity_id = self.unfollow_pool.create_activity(cr, uid, {}, {'patient_ids': [[4, patient_id]], 'from_user_id': self.nt_id})
+        unfollow_activity_id = self.unfollow_pool.create_activity(cr, uid, {}, {'patient_ids': [[4, patient_id]]})
         self.assertTrue(follow_activity_id, msg="Patient Unfollow: Create activity failed")
         check_unfollow = self.activity_pool.browse(cr, uid, unfollow_activity_id)
         self.assertTrue(patient_id in [patient.id for patient in check_unfollow.data_ref.patient_ids], msg="Patient Unfollow: Incorrect patient")
-        self.assertTrue(check_unfollow.data_ref.from_user_id.id == self.nt_id, msg="Patient Unfollow: Incorrect user")
         check_user = self.users_pool.browse(cr, uid, self.nt_id)
         self.assertTrue(patient_id in [patient.id for patient in check_user.following_ids], msg="Patient Unfollow: The user is not following that patient")
         self.activity_pool.complete(cr, uid, unfollow_activity_id)
