@@ -335,6 +335,11 @@ class nh_clinical_patient_follow(orm.Model):
         following_ids = [[4, patient.id] for patient in follow_activity.data_ref.patient_ids]
         res = user_pool.write(cr, uid, follow_activity.data_ref.to_user_id.id,
                               {'following_ids': following_ids}, context=context)
+        patient_ids = [patient.id for patient in follow_activity.data_ref.patient_ids]
+        update_activity_ids = activity_pool.search(cr, uid, [
+            ['patient_id', 'in', patient_ids],
+            ['state', 'not in', ['completed', 'cancelled']]], context=context)
+        [activity_pool.update_activity(cr, SUPERUSER_ID, activity_id, context=context) for activity_id in update_activity_ids]
         return res
 
 
@@ -354,4 +359,9 @@ class nh_clinical_patient_unfollow(orm.Model):
         unfollow_ids = [[3, patient.id] for patient in unfollow_activity.data_ref.patient_ids]
         res = user_pool.write(cr, uid, unfollow_activity.data_ref.from_user_id.id,
                               {'following_ids': unfollow_ids}, context=context)
+        patient_ids = [patient.id for patient in unfollow_activity.data_ref.patient_ids]
+        update_activity_ids = activity_pool.search(cr, uid, [
+            ['patient_id', 'in', patient_ids],
+            ['state', 'not in', ['completed', 'cancelled']]], context=context)
+        [activity_pool.update_activity(cr, SUPERUSER_ID, activity_id, context=context) for activity_id in update_activity_ids]
         return res

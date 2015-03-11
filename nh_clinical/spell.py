@@ -118,6 +118,7 @@ class nh_clinical_spell(orm.Model):
         return super(nh_clinical_spell, self).write(cr, uid, ids, vals, context=context)
 
     def get_activity_user_ids(self, cr, uid, activity_id, context=None):
+        activity_pool = self.pool['nh.activity']
         cr.execute("select location_id from nh_activity where id = %s" % activity_id)
         if not cr.fetchone()[0]:
             return []
@@ -155,4 +156,7 @@ class nh_clinical_spell(orm.Model):
         cr.execute(sql)
         res = cr.dictfetchone()
         user_ids = list(res and set(res['user_ids']) or [])
-        return user_ids
+        activity = activity_pool.browse(cr, uid, activity_id, context=context)
+        follower_ids = [user.id for user in activity.patient_id.follower_ids]
+        user_ids += follower_ids
+        return list(set(user_ids))
