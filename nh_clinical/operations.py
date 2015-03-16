@@ -1,7 +1,7 @@
 from datetime import datetime as dt
 import logging
 
-from openerp.osv import orm, fields
+from openerp.osv import orm, fields, osv
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as dtf
 from openerp import SUPERUSER_ID
 
@@ -323,8 +323,7 @@ class nh_clinical_patient_follow(orm.Model):
     _name = 'nh.clinical.patient.follow'
     _inherit = ['nh.activity.data']
     _columns = {
-        'patient_ids': fields.many2many('nh.clinical.patient', 'follow_patient_rel', 'follow_id', 'patient_id', 'Patients to Follow', required=True),
-        'to_user_id': fields.many2one('res.users', 'Invited User', required=True)
+        'patient_ids': fields.many2many('nh.clinical.patient', 'follow_patient_rel', 'follow_id', 'patient_id', 'Patients to Follow', required=True)
     }
 
     def complete(self, cr, uid, activity_id, context=None):
@@ -333,7 +332,9 @@ class nh_clinical_patient_follow(orm.Model):
         user_pool = self.pool['res.users']
         follow_activity = activity_pool.browse(cr, uid, activity_id, context=context)
         following_ids = [[4, patient.id] for patient in follow_activity.data_ref.patient_ids]
-        res = user_pool.write(cr, uid, follow_activity.data_ref.to_user_id.id,
+        if not follow_activity.user_id:
+            raise osv.except_osv('Error!', 'Cannot complete follow activity without an assigned user to follow the patients')
+        res = user_pool.write(cr, SUPERUSER_ID, follow_activity.user_id.id,
                               {'following_ids': following_ids}, context=context)
         patient_ids = [patient.id for patient in follow_activity.data_ref.patient_ids]
         update_activity_ids = activity_pool.search(cr, uid, [

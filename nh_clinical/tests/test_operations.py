@@ -170,11 +170,11 @@ class test_operations(common.SingleTransactionCase):
         cr, uid = self.cr, self.uid
         patient_ids = self.patient_ids
         patient_id = fake.random_element(patient_ids)
-        follow_activity_id = self.follow_pool.create_activity(cr, uid, {}, {'patient_ids': [[4, patient_id]], 'to_user_id': self.nt_id})
+        follow_activity_id = self.follow_pool.create_activity(cr, uid, {'user_id': self.nt_id}, {'patient_ids': [[4, patient_id]]})
         self.assertTrue(follow_activity_id, msg="Patient Follow: Create activity failed")
         check_follow = self.activity_pool.browse(cr, uid, follow_activity_id)
         self.assertTrue(patient_id in [patient.id for patient in check_follow.data_ref.patient_ids], msg="Patient Follow: Incorrect patient")
-        self.assertTrue(check_follow.data_ref.to_user_id.id == self.nt_id, msg="Patient Follow: Incorrect user followd")
+        self.assertTrue(check_follow.user_id.id == self.nt_id, msg="Patient Follow: Incorrect user followd")
         check_user = self.users_pool.browse(cr, uid, self.nt_id)
         self.assertTrue(patient_id not in [patient.id for patient in check_user.following_ids], msg="Patient Follow: The user is already following that patient")
         self.activity_pool.complete(cr, uid, follow_activity_id)
