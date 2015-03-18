@@ -29,6 +29,7 @@ class nh_clinical_userboard(orm.Model):
     _groups = {'hca': ['NH Clinical HCA Group'],
                'nurse': ['NH Clinical Nurse Group'],
                'ward_manager': ['NH Clinical Ward Manager Group', 'Contact Creation'],
+               'senior_manager': ['NH Clinical Senior Manager Group', 'Contact Creation'],
                'doctor': ['NH Clinical Doctor Group']}
 
     _table = "nh_clinical_userboard"
@@ -40,6 +41,7 @@ class nh_clinical_userboard(orm.Model):
         'hca': fields.boolean('HCA'),
         'nurse': fields.boolean('Nurse'),
         'ward_manager': fields.boolean('Ward Manager'),
+        'senior_manager': fields.boolean('Senior Manager'),
         'doctor': fields.boolean('Doctor')
     }
 
@@ -128,13 +130,17 @@ class nh_clinical_userboard(orm.Model):
                         else false
                     end as ward_manager,
                     case
+                        when ug.groups @> '{"NH Clinical Senior Manager Group"}' then true
+                        else false
+                    end as senior_manager,
+                    case
                         when ug.groups @> '{"NH Clinical Doctor Group"}' then true
                         else false
                     end as doctor
                 from res_users users
                 inner join res_partner partner on partner.id = users.partner_id
                 inner join user_groups ug on ug.id = users.id
-                where ug.groups @> '{"NH Clinical HCA Group"}' or ug.groups @> '{"NH Clinical Nurse Group"}' or ug.groups @> '{"NH Clinical Ward Manager Group"}' or ug.groups @> '{"NH Clinical Doctor Group"}'
+                where ug.groups @> '{"NH Clinical HCA Group"}' or ug.groups @> '{"NH Clinical Nurse Group"}' or ug.groups @> '{"NH Clinical Ward Manager Group"}' or ug.groups @> '{"NH Clinical Senior Manager Group"}' or ug.groups @> '{"NH Clinical Doctor Group"}'
             )
         """ % (self._table, self._table))
 
@@ -152,6 +158,7 @@ class nh_clinical_admin_userboard(orm.Model):
     _groups = {'hca': ['NH Clinical HCA Group'],
                'nurse': ['NH Clinical Nurse Group'],
                'ward_manager': ['NH Clinical Ward Manager Group', 'Contact Creation'],
+               'senior_manager': ['NH Clinical Senior Manager Group', 'Contact Creation'],
                'admin': ['NH Clinical Admin Group', 'Contact Creation'],
                'kiosk': ['NH Clinical Nurse Group'],
                'doctor': ['NH Clinical Doctor Group']}
@@ -165,6 +172,7 @@ class nh_clinical_admin_userboard(orm.Model):
         'hca': fields.boolean('HCA'),
         'nurse': fields.boolean('Nurse'),
         'ward_manager': fields.boolean('Ward Manager'),
+        'senior_manager': fields.boolean('Senior Manager'),
         'doctor': fields.boolean('Doctor'),
         'kiosk': fields.boolean('eObs Kiosk'),
         'admin': fields.boolean('Open eObs Administrator')
@@ -266,6 +274,10 @@ class nh_clinical_admin_userboard(orm.Model):
                         else false
                     end as ward_manager,
                     case
+                        when ug.groups @> '{"NH Clinical Senior Manager Group"}' then true
+                        else false
+                    end as senior_manager,
+                    case
                         when ug.groups @> '{"NH Clinical Doctor Group"}' then true
                         else false
                     end as doctor,
@@ -280,6 +292,6 @@ class nh_clinical_admin_userboard(orm.Model):
                 from res_users users
                 inner join res_partner partner on partner.id = users.partner_id
                 inner join user_groups ug on ug.id = users.id
-                where users.id != 1 and (ug.groups @> '{"NH Clinical HCA Group"}' or ug.groups @> '{"NH Clinical Nurse Group"}' or ug.groups @> '{"NH Clinical Ward Manager Group"}' or ug.groups @> '{"NH Clinical Doctor Group"}' or ug.groups @> '{"NH Clinical Kiosk Group"}' or ug.groups @> '{"NH Clinical Admin Group"}')
+                where users.id != 1 and (ug.groups @> '{"NH Clinical HCA Group"}' or ug.groups @> '{"NH Clinical Nurse Group"}' or ug.groups @> '{"NH Clinical Ward Manager Group"}' or ug.groups @> '{"NH Clinical Senior Manager Group"}' or ug.groups @> '{"NH Clinical Doctor Group"}' or ug.groups @> '{"NH Clinical Kiosk Group"}' or ug.groups @> '{"NH Clinical Admin Group"}')
             )
         """ % (self._table, self._table))

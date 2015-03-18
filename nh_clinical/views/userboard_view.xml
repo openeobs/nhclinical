@@ -13,6 +13,7 @@
                         <filter name="filter_hca" string="HCA Users" domain="[['hca','=',True]]"/>
                         <filter name="filter_nurse" string="Nurse Users" domain="[['nurse','=',True]]"/>
                         <filter name="filter_ward_manager" string="Ward Manager Users" domain="[['ward_manager','=',True]]"/>
+                        <filter name="filter_senior_manager" string="Senior Manager Users" domain="[['senior_manager','=',True]]"/>
                         <filter name="filter_doctor" string="Doctor Users" domain="[['doctor','=',True]]"/>
                         <filter name="filter_kiosk" string="Kiosk Users" domain="[['kiosk','=',True]]"/>
                         <filter name="filter_admin" string="Admin Users" domain="[['admin','=',True]]"/>
@@ -31,6 +32,7 @@
                     <field name="hca"/>
                     <field name="nurse"/>
                     <field name="ward_manager"/>
+                    <field name="senior_manager"/>
                     <field name="doctor"/>
                     <field name="kiosk"/>
                     <field name="admin"/>
