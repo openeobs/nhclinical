@@ -170,27 +170,48 @@ class test_operations(common.SingleTransactionCase):
         cr, uid = self.cr, self.uid
         patient_ids = self.patient_ids
         patient_id = fake.random_element(patient_ids)
+        patient2_id = fake.random_element(patient_ids)
+        while patient2_id == patient_id:
+            patient2_id = fake.random_element(patient_ids)
+
+        # Creating 2 Patient Follow Activities with different groups of patients
         follow_activity_id = self.follow_pool.create_activity(cr, uid, {'user_id': self.nt_id}, {'patient_ids': [[4, patient_id]]})
+        follow_activity_id2 = self.follow_pool.create_activity(cr, uid, {'user_id': self.nt_id}, {'patient_ids': [[6, False, [patient_id, patient2_id]]]})
         self.assertTrue(follow_activity_id, msg="Patient Follow: Create activity failed")
+        self.assertTrue(follow_activity_id2, msg="Patient Follow: Create second activity failed")
+
+        # Checking System state is OK PRE-COMPLETE the first Follow Activity
         check_follow = self.activity_pool.browse(cr, uid, follow_activity_id)
         self.assertTrue(patient_id in [patient.id for patient in check_follow.data_ref.patient_ids], msg="Patient Follow: Incorrect patient")
-        self.assertTrue(check_follow.user_id.id == self.nt_id, msg="Patient Follow: Incorrect user followd")
+        self.assertEqual(check_follow.user_id.id, self.nt_id, msg="Patient Follow: Incorrect user following")
         check_user = self.users_pool.browse(cr, uid, self.nt_id)
         self.assertTrue(patient_id not in [patient.id for patient in check_user.following_ids], msg="Patient Follow: The user is already following that patient")
+
+        # Complete Follow Activity and check System state POST-COMPLETE
         self.activity_pool.complete(cr, uid, follow_activity_id)
         check_user = self.users_pool.browse(cr, uid, self.nt_id)
         self.assertTrue(patient_id in [patient.id for patient in check_user.following_ids], msg="Patient Follow: The user is not following that patient")
+        self.assertFalse(patient2_id in [patient.id for patient in check_user.following_ids], msg="Patient Follow: The user should not be following that patient")
         check_patient = self.patient_pool.browse(cr, uid, patient_id)
+        check_patient2 = self.patient_pool.browse(cr, uid, patient2_id)
         self.assertTrue(self.nt_id in [user.id for user in check_patient.follower_ids], msg="Patient Follow: The user is not in the patient followers list")
+        self.assertFalse(self.nt_id in [user.id for user in check_patient2.follower_ids], msg="Patient Follow: The user should not be in the patient followers list")
 
+        # Create an Unfollow Activity
         unfollow_activity_id = self.unfollow_pool.create_activity(cr, uid, {}, {'patient_ids': [[4, patient_id]]})
         self.assertTrue(follow_activity_id, msg="Patient Unfollow: Create activity failed")
+
+        # Checking System state is OK PRE-COMPLETE the Unfollow Activity
         check_unfollow = self.activity_pool.browse(cr, uid, unfollow_activity_id)
         self.assertTrue(patient_id in [patient.id for patient in check_unfollow.data_ref.patient_ids], msg="Patient Unfollow: Incorrect patient")
         check_user = self.users_pool.browse(cr, uid, self.nt_id)
         self.assertTrue(patient_id in [patient.id for patient in check_user.following_ids], msg="Patient Unfollow: The user is not following that patient")
+
+        # Complete Unfollow Activity and check System state POST-COMPLETE
         self.activity_pool.complete(cr, uid, unfollow_activity_id)
         check_user = self.users_pool.browse(cr, uid, self.nt_id)
         self.assertTrue(patient_id not in [patient.id for patient in check_user.following_ids], msg="Patient Unfollow: The user is still following that patient")
         check_patient = self.patient_pool.browse(cr, uid, patient_id)
-        self.assertTrue(self.nt_id not in [user.id for user in check_patient.follower_ids], msg="Patient Follow: The user still is in the patient followers list")
+        self.assertTrue(self.nt_id not in [user.id for user in check_patient.follower_ids], msg="Patient Unfollow: The user still is in the patient followers list")
+        check_follow2 = self.activity_pool.browse(cr, uid, follow_activity_id2)
+        self.assertEqual(check_follow2.state, 'cancelled', msg="Patient Unfollow: A follow activity containing the unfollowed patient was not cancelled")

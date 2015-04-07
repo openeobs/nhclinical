@@ -355,6 +355,7 @@ class nh_clinical_patient_unfollow(orm.Model):
         super(nh_clinical_patient_unfollow, self).complete(cr, uid, activity_id, context)
         activity_pool = self.pool['nh.activity']
         patient_pool = self.pool['nh.clinical.patient']
+        follow_pool = self.pool['nh.clinical.patient.follow']
         unfollow_activity = activity_pool.browse(cr, uid, activity_id, context=context)
         patient_ids = [patient.id for patient in unfollow_activity.data_ref.patient_ids]
         res = patient_pool.write(cr, uid, patient_ids, {'follower_ids': [[5]]}, context=context)
@@ -362,4 +363,13 @@ class nh_clinical_patient_unfollow(orm.Model):
             ['patient_id', 'in', patient_ids],
             ['state', 'not in', ['completed', 'cancelled']]], context=context)
         [activity_pool.update_activity(cr, SUPERUSER_ID, activity_id, context=context) for activity_id in update_activity_ids]
+        # CANCEL PATIENT FOLLOW ACTIVITIES THAT CONTAIN ANY OF THE UNFOLLOWED PATIENTS
+        follow_ids = []
+        for patient_id in patient_ids:
+            follow_ids += follow_pool.search(cr, uid, [
+                ['patient_ids', 'in', [patient_id]],
+                ['activity_id.state', 'not in', ['completed', 'cancelled']]
+            ])
+        follow_activity_ids = [f.activity_id.id for f in follow_pool.browse(cr, uid, follow_ids, context=context)]
+        [activity_pool.cancel(cr, uid, activity_id, context=context) for activity_id in follow_activity_ids]
         return res
