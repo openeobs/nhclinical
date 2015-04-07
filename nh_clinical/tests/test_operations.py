@@ -174,11 +174,16 @@ class test_operations(common.SingleTransactionCase):
         while patient2_id == patient_id:
             patient2_id = fake.random_element(patient_ids)
 
-        # Creating 2 Patient Follow Activities with different groups of patients
+        # Creating 3 Patient Follow Activities:
+        # 1st one to test Patient Follow
+        # 2nd one to test open follow activities are cancelled when 'unfollowing' a patient
+        # 3rd one to test 2nd case only happens if you created those follow activities
         follow_activity_id = self.follow_pool.create_activity(cr, uid, {'user_id': self.nt_id}, {'patient_ids': [[4, patient_id]]})
         follow_activity_id2 = self.follow_pool.create_activity(cr, uid, {'user_id': self.nt_id}, {'patient_ids': [[6, False, [patient_id, patient2_id]]]})
+        follow_activity_id3 = self.follow_pool.create_activity(cr, self.wmu_id, {'user_id': self.nt_id}, {'patient_ids': [[6, False, [patient_id, patient2_id]]]})
         self.assertTrue(follow_activity_id, msg="Patient Follow: Create activity failed")
         self.assertTrue(follow_activity_id2, msg="Patient Follow: Create second activity failed")
+        self.assertTrue(follow_activity_id3, msg="Patient Follow: Create second activity failed")
 
         # Checking System state is OK PRE-COMPLETE the first Follow Activity
         check_follow = self.activity_pool.browse(cr, uid, follow_activity_id)
@@ -215,3 +220,5 @@ class test_operations(common.SingleTransactionCase):
         self.assertTrue(self.nt_id not in [user.id for user in check_patient.follower_ids], msg="Patient Unfollow: The user still is in the patient followers list")
         check_follow2 = self.activity_pool.browse(cr, uid, follow_activity_id2)
         self.assertEqual(check_follow2.state, 'cancelled', msg="Patient Unfollow: A follow activity containing the unfollowed patient was not cancelled")
+        check_follow3 = self.activity_pool.browse(cr, uid, follow_activity_id3)
+        self.assertNotEqual(check_follow3.state, 'cancelled', msg="Patient Unfollow: A follow activity created by a different user was cancelled")

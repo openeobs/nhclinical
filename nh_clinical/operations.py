@@ -367,6 +367,7 @@ class nh_clinical_patient_unfollow(orm.Model):
         follow_ids = []
         for patient_id in patient_ids:
             follow_ids += follow_pool.search(cr, uid, [
+                ['activity_id.create_uid', '=', uid],
                 ['patient_ids', 'in', [patient_id]],
                 ['activity_id.state', 'not in', ['completed', 'cancelled']]
             ])
