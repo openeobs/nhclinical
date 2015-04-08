@@ -47,7 +47,8 @@ class nh_activity(orm.Model):
         'location_name': fields.related('location_id', 'full_name', type='char', size=150, string='Location Name'),
         'pos_id': fields.many2one('nh.clinical.pos', 'POS', readonly=True),
         'spell_activity_id': fields.many2one('nh.activity', 'Spell Activity', readonly=True),
-        'cancel_reason_id': fields.many2one('nh.cancel.reason', 'Cancellation Reason')
+        'cancel_reason_id': fields.many2one('nh.cancel.reason', 'Cancellation Reason'),
+        'ward_manager_id': fields.many2one('res.users', 'Ward Manager of the ward on Complete/Cancel')
     }
 
     def write(self, cr, uid, ids, vals, context=None):
@@ -72,6 +73,46 @@ class nh_activity_data(orm.AbstractModel):
         'cancelled': []
     }
     _POLICY = {'activities': []}
+
+    def _audit_ward_manager(self, cr, uid, activity_id, context=None):
+        """
+        Looks for the Activity Location and the Ward Manager responsible for the Ward where the Location is.
+        If there is a Ward Manager then it is stored in the 'ward_manager_id' field. If there is no location or
+        the location is not within a ward or there is not a ward manager assigned to the ward, then nothing will be
+        audited.
+        :return: True if the ward_manager_id is stored. False in any other case.
+        """
+        if isinstance(activity_id, list) and len(activity_id) == 1:
+            activity_id = activity_id[0]
+        activity_pool = self.pool['nh.activity']
+        location_pool = self.pool['nh.clinical.location']
+        activity = activity_pool.browse(cr, uid, activity_id, context=context)
+        if activity.location_id:
+            ward_id = location_pool.find_nearest_location_id(cr, uid, activity.location_id.id, 'ward', context=context)
+            ward = location_pool.browse(cr, uid, ward_id, context=context)
+            if ward.assigned_wm_ids:
+                ward_manager_id = ward.assigned_wm_ids[0].id
+                activity_pool.write(cr, uid, activity_id, {'ward_manager_id': ward_manager_id}, context=context)
+                return True
+        return False
+
+    def complete(self, cr, uid, activity_id, context=None):
+        """
+        Extension of the complete method to Audit the Ward Manager responsible for the ward where the activity was
+        completed.
+        """
+        res = super(nh_activity_data, self).complete(cr, uid, activity_id, context=context)
+        self._audit_ward_manager(cr, uid, activity_id, context=context)
+        return res
+
+    def cancel(self, cr, uid, activity_id, context=None):
+        """
+        Extension of the cancel method to Audit the Ward Manager responsible for the ward where the activity was
+        cancelled.
+        """
+        res = super(nh_activity_data, self).cancel(cr, uid, activity_id, context=context)
+        self._audit_ward_manager(cr, uid, activity_id, context=context)
+        return res
 
     def update_activity(self, cr, uid, activity_id, context=None):
         api = self.pool['nh.clinical.api']
