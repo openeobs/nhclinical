@@ -431,13 +431,18 @@ class nh_clinical_location(orm.Model):
     def activate_deactivate(self, cr, uid, location_id, context=None):
         """
         Activates the location if it's inactive. Deactivates it if it's active.
+        Added Audit feature by calling Location Activate / Deactivate Activities instead of just writing active field.
         :return: True if successful
         """
         location = self.browse(cr, uid, location_id[0], context=context)
-        data = {'active': False} if location.active and location.is_available else {'active': True}
-        if location.active and not location.is_available:
-            raise osv.except_osv('Error!', "Can't deactivate a location that is being used.")
-        return self.write(cr, uid, location.id, data, context=context)
+        activity_pool = self.pool['nh.activity']
+        activate_pool = self.pool['nh.clinical.location.activate']
+        deactivate_pool = self.pool['nh.clinical.location.deactivate']
+        if location.active:
+            activity_id = deactivate_pool.create_activity(cr, SUPERUSER_ID, {}, {'location_id': location.id}, context=context)
+        else:
+            activity_id = activate_pool.create_activity(cr, SUPERUSER_ID, {}, {'location_id': location.id}, context=context)
+        return activity_pool.complete(cr, uid, activity_id, context=context)
 
     def find_nearest_location_id(self, cr, uid, location_id, usage='ward', context=None):
         """

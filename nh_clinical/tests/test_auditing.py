@@ -42,6 +42,9 @@ class TestAuditing(common.SingleTransactionCase):
         cls.adt_id = cls.users_pool.search(cr, uid, [('groups_id.name', 'in', ['NH Clinical ADT Group']), ('pos_id', '=', cls.pos_id)])[0]
 
     def test_location_activate(self):
+        """
+        Tests Location Activate activity
+        """
         cr, uid = self.cr, self.uid
         
         # Scenario 1: Activating an inactive location
@@ -72,6 +75,9 @@ class TestAuditing(common.SingleTransactionCase):
             self.activity_pool.complete(cr, uid, activity_id)
         
     def test_location_deactivate(self):
+        """
+        Tests Location Deactivate activity
+        """
         cr, uid = self.cr, self.uid
         
         # Scenario 1: Deactivating an active location
@@ -114,3 +120,36 @@ class TestAuditing(common.SingleTransactionCase):
         activity_id = self.deactivate_pool.create_activity(cr, uid, {}, {'location_id': active_location_id[1]})
         with self.assertRaises(except_orm):
             self.activity_pool.complete(cr, uid, activity_id)
+
+    def test_location_activation_auditing(self):
+        """
+        Tests that Location Activate/Deactivate is being audited
+        """
+        cr, uid = self.cr, self.uid
+
+        # Scenario 1: Deactivating an active location
+        active_location_id = self.location_pool.search(cr, uid, [
+            ['parent_id', '=', self.wt_id],
+            ['active', '=', True],
+            ['is_available', '=', True]])
+        self.assertTrue(active_location_id, msg="Pre-state for Activate/Deactivate Location Auditing: No location found!")
+        self.location_pool.activate_deactivate(cr, self.wmt_id, active_location_id)
+        audit_activity_id = self.activity_pool.search(cr, uid, [
+            ['location_id', '=', active_location_id[0]],
+            ['state', '=', 'completed'],
+            ['data_model', '=', 'nh.clinical.location.deactivate']
+        ])
+        self.assertTrue(audit_activity_id, msg="Audit activity not found after deactivating the Location")
+        audit_activity = self.activity_pool.browse(cr, uid, audit_activity_id[0])
+        self.assertEqual(audit_activity.terminate_uid.id, self.wmt_id, msg="Audit activity: Wrong user recorded")
+
+        # Scenario 2: Activating an inactive location
+        self.location_pool.activate_deactivate(cr, self.wmt_id, active_location_id)
+        audit_activity_id = self.activity_pool.search(cr, uid, [
+            ['location_id', '=', active_location_id[0]],
+            ['state', '=', 'completed'],
+            ['data_model', '=', 'nh.clinical.location.activate']
+        ])
+        self.assertTrue(audit_activity_id, msg="Audit activity not found after activating the Location")
+        audit_activity = self.activity_pool.browse(cr, uid, audit_activity_id[0])
+        self.assertEqual(audit_activity.terminate_uid.id, self.wmt_id, msg="Audit activity: Wrong user recorded")
