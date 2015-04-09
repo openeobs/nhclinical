@@ -36,20 +36,14 @@ class responsibility_allocation_wizard(osv.TransientModel):
 
     def submit(self, cr, uid, ids, context=None):
         data = self.browse(cr, uid, ids[0], context=context)
+        allocation_pool = self.pool['nh.clinical.user.responsibility.allocation']
+        activity_pool = self.pool['nh.activity']
 
-        locations = []
-        if any([g.name == 'NH Clinical Ward Manager Group' for g in data.user_id.groups_id]):
-            for l in data.location_ids:
-                if l.usage == 'ward':
-                    locations.append(l.id)
-                else:
-                    locations += self.get_location_list(cr, uid, l.id, context=context)
-        else:
-            for l in data.location_ids:
-                locations += self.get_location_list(cr, uid, l.id, context=context)
-        vals = {'location_ids': [[6, False, locations]]}
+        locations = [loc.id for loc in data.location_ids]
 
-        user_pool = self.pool['res.users']
-        user_pool.write(cr, uid, data.user_id.id, vals, context=context)
+        activity_id = allocation_pool.create_activity(cr, uid, {}, {
+            'responsible_user_id': data.user_id.id,
+            'location_ids': [[6, False, locations]]}, context=context)
+        activity_pool.complete(cr, uid, activity_id, context=context)
 
         return {'type': 'ir.actions.act_window_close'}
