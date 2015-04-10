@@ -34,7 +34,7 @@ class TestCookieFix(SingleTransactionCase):
 
         with request:
             result = _dispatch_nodb()
-        response = root.get_response(root, request, result, explicit_session)
+        response = root.get_response(request, result, explicit_session)
         cookie = [h for h in response.headers if h[0] == 'Set-Cookie'][0]
         cookie_data = [kv.split('=') for kv in [l for l in cookie[1].split('; ')]]
         cookie_age = [int(c[1]) for c in cookie_data if c[0] == 'Max-Age'][0]

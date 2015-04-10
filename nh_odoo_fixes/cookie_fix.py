@@ -1,7 +1,7 @@
 from openerp.http import *
 from werkzeug import exceptions
 
-@staticmethod
+
 def get_response(self, httprequest, result, explicit_session):
     """
     Override Odoo's default 3 month cookie timeout with our own
