@@ -33,31 +33,14 @@ def data_model_event(callback=None):
             self, cr, uid, activity_id = args[:4]
             if isinstance(activity_id, list) and len(activity_id) == 1:
                 activity_id = activity_id[0]
-            assert isinstance(activity_id, (int, long)) and activity_id > 0, \
-                "activity_id must be INT or LONG and > 0, found type='%s', value=%s, f='%s'" \
-                % (type(activity_id), activity_id, f)
+            if not isinstance(activity_id, (int, long)):
+                raise osv.except_osv('Type Error!', "activity_id must be int or long, found to be %s" % type(activity_id))
+            elif activity_id < 1:
+                raise osv.except_osv('ID Error!', "activity_id must be > 0, found to be %s" % activity_id)
             activity = self.browse(cr, uid, activity_id)
             data_model = self.pool[activity.data_model]
-            
-            handlers = [h for h in self._handlers
-                        if h['trigger_model'] == activity.data_model and h['trigger_method'] == f.__name__]
-            
-            if handlers:  # run before handlers
-                event = Event(model=data_model, method=f.__name__, activity=activity, 
-                              data=activity.data_ref, args=args, kwargs=kwargs)
-                [eval("self.pool['%s'].%s(cr, uid[1], args[2], event)" % (h['handler_model'], h['handler_method']))
-                    for h in handlers if h['when'] == 'before']
-            
-            f(*args, **kwargs)  # FIXME: should we execute this f at all?
+            f(*args, **kwargs)
             res = eval("data_model.%s(*args[1:], **kwargs)" % f.__name__)
-            
-            if handlers:  # run after handlers
-                activity = self.browse(cr, uid, activity_id)
-                event = Event(model=data_model, method=f.__name__, activity=activity, 
-                              data=activity.data_ref, args=args, kwargs=kwargs)
-                [eval("self.pool['%s'].%s(cr, uid, event)" % (h['handler_model'], h['handler_method']))
-                    for h in handlers if h['when'] == 'after']
-
             return res
         return wrapper
     return decorator
@@ -132,18 +115,14 @@ class nh_activity(orm.Model):
 
     def create(self, cr, uid, vals, context=None):
         if not vals.get('data_model'):
-            raise orm.except_orm('Exception!', msg="data_model is not defined!")
-
+            raise osv.except_osv('Error!', "data_model is not defined!")
         data_model_pool = self.pool.get(vals['data_model'])
-
         if not data_model_pool:
-            raise orm.except_orm('Exception!', msg="data_model does not exist in the model pool!")
-
+            raise osv.except_osv('Error!', "data_model does not exist in the model pool!")
         if 'summary' not in vals:
             vals.update({'summary': data_model_pool._description})
 
         activity_id = super(nh_activity, self).create(cr, uid, vals, context)
-
         _logger.debug("activity '%s' created, activity.id=%s" % (vals.get('data_model'), activity_id))
         return activity_id
 
@@ -163,131 +142,94 @@ class nh_activity(orm.Model):
             for created in activity.created_ids:
                 created_ids += self.get_recursive_created_ids(cr, uid, created.id, context=context)
             return created_ids
-    
-    def activity_rank_map(self, cr, uid, 
-                          partition_by="user_id", where=None,
-                          partition_order="id desc",
-                          rank_order="desc", limit=None):
-        
-        args = {
-            "partition_by": partition_by,
-            "where": where and "where %s" % where or "",
-            "partition_order": partition_order,
-            "rank_order": rank_order,
-            "limit": limit and "limit %s" % limit or ""
-        }
-        sql = """
-            select 
-                id,
-                rank() over (partition by %(partition_by)s order by %(partition_order)s) as rank
-            from nh_activity
-            %(where)s
-            order by rank %(rank_order)s
-            %(limit)s
-        """ % args
-        cr.execute(sql)
-        res = {activity['rank']: activity['id'] for activity in cr.dictfetchall()}
-        return res 
+
     # DATA API
 
     @data_model_event(callback="start_act_window")
     def start_act_window(self, cr, uid, activity_id, fields, context=None):
-        return {}
+        return True
 
     @data_model_event(callback="schedule_act_window")
     def schedule_act_window(self, cr, uid, activity_id, fields, context=None):
-        return {}
+        return True
 
     @data_model_event(callback="submit_act_window")
     def submit_act_window(self, cr, uid, activity_id, fields, context=None):
-        return {}
+        return True
 
     @data_model_event(callback="complete_act_window")
     def complete_act_window(self, cr, uid, activity_id, fields, context=None):
-        return {}
+        return True
 
     @data_model_event(callback="cancel_act_window")
     def cancel_act_window(self, cr, uid, activity_id, fields, context=None):
-        return {}
+        return True
 
     @data_model_event(callback="update_activity")
     def update_activity(self, cr, uid, activity_id, context=None):
-        assert isinstance(activity_id, (int, long)), "activity_id must be int or long, found to be %s" % type(
-            activity_id)
-        return {}
+        return True
 
     @data_model_event(callback="submit")
     def submit(self, cr, uid, activity_id, vals, context=None):
-        assert isinstance(activity_id, (int, long)), "activity_id must be int or long, found to be %s" % type(
-            activity_id)
-        assert isinstance(vals, dict), "vals must be a dict, found to be %s" % type(vals)
-        return {}
+        if not isinstance(vals, dict):
+            raise osv.except_osv('Type Error!', "vals must be a dict, found to be %s" % type(vals))
+        return True
 
     # MGMT API
     @data_model_event(callback="schedule")
     def schedule(self, cr, uid, activity_id, date_scheduled=None, context=None):
-        assert isinstance(activity_id, (int, long)), "activity_id must be int or long, found to be %s" % type(
-            activity_id)
-        #FIXME: Why is this carrying out checks but then doing nothing and returning nothing??
         if date_scheduled:
+            if isinstance(date_scheduled, datetime):
+                return True
+            elif not isinstance(date_scheduled, str):
+                raise osv.except_osv('Type Error!', "date must be a datetime or a date formatted string, "
+                                                    "found to be %s" % type(date_scheduled))
             date_formats = ['%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M', '%Y-%m-%d %H', '%Y-%m-%d']
             res = []
             for df in date_formats:
                 try:
-                    # FIXME: Adding a check for datetime format.  We should add an assert to only allow what we want
-                    # through here though
-                    if not isinstance(date_scheduled, datetime):
-                        datetime.strptime(date_scheduled, df)
+                    datetime.strptime(date_scheduled, df)
                 except ValueError:
                     res.append(False)
                 else:
                     res.append(True)
-        return {}
+            if not any(res):
+                raise osv.except_osv('Format Error!', "Expected date formatted string, found %s" % date_scheduled)
+        return True
 
     @data_model_event(callback="assign")
     def assign(self, cr, uid, activity_id, user_id, context=None):
-        assert isinstance(activity_id, (int, long)), "activity_id must be int or long, found to be %s" % type(
-            activity_id)
-        assert isinstance(user_id, (int, long)), "user_id must be int or long, found to be %s" % type(user_id)
-        return {}
+        if not isinstance(user_id, (int, long)):
+            raise osv.except_osv('Type Error!', "user_id must be int or long, found to be %s" % type(user_id))
+        return True
 
     @data_model_event(callback="unassign")
     def unassign(self, cr, uid, activity_id, context=None):
-        assert isinstance(activity_id, (int, long)), "activity_id must be int or long, found to be %s" % type(
-            activity_id)
-        return {}
+        return True
 
     @data_model_event(callback="start")
     def start(self, cr, uid, activity_id, context=None):
-        assert isinstance(activity_id, (int, long)), "activity_id must be int or long, found to be %s" % type(
-            activity_id)
-        return {}
+        return True
 
     @data_model_event(callback="complete")
     def complete(self, cr, uid, activity_id, context=None):
-        if isinstance(activity_id, list) and len(activity_id) == 1:
-            activity_id = activity_id[0]
-        assert isinstance(activity_id, (int, long)), "activity_id must be int or long, found to be %s" % type(
-            activity_id)
-        return {}
+        return True
 
     @data_model_event(callback="cancel")
     def cancel(self, cr, uid, activity_id, context=None):
-        assert isinstance(activity_id, (int, long)), "activity_id must be int or long, found to be %s" % type(
-            activity_id)
-        return {}
+        return True
 
 
 class nh_activity_data(orm.AbstractModel):
     _name = 'nh.activity.data'
     _transitions = {
         'new': ['schedule', 'start', 'complete', 'cancel', 'submit', 'assign', 'unassign'],
-        'scheduled': ['start', 'complete', 'cancel', 'submit', 'assign', 'unassign'],
+        'scheduled': ['schedule', 'start', 'complete', 'cancel', 'submit', 'assign', 'unassign'],
         'started': ['complete', 'cancel', 'submit', 'assign', 'unassign'],
         'completed': ['cancel'],
         'cancelled': []
     }
-    _description = _name  #"Activity Data Base Model"
+    _description = 'Undefined Activity'
     _start_view_xmlid = None
     _schedule_view_xmlid = None
     _submit_view_xmlid = None
@@ -297,6 +239,13 @@ class nh_activity_data(orm.AbstractModel):
 
     def is_action_allowed(self, state, action):
         return action in self._transitions[state]
+
+    def check_action(self, state, action):
+        if not self.is_action_allowed(state, action):
+            raise osv.except_osv('Transition Error!',
+                                 "event '%s' on activity type '%s' can not be executed from state '%s'" %
+                                 (action, self._name, state))
+        return True
     
     _columns = {
         'name': fields.char('Name', size=256),
@@ -313,25 +262,16 @@ class nh_activity_data(orm.AbstractModel):
         return super(nh_activity_data, self).create(cr, uid, vals, context)
 
     def create_activity(self, cr, uid, vals_activity={}, vals_data={}, context=None):
-        assert isinstance(vals_activity, dict), 'vals_activity must be a dict, found {}'.format(type(vals_activity))
-        assert isinstance(vals_data, dict), 'vals_data must be a dict, found {}'.format(type(vals_data))
+        if not isinstance(vals_activity, dict):
+            raise osv.except_osv('Type Error!', 'vals_activity must be a dict, found {}'.format(type(vals_activity)))
+        if not isinstance(vals_data, dict):
+            raise osv.except_osv('Type Error!', 'vals_data must be a dict, found {}'.format(type(vals_data)))
         activity_pool = self.pool['nh.activity']
         vals_activity.update({'data_model': self._name})
         new_activity_id = activity_pool.create(cr, uid, vals_activity, context)
         if vals_data:
             activity_pool.submit(cr, uid, new_activity_id, vals_data, context)
         return new_activity_id
-
-    def _ui_window(self, cr, uid, ids, context=None):
-        active_id = context.get('active_id', False)
-        if active_id:
-            activity_pool = self.pool['nh.activity']
-            activity_pool.write(cr, uid, active_id, {'data_ref': "%s,%s" % (self._name, str(ids[0]))})
-            activity = activity_pool.browse(cr, uid, active_id, context)
-            activity_pool.update_activity(cr, SUPERUSER_ID, activity.id, context)
-            activity_pool.complete(cr, uid, activity.id, context)
-            _logger.debug("activity '%s', activity.id=%s data completed via UI" % (activity.data_model, activity.id))
-        return {'type': 'ir.actions.act_window_close'}
 
     def submit_ui(self, cr, uid, ids, context=None):
         if context.get('active_id'):
@@ -399,20 +339,16 @@ class nh_activity_data(orm.AbstractModel):
     def start(self, cr, uid, activity_id, context=None):
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
-        if not self.is_action_allowed(activity.state, 'start'):
-            osv.except_osv('Error!', "activity of type '%s' can not be started from state '%s'" % (activity.data_model, activity.state))
+        self.check_action(activity.state, 'start')
         activity_pool.write(cr, uid, activity_id, {'state': 'started', 'date_started': datetime.now().strftime(DTF)}, context=context)
         _logger.debug("activity '%s', activity.id=%s started" % (activity.data_model, activity.id))
         return True
 
     def complete(self, cr, uid, activity_id, context=None):
-        if isinstance(activity_id, list) and len(activity_id) == 1:
-            activity_id = activity_id[0]
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
-        if not self.is_action_allowed(activity.state, 'complete'):
-            osv.except_osv('Error!', "activity of type '%s' can not be completed from state '%s'" % (activity.data_model, activity.state))
-        activity_pool.write(cr, uid, activity.id, 
+        self.check_action(activity.state, 'complete')
+        activity_pool.write(cr, uid, activity.id,
                             {'state': 'completed', 'terminate_uid': uid,
                              'date_terminated': datetime.now().strftime(DTF)}, context=context)
         _logger.debug("activity '%s', activity.id=%s completed" % (activity.data_model, activity.id))
@@ -421,10 +357,9 @@ class nh_activity_data(orm.AbstractModel):
     def assign(self, cr, uid, activity_id, user_id, context=None):
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
-        if not self.is_action_allowed(activity.state, 'assign'):
-            osv.except_osv('Error!', "activity of type '%s' can not be assigned in state '%s'" % (activity.data_model, activity.state))
+        self.check_action(activity.state, 'assign')
         if activity.user_id:
-            osv.except_osv('Error!', "activity is already assigned to '%s'" % activity.user_id.name)
+            raise osv.except_osv('Error!', "activity is already assigned to '%s'" % activity.user_id.name)
         activity_pool.write(cr, uid, activity_id, {'user_id': user_id}, context=context)
         _logger.debug("activity '%s', activity.id=%s assigned to user.id=%s" % (activity.data_model, activity.id, user_id))
         return True
@@ -432,12 +367,11 @@ class nh_activity_data(orm.AbstractModel):
     def unassign(self, cr, uid, activity_id, context=None):
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
-        if not self.is_action_allowed(activity.state, 'unassign'):
-            osv.except_osv('Error!', "activity of type '%s' can not be unassigned in state '%s'" % (activity.data_model, activity.state))
+        self.check_action(activity.state, 'unassign')
         if not activity.user_id:
-            osv.except_osv('Error!', "activity is not assigned yet!")
+            raise osv.except_osv('Error!', "activity is not assigned yet!")
         if uid != activity.user_id.id:
-            osv.except_osv('Error!', "only the activity owner is allowed to unassign it!")
+            raise osv.except_osv('Error!', "only the activity owner is allowed to unassign it!")
         activity_pool.write(cr, uid, activity_id, {'user_id': False}, context=context)
         _logger.debug("activity '%s', activity.id=%s unassigned" % (activity.data_model, activity.id))
         return True
@@ -445,9 +379,8 @@ class nh_activity_data(orm.AbstractModel):
     def cancel(self, cr, uid, activity_id, context=None):
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context)
-        if not self.is_action_allowed(activity.state, 'cancel'):
-            osv.except_osv('Error!', "activity of type '%s' can not be cancelled in state '%s'" % (activity.data_model, activity.state))
-        activity_pool.write(cr, uid, activity_id, {'state': 'cancelled', 
+        self.check_action(activity.state, 'cancel')
+        activity_pool.write(cr, uid, activity_id, {'state': 'cancelled',
                             'terminate_uid': uid, 'date_terminated': datetime.now().strftime(DTF)}, context=context)
         _logger.debug("activity '%s', activity.id=%s cancelled" % (activity.data_model, activity.id))
         return True
@@ -455,10 +388,9 @@ class nh_activity_data(orm.AbstractModel):
     def schedule(self, cr, uid, activity_id, date_scheduled=None, context=None):
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
-        if not self.is_action_allowed(activity.state, 'schedule'):
-            osv.except_osv('Error!', "activity of type '%s' can not be scheduled in state '%s'" % (activity.data_model, activity.state))
+        self.check_action(activity.state, 'schedule')
         if not activity.date_scheduled and not date_scheduled:
-            osv.except_osv('Error!', "Schedule date is neither set on activity nor passed to the method")
+            raise osv.except_osv('Error!', "Schedule date is neither set on activity nor passed to the method")
         date_scheduled = date_scheduled or activity.date_scheduled
         activity_pool.write(cr, uid, activity_id, {'date_scheduled': date_scheduled, 'state': 'scheduled'}, context=context)
         _logger.debug("activity '%s', activity.id=%s scheduled, date_scheduled='%s'" % (
@@ -467,9 +399,8 @@ class nh_activity_data(orm.AbstractModel):
 
     def submit(self, cr, uid, activity_id, vals, context=None):
         activity_pool = self.pool['nh.activity']
-        activity = activity_pool.browse(cr, uid, activity_id, context)
-        if not self.is_action_allowed(activity.state, 'submit'):
-            osv.except_osv('Error!', "Data can't be submitted to activity of type '%s' in state '%s'" % (activity.data_model, activity.state))
+        activity = activity_pool.browse(cr, uid, activity_id, context=context)
+        self.check_action(activity.state, 'submit')
         data_vals = vals.copy()
         if not activity.data_ref:
             _logger.debug(
@@ -483,12 +414,12 @@ class nh_activity_data(orm.AbstractModel):
             self.write(cr, uid, activity.data_ref.id, vals, context=context)
 
         self.update_activity(cr, SUPERUSER_ID, activity_id, context=context)
-        return {}
+        return True
 
     def update_activity(self, cr, uid, activity_id, context=None):
         """
             Hook for data-driven activity update
             Should be called on methods that change activity data
         """
-        return {}
+        return True
 
