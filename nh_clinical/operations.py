@@ -371,6 +371,7 @@ class nh_clinical_patient_unfollow(orm.Model):
                 ['patient_ids', 'in', [patient_id]],
                 ['activity_id.state', 'not in', ['completed', 'cancelled']]
             ])
+        follow_ids = list(set(follow_ids))
         follow_activity_ids = [f.activity_id.id for f in follow_pool.browse(cr, uid, follow_ids, context=context)]
         [activity_pool.cancel(cr, uid, activity_id, context=context) for activity_id in follow_activity_ids]
         return res
