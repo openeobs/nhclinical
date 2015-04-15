@@ -364,7 +364,9 @@ class TestActivity(common.SingleTransactionCase):
         self.assertTrue(self.test_model_pool.check_action('scheduled', 'schedule'))
         with self.assertRaises(except_orm):
             self.test_model_pool.check_action('started', 'schedule')
+        with self.assertRaises(except_orm):
             self.test_model_pool.check_action('completed', 'schedule')
+        with self.assertRaises(except_orm):
             self.test_model_pool.check_action('cancelled', 'schedule')
         
         # Scenario 2: Start action
@@ -372,7 +374,9 @@ class TestActivity(common.SingleTransactionCase):
         self.assertTrue(self.test_model_pool.check_action('scheduled', 'start'))
         with self.assertRaises(except_orm):
             self.test_model_pool.check_action('started', 'start')
+        with self.assertRaises(except_orm):
             self.test_model_pool.check_action('completed', 'start')
+        with self.assertRaises(except_orm):
             self.test_model_pool.check_action('cancelled', 'start')
         
         # Scenario 3: Complete action
@@ -381,6 +385,7 @@ class TestActivity(common.SingleTransactionCase):
         self.assertTrue(self.test_model_pool.check_action('started', 'complete'))
         with self.assertRaises(except_orm):
             self.test_model_pool.check_action('completed', 'complete')
+        with self.assertRaises(except_orm):
             self.test_model_pool.check_action('cancelled', 'complete')
         
         # Scenario 4: Cancel action
@@ -397,6 +402,7 @@ class TestActivity(common.SingleTransactionCase):
         self.assertTrue(self.test_model_pool.check_action('started', 'submit'))
         with self.assertRaises(except_orm):
             self.test_model_pool.check_action('completed', 'submit')
+        with self.assertRaises(except_orm):
             self.test_model_pool.check_action('cancelled', 'submit')
         
         # Scenario 6: Assign action
@@ -405,6 +411,7 @@ class TestActivity(common.SingleTransactionCase):
         self.assertTrue(self.test_model_pool.check_action('started', 'assign'))
         with self.assertRaises(except_orm):
             self.test_model_pool.check_action('completed', 'assign')
+        with self.assertRaises(except_orm):
             self.test_model_pool.check_action('cancelled', 'assign')
         
         # Scenario 7: Unassign action
@@ -413,6 +420,7 @@ class TestActivity(common.SingleTransactionCase):
         self.assertTrue(self.test_model_pool.check_action('started', 'unassign'))
         with self.assertRaises(except_orm):
             self.test_model_pool.check_action('completed', 'unassign')
+        with self.assertRaises(except_orm):
             self.test_model_pool.check_action('cancelled', 'unassign')
 
     def test_create_activity(self):
@@ -434,5 +442,5 @@ class TestActivity(common.SingleTransactionCase):
         # Scenario 3: Create a new Activity with wrong data parameters
         with self.assertRaises(except_orm):
             activity_id = self.test_model_pool.create_activity(cr, uid, 'test', {})
+        with self.assertRaises(except_orm):
             activity_id = self.test_model_pool.create_activity(cr, uid, {}, 'test')
-
