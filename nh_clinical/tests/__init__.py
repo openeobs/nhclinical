@@ -1,3 +1,4 @@
+import test_location
 import test_new_demo
 import test_adt
 import test_operations
