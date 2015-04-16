@@ -88,8 +88,11 @@ class nh_activity_data(orm.AbstractModel):
         location_pool = self.pool['nh.clinical.location']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
         if activity.location_id:
-            ward_id = location_pool.find_nearest_location_id(cr, uid, activity.location_id.id, 'ward', context=context)
-            ward = location_pool.browse(cr, uid, ward_id, context=context)
+            if activity.location_id.usage != 'ward':
+                ward_id = location_pool.get_closest_parent_id(cr, uid, activity.location_id.id, 'ward', context=context)
+                ward = location_pool.browse(cr, uid, ward_id, context=context)
+            else:
+                ward = activity.location_id
             if ward.assigned_wm_ids:
                 ward_manager_id = ward.assigned_wm_ids[0].id
                 activity_pool.write(cr, uid, activity_id, {'ward_manager_id': ward_manager_id}, context=context)
