@@ -20,7 +20,7 @@ class Event(object):
         self.activity =kwargs.get('activity', None)
         self.data = kwargs.get('data', None)
         self.args = kwargs.get('args', [])
-        self.kwargs  = kwargs.get('kwargs', {})
+        self.kwargs = kwargs.get('kwargs', {})
     
     def __repr__(self):
         res = "%s::%s()" % (self.model, self.method)
