@@ -134,16 +134,16 @@ class nh_clinical_location(orm.Model):
     _types = [('poc', 'Point of Care'), ('structural', 'Structural'), ('virtual', 'Virtual'), ('pos', 'POS')]
     _usages = [('bed', 'Bed'), ('bay', 'Bay'),('ward', 'Ward'), ('room', 'Room'),('department', 'Department'), ('hospital', 'Hospital')]
 
-    def _location2pos_id(self, cr, uid, ids, field, args, context=None):
+    def _get_pos_id(self, cr, uid, ids, field, args, context=None):
         res = {}
         pos_pool = self.pool['nh.clinical.pos']
         for location in self.browse(cr, uid, ids, context):
-            pos_location_id = self.search(cr, uid, [['parent_id','=',False],['child_ids','child_of',location.id]])
-            pos_location_id = pos_location_id and pos_location_id[0] or False
-            pos_id = pos_pool.search(cr, uid, [['location_id','=',pos_location_id]])
-            res[location.id] = pos_id and pos_id[0] or False
+            pos_location_id = self.search(cr, uid, [['parent_id', '=', False], ['child_ids', 'child_of', location.id]])
+            pos_location_id = pos_location_id[0] if pos_location_id else False
+            pos_id = pos_pool.search(cr, uid, [['location_id', '=', pos_location_id]])
+            res[location.id] = pos_id[0] if pos_id else False
             if not pos_id:
-                _logger.warning("pos_id not found for location '%s', id=%s" % (location.code, location.id))
+                _logger.debug("pos_id not found for location '%s', id=%s" % (location.code, location.id))
         return res
 
     def _pos2location_id(self, cr, uid, ids, context=None):
@@ -154,102 +154,99 @@ class nh_clinical_location(orm.Model):
 
     def _is_available(self, cr, uid, ids, field, args, context=None):
         res = {}
-        available_location_ids = self.get_available_location_ids(cr, uid, context=context)
-        for location_id in ids:
-            res[location_id] = location_id in available_location_ids
+        for location in self.browse(cr, uid, ids, context):
+            available_location_ids = self.get_available_location_ids(cr, uid, usages=[location.usage], context=context)
+            res[location.id] = location.id in available_location_ids
         return res
 
-    def _placement2location_id(self, cr, uid, ids, context=None):
-        sql = """
-            select distinct m.location_id from nh_activity a
-            inner join nh_clinical_patient_move m on a.data_model = 'nh.clinical.patient.move' and m.activity_id = a.id
-            where a.state = 'completed'
-        """
-        cr.execute(sql)
-        res = [rec['location_id'] for rec in cr.dictfetchall()]
-        return res
-
-    def _get_patient_ids (self, cr, uid, ids, field, args, context=None):
+    def _get_patient_ids(self, cr, uid, ids, field, args, context=None):
         res = {}
         patient_pool = self.pool['nh.clinical.patient']
-        for lid in ids:
-            res[lid] = patient_pool.search(cr, uid, [('current_location_id', 'child_of', lid)], context=context)
+        for loc in self.browse(cr, uid, ids, context=context):
+            res[loc.id] = patient_pool.search(cr, uid, [('current_location_id', 'child_of', loc.id)], context=context)
         return res
+
+    def _get_user_ids(self, cr, uid, location_id, group_names=None, recursive=True, context=None):
+        loc = self.browse(cr, uid, location_id, context=context)
+        if not group_names:
+            group_names = []
+        res = []
+        if recursive:
+            if loc.child_ids:
+                for child in loc.child_ids:
+                    res += self._get_user_ids(cr, uid, child.id, group_names, context=context)
+        for user in loc.user_ids:
+            if not group_names:
+                res += [user.id]
+            elif any([g.name in group_names for g in user.groups_id]):
+                res += [user.id]
+        return list(set(res))
 
     def _get_hca_ids(self, cr, uid, ids, field, args, context=None):
         res = {}
         for loc in self.browse(cr, uid, ids, context=context):
-            user_ids = []
-            for user in loc.user_ids:
-                if any([g.name == 'NH Clinical HCA Group' for g in user.groups_id]):
-                    user_ids.append(user.id)
-            res[loc.id] = list(set(user_ids))
+            res[loc.id] = self._get_user_ids(cr, uid, loc.id, group_names=['NH Clinical HCA Group'], context=context)
         return res
 
     def _get_nurse_ids(self, cr, uid, ids, field, args, context=None):
         res = {}
         for loc in self.browse(cr, uid, ids, context=context):
-            user_ids = []
-            for user in loc.user_ids:
-                if any([g.name == 'NH Clinical Nurse Group' for g in user.groups_id]):
-                    user_ids.append(user.id)
-            res[loc.id] = list(set(user_ids))
+            res[loc.id] = self._get_user_ids(cr, uid, loc.id, group_names=['NH Clinical Nurse Group'], context=context)
         return res
 
     def _get_wm_ids(self, cr, uid, ids, field, args, context=None):
         res = {}
         for loc in self.browse(cr, uid, ids, context=context):
-            user_ids = []
-            for user in loc.user_ids:
-                if any([g.name == 'NH Clinical Ward Manager Group' for g in user.groups_id]):
-                    user_ids.append(user.id)
-            res[loc.id] = list(set(user_ids))
+            if loc.usage == 'ward':
+                res[loc.id] = self._get_user_ids(cr, uid, loc.id, group_names=['NH Clinical Ward Manager Group'],
+                                                 recursive=False, context=context)
+            else:
+                res[loc.id] = self._get_user_ids(cr, uid, loc.id, group_names=['NH Clinical Ward Manager Group'],
+                                                 context=context)
         return res
 
     def _get_doctor_ids(self, cr, uid, ids, field, args, context=None):
         res = {}
         for loc in self.browse(cr, uid, ids, context=context):
-            user_ids = []
-            for user in loc.user_ids:
-                if any([g.name == 'NH Clinical Doctor Group' for g in user.groups_id]):
-                    user_ids.append(user.id)
-            for child in loc.child_ids:
-                child_res = self._get_doctor_ids(cr, uid, child.id, 'assigned_doctor_ids', None, context=context)
-                user_ids += child_res[child.id]
-            res[loc.id] = list(set(user_ids))
+            res[loc.id] = self._get_user_ids(cr, uid, loc.id,
+                                             group_names=['NH Clinical Doctor Group',
+                                                          'NH Clinical Junior Doctor Group',
+                                                          'NH Clinical Consultant Group',
+                                                          'NH Clinical Registrar Group'],
+                                             context=context)
         return res
-
-    def _get_users(self, cr, uid, location_id, group_name, context=None):
-        loc = self.browse(cr, uid, location_id, context=context)
-        res = []
-        if loc.child_ids:
-            for child in loc.child_ids:
-                res += self._get_users(cr, uid, child.id, group_name, context=context)
-        for user in loc.user_ids:
-            if any([g.name == group_name for g in user.groups_id]):
-                res += [user.id]
-        return list(set(res))
 
     def _get_hcas(self, cr, uid, ids, field, args, context=None):
         res = {}
-        for loc_id in ids:
-            res[loc_id] = len(self._get_users(cr, uid, loc_id, 'NH Clinical HCA Group', context=context))
+        for loc in self.browse(cr, uid, ids, context=context):
+            res[loc.id] = len(self._get_user_ids(cr, uid, loc.id, group_names=['NH Clinical HCA Group'],
+                                                 context=context))
         return res
 
     def _get_nurses(self, cr, uid, ids, field, args, context=None):
         res = {}
-        for loc_id in ids:
-            res[loc_id] = len(self._get_users(cr, uid, loc_id, 'NH Clinical Nurse Group', context=context))
+        for loc in self.browse(cr, uid, ids, context=context):
+            res[loc.id] = len(self._get_user_ids(cr, uid, loc.id, group_names=['NH Clinical Nurse Group'],
+                                                 context=context))
         return res
 
-    def _get_related_patients(self, cr, uid, ids, field, args, context=None):
+    def _get_waiting_patients(self, cr, uid, ids, field, args, context=None):
+        """
+        Returns the number of patients waiting to be allocated into a location within the selected location.
+        Which means patients that have open patient placement activities related to this location.
+        """
         res = {}
         placement_pool = self.pool['nh.clinical.patient.placement']
         for loc in self.browse(cr, uid, ids, context=context):
-            res[loc.id] = len(placement_pool.search(cr, uid, [('suggested_location_id', '=', loc.id), ('state', 'not in', ['completed', 'cancelled'])]))
+            res[loc.id] = len(placement_pool.search(cr, uid, [('suggested_location_id', '=', loc.id),
+                                                              ('state', 'not in', ['completed', 'cancelled'])]))
         return res
 
-    def _get_related_patients_childs(self, cr, uid, ids, field, args, context=None):
+    def _get_child_patients(self, cr, uid, ids, field, args, context=None):
+        """
+        Returns the number of patients related to the child locations of this location. Number of patients
+        related to this location are not included.
+        """
         res = {}
         for loc in self.browse(cr, uid, ids, context=context):
             sum = 0
@@ -258,92 +255,12 @@ class nh_clinical_location(orm.Model):
             res[loc.id] = sum
         return res
 
-    def _get_parent_ids(self, cr, uid, ids, field, args, context=None):
-        res = {location_id: False for location_id in ids}
-        sql = """
-        with
-            recursive route(level, path, parent_id, id) as (
-                    select 0 as level, id::text, parent_id, id
-                    from nh_clinical_location
-                    where parent_id is null
-                union
-                    select level + 1, path||','||location.id, location.parent_id, location.id
-                    from nh_clinical_location location
-                    join route on location.parent_id = route.id
-            ),
-            map as(
-                select
-                    route.id as location_id,
-                    ('{'||path||'}')::int[] as parent_ids
-                from route
-                order by path
-            )
-            select
-                location_id,
-                parent_ids[1:array_length(parent_ids, 1)-1] as parent_ids
-            from map
-            where location_id in (%s)
-        """ % ",".join(map(str, ids))
-        cr.execute(sql)
-        [res.update({row['location_id']: row['parent_ids']}) for row in cr.dictfetchall()]
-        return res
-
-    def _parent_ids_search(self, cr, uid, obj, name, args, domain=None, context=None):
-        arg1, op, arg2 = args[0]
-        arg2 = isinstance(arg2, (list, tuple)) and arg2 or [arg2]
-        all_ids = self.search(cr, uid, [])
-        child_parent_map = self._get_parent_ids(cr, uid, all_ids, 'parent_ids', None)
-        location_ids = [k for k, v in child_parent_map.items() if set(v or []) & set(arg2 or [])]
-        return [('id', 'in', location_ids)]
-
-    def _get_path(self, cr, uid, ids, field, args, context=None):
-        res = {location_id: False for location_id in ids}
-        sql = """
-        with
-            recursive route(level, path, parent_id, id, code) as (
-                    select 0 as level, code::text, parent_id, id, code::text
-                    from nh_clinical_location
-                    where parent_id is null
-                union
-                    select level + 1, path||','||location.code::text, location.parent_id, location.id, location.code::text
-                    from nh_clinical_location location
-                    join route on location.parent_id = route.id
-            ),
-            map as(
-                select
-                    level,
-                    route.id as location_id,
-                    ('{'||path||'}')::text[] as path
-                from route
-                order by path
-            )
-            select
-                location_id,
-                '/'||array_to_string(path[1:array_length(path, 1)-1], '/') as path
-            from map
-            where location_id in (%s)
-        """ % ",".join(map(str, ids))
-        cr.execute(sql)
-        [res.update({row['location_id']: row['path']}) for row in cr.dictfetchall()]
-        return res
-
-    def _get_name(self, cr, uid, ids, field, args, context=None):
-        result = dict.fromkeys(ids, False)
-        for id in ids:
-            location = self.read(cr, uid, id, ['usage', 'name'], context=context)
-            if location['usage'] == 'ward':
-                result[id] = location['name']
-            else:
-                parent_id = self._get_closest_parent_id(cr, uid, id, 'ward', context=context)
-                if parent_id:
-                    parent = self.read(cr, uid, parent_id, ['name'], context=context)
-                else:
-                    parent = False
-                result[id] = '{0} [{1}]'.format(location['name'], parent['name']) if parent else location['name']
-        return result
-
-    def _get_closest_parent_id(self, cr, uid, id, usage, context=None):
-        location = self.read(cr, uid, id, ['parent_id'], context=context)
+    def get_closest_parent_id(self, cr, uid, location_id, usage, context=None):
+        """
+        Returns the closest parent found in the hierarchy that has the specified usage.
+        Returns False if no parent with that usage is found.
+        """
+        location = self.read(cr, uid, location_id, ['parent_id'], context=context)
         if not location['parent_id']:
             return False
         else:
@@ -351,10 +268,30 @@ class nh_clinical_location(orm.Model):
         if parent['usage'] == usage:
             return parent['id']
         else:
+            return self.get_closest_parent_id(cr, uid, parent['id'], usage, context=context)
 
-            return self._get_closest_parent_id(cr, uid, parent['id'], usage, context=context)
+    def _get_name(self, cr, uid, ids, field, args, context=None):
+        result = {}
+        for location in self.browse(cr, uid, ids, context=context):
+            if location.usage == 'ward':
+                result[location.id] = location.name
+            else:
+                parent_id = self.get_closest_parent_id(cr, uid, location.id, 'ward', context=context)
+                if parent_id:
+                    parent = self.read(cr, uid, parent_id, ['name'], context=context)
+                else:
+                    parent = False
+                result[location.id] = '{0} [{1}]'.format(location.name, parent['name']) if parent else location.name
+        return result
 
     def _is_available_search(self, cr, uid, obj, name, args, domain=None, context=None):
+        """
+        Allows to search through the method _is_available so the field is_available can be searched.
+        It ignores any operand that is not '=' or '!=' because is_available is a boolean and they would not make sense.
+        :param args: list of tuples that define the domain of the search with the format: [is_available, operand, value]
+        :return [('id', 'in', list of location ids)] that will be used by the orm to filter locations. The actual meaning
+                of this is that any location id in the list is to be returned with the specified search domain.
+        """
         location_ids = []
         for cond in args:
             available_value = bool(cond[2])
@@ -375,13 +312,11 @@ class nh_clinical_location(orm.Model):
         'code': fields.char('Code', size=256),
         'parent_id': fields.many2one('nh.clinical.location', 'Parent Location'),
         'child_ids': fields.one2many('nh.clinical.location', 'parent_id', 'Child Locations'),
-        'parent_ids': fields.function(_get_parent_ids, fnct_search=_parent_ids_search, type='many2many', relation='nh.clinical.location', string='Parent Locations'),
-        'path': fields.function(_get_path, type='text', string='Location Path'),
         'type': fields.selection(_types, 'Location Type'),
         'usage': fields.selection(_usages, 'Location Usage'),
         'active': fields.boolean('Active'),
-        'pos_id': fields.function(_location2pos_id, type='many2one', relation='nh.clinical.pos', string='POS', store={
-            'nh.clinical.location': (lambda s, cr, uid, ids, c: s.search(cr, uid, [['id','child_of',ids]]), ['parent_id'], 10),
+        'pos_id': fields.function(_get_pos_id, type='many2one', relation='nh.clinical.pos', string='POS', store={
+            'nh.clinical.location': (lambda s, cr, uid, ids, c: s.search(cr, uid, [['id', 'child_of', ids]]), ['parent_id'], 10),
             'nh.clinical.pos': (_pos2location_id, ['location_id'], 5),
             }),
         'company_id': fields.related('pos_id', 'company_id', type='many2one', relation='res.company', string='Company'),
@@ -396,8 +331,8 @@ class nh_clinical_location(orm.Model):
         'assigned_doctor_ids': fields.function(_get_doctor_ids, type='many2many', relation='res.users', string="Assigned Doctors"),
         'related_hcas': fields.function(_get_hcas, type='integer', string="Number of related HCAs"),
         'related_nurses': fields.function(_get_nurses, type='integer', string="Number of related Nurses"),
-        'related_patients': fields.function(_get_related_patients, type='integer', string="Number of related Patients"),
-        'related_patients_childs': fields.function(_get_related_patients_childs, type='integer', string="Number of related Patients from child locations"),
+        'waiting_patients': fields.function(_get_waiting_patients, type='integer', string="Number of Waiting Patients"),
+        'child_patients': fields.function(_get_child_patients, type='integer', string="Number of Patients from child locations"),
         'context_ids': fields.many2many('nh.clinical.context', 'nh_location_context_rel', 'location_id', 'context_id', string='Related Clinical Contexts')
     }
 
@@ -408,33 +343,30 @@ class nh_clinical_location(orm.Model):
 
     _sql_constraints = [('location_code_uniq', 'unique(code)', 'The code for a location must be unique!')]
 
-    def get_location_activity_ids(self, cr, uid, location_id, context=None):
+    def get_available_location_ids(self, cr, uid, usages=None, context=None):
         """
+        Get a list of available locations.
+        Only returns beds unless specified otherwise.
         """
-        location_models = [model for model_name, model in self.pool.models.items()
-                           if 'location_id' in model._columns.keys()
-                           and model._columns['location_id']._obj == 'nh.clinical.location']
-        activity_ids = []
-        for m in location_models:
-            data_ids = m.search(cr, uid, [('location_id', '=', location_id)], context=context),
-            data = m.browse(cr, uid, data_ids, context)[0]
-            data = data and data[0]
-            data and data.activity_id and activity_ids.append(data.activity_id.id)
-        return activity_ids
+        if not usages:
+            usages = ['bed']
+        activity_pool = self.pool['nh.activity']
+        open_spell_ids = activity_pool.search(cr, uid, [
+            ['data_model', '=', 'nh.clinical.spell'], ['state', '=', 'started']], context=context)
+        busy_location_ids = [a.location_id.id if a.location_id.usage == 'bed' else False
+                             for a in activity_pool.browse(cr, uid, open_spell_ids, context=context)]
+        busy_location_ids = list(set(busy_location_ids))
+        return self.search(cr, uid, [['usage', 'in', usages], ['id', 'not in', busy_location_ids]], context=context)
 
-    def get_available_location_ids(self, cr, uid, usages=[], location_id=None, context=None):
-        api_pool = self.pool['nh.clinical.api']
-        res = api_pool.location_map(cr, uid, location_ids=[], types=[], usages=[], codes=[],
-                                    occupied_range=[], capacity_range=[], available_range=[1, 1]).keys()
-        return res
-
-    def activate_deactivate(self, cr, uid, location_id, context=None):
+    def switch_active_status(self, cr, uid, location_id, context=None):
         """
         Activates the location if it's inactive. Deactivates it if it's active.
         Added Audit feature by calling Location Activate / Deactivate Activities instead of just writing active field.
         :return: True if successful
         """
-        location = self.browse(cr, uid, location_id[0], context=context)
+        if isinstance(location_id, list):
+            location_id = location_id[0]
+        location = self.browse(cr, uid, location_id, context=context)
         activity_pool = self.pool['nh.activity']
         activate_pool = self.pool['nh.clinical.location.activate']
         deactivate_pool = self.pool['nh.clinical.location.deactivate']
@@ -444,45 +376,23 @@ class nh_clinical_location(orm.Model):
             activity_id = activate_pool.create_activity(cr, SUPERUSER_ID, {}, {'location_id': location.id}, context=context)
         return activity_pool.complete(cr, uid, activity_id, context=context)
 
-    def find_nearest_location_id(self, cr, uid, location_id, usage='ward', context=None):
-        """
-        Returns the closest location with the provided usage.
-        :param usage: String. Can be 'ward', 'bed', 'hospital'...
-        :return: Id of the found location. False if there is no location found.
-        """
-        location = self.browse(cr, uid, location_id, context=context)
-        if location.usage == usage:
-            return location.id
-        else:
-            if not location.parent_id:
-                return False
-            else:
-                return self.find_nearest_location_id(cr, uid, location.parent_id.id, usage=usage, context=context)
+    def check_context_ids(self, cr, uid, context_ids, context=None):
+        if isinstance(context_ids[0], list):
+            if context_ids[0][0] == 4:
+                context_ids = [c[1] for c in context_ids[0]]
+            elif context_ids[0][0] == 6:
+                context_ids = context_ids[0][2]
+        self.pool['nh.clinical.context'].check_model(cr, uid, context_ids, self._name, context=context)
+        return True
 
     def create(self, cr, uid, vals, context=None):
         if vals.get('context_ids'):
-            cids = vals['context_ids'][0]
-            if isinstance(cids, list):
-                if cids[0] == 4:
-                    cids = [c[1] for c in cids]
-                elif cids[0] == 6:
-                    cids = cids[2]
-            else:
-                cids = vals['context_ids']
-            self.pool['nh.clinical.context'].check_model(cr, uid, cids, self._name, context=context)
+            self.check_context_ids(cr, uid, vals.get('context_ids'), context=context)
         return super(nh_clinical_location, self).create(cr, uid, vals, context=context)
 
     def write(self, cr, uid, ids, vals, context=None):
-        if 'context_ids' in vals:
-            cids = vals['context_ids'][0]
-            if isinstance(cids, list):
-                if cids[0] == 4:
-                    cids = [c[1] for c in cids]
-                elif cids[0] == 6:
-                    cids = cids[2]
-            else:
-                cids = vals['context_ids']
-            self.pool['nh.clinical.context'].check_model(cr, uid, cids, self._name, context=context)
+        if vals.get('context_ids'):
+            self.check_context_ids(cr, uid, vals.get('context_ids'), context=context)
         return super(nh_clinical_location, self).write(cr, uid, ids, vals, context=context)
 
 
