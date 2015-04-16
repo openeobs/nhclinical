@@ -110,12 +110,11 @@ class TestAuditing(common.SingleTransactionCase):
         patient_id = fake.random_element(self.patient_ids)
         spell_id = self.spell_pool.create_activity(cr, uid, {}, {
             'patient_id': patient_id,
+            'location_id': active_location_id[1],
             'pos_id': self.pos_id,
             'code': 'TESTSPELL0001',
             'start_date': dt.now().strftime(dtf)})
         self.activity_pool.start(cr, uid, spell_id)
-        move_id = self.move_pool.create_activity(cr, uid, {}, {'patient_id': patient_id, 'location_id': active_location_id[1]})
-        self.activity_pool.complete(cr, uid, move_id)
         location = self.location_pool.browse(cr, uid, active_location_id[1])
         self.assertFalse(location.is_available, msg="Scenario 4 Pre-state: Location is available")
         activity_id = self.deactivate_pool.create_activity(cr, uid, {}, {'location_id': active_location_id[1]})
@@ -134,7 +133,7 @@ class TestAuditing(common.SingleTransactionCase):
             ['active', '=', True],
             ['is_available', '=', True]])
         self.assertTrue(active_location_id, msg="Pre-state for Activate/Deactivate Location Auditing: No location found!")
-        self.location_pool.activate_deactivate(cr, self.wmt_id, active_location_id)
+        self.location_pool.switch_active_status(cr, self.wmt_id, active_location_id)
         audit_activity_id = self.activity_pool.search(cr, uid, [
             ['location_id', '=', active_location_id[0]],
             ['state', '=', 'completed'],
@@ -145,7 +144,7 @@ class TestAuditing(common.SingleTransactionCase):
         self.assertEqual(audit_activity.terminate_uid.id, self.wmt_id, msg="Audit activity: Wrong user recorded")
 
         # Scenario 2: Activating an inactive location
-        self.location_pool.activate_deactivate(cr, self.wmt_id, active_location_id)
+        self.location_pool.switch_active_status(cr, self.wmt_id, active_location_id)
         audit_activity_id = self.activity_pool.search(cr, uid, [
             ['location_id', '=', active_location_id[0]],
             ['state', '=', 'completed'],
