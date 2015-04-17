@@ -74,6 +74,23 @@ class res_users(orm.Model):
         'doctor_id': fields.many2one('nh.clinical.doctor', 'Related Doctor')
     }
 
+    def check_pos(self, cr, uid, user_id, exception=False, context=None):
+        """
+        Checks if the provided user has an assigned Point of Service
+        :param exception: boolean.
+        :return: if no exception parameter is provided: True if pos is defined. False if not.
+                if exception: True if pos is defined. Point of Service Not Defined exception is raised if not.
+        """
+        user = self.browse(cr, uid, user_id, context=context)
+        result = bool(user.pos_id)
+        if not exception:
+            return result
+        else:
+            if not result:
+                raise osv.except_osv('Point of Service Not Defined!', 'User %s has no POS defined.' % user.name)
+            else:
+                return result
+
     def create(self, cr, user, vals, context=None):
         res = super(res_users, self).create(cr, user, vals, context=dict(context or {}, mail_create_nosubscribe=True))
         if 'doctor_id' in vals:
