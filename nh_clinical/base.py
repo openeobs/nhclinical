@@ -60,13 +60,6 @@ class res_users(orm.Model):
             self.pool['nh.clinical.doctor'].write(cr, user, vals['doctor_id'], {'user_id': res}, context=context)
         return res
 
-    def get_all_responsibility_location_ids(self, cr, uid, user_id, context=None):
-        location_pool = self.pool['nh.clinical.location']
-        location_ids =[]
-        for user_location_id in self.browse(cr, uid, user_id, context).location_ids:
-            location_ids.extend( location_pool.search(cr, uid, [['id', 'child_of', user_location_id.id]]) )
-        return location_ids
-
     def write(self, cr, uid, ids, values, context=None):
         res = super(res_users, self).write(cr, uid, ids, values, context)
         if values.get('location_ids') or values.get('groups_id'):
