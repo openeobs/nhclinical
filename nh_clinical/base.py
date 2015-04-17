@@ -410,10 +410,25 @@ class nh_clinical_patient(osv.Model):
     ]
 
     def _get_fullname(self, vals):
+        family_name = vals.get('family_name')
+        given_name = vals.get('given_name')
+        middle_names = vals.get('middle_names')
+
+        if family_name and (given_name or middle_names):
+            family_name_separator = ', '
+        else:
+            family_name_separator = ''
+
+        if given_name and middle_names:
+            given_name_separator = ' '
+        else:
+            given_name_separator = ''
 
         #TODO: Make this better and support comma dependency / format etc
-        return ''.join([vals.get('family_name', '') or '', ', ',
-                        vals.get('given_name', '') or '', ' ',
+        return ''.join([vals.get('family_name', '') or '',
+                        family_name_separator,
+                        vals.get('given_name', '') or '',
+                        given_name_separator,
                         vals.get('middle_names', '') or ''])
 
     def _get_name(self, cr, uid, ids, fn, args, context=None):
