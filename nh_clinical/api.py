@@ -476,46 +476,6 @@ with
         occupied_bed_ids = self.location_map(cr, uid, location_ids=bed_ids, available_range=[1,1]).keys()
         return occupied_bed_ids
 
-    def activity_rank_map(self, cr, uid, 
-                        partition_by="patient_id, state", partition_order="sequence desc", rank_order="desc",
-                        ranks=[],
-                        activity_ids=[], pos_ids=[], location_ids=[], patient_ids=[],
-                        device_ids=[], data_models=[], states=[]):
-        where_list = []
-        if activity_ids: where_list.append("id in (%s)" % list2sqlstr(activity_ids))
-        if pos_ids: where_list.append("pos_id in (%s)" % ','.join([str(int(id)) for id in pos_ids]))    
-        if location_ids: where_list.append("location_id in (%s)" % ','.join([str(int(id)) for id in location_ids])) 
-        if patient_ids: where_list.append("patient_id in (%s)" % ','.join([str(int(id)) for id in patient_ids]))
-        if device_ids: where_list.append("device_id in (%s)" % ','.join([str(int(id)) for id in device_ids]))
-        if data_models: where_list.append("data_model in ('%s')" % "','".join(data_models))
-        if states: where_list.append("state in ('%s')" % "','".join(states))
-        if ranks: where_list.append("rank in (%s)" % ','.join([str(int(r)) for r in ranks]))
-        
-        args = {
-          "partition_by": partition_by,
-          "where": where_list and "where %s" % " and ".join(where_list) or "",
-          "partition_order": partition_order
-        }
-        sql = """
-            with 
-            activity as (
-                select 
-                    id, 
-                    pos_id,
-                    location_id,
-                    patient_id,
-                    data_model,
-                    state,
-                    rank() over (partition by {partition_by} order by {partition_order}) as rank
-                from nh_activity
-            )
-            select * from activity
-            {where}
-            """.format(**args)
-        cr.execute(sql)
-        res = {r['id']: r['rank'] for r in cr.dictfetchall()}
-        return res 
-
     def activity_map(self, cr, uid, activity_ids=[], creator_ids=[],
                        pos_ids=[], location_ids=[], patient_ids=[],
                        device_ids=[], data_models=[], states=[], device_type_ids=[]):
