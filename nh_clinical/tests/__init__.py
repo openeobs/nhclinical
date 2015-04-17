@@ -9,5 +9,5 @@
 # import test_activity_extension
 # import test_auditing
 # import test_patient
-import test_base_extension
+import test_base_extensions
 # import test_activity_access
