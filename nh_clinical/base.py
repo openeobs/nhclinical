@@ -446,27 +446,52 @@ class nh_clinical_patient(osv.Model):
         ['S', 'Other ethnic group'], ['Z', 'Not stated']
     ]
 
-    def _get_fullname(self, vals):
-        family_name = vals.get('family_name')
-        given_name = vals.get('given_name')
-        middle_names = vals.get('middle_names')
-
-        if family_name and (given_name or middle_names):
-            family_name_separator = ', '
+    @staticmethod
+    def _family(family_name, given_name, middle_names):
+        """
+        Returns formatted string "family_name, given_name middle names".
+        Returns an empty string if all arguments are empty strings or None.
+        """
+        if family_name and given_name and middle_names:
+            full_name = '{fn}, {gn} {mn}'
+        elif family_name and given_name and not middle_names:
+            full_name = '{fn}, {gn}'
+        elif family_name and not given_name and middle_names:
+            full_name = '{fn}, {mn}'
+        elif family_name and not given_name and not middle_names:
+            full_name = '{fn}'
+        elif not family_name and given_name and middle_names:
+            full_name = '{gn} {mn}'
+        elif not family_name and given_name and not middle_names:
+            full_name = '{gn}'
+        elif not family_name and not given_name and middle_names:
+            full_name = '{mn}'
         else:
-            family_name_separator = ''
+            full_name = ''
 
-        if given_name and middle_names:
-            given_name_separator = ' '
+        return full_name.format(fn=family_name, gn=given_name,
+                                mn=middle_names)
+
+    @staticmethod
+    def _given(family_name, given_name, middle_names):
+        """
+        Returns formatted string "given_name middle_names family_name".
+        Returns an empty string if all arguments are empty strings or None.
+        """
+        names = [x for x in [given_name, middle_names, family_name] if x]
+        return ' '.join(names)
+
+    def _get_fullname(self, vals, fmt='{fn}, {gn} {mn}'):
+        family = vals.get('family_name')
+        given = vals.get('given_name')
+        middle = vals.get('middle_names')
+
+        if fmt == '{fn}, {gn} {mn}':
+            return self._family(family, given, middle)
+        elif fmt == '{gn} {mn} {fn}':
+            return self._given(family, given, middle)
         else:
-            given_name_separator = ''
-
-        #TODO: Make this better and support comma dependency / format etc
-        return ''.join([vals.get('family_name', '') or '',
-                        family_name_separator,
-                        vals.get('given_name', '') or '',
-                        given_name_separator,
-                        vals.get('middle_names', '') or ''])
+            return fmt.format(fn=family, gn=given, mn=middle)
 
     def _get_name(self, cr, uid, ids, fn, args, context=None):
         result = dict.fromkeys(ids, False)

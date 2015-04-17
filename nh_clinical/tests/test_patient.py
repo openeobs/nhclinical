@@ -13,59 +13,88 @@ class TestClinicalPatient(common.SingleTransactionCase):
 
         cls.patient_pool = cls.registry('nh.clinical.patient')
 
-    def test_get_fullname(self):
-        family_name = 'Smith'
-        given_name = 'John'
-        middle_names = 'Andrew Clarke'
-
-        # no names
-        patient_name = dict(family_name='', given_name='', middle_names='')
-        self.assertEquals('',
-                          self.patient_pool._get_fullname(patient_name))
-
+    def test_family(self):
         # family, given and middle names
-        patient_name = {
-            'family_name': family_name, 'given_name': given_name,
-            'middle_names': middle_names,
-        }
-        self.assertEquals('Smith, John Andrew Clarke',
-                          self.patient_pool._get_fullname(patient_name))
+        self.assertEquals(
+            'Smith, John Clarke',
+            self.patient_pool._family('Smith', 'John', 'Clarke')
+        )
+        # family, given, no middle
+        self.assertEquals(
+            'Smith, John',
+            self.patient_pool._family('Smith', 'John', '')
+        )
+        # family and middle, no given name
+        self.assertEquals(
+            'Smith, Clarke',
+            self.patient_pool._family('Smith', '', 'Clarke')
+        )
+        # family name only
+        self.assertEquals(
+            'Smith',
+            self.patient_pool._family('Smith', '', '')
+        )
+        # no family, given and middle names only
+        self.assertEqual(
+            'John Clarke',
+            self.patient_pool._family('', 'John', 'Clarke')
+        )
+        # given name only
+        self.assertEquals(
+            'John',
+            self.patient_pool._family('', 'John', '')
+        )
+        # middle names only
+        self.assertEquals(
+            'Clarke',
+            self.patient_pool._family('', '', 'Clarke')
+        )
+        # no names
+        self.assertEquals('', self.patient_pool._family('', '', ''))
 
-        # family and given name, but no middle names
-        patient_name['middle_names'] = ''
-        self.assertEquals('Smith, John',
-                          self.patient_pool._get_fullname(patient_name))
+    def test_given(self):
+        # family, given and middle names
+        self.assertEquals(
+            'John Clarke Smith',
+            self.patient_pool._given('Smith', 'John', 'Clarke')
+        )
+        # family, given, no middle
+        self.assertEquals(
+            'John Smith',
+            self.patient_pool._given('Smith', 'John', '')
+        )
+        # family and middle, no given name
+        self.assertEquals(
+            'Clarke Smith',
+            self.patient_pool._given('Smith', '', 'Clarke')
+        )
+        # family name only
+        self.assertEquals(
+            'Smith',
+            self.patient_pool._given('Smith', '', '')
+        )
+        # no family, given and middle names only
+        self.assertEqual(
+            'John Clarke',
+            self.patient_pool._given('', 'John', 'Clarke')
+        )
+        # given name only
+        self.assertEquals(
+            'John',
+            self.patient_pool._given('', 'John', '')
+        )
+        # middle names only
+        self.assertEquals(
+            'Clarke',
+            self.patient_pool._given('', '', 'Clarke')
+        )
+        # no names
+        self.assertEquals('', self.patient_pool._given('', '', ''))
 
-        # family name, no given name, but middle names
-        patient_name['given_name'] = ''
-        patient_name['middle_names'] = middle_names
-        self.assertEquals('Smith, Andrew Clarke',
-                          self.patient_pool._get_fullname(patient_name))
+    def test_get_fullname(self):
+        pass
 
-        # family name, no given name, no middle names
-        patient_name['middle_names'] = ''
-        self.assertEquals('Smith',
-                          self.patient_pool._get_fullname(patient_name))
-
-        # No family name, but given and middle names
-        patient_name['family_name'] = ''
-        patient_name['given_name'] = given_name
-        patient_name['middle_names'] = middle_names
-        self.assertEquals('John Andrew Clarke',
-                          self.patient_pool._get_fullname(patient_name))
-
-        # no family name and no middle names, just given name
-        patient_name['middle_names'] = ''
-        self.assertEquals('John',
-                          self.patient_pool._get_fullname(patient_name))
-
-        # no family name, but middle names and no given name
-        patient_name['middle_names'] = middle_names
-        patient_name['given_name'] = ''
-        self.assertEquals('Andrew Clarke',
-                          self.patient_pool._get_fullname(patient_name))
-
-    def test_full_name(self):
+    def test_get_name(self):
         pass
 
     def test_check_hospital_number(self):
