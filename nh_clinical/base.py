@@ -438,19 +438,51 @@ class nh_clinical_patient(osv.Model):
             result[r['id']] = self._get_fullname(r)
         return result
 
-    def _check_hospital_number(self, cr, uid, hospital_number, context=None):
-        domain = [('other_identifier', '=', hospital_number)]
-        return self.search(cr, uid, domain, context=context)
+    def check_hospital_number(self, cr, uid, hospital_number, exception=False, context=None):
+        """
+        Checks if there is a patient with the provided Hospital Number
+        :param exception: string with values 'True' or 'False'.
+        :return: if no exception parameter is provided: True if patient exists. False if not.
+                if exception = 'True': Integrity Error exception is raised if patient exists. False if not.
+                if exception = 'False': True if patient exists. Patient Not Found exception is raised if not.
+        """
+        domain = [['other_identifier', '=', hospital_number]]
+        result = bool(self.search(cr, uid, domain, context=context))
+        if exception:
+            if eval(exception) and result:
+                raise osv.except_osv('Integrity Error!', 'Patient with Hospital Number %s already exists!'
+                                     % hospital_number)
+            elif not eval(exception) and not result:
+                raise osv.except_osv('Patient Not Found!', 'There is no patient with Hospital Number %s' %
+                                     hospital_number)
+        return result
 
-    def _check_nhs_number(self, cr, uid, nhs_number, data, context=None):
-        if not nhs_number:
-            return False
-        domain = [('patient_identifier', '=', nhs_number)]
-        patient_id = self.search(cr, uid, domain, context=context)
-        if patient_id:
-            return self.write(cr, uid, patient_id[0], data, context=context)
-        else:
-            return False
+    def check_nhs_number(self, cr, uid, nhs_number, exception=False, context=None):
+        """
+        Checks if there is a patient with the provided NHS Number
+        :param exception: string with values 'True' or 'False'.
+        :return: if no exception parameter is provided: True if patient exists. False if not.
+                if exception = 'True': Integrity Error exception is raised if patient exists. False if not.
+                if exception = 'False': True if patient exists. Patient Not Found exception is raised if not.
+        """
+        domain = [['patient_identifier', '=', nhs_number]]
+        result = bool(self.search(cr, uid, domain, context=context))
+        if exception:
+            if eval(exception) and result:
+                raise osv.except_osv('Integrity Error!', 'Patient with NHS Number %s already exists!'
+                                     % nhs_number)
+            elif not eval(exception) and not result:
+                raise osv.except_osv('Patient Not Found!', 'There is no patient with NHS Number %s' %
+                                     nhs_number)
+        return result
+
+    def update(self, cr, uid, hospital_number, data, context=None):
+        """
+        Updates patient data receiving a hospital_number as identifier instead of the usual patient_id
+        :return: True if successful
+        """
+        patient_id = self.search(cr, uid, [['other_identifier', '=', hospital_number]], context=context)
+        return self.write(cr, uid, patient_id, data, context=context)
 
     _columns = {
         'current_location_id': fields.many2one('nh.clinical.location', 'Current Location'),
