@@ -28,6 +28,26 @@ class res_partner(orm.Model):
                                                context=dict(context or {}, mail_create_nosubscribe=True))
 
 
+class res_partner_title_extension(orm.Model):
+    _inherit = 'res.partner.title'
+
+    def get_title_by_name(self, cr, uid, title, create=True, context=None):
+        """
+        Searches for the title with the provided name.
+        :param create: if True, the title will be created if it does not exist.
+        :return: ID of the title. False if it does not exist an create = False
+        """
+        title = title.replace('.', '').replace(' ', '').lower()
+        title_id = self.search(cr, uid, [['name', '=', title]], context=context)
+        if not create:
+            return title_id[0] if title_id else False
+        else:
+            if not title_id:
+                return self.create(cr, uid, {'name': title}, context=context)
+            else:
+                return title_id[0]
+
+
 class res_company(orm.Model):
     _name = 'res.company'
     _inherit = 'res.company'
