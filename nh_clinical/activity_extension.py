@@ -9,19 +9,6 @@ from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
 _logger = logging.getLogger(__name__)
 
 
-def list2sqlstr(lst):
-    res = []
-    lst = isinstance(lst, (list, tuple)) and lst or [lst]
-    for l in lst:
-        if isinstance(l, (int, long)):
-            res.append("%s" % int(l))
-        elif isinstance(l, basestring):
-            res.append("'%s'" % l) 
-        elif l is None:
-            res.append("0")
-    return ",".join(res)
-
-
 class nh_cancel_reason(orm.Model):
     """cancellation reason
     """
