@@ -46,7 +46,7 @@ class TestClinicalPatient(common.SingleTransactionCase):
         # no names
         name = dict(family_name='', given_name='', middle_names='')
         self.assertEquals(',', self.patient_pool._get_fullname(name))
-        # raises TypeError if integer is passed
+        # None
         name = dict(family_name=None, given_name='', middle_names='')
         self.assertEquals(',', self.patient_pool._get_fullname(name))
 
