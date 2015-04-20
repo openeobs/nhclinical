@@ -12,49 +12,7 @@ class TestClinicalPatient(common.SingleTransactionCase):
         cr, uid = cls.cr, cls.uid
 
         cls.patient_pool = cls.registry('nh.clinical.patient')
-    """
-    def test_given_middle_family(self):
-        # family, given and middle names
-        self.assertEquals(
-            'John Clarke Smith',
-            self.patient_pool._given_middle_family('Smith', 'John', 'Clarke')
-        )
-        # family, given, no middle
-        self.assertEquals(
-            'John Smith',
-            self.patient_pool._given_middle_family('Smith', 'John', '')
-        )
-        # family and middle, no given name
-        self.assertEquals(
-            'Clarke Smith',
-            self.patient_pool._given_middle_family('Smith', '', 'Clarke')
-        )
-        # family name only
-        self.assertEquals(
-            'Smith',
-            self.patient_pool._given_middle_family('Smith', '', '')
-        )
-        # no family, given and middle names only
-        self.assertEqual(
-            'John Clarke',
-            self.patient_pool._given_middle_family('', 'John', 'Clarke')
-        )
-        # given name only
-        self.assertEquals(
-            'John',
-            self.patient_pool._given_middle_family('', 'John', '')
-        )
-        # middle names only
-        self.assertEquals(
-            'Clarke',
-            self.patient_pool._given_middle_family('', '', 'Clarke')
-        )
-        # no names
-        self.assertEquals(
-            '',
-            self.patient_pool._given_middle_family('', '', '')
-        )
-    """
+
     def test_get_fullname(self):
         # family, given and middle names
         name = dict(family_name='Smith', given_name='John',
