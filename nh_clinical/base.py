@@ -446,52 +446,24 @@ class nh_clinical_patient(osv.Model):
         ['S', 'Other ethnic group'], ['Z', 'Not stated']
     ]
 
-    @staticmethod
-    def _family(family_name, given_name, middle_names):
-        """
-        Returns formatted string "family_name, given_name middle names".
-        Returns an empty string if all arguments are empty strings or None.
-        """
-        if family_name and given_name and middle_names:
-            full_name = '{fn}, {gn} {mn}'
-        elif family_name and given_name and not middle_names:
-            full_name = '{fn}, {gn}'
-        elif family_name and not given_name and middle_names:
-            full_name = '{fn}, {mn}'
-        elif family_name and not given_name and not middle_names:
-            full_name = '{fn}'
-        elif not family_name and given_name and middle_names:
-            full_name = '{gn} {mn}'
-        elif not family_name and given_name and not middle_names:
-            full_name = '{gn}'
-        elif not family_name and not given_name and middle_names:
-            full_name = '{mn}'
-        else:
-            full_name = ''
-
-        return full_name.format(fn=family_name, gn=given_name,
-                                mn=middle_names)
-
-    @staticmethod
-    def _given(family_name, given_name, middle_names):
-        """
-        Returns formatted string "given_name middle_names family_name".
-        Returns an empty string if all arguments are empty strings or None.
-        """
-        names = [x for x in [given_name, middle_names, family_name] if x]
-        return ' '.join(names)
-
     def _get_fullname(self, vals, fmt='{fn}, {gn} {mn}'):
-        family = vals.get('family_name')
-        given = vals.get('given_name')
-        middle = vals.get('middle_names')
+        """
+        Formats full name from constituent family, given and middle names.
+        :param vals: dictionary containing keys 'family_name', 'given_name'
+                     and 'middle_names'.
+        :param fmt: string with format for full name. Default is
+                    '{fn}, {gn}, {mn}', if no argument is provided. Named
+                    arguments must be 'fn' (family name), 'gn' (given name)
+                    and 'mn' (middle name(s).
+        :return: string containing full name.
+        """
+        for k, v in vals.iteritems():
+            if v is None:
+                vals.update({k: ''})
 
-        if fmt == '{fn}, {gn} {mn}':
-            return self._family(family, given, middle)
-        elif fmt == '{gn} {mn} {fn}':
-            return self._given(family, given, middle)
-        else:
-            return fmt.format(fn=family, gn=given, mn=middle)
+        return ' '.join(fmt.format(fn=vals.get('family_name'),
+                                   gn=vals.get('given_name'),
+                                   mn=vals.get('middle_names')).split())
 
     def _get_name(self, cr, uid, ids, fn, args, context=None):
         result = dict.fromkeys(ids, False)
