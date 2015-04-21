@@ -26,7 +26,7 @@ class TestClinicalPatient(common.SingleTransactionCase):
         # family and middle, no given name
         name = dict(family_name='Smith', given_name='', middle_names='Clarke')
         self.assertEquals(
-            'Smith, Clarke',self.patient_pool._get_fullname(name))
+            'Smith, Clarke', self.patient_pool._get_fullname(name))
         # family name only
         name = dict(family_name='Smith', given_name='', middle_names='')
         self.assertEquals(
@@ -46,18 +46,77 @@ class TestClinicalPatient(common.SingleTransactionCase):
         # no names
         name = dict(family_name='', given_name='', middle_names='')
         self.assertEquals(',', self.patient_pool._get_fullname(name))
-        # None
+        # None as argument
         name = dict(family_name=None, given_name='', middle_names='')
+        self.assertEquals(',', self.patient_pool._get_fullname(name))
+        # False as argument
+        name = dict(family_name=False, given_name='', middle_names='')
         self.assertEquals(',', self.patient_pool._get_fullname(name))
 
     def test_get_name(self):
-        pass
+        cr, uid = self.cr, self.uid
+
+        # Scenario 1: Family, middle and given names are present in record.
+        patient_id = self.patient_pool.create(cr, uid, {
+            'other_identifier': 'TESTHN001', 'given_name': 'John',
+            'family_name': 'Smith', 'middle_names': 'Clarke'})
+        result = self.patient_pool._get_name(cr, uid, [patient_id], fn=None, args=None)
+        self.assertEquals('Smith, John Clarke', result[patient_id])
+
+        # Scenario 2: Only one name field is present in record.
+        patient_id_1 = self.patient_pool.create(cr, uid, {
+            'other_identifier': 'TESTHN001', 'given_name': 'John'})
+        result = self.patient_pool._get_name(cr, uid, [patient_id_1], fn=None, args=None)
+        self.assertEquals(', John', result[patient_id_1])
+
+        # Scenario 3: No names are present in patient record.
+        patient_id_2 = self.patient_pool.create(cr, uid, {'other_identifier': 'TESTHN001'})
+        result = self.patient_pool._get_name(cr, uid, [patient_id_2], fn=None, args=None)
+        self.assertEquals(',', result[patient_id_2])
 
     def test_check_hospital_number(self):
-        pass
+        cr, uid = self.cr, self.uid
+        self.patient_pool.create(cr, uid, {'other_identifier': 'TESTHN001'})
+
+        # Scenario 1: if exception is False and hospital_number is correct.
+        result = self.patient_pool.check_hospital_number(cr, uid, 'TESTHN001')
+        self.assertTrue(result)
+
+        # Scenario 2: if exception is False and hospital_number is incorrect.
+        result = self.patient_pool.check_hospital_number(cr, uid, 'TESTHN002')
+        self.assertFalse(result)
+
+        from openerp.exceptions import except_orm
+        # Scenario 3: if exception is True and hospital_number is correct.
+        with self.assertRaises(except_orm):
+            self.patient_pool.check_hospital_number(cr, uid, 'TESTHN001', exception=True)
+
+        # Scenario 4: if exception is False and hospital_number is incorrect.
+        with self.assertRaises(except_orm):
+            self.patient_pool.check_hospital_number(cr, uid, 'TESTHN002', exception=True)
 
     def test_check_nhs_number(self):
-        pass
+        cr, uid = self.cr, self.uid
+        self.patient_pool.create(cr, uid, {
+            'other_identifier': 'TESTHN001', 'patient_identifier': 'TESTPI001'})
+
+        # Scenario 1: if exception is False and nhs_number is correct.
+        result = self.patient_pool.check_nhs_number(cr, uid, 'TESTPI001')
+        self.assertTrue(result)
+
+        # Scenario 2: if exception is False and nhs_number is incorrect.
+        result = self.patient_pool.check_nhs_number(cr, uid, 'TESTPI002')
+        self.assertFalse(result)
+
+        from openerp.exceptions import except_orm
+        # Scenario 3: if exception is True and nhs_number is correct.
+        with self.assertRaises(except_orm):
+            self.patient_pool.check_nhs_number(cr, uid, 'TESTPI001', exception=True)
+
+        # Scenario 4: if exception is True and nhs_number is incorrect.
+        with self.assertRaises(except_orm):
+            self.patient_pool.check_nhs_number(cr, uid, 'TESTPI002', exception=True)
+
 
 
 

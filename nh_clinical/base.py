@@ -458,7 +458,8 @@ class nh_clinical_patient(osv.Model):
         :return: string containing full name.
         """
         for k, v in vals.iteritems():
-            if v is None:
+            # set None or False to empty str
+            if v in [None, False]:
                 vals.update({k: ''})
 
         return ' '.join(fmt.format(fn=vals.get('family_name'),
@@ -483,10 +484,10 @@ class nh_clinical_patient(osv.Model):
         domain = [['other_identifier', '=', hospital_number]]
         result = bool(self.search(cr, uid, domain, context=context))
         if exception:
-            if eval(exception) and result:
+            if result:
                 raise osv.except_osv('Integrity Error!', 'Patient with Hospital Number %s already exists!'
                                      % hospital_number)
-            elif not eval(exception) and not result:
+            elif not result:
                 raise osv.except_osv('Patient Not Found!', 'There is no patient with Hospital Number %s' %
                                      hospital_number)
         return result
@@ -502,10 +503,10 @@ class nh_clinical_patient(osv.Model):
         domain = [['patient_identifier', '=', nhs_number]]
         result = bool(self.search(cr, uid, domain, context=context))
         if exception:
-            if eval(exception) and result:
+            if result:
                 raise osv.except_osv('Integrity Error!', 'Patient with NHS Number %s already exists!'
                                      % nhs_number)
-            elif not eval(exception) and not result:
+            elif not result:
                 raise osv.except_osv('Patient Not Found!', 'There is no patient with NHS Number %s' %
                                      nhs_number)
         return result
