@@ -457,9 +457,8 @@ class nh_clinical_patient(osv.Model):
                     and 'mn' (middle name(s).
         :return: string containing full name.
         """
-        for k, v in vals.iteritems():
-            # set None or False to empty str
-            if v in [None, False]:
+        for k in ['family_name', 'given_name', 'middle_names']:
+            if k not in vals or vals[k] in [None, False]:
                 vals.update({k: ''})
 
         return ' '.join(fmt.format(fn=vals.get('family_name'),

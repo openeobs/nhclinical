@@ -12,6 +12,7 @@ class TestClinicalPatient(common.SingleTransactionCase):
         cr, uid = cls.cr, cls.uid
 
         cls.patient_pool = cls.registry('nh.clinical.patient')
+        cls.partner_pool = cls.registry('res.partner')
 
     def test_get_fullname(self):
         # family, given and middle names
@@ -47,10 +48,13 @@ class TestClinicalPatient(common.SingleTransactionCase):
         name = dict(family_name='', given_name='', middle_names='')
         self.assertEquals(',', self.patient_pool._get_fullname(name))
         # None as argument
-        name = dict(family_name=None, given_name='', middle_names='')
+        name = dict(family_name=None, given_name=None, middle_names=None)
         self.assertEquals(',', self.patient_pool._get_fullname(name))
         # False as argument
         name = dict(family_name=False, given_name='', middle_names='')
+        self.assertEquals(',', self.patient_pool._get_fullname(name))
+        # an empty dictionary creates name ','
+        name = dict()
         self.assertEquals(',', self.patient_pool._get_fullname(name))
 
     def test_get_name(self):
@@ -116,6 +120,36 @@ class TestClinicalPatient(common.SingleTransactionCase):
         # Scenario 4: if exception is True and nhs_number is incorrect.
         with self.assertRaises(except_orm):
             self.patient_pool.check_nhs_number(cr, uid, 'TESTPI002', exception=True)
+
+    def test_create(self):
+        cr, uid = self.cr, self.uid
+
+        patient_id = self.patient_pool.create(cr, uid, {'other_identifier': 'TESTHN001'})
+        patient = self.patient_pool.browse(cr, uid, [patient_id])
+        self.assertEquals(patient_id, patient.id)
+        self.assertEquals('TESTHN001', patient.other_identifier)
+
+        # test for when 'name' is not in vals
+        self.assertEquals(',', patient.name)
+
+        # test for that a partner is created in res_partner.
+        self.assertEquals(patient_id, self.partner_pool.browse(cr, uid, [patient_id]).id)
+
+        # test when 'name' is in vals
+        patient_id = self.patient_pool.create(cr, uid, {'other_identifier': 'TESTHN001', 'name': 'Smith, John'})
+        patient = self.patient_pool.browse(cr, uid, [patient_id])
+        self.assertEquals('Smith, John', patient.name)
+
+    def test_unlink(self):
+        cr, uid = self.cr, self.uid
+
+        patient_id = self.patient_pool.create(cr, uid, {'other_identifier': 'TEST_UNLINK'})
+        self.patient_pool.unlink(cr, uid, [patient_id])
+        # unlink sets the field 'active' to False, making it invisible to users
+        self.assertFalse(self.patient_pool.browse(cr, uid, [patient_id]).active)
+
+
+
 
 
 
