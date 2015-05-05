@@ -291,7 +291,7 @@ class nh_clinical_location(orm.Model):
         Returns False if no parent with that usage is found.
         """
         location = self.read(cr, uid, location_id, ['parent_id'], context=context)
-        if not location['parent_id']:
+        if not location or not location['parent_id']:
             return False
         else:
             parent = self.read(cr, uid, location['parent_id'][0], ['usage'], context=context)
@@ -299,6 +299,15 @@ class nh_clinical_location(orm.Model):
             return parent['id']
         else:
             return self.get_closest_parent_id(cr, uid, parent['id'], usage, context=context)
+
+    def is_child_of(self, cr, uid, location_id, code, context=None):
+        """
+        Returns True if the location_id provided is a child of the location code provided.
+        False otherwise.
+        """
+        code_location_id = self.search(cr, uid, [['code', '=', code]], context=context)
+        child_location_ids = self.search(cr, uid, [['id', 'child_of', code_location_id[0]]], context=context)
+        return location_id in child_location_ids
 
     def _get_name(self, cr, uid, ids, field, args, context=None):
         result = {}
@@ -483,10 +492,10 @@ class nh_clinical_patient(osv.Model):
         domain = [['other_identifier', '=', hospital_number]]
         result = bool(self.search(cr, uid, domain, context=context))
         if exception:
-            if result:
+            if result and eval(exception):
                 raise osv.except_osv('Integrity Error!', 'Patient with Hospital Number %s already exists!'
                                      % hospital_number)
-            elif not result:
+            elif not result and not eval(exception):
                 raise osv.except_osv('Patient Not Found!', 'There is no patient with Hospital Number %s' %
                                      hospital_number)
         return result

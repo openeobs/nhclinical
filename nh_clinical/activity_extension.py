@@ -260,6 +260,7 @@ class nh_activity_data(orm.AbstractModel):
         """
         activity_pool = self.pool['nh.activity']
         api_pool = self.pool['nh.clinical.api']
+        location_pool = self.pool['nh.clinical.location']
         if self._POLICY.get('activities', []):
             activity = activity_pool.browse(cr, SUPERUSER_ID, activity_id, context)
             spell_activity_id = api_pool.get_patient_spell_activity_id(cr, SUPERUSER_ID, activity.data_ref.patient_id.id, context=context)
@@ -268,9 +269,15 @@ class nh_activity_data(orm.AbstractModel):
         for trigger_activity in self._POLICY.get('activities', []):
             pool = self.pool[trigger_activity['model']]
             if trigger_activity.get('context') and location_id:
-                location = self.pool['nh.clinical.location'].browse(cr, uid, location_id, context=context)
+                location = location_pool.browse(cr, uid, location_id, context=context)
                 if not any([c.name == trigger_activity.get('context') for c in location.context_ids]):
                     continue
+            if trigger_activity.get('domains'):
+                for domain in trigger_activity.get('domains'):
+                    domain_pool = self.pool.get(domain['object'])
+                    search_domain = domain['domain'] + [['patient_id', '=', activity.data_ref.patient_id.id]]
+                    if domain_pool.search(cr, uid, search_domain, context=context):
+                        continue
             if trigger_activity.get('cancel_others'):
                 api_pool.cancel_open_activities(cr, uid, spell_activity_id, pool._name, context=context)
             data = {
@@ -278,7 +285,7 @@ class nh_activity_data(orm.AbstractModel):
             }
             if trigger_activity.get('create_data'):
                 for key in trigger_activity['create_data'].keys():
-                    data[key] = eval('activity.'+trigger_activity['create_data'][key])
+                    data[key] = eval(trigger_activity['create_data'][key])
             ta_activity_id = pool.create_activity(cr, SUPERUSER_ID, {
                 'patient_id': activity.patient_id.id,
                 'parent_id': spell_activity_id,

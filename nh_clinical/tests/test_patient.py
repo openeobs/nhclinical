@@ -1,6 +1,7 @@
 import logging
 
 from openerp.tests import common
+from openerp.osv.orm import except_orm
 
 _logger = logging.getLogger(__name__)
 
@@ -90,14 +91,13 @@ class TestClinicalPatient(common.SingleTransactionCase):
         result = self.patient_pool.check_hospital_number(cr, uid, 'TESTHN002')
         self.assertFalse(result)
 
-        from openerp.exceptions import except_orm
         # Scenario 3: if exception is True and hospital_number is correct.
         with self.assertRaises(except_orm):
-            self.patient_pool.check_hospital_number(cr, uid, 'TESTHN001', exception=True)
+            self.patient_pool.check_hospital_number(cr, uid, 'TESTHN001', exception='True')
 
         # Scenario 4: if exception is False and hospital_number is incorrect.
         with self.assertRaises(except_orm):
-            self.patient_pool.check_hospital_number(cr, uid, 'TESTHN002', exception=True)
+            self.patient_pool.check_hospital_number(cr, uid, 'TESTHN002', exception='False')
 
     def test_check_nhs_number(self):
         cr, uid = self.cr, self.uid
@@ -112,7 +112,6 @@ class TestClinicalPatient(common.SingleTransactionCase):
         result = self.patient_pool.check_nhs_number(cr, uid, 'TESTPI002')
         self.assertFalse(result)
 
-        from openerp.exceptions import except_orm
         # Scenario 3: if exception is True and nhs_number is correct.
         with self.assertRaises(except_orm):
             self.patient_pool.check_nhs_number(cr, uid, 'TESTPI001', exception=True)

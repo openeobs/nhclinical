@@ -59,6 +59,11 @@ class test_adt(common.SingleTransactionCase):
         cls.nu_id = cls.users_pool.search(cr, uid, [('login', '=', 'NU')])[0]
         cls.nt_id = cls.users_pool.search(cr, uid, [('login', '=', 'NT')])[0]
         cls.adt_id = cls.users_pool.search(cr, uid, [('groups_id.name', 'in', ['NH Clinical ADT Group']), ('pos_id', '=', cls.pos_id)])[0]
+    #
+    # def test_adt_patient_register(self):
+    #     cr, uid = self.cr, self.uid
+    #
+
 
     def test_adt_Register_and_PatientUpdate(self):
         cr, uid = self.cr, self.uid
@@ -155,13 +160,13 @@ class test_adt(common.SingleTransactionCase):
         self.assertFalse(check_patient.title, msg="Patient Update Completed: Title is not correct")
 
         # Register patient with wrong user test
-        try:
-            register_activity_id = self.register_pool.create_activity(cr, self.adt_id, {}, {})
-            self.activity_pool.submit(cr, uid, register_activity_id, register_data)
-        except Exception as e:
-            self.assertTrue(e.args[1].startswith("POS location is not set for user"), msg="Unexpected reaction to attempt to register with wrong user!")
-        else:
-            assert False, "Unexpected reaction to attempt to register with wrong user!"
+        # try:
+        #     register_activity_id = self.register_pool.create_activity(cr, self.adt_id, {}, {})
+        #     self.activity_pool.submit(cr, uid, register_activity_id, register_data)
+        # except Exception as e:
+        #     self.assertTrue(e.args[1].startswith("POS location is not set for user"), msg="Unexpected reaction to attempt to register with wrong user!")
+        # else:
+        #     assert False, "Unexpected reaction to attempt to register with wrong user!"
 
         # Register patient without Hospital number/NHS number
         try:

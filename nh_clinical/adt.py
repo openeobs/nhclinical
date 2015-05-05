@@ -3,20 +3,13 @@
 from datetime import datetime as dt
 import logging
 
-from openerp.osv import orm, fields
+from openerp.osv import orm, fields, osv
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
 from openerp import SUPERUSER_ID
 
 from openerp.addons.nh_activity.activity import except_if
 
 _logger = logging.getLogger(__name__)
-
-
-class nh_clinical_adt(orm.Model):
-    _name = 'nh.clinical.adt'
-    _inherit = ['nh.activity.data']     
-    _columns = {
-    }
 
 
 class nh_clinical_adt_patient_register(orm.Model):
@@ -34,25 +27,50 @@ class nh_clinical_adt_patient_register(orm.Model):
     """
     _name = 'nh.clinical.adt.patient.register'
     _inherit = ['nh.activity.data']   
-    _description = 'ADT Patient Register'   
+    _description = 'ADT Patient Register'
+
+    _gender = [['BOTH', 'Both'], ['F', 'Female'], ['I', 'Intermediate'],
+               ['M', 'Male'], ['NSP', 'Not Specified'], ['U', 'Unknown']]
+    _ethnicity = [
+        ['A', 'White - British'], ['B', 'White - Irish'], ['C', 'White - Other background'],
+        ['D', 'Mixed - White and Black Caribbean'], ['E', 'Mixed - White and Black African'],
+        ['F', 'Mixed - White and Asian'], ['G', 'Mixed - Other background'], ['H', 'Asian - Indian'],
+        ['J', 'Asian - Pakistani'], ['K', 'Asian - Bangladeshi'], ['L', 'Asian - Other background'],
+        ['M', 'Black - Caribbean'], ['N', 'Black - African'], ['P', 'Black - Other background'], ['R', 'Chinese'],
+        ['S', 'Other ethnic group'], ['Z', 'Not stated']
+    ]
+
     _columns = { 
         'patient_id': fields.many2one('nh.clinical.patient', 'Patient'),
         'pos_id': fields.many2one('nh.clinical.pos', 'POS', required=True),
-        'patient_identifier': fields.text('patientId'),
-        'other_identifier': fields.text('otherId'),
-        'family_name': fields.text('familyName'),
-        'given_name': fields.text('givenName'),
-        'middle_names': fields.text('middleName'),  
-        'dob': fields.datetime('DOB'),
-        'gender': fields.char('Gender'),
-        'sex': fields.char('Sex'),
-        'ethnicity': fields.char('Ethnicity'),
+        'patient_identifier': fields.char('Hospital Number', size=20),
+        'other_identifier': fields.char('NHS Number', size=10),
+        'family_name': fields.char('Last Name', size=200),
+        'given_name': fields.char('First Name', size=200),
+        'middle_names': fields.char('Middle Names', size=200),
+        'dob': fields.datetime('Date of Birth'),
+        'gender': fields.selection(_gender, string='Gender'),
+        'sex': fields.selection(_gender, string='Sex'),
+        'ethnicity': fields.selection(_ethnicity, string='Ethnicity'),
         'title': fields.many2one('res.partner.title', 'Title')
     }
+
+    # Need to check hospital number --> method in patient
+    # Need to check nhs number --> method in patient
+    # Can we register a patient without both Hospital Number and NHS Number?
+    # Check dob? Make sure it is not a date in the future? -> should be a method in patient
+    # Check Title and create a new one if it does not exist. -> should be a method in res.partner.title
     
     def submit(self, cr, uid, activity_id, vals, context=None):
+        # data = vals.copy()
+        # user_pool = self.pool['res.users']
+        # title_pool = self.pool['res.partner.title']
+        # user_pool.check_pos(cr, uid, uid, exception=True, context=context)
+        # data['pos_id'] = user_pool.browse(cr, uid, uid, context=context).pos_id.id
+        # if data.get('title'):
+        #     data['title'] = title_pool.get_title_by_name(cr, uid, data['title'], context=context)
+
         vals_copy = vals.copy()
-        res = {}
         user = self.pool['res.users'].browse(cr, uid, uid, context)
         except_if(not user.pos_id or not user.pos_id.location_id, msg="POS location is not set for user.login = %s!" % user.login)        
         except_if(not 'patient_identifier' in vals_copy.keys() and not 'other_identifier' in vals_copy.keys(),
@@ -74,14 +92,12 @@ class nh_clinical_adt_patient_register(orm.Model):
             if not title_id:
                 title_id = title_pool.create(cr, uid, {'name': vals_copy.get('title')})
             vals_copy.update({'title': title_id})
-        # patient_id = patient_pool.create(cr, uid, vals_copy, context)
         vals_copy.update({'pos_id': user.pos_id.id})
+
         super(nh_clinical_adt_patient_register, self).submit(cr, uid, activity_id, vals_copy, context)
-        # res.update({'patient_id': patient_id})
-        return res
+        return True
     
-    def complete(self, cr, uid, activity_id, context=None): 
-        res = {}
+    def complete(self, cr, uid, activity_id, context=None):
         activity_pool = self.pool['nh.activity']
         register_activity = activity_pool.browse(cr, uid, activity_id, context=context)
         patient_pool = self.pool['nh.clinical.patient']
@@ -100,7 +116,7 @@ class nh_clinical_adt_patient_register(orm.Model):
         patient_id = patient_pool.create(cr, uid, vals, context)
         self.write(cr, uid, register_activity.data_ref.id, {'patient_id': patient_id}, context=context)
         super(nh_clinical_adt_patient_register, self).complete(cr, uid, activity_id, context)
-        return res
+        return patient_id
 
 
 class nh_clinical_adt_patient_admit(orm.Model):
@@ -148,6 +164,8 @@ class nh_clinical_adt_patient_admit(orm.Model):
             raise orm.except_orm('Exception!', msg="POS location is not set for user.login = %s!" % user.login)
 
         # location validation
+        if not vals.get('location'):
+            raise osv.except_osv('Location Error!', 'Location must be set for admission!')
         suggested_location = api_pool.get_locations(cr, SUPERUSER_ID, codes=[vals['location']], pos_ids=[user.pos_id.id])
         if not suggested_location:
             _logger.warn("ADT suggested_location '%s' not found! Will automatically create one" % vals['location'])
@@ -386,6 +404,8 @@ class nh_clinical_adt_patient_transfer(orm.Model):
         spell_activity = activity_pool.browse(cr, uid, spell_activity_id, context=context)
         patient_id = patient_id[0]           
         location_pool = self.pool['nh.clinical.location']
+        if not vals.get('location'):
+            raise osv.except_osv('Location Error!', 'Location must be set for transfer!')
         location_id = location_pool.search(cr, uid, [('code', '=', vals['location'])], context=context)
         if not location_id:
             _logger.warn("ADT transfer location '%s' not found! Will automatically create one" % vals['location'])
@@ -433,22 +453,26 @@ class nh_clinical_adt_patient_transfer(orm.Model):
         super(nh_clinical_adt_patient_transfer, self).complete(cr, uid, activity_id, context=context)
         activity_pool = self.pool['nh.activity']
         api_pool = self.pool['nh.clinical.api']
+        location_pool = self.pool['nh.clinical.location']
         move_pool = self.pool['nh.clinical.patient.move']
         transfer_activity = activity_pool.browse(cr, SUPERUSER_ID, activity_id, context=context)
+        spell_activity_id = api_pool.get_patient_spell_activity_id(cr, uid, transfer_activity.data_ref.patient_id.id, context=context)
+        spell_activity = activity_pool.browse(cr, uid, spell_activity_id, context=context)
         # patient move
-        spell_activity_id = api_pool.get_patient_spell_activity_id(cr, SUPERUSER_ID, transfer_activity.patient_id.id, context=context)
-        except_if(not spell_activity_id, msg="Spell not found!")
-        move_activity_id = move_pool.create_activity(cr, SUPERUSER_ID, {
-            'parent_id': spell_activity_id,
-            'creator_id': activity_id
-        }, {
-            'patient_id': transfer_activity.patient_id.id,
-            'location_id': transfer_activity.data_ref.location_id.id},
-            context=context)
-        res[move_pool._name] = move_activity_id
-        activity_pool.complete(cr, SUPERUSER_ID, move_activity_id, context)
-        # trigger policy activities
-        self.trigger_policy(cr, uid, activity_id, location_id=transfer_activity.data_ref.location_id.id, context=context)
+        if not location_pool.is_child_of(cr, uid, spell_activity.location_id.id, transfer_activity.data_ref.location, context=context):
+            spell_activity_id = api_pool.get_patient_spell_activity_id(cr, SUPERUSER_ID, transfer_activity.patient_id.id, context=context)
+            except_if(not spell_activity_id, msg="Spell not found!")
+            move_activity_id = move_pool.create_activity(cr, SUPERUSER_ID, {
+                'parent_id': spell_activity_id,
+                'creator_id': activity_id
+            }, {
+                'patient_id': transfer_activity.patient_id.id,
+                'location_id': transfer_activity.data_ref.location_id.id},
+                context=context)
+            res[move_pool._name] = move_activity_id
+            activity_pool.complete(cr, SUPERUSER_ID, move_activity_id, context)
+            # trigger policy activities
+            self.trigger_policy(cr, uid, activity_id, location_id=transfer_activity.data_ref.location_id.id, context=context)
         return res
         
 
@@ -555,7 +579,6 @@ class nh_clinical_adt_patient_update(orm.Model):
         return super(nh_clinical_adt_patient_update, self).submit(cr, uid, activity_id, vals_copy, context)
     
     def complete(self, cr, uid, activity_id, context=None): 
-        res = {}
         activity_pool = self.pool['nh.activity']
         update_activity = activity_pool.browse(cr, uid, activity_id, context=context)
         patient_pool = self.pool['nh.clinical.patient']
@@ -602,6 +625,8 @@ class nh_clinical_adt_spell_update(orm.Model):
         vals_copy = vals.copy()
         # location validation
         location_pool = self.pool['nh.clinical.location']
+        if not vals.get('location'):
+            raise osv.except_osv('Location Error!', 'Location must be set for admission!')
         suggested_location_id = location_pool.search(cr, SUPERUSER_ID, [('code', '=', vals['location']), ('id', 'child_of', user.pos_id.location_id.id)], context=context)
         if not suggested_location_id:
             _logger.warn("ADT suggested_location '%s' not found! Will automatically create one" % vals['location'])
@@ -669,6 +694,7 @@ class nh_clinical_adt_spell_update(orm.Model):
         super(nh_clinical_adt_spell_update, self).complete(cr, uid, activity_id, context=context)
         activity_pool = self.pool['nh.activity']
         api_pool = self.pool['nh.clinical.api']
+        location_pool = self.pool['nh.clinical.location']
         update_activity = activity_pool.browse(cr, SUPERUSER_ID, activity_id, context=context)
         spell_activity_id = api_pool.get_patient_spell_activity_id(cr, SUPERUSER_ID, update_activity.data_ref.patient_id.id, context=context)
         except_if(not spell_activity_id, msg="Spell not found!")
@@ -676,22 +702,24 @@ class nh_clinical_adt_spell_update(orm.Model):
         data = {
             'con_doctor_ids': [[6, False, [d.id for d in update_activity.data_ref.con_doctor_ids]]],
             'ref_doctor_ids': [[6, False, [d.id for d in update_activity.data_ref.ref_doctor_ids]]],
-            'location_id': update_activity.data_ref.pos_id.lot_admission_id.id,
             'code': update_activity.data_ref.code,
             'start_date': update_activity.data_ref.start_date if update_activity.data_ref.start_date < spell_activity.data_ref.start_date else spell_activity.data_ref.start_date
         }
+        if spell_activity.location_id.code != update_activity.data_ref.location:
+            data.update({'location_id': update_activity.data_ref.pos_id.lot_admission_id.id})
         res = activity_pool.submit(cr, uid, spell_activity_id, data, context=context)
         activity_pool.write(cr, SUPERUSER_ID, activity_id, {'parent_id': spell_activity_id})
         # patient move
-        move_pool = self.pool['nh.clinical.patient.move']
-        move_activity_id = move_pool.create_activity(cr, SUPERUSER_ID,
-            {'parent_id': spell_activity_id, 'creator_id': activity_id},
-            {'patient_id': update_activity.data_ref.patient_id.id,
-             'location_id': update_activity.data_ref.suggested_location_id.id},
-            context=context)
-        activity_pool.complete(cr, SUPERUSER_ID, move_activity_id, context)
-        # trigger policy activities
-        self.trigger_policy(cr, uid, activity_id, location_id=update_activity.data_ref.suggested_location_id.id, context=context)
+        if not location_pool.is_child_of(cr, uid, spell_activity.location_id.id, update_activity.data_ref.location, context=context):
+            move_pool = self.pool['nh.clinical.patient.move']
+            move_activity_id = move_pool.create_activity(cr, SUPERUSER_ID,
+                {'parent_id': spell_activity_id, 'creator_id': activity_id},
+                {'patient_id': update_activity.data_ref.patient_id.id,
+                 'location_id': update_activity.data_ref.suggested_location_id.id},
+                context=context)
+            activity_pool.complete(cr, SUPERUSER_ID, move_activity_id, context)
+            # trigger policy activities
+            self.trigger_policy(cr, uid, activity_id, location_id=update_activity.data_ref.suggested_location_id.id, context=context)
         return res
 
 
@@ -725,6 +753,9 @@ class nh_clinical_adt_patient_cancel_discharge(orm.Model):
                   ('state', '=', 'completed'),
                   ('patient_id', '=', patient_id)]
         move_activity_ids = activity_pool.search(cr, uid, domain, order='date_terminated desc, sequence desc', context=context)
+        if not move_activity_ids:
+            raise osv.except_osv('Policy Error!',
+                                 'Cannot cancel discharge operation if the patient was not discharged previously.')
         move_activity = activity_pool.browse(cr, uid, move_activity_ids[1], context=context)
         vals_copy = vals.copy()
         if move_activity.location_id.type == 'poc':
@@ -787,7 +818,7 @@ class nh_clinical_adt_patient_cancel_discharge(orm.Model):
                 res[move_pool._name] = move_activity_id
                 activity_pool.complete(cr, SUPERUSER_ID, move_activity_id, context)
                 # trigger policy activities
-                self.trigger_policy(cr, uid, activity_id, location_id=cancel_activity.data_ref.last_location_id.parent_id.id, context=context)
+                self.trigger_policy(cr, uid, activity_id, location_id=cancel_activity.data_ref.last_location_id.id, context=context)
         else:
             move_activity_id = move_pool.create_activity(cr, SUPERUSER_ID,
                 {'parent_id': spell_activity_id, 'creator_id': activity_id},
@@ -797,7 +828,7 @@ class nh_clinical_adt_patient_cancel_discharge(orm.Model):
             res[move_pool._name] = move_activity_id
             activity_pool.complete(cr, SUPERUSER_ID, move_activity_id, context)
             # trigger policy activities
-            self.write(cr, uid, cancel_activity.data_ref.id, {'last_location_id': cancel_activity.data_ref.last_location_id.child_ids[0].id}, context=context)
+            # self.write(cr, uid, cancel_activity.data_ref.id, {'last_location_id': cancel_activity.data_ref.last_location_id.child_ids[0].id}, context=context)
             self.trigger_policy(cr, uid, activity_id, location_id=cancel_activity.data_ref.last_location_id.id, context=context)
             self.write(cr, uid, cancel_activity.data_ref.id, {'last_location_id': cancel_activity.data_ref.last_location_id.id}, context=context)
         return res
@@ -844,20 +875,27 @@ class nh_clinical_adt_patient_cancel_transfer(orm.Model):
         activity_pool = self.pool['nh.activity']
         api_pool = self.pool['nh.clinical.api']
         move_pool = self.pool['nh.clinical.patient.move']
+        location_pool = self.pool['nh.clinical.location']
         cancel_activity = activity_pool.browse(cr, SUPERUSER_ID, activity_id, context=context)
-
-        # patient move
         spell_activity_id = api_pool.get_patient_spell_activity_id(cr, SUPERUSER_ID, cancel_activity.data_ref.patient_id.id, context=context)
         except_if(not spell_activity_id, msg="Spell not found!")
-        move_activity_id = move_pool.create_activity(cr, SUPERUSER_ID,{
-            'parent_id': spell_activity_id,
-            'creator_id': activity_id
-        }, {
-            'patient_id': cancel_activity.data_ref.patient_id.id,
-            'location_id': cancel_activity.data_ref.last_location_id.id},
-            context=context)
-        res[move_pool._name] = move_activity_id
-        activity_pool.complete(cr, SUPERUSER_ID, move_activity_id, context)
-        # trigger policy activities
-        self.trigger_policy(cr, uid, activity_id, location_id=cancel_activity.data_ref.last_location_id.id, context=context)
+        spell_activity = activity_pool.browse(cr, uid, spell_activity_id, context=context)
+
+        if not location_pool.is_child_of(cr, uid, spell_activity.location_id.id, cancel_activity.data_ref.last_location_id.code, context=context):
+            move_activity_id = move_pool.create_activity(cr, SUPERUSER_ID,{
+                'parent_id': spell_activity_id,
+                'creator_id': activity_id
+            }, {
+                'patient_id': cancel_activity.data_ref.patient_id.id,
+                'location_id': cancel_activity.data_ref.last_location_id.id},
+                context=context)
+            res[move_pool._name] = move_activity_id
+            activity_pool.complete(cr, SUPERUSER_ID, move_activity_id, context)
+            # trigger policy activities
+            self.trigger_policy(cr, uid, activity_id, location_id=cancel_activity.data_ref.last_location_id.id, context=context)
+        domain = [('data_model', '=', 'nh.clinical.adt.patient.transfer'),
+                  ('state', '=', 'completed'),
+                  ('patient_id', '=', cancel_activity.data_ref.patient_id.id)]
+        transfer_activity_ids = activity_pool.search(cr, uid, domain, order='date_terminated desc, sequence desc', context=context)
+        activity_pool.cancel(cr, uid, transfer_activity_ids[0], context=context)
         return res
