@@ -275,7 +275,7 @@ class nh_activity_data(orm.AbstractModel):
             if trigger_activity.get('domains'):
                 for domain in trigger_activity.get('domains'):
                     domain_pool = self.pool.get(domain['object'])
-                    search_domain = domain['domain'] + [['patient_id', '=', activity.data_ref.patient_id.id]]
+                    search_domain = domain['domain'] + [['parent_id', '=', spell_activity_id]]
                     if domain_pool.search(cr, uid, search_domain, context=context):
                         continue
             if trigger_activity.get('cancel_others'):
