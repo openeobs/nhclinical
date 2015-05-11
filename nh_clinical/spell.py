@@ -91,7 +91,7 @@ class nh_clinical_spell(orm.Model):
         'patient_id': fields.many2one('nh.clinical.patient', 'Patient', required=True),
         'location_id': fields.many2one('nh.clinical.location', 'Placement Location'),
         'pos_id': fields.many2one('nh.clinical.pos', 'Placement Location', required=True),
-        'code': fields.text("Code"),
+        'code': fields.char("Code", size=256),
         'start_date': fields.datetime("ADT Start Date"),
         'move_date': fields.datetime("Last Movement Date"),
         'ref_doctor_ids': fields.many2many('nh.clinical.doctor', 'ref_doctor_spell_rel', 'spell_id', 'doctor_id', "Referring Doctors"),

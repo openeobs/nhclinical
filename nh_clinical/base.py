@@ -424,6 +424,32 @@ class nh_clinical_location(orm.Model):
         self.pool['nh.clinical.context'].check_model(cr, uid, context_ids, self._name, context=context)
         return True
 
+    def get_by_code(self, cr, uid, code, auto_create=False, context=None):
+        """
+        :return: id of the location with the provided code if it exists.
+                 False if auto_create is False and it does not exist.
+                 id of a new ward location with the provided code if auto_create is True.
+        """
+        location_ids = self.search(cr, uid, [['code', '=', code]], context=context)
+        if not location_ids:
+            if not auto_create:
+                return False
+            else:
+                _logger.warn("Location '%s' not found! Automatically creating one with this code." % code)
+                user_pool = self.pool['res.users']
+                user = user_pool.browse(cr, uid, uid, context=context)
+                location_id = self.create(cr, uid, {
+                    'name': code,
+                    'code': code,
+                    'pos_id': user.pos_id.id if user.pos_id else False,
+                    'parent_id': user.pos_id.location_id.id if user.pos_id.location_id else False,
+                    'type': 'poc',
+                    'usage': 'ward'
+                }, context=context)
+        else:
+            location_id = location_ids[0]
+        return location_id
+
     def create(self, cr, uid, vals, context=None):
         if vals.get('context_ids'):
             self.check_context_ids(cr, uid, vals.get('context_ids'), context=context)
