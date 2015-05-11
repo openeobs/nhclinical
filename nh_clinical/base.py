@@ -511,10 +511,10 @@ class nh_clinical_patient(osv.Model):
         domain = [['patient_identifier', '=', nhs_number]]
         result = bool(self.search(cr, uid, domain, context=context))
         if exception:
-            if result:
+            if result and eval(exception):
                 raise osv.except_osv('Integrity Error!', 'Patient with NHS Number %s already exists!'
                                      % nhs_number)
-            elif not result:
+            elif not result and not eval(exception):
                 raise osv.except_osv('Patient Not Found!', 'There is no patient with NHS Number %s' %
                                      nhs_number)
         return result
@@ -567,6 +567,28 @@ class nh_clinical_patient(osv.Model):
 
     def unlink(self, cr, uid, ids, context=None):
         return super(nh_clinical_patient, self).write(cr, uid, ids, {'active': False}, context=context)
+
+    def check_data(self, cr, uid, data, context=None):
+        """
+        Checks creation / update data for patients.
+        Either the Hospital Number (other_identifier) or the NHS Number (patient_identifier) is required.
+        Hospital Number must be unique.
+        NHS Number must be unique.
+        changes title to res.partner.title id. Will create a new one if it does not exist.
+        :return: True if successful
+        """
+        title_pool = self.pool['res.partner.title']
+        if 'patient_identifier' not in data.keys() and 'other_identifier' not in data.keys():
+            raise osv.except_osv('Register Error!', 'Either the Hospital Number or the NHS Number is required to '
+                                                    'register a new patient.')
+        if 'other_identifier' in data.keys():
+            self.check_hospital_number(cr, uid, data['other_identifier'], exception='True', context=context)
+        if 'patient_identifier' in data.keys():
+            self.check_nhs_number(cr, uid, data['patient_identifier'], exception='True', context=context)
+        if 'title' in data.keys():
+            if not isinstance(data.get('title'), int):
+                data['title'] = title_pool.get_title_by_name(cr, uid, data['title'], context=context)
+        return True
 
 
 #FIXME: This is here to prevent mail message from complaining when creating a user
