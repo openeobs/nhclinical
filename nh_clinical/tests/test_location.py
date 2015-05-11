@@ -23,7 +23,7 @@ class TestLocation(common.SingleTransactionCase):
         cls.user_pool = cls.registry('res.users')
         cls.group_pool = cls.registry('res.groups')
 
-    def test_create(self):
+    def test_01_create(self):
         cr, uid = self.cr, self.uid
 
         # Scenario 1: Create a new Location
@@ -34,7 +34,7 @@ class TestLocation(common.SingleTransactionCase):
         self.assertEqual(location.patient_capacity, 1, msg="Location default capacity not set")
         self.assertEqual(location.name, 'Test Loc', msg="Location name not set")
 
-    def test_get_pos_id(self):
+    def test_02_get_pos_id(self):
         cr, uid = self.cr, self.uid
 
         # Scenario 1: Create a new Location with a POS assigned to it
@@ -54,7 +54,7 @@ class TestLocation(common.SingleTransactionCase):
         result = self.location_pool._get_pos_id(cr, uid, location_id, field='pos_id', args={})
         self.assertEqual(result[location_id], False, msg="POS assigned incorrectly to the Location")
 
-    def test_get_available_location_ids(self):
+    def test_03_get_available_location_ids(self):
         cr, uid = self.cr, self.uid
 
         # Scenario 1: Create a new Location and check its returned
@@ -76,7 +76,7 @@ class TestLocation(common.SingleTransactionCase):
         result = self.location_pool.get_available_location_ids(cr, uid)
         self.assertFalse(location_id in result, msg="Location found in Available Locations")
 
-    def test_is_available(self):
+    def test_04_is_available(self):
         cr, uid = self.cr, self.uid
 
         # Scenario 1: Create a new Location and check its availability
@@ -136,7 +136,7 @@ class TestLocation(common.SingleTransactionCase):
         result = self.location_pool._is_available(cr, uid, location_id, field='is_available', args={})
         self.assertTrue(result[location_id], msg="Availability updated incorrectly when spell is started")
 
-    def test_get_patient_ids(self):
+    def test_05_get_patient_ids(self):
         cr, uid = self.cr, self.uid
 
         # Scenario 1: Create a new Location and check its patients
@@ -179,7 +179,7 @@ class TestLocation(common.SingleTransactionCase):
         result = self.location_pool._get_child_patients(cr, uid, location_id, field='child_patients', args={})
         self.assertEqual(result[location_id], 1, msg="Wrong number of patients returned")
 
-    def test_get_users_from_location(self):
+    def test_06_get_users_from_location(self):
         """
         Test _get_user_ids and the other methods related to getting users from the location
         SET UP: location_id is a Ward with room_id and bed_id as a child locations
@@ -324,7 +324,7 @@ class TestLocation(common.SingleTransactionCase):
         self.assertTrue(registrar_user_id in result[location_id], msg="Registrar not found in result")
         self.assertTrue(doctor_user2_id in result[location_id], msg="Doctor assigned to bed not found in result")
 
-    def test_get_waiting_patients(self):
+    def test_07_get_waiting_patients(self):
         cr, uid = self.cr, self.uid
 
         location_id = self.location_pool.create(cr, uid, {'name': 'Test Loc', 'code': 'TESTLOC13',
@@ -351,7 +351,7 @@ class TestLocation(common.SingleTransactionCase):
         result = self.location_pool._get_waiting_patients(cr, uid, location_id, field='waiting_patients', args={})
         self.assertEqual(result[location_id], 0, msg="Wrong number of related patients")
 
-    def test_get_closest_parent_id(self):
+    def test_08_get_closest_parent_id(self):
         cr, uid = self.cr, self.uid
         # Set Up Ward parent of Bay parent of Room parent of Bed
         ward_id = self.location_pool.create(cr, uid, {'name': 'Test Ward', 'code': 'TESTLOC15',
@@ -378,7 +378,36 @@ class TestLocation(common.SingleTransactionCase):
         self.assertFalse(self.location_pool.get_closest_parent_id(cr, uid, bay_id, 'room'), msg="Found an unexpected parent location")
         self.assertFalse(self.location_pool.get_closest_parent_id(cr, uid, ward_id, 'ward'), msg="Found an unexpected parent location")
 
-    def test_get_name(self):
+    def test_09_is_child_of(self):
+        cr, uid = self.cr, self.uid
+
+        ward_id = self.location_pool.search(cr, uid, [['code', '=', 'TESTLOC15']])[0]
+        bay_id = self.location_pool.search(cr, uid, [['code', '=', 'TESTLOC16']])[0]
+        room_id = self.location_pool.search(cr, uid, [['code', '=', 'TESTLOC17']])[0]
+        bed_id = self.location_pool.search(cr, uid, [['code', '=', 'TESTLOC18']])[0]
+
+        # Scenario 1: Test 0 level deep relationships.
+        self.assertTrue(self.location_pool.is_child_of(cr, uid, bed_id, 'TESTLOC18'))
+        self.assertTrue(self.location_pool.is_child_of(cr, uid, room_id, 'TESTLOC17'))
+        self.assertTrue(self.location_pool.is_child_of(cr, uid, bay_id, 'TESTLOC16'))
+        self.assertTrue(self.location_pool.is_child_of(cr, uid, ward_id, 'TESTLOC15'))
+
+        # Scenario 2: Test 1 level deep relationships.
+        self.assertTrue(self.location_pool.is_child_of(cr, uid, bed_id, 'TESTLOC17'))
+        self.assertTrue(self.location_pool.is_child_of(cr, uid, room_id, 'TESTLOC16'))
+        self.assertTrue(self.location_pool.is_child_of(cr, uid, bay_id, 'TESTLOC15'))
+
+        # Scenario 3: Test X level deep relationships.
+        self.assertTrue(self.location_pool.is_child_of(cr, uid, bed_id, 'TESTLOC15'))
+        self.assertTrue(self.location_pool.is_child_of(cr, uid, room_id, 'TESTLOC15'))
+        self.assertTrue(self.location_pool.is_child_of(cr, uid, bay_id, 'TESTLOC15'))
+
+        # Scenario 3: Test False cases.
+        self.assertFalse(self.location_pool.is_child_of(cr, uid, room_id, 'TESTLOC18'))
+        self.assertFalse(self.location_pool.is_child_of(cr, uid, bay_id, 'TESTLOC17'))
+        self.assertFalse(self.location_pool.is_child_of(cr, uid, ward_id, 'TESTLOC16'))
+
+    def test_10_get_name(self):
         cr, uid = self.cr, self.uid
 
         ward_id = self.location_pool.create(cr, uid, {'name': 'Test Ward', 'code': 'TESTLOC19',
@@ -405,7 +434,7 @@ class TestLocation(common.SingleTransactionCase):
         # Scenario 4: 2nd Bed name. No Ward as parent.
         self.assertEqual('Test Bed 2', result[bed2_id])
 
-    def test_is_available_search(self):
+    def test_11_is_available_search(self):
         cr, uid = self.cr, self.uid
 
         # Set up: create a location and make it unavailable
@@ -432,7 +461,7 @@ class TestLocation(common.SingleTransactionCase):
                                                          args=[['is_available', '>', 2], ['is_available', '<', 'a']])
         self.assertEqual([], result[0][2], msg="Search returned results with wrong operators")
 
-    def test_switch_active_status(self):
+    def test_12_switch_active_status(self):
         cr, uid = self.cr, self.uid
 
         location_id = self.location_pool.create(cr, uid, {'name': 'Test Loc', 'code': 'TESTLOC24',
