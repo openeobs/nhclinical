@@ -694,3 +694,40 @@ class nh_clinical_doctor(orm.Model):
         if 'user_id' in vals:
             self.pool['res.users'].write(cr, uid, vals['user_id'], {'doctor_id': ids[0]}, context=context)
         return res
+
+    def evaluate_doctors_dict(self, cr, uid, data, context=None):
+        if not data.get('doctors'):
+            _logger.warn("Trying to evaluate doctors dictionary without doctors data!")
+            return False
+        else:
+            try:
+                doctors = eval(str(data['doctors']))
+                patient_pool = self.pool['nh.clinical.patient']
+                ref_doctor_ids = []
+                con_doctor_ids = []
+                for d in doctors:
+                    doctor_id = self.search(cr, uid, [['code', '=', d.get('code')]], context=context)
+                    if not doctor_id:
+                        title_id = False
+                        if 'title' in d.keys():
+                            title_pool = self.pool['res.partner.title']
+                            title_id = title_pool.get_title_by_name(cr, uid, d['title'], context=context)
+                        doctor = {
+                            'name': patient_pool._get_fullname(d),
+                            'title': title_id,
+                            'code': d.get('code'),
+                            'gender': d.get('gender'),
+                            'gmc': d.get('gmc')
+                        }
+                        doctor_id = self.create(cr, uid, doctor, context=context)
+                    else:
+                        if len(doctor_id) > 1:
+                            _logger.warn("More than one doctor found with code '%s' passed id=%s" %
+                                         (d.get('code'), doctor_id[0]))
+                        doctor_id = doctor_id[0]
+                    ref_doctor_ids.append(doctor_id) if d['type'] == 'r' else con_doctor_ids.append(doctor_id)
+                ref_doctor_ids and data.update({'ref_doctor_ids': [[6, False, ref_doctor_ids]]})
+                con_doctor_ids and data.update({'con_doctor_ids': [[6, False, con_doctor_ids]]})
+            except:
+                _logger.warn("Can't evaluate 'doctors': %s" % (data['doctors']))
+        return True
