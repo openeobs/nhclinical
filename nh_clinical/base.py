@@ -535,9 +535,7 @@ class nh_clinical_patient(osv.Model):
         'gender': fields.selection(_gender, 'Gender'),
         'ethnicity': fields.selection(_ethnicity, 'Ethnicity'),
         'patient_identifier': fields.char('Patient Identifier', size=100, select=True, help="NHS Number"),
-        'other_identifier': fields.char('Other Identifier', size=100, required=True, select=True,
-                                        help="Hospital Number"),
-
+        'other_identifier': fields.char('Other Identifier', size=100, select=True, help="Hospital Number"),
         'given_name': fields.char('Given Name', size=200),
         'middle_names': fields.char('Middle Name(s)', size=200),
         'family_name': fields.char('Family Name', size=200, select=True),
@@ -562,6 +560,10 @@ class nh_clinical_patient(osv.Model):
     def create(self, cr, uid, vals, context=None):
         if not vals.get('name'):
             vals.update({'name': self._get_fullname(vals)})
+        if 'other_identifier' in vals:
+            self.check_hospital_number(cr, uid, vals.get('other_identifier'), exception='True', context=context)
+        if 'patient_identifier' in vals:
+            self.check_nhs_number(cr, uid, vals.get('patient_identifier'), exception='True', context=context)
         return super(nh_clinical_patient, self).create(cr, uid, vals,
                                                        context=dict(context or {}, mail_create_nosubscribe=True))
 
@@ -598,6 +600,8 @@ class nh_clinical_patient(osv.Model):
             patient_id = self.search(cr, uid, domain, context=context)
             if not patient_id:
                 raise osv.except_osv('Update Error!', 'No patient found with the provided identifier.')
+            if len(patient_id) > 1:
+                raise osv.except_osv('Update Error!', 'Identifiers for more than one patient provided.')
             data['patient_id'] = patient_id[0]
         if 'title' in data.keys():
             if not isinstance(data.get('title'), int):
