@@ -568,23 +568,37 @@ class nh_clinical_patient(osv.Model):
     def unlink(self, cr, uid, ids, context=None):
         return super(nh_clinical_patient, self).write(cr, uid, ids, {'active': False}, context=context)
 
-    def check_data(self, cr, uid, data, context=None):
+    def check_data(self, cr, uid, data, create=True, context=None):
         """
-        Checks creation / update data for patients.
+        Checks create / update data for patients.
         Either the Hospital Number (other_identifier) or the NHS Number (patient_identifier) is required.
-        Hospital Number must be unique.
-        NHS Number must be unique.
+        On create: Hospital Number must be unique and NHS Number must be unique.
+        On update: At patient must exist with either the Hospital Number or the NHS Number provided.
         changes title to res.partner.title id. Will create a new one if it does not exist.
         :return: True if successful
         """
         title_pool = self.pool['res.partner.title']
         if 'patient_identifier' not in data.keys() and 'other_identifier' not in data.keys():
-            raise osv.except_osv('Register Error!', 'Either the Hospital Number or the NHS Number is required to '
-                                                    'register a new patient.')
-        if 'other_identifier' in data.keys():
-            self.check_hospital_number(cr, uid, data['other_identifier'], exception='True', context=context)
-        if 'patient_identifier' in data.keys():
-            self.check_nhs_number(cr, uid, data['patient_identifier'], exception='True', context=context)
+            raise osv.except_osv('Patient Data Error!', 'Either the Hospital Number or the NHS Number is required to '
+                                                        'register/update a patient.')
+        if create:
+            if 'other_identifier' in data.keys():
+                self.check_hospital_number(cr, uid, data['other_identifier'], exception='True', context=context)
+            if 'patient_identifier' in data.keys():
+                self.check_nhs_number(cr, uid, data['patient_identifier'], exception='True', context=context)
+        else:
+            if 'other_identifier' in data.keys() and 'patient_identifier' in data.keys():
+                domain = ['|',
+                          ['other_identifier', '=', data['other_identifier']],
+                          ['patient_identifier', '=', data['patient_identifier']]]
+            elif 'other_identifier' in data.keys():
+                domain = [['other_identifier', '=', data['other_identifier']]]
+            else:
+                domain = [['patient_identifier', '=', data['patient_identifier']]]
+            patient_id = self.search(cr, uid, domain, context=context)
+            if not patient_id:
+                raise osv.except_osv('Update Error!', 'No patient found with the provided identifier.')
+            data['patient_id'] = patient_id[0]
         if 'title' in data.keys():
             if not isinstance(data.get('title'), int):
                 data['title'] = title_pool.get_title_by_name(cr, uid, data['title'], context=context)

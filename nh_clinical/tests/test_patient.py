@@ -174,7 +174,26 @@ class TestClinicalPatient(common.SingleTransactionCase):
         with self.assertRaises(except_orm):
             self.patient_pool.check_data(cr, uid, data)
 
-        # Scenario 4: Correct data with title
+        # Scenario 4: Correct create data with title
         data.update({'patient_identifier': 'TESTNHS09', 'title': 'Mr.'})
         self.assertTrue(self.patient_pool.check_data(cr, uid, data))
         self.assertTrue(isinstance(data.get('title'), int))
+
+        # Scenario 5: Update data, no existing patient with Hospital Number or NHS Number
+        data.update({'other_identifier': 'TESTHN008', 'patient_identifier': 'TESTNHS08'})
+        with self.assertRaises(except_orm):
+            self.patient_pool.check_data(cr, uid, data, create=False)
+
+        # Scenario 6: Update data, no existing patient with Hospital Number
+        data.update({'other_identifier': 'TESTHN008'})
+        with self.assertRaises(except_orm):
+            self.patient_pool.check_data(cr, uid, data, create=False)
+
+        # Scenario 7: Update data, no existing patient with NHS Number
+        data.update({'patient_identifier': 'TESTNHS08'})
+        with self.assertRaises(except_orm):
+            self.patient_pool.check_data(cr, uid, data, create=False)
+
+        # Scenario 8: Correct update data
+        data.update({'patient_identifier': 'TESTPI001'})
+        self.assertTrue(self.patient_pool.check_data(cr, uid, data, create=False))
