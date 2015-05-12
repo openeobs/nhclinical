@@ -492,12 +492,12 @@ class nh_clinical_api_demo(orm.AbstractModel):
     
     
     
-    def build_uat_pos(self, cr, uid, 
-                       bed_count=5, ward_count=2, 
-                       patient_admit_count=10, patient_placement_count=5, 
-                       ews_count=3, weight_count=3, blood_sugar_count=3,
-                       height_count=3, o2target_count=3, mrsa_count=3, diabetes_count=3):
-#                        adt_user_count=1, hca_count=2, nurse_count=2, doctor_count=2, ward_manager_count=2):
+    def build_uat_pos(self, cr, uid, bed_count=5, ward_count=2,
+                      patient_admit_count=10, patient_placement_count=5,
+                      ews_count=3, weight_count=3, blood_sugar_count=3,
+                      height_count=3, o2target_count=3, mrsa_count=3,
+                      diabetes_count=3):
+        # adt_user_count=1, hca_count=2, nurse_count=2, doctor_count=2, ward_manager_count=2):
         """
         Creates UAT POS with set names, wards, beds
         Returns pos_id

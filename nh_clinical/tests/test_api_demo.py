@@ -42,3 +42,6 @@ class TestDemoAPI(common.SingleTransactionCase):
         self.assertTrue(user.login == 'testlogin', msg="User login not correct")
         self.assertTrue(all([loc.id in [self.pos_location_id] for loc in user.location_ids]), msg="User locations not correct")
         self.assertTrue(all([group.name in ['NH Clinical Base Group', 'NH Clinical Ward Manager Group', 'Contact Creation'] for group in user.groups_id]), msg="User groups not correct")
+
+    def test_build_uat_post(self):
+        pass
