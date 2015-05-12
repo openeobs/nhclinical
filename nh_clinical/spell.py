@@ -3,7 +3,7 @@
 from datetime import datetime as dt
 import logging
 
-from openerp.osv import orm, fields
+from openerp.osv import orm, fields, osv
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
 
 _logger = logging.getLogger(__name__)
@@ -157,3 +157,22 @@ class nh_clinical_spell(orm.Model):
         res = cr.dictfetchone()
         user_ids = list(res and set(res['user_ids']) or [])
         return user_ids
+
+    def get_by_patient_id(self, cr, uid, patient_id, exception=False, context=None):
+        """
+        Checks if there is a started spell for the provided Patient
+        :param exception: string with values 'True' or 'False'.
+        :return: if no exception parameter is provided: spell id if exists. False if not.
+                if exception = 'True': Integrity Error exception is raised if spell exists. False if not.
+                if exception = 'False': spell id if exists. No Started Spell exception is raised if not.
+        """
+        domain = [['patient_id', '=', patient_id], ['activity_id.state', '=', 'started']]
+        spell_id = self.search(cr, uid, domain, context=context)
+        if exception:
+            if spell_id and eval(exception):
+                raise osv.except_osv('Integrity Error!', 'Patient with id %s already has a started spell!'
+                                     % patient_id)
+            elif not spell_id and not eval(exception):
+                raise osv.except_osv('Spell Not Found!', 'There is no started spell for patient with id %s' %
+                                     patient_id)
+        return spell_id[0] if spell_id else False
