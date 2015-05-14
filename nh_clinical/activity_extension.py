@@ -193,16 +193,16 @@ class nh_activity_data(orm.AbstractModel):
         """
         location_id = False
         data_ids = self.search(cr, uid, [('activity_id', '=', activity_id)])
-        data = self.browse(cr, uid, data_ids, context)[0]
+        data = self.browse(cr, uid, data_ids, context=context)[0]
 
         if 'location_id' in self._columns.keys():
-            location_id = data.location_id and data.location_id.id or False
+            location_id = data.location_id.id if data.location_id else False
         if not location_id:
             location_id = data.activity_id.patient_id.current_location_id.id
         if not location_id:
             location_id = data.activity_id.spell_activity_id and data.activity_id.spell_activity_id.location_id.id or False
         if not location_id:
-            location_id = data.activity_id.parent_id and data.activity_id.parent_id.location_id.id or False
+            location_id = data.activity_id.parent_id.location_id.id if data.activity_id.parent_id else False
         return location_id
 
     def get_activity_patient_id(self, cr, uid, activity_id, context=None):
@@ -244,7 +244,7 @@ class nh_activity_data(orm.AbstractModel):
         user_ids += follower_ids
         return list(set(user_ids))
 
-    def trigger_policy(self, cr, uid, activity_id, location_id=None, context=None):
+    def trigger_policy(self, cr, uid, activity_id, location_id=None, case=False, context=None):
         """
         triggers the list of activities in the _POLICY['activities'] list.
         location_id [optional]. Required for context checking.
@@ -267,17 +267,22 @@ class nh_activity_data(orm.AbstractModel):
         else:
             return True
         for trigger_activity in self._POLICY.get('activities', []):
+            if case and trigger_activity.get('case') != case:
+                continue
             pool = self.pool[trigger_activity['model']]
             if trigger_activity.get('context') and location_id:
                 location = location_pool.browse(cr, uid, location_id, context=context)
                 if not any([c.name == trigger_activity.get('context') for c in location.context_ids]):
                     continue
             if trigger_activity.get('domains'):
+                break_trigger = False
                 for domain in trigger_activity.get('domains'):
                     domain_pool = self.pool.get(domain['object'])
                     search_domain = domain['domain'] + [['parent_id', '=', spell_activity_id]]
                     if domain_pool.search(cr, uid, search_domain, context=context):
-                        continue
+                        break_trigger = True
+                if break_trigger:
+                    continue
             if trigger_activity.get('cancel_others'):
                 api_pool.cancel_open_activities(cr, uid, spell_activity_id, pool._name, context=context)
             data = {

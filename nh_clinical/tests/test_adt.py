@@ -3,25 +3,16 @@ import logging
 
 from openerp.tests import common
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as dtf
+from openerp.osv.orm import except_orm
 
 _logger = logging.getLogger(__name__)
 
-from faker import Faker
-fake = Faker()
-seed = fake.random_int(min=0, max=9999999)
 
-
-def next_seed():
-    global seed
-    seed += 1
-    return seed
-
-
-class test_adt(common.SingleTransactionCase):
+class testADT(common.SingleTransactionCase):
 
     @classmethod
     def setUpClass(cls):
-        super(test_adt, cls).setUpClass()
+        super(testADT, cls).setUpClass()
         cr, uid = cls.cr, cls.uid
 
         cls.users_pool = cls.registry('res.users')
@@ -59,360 +50,428 @@ class test_adt(common.SingleTransactionCase):
         cls.nu_id = cls.users_pool.search(cr, uid, [('login', '=', 'NU')])[0]
         cls.nt_id = cls.users_pool.search(cr, uid, [('login', '=', 'NT')])[0]
         cls.adt_id = cls.users_pool.search(cr, uid, [('groups_id.name', 'in', ['NH Clinical ADT Group']), ('pos_id', '=', cls.pos_id)])[0]
-    #
-    # def test_adt_patient_register(self):
-    #     cr, uid = self.cr, self.uid
-    #
 
-
-    def test_adt_Register_and_PatientUpdate(self):
+    def test_01_adt_patient_register(self):
         cr, uid = self.cr, self.uid
 
-        fake.seed(next_seed())
-        gender = fake.random_element(('M', 'F'))
-        other_identifier = str(fake.random_int(min=1000001, max=9999999))
-        dob = fake.date_time_between(start_date="-80y", end_date="-10y").strftime("%Y-%m-%d %H:%M:%S")
-        family_name = fake.last_name()
-        given_name = fake.first_name()
-
+        # Scenario 1: Register a new patient with Hospital Number
         register_data = {
-            'family_name': family_name,
-            'given_name': given_name,
-            'other_identifier': other_identifier,
-            'dob': dob,
-            'gender': gender,
-            'sex': gender}
-
+            'family_name': 'Family',
+            'given_name': 'Given',
+            'other_identifier': 'TEST001',
+            'dob': '1984-10-01 00:00:00',
+            'gender': 'M',
+            'sex': 'M'
+        }
         register_activity_id = self.register_pool.create_activity(cr, self.adt_id, {}, {})
         self.activity_pool.submit(cr, self.adt_id, register_activity_id, register_data)
-        check_register = self.activity_pool.browse(cr, self.adt_id, register_activity_id)
+        patient_id = self.activity_pool.complete(cr, self.adt_id, register_activity_id)
+        self.assertTrue(patient_id, msg="Patient Register: patient id not returned")
+        patient_data = self.patient_pool.read(cr, uid, patient_id, ['family_name', 'given_name', 'other_identifier',
+                                                                    'dob', 'gender', 'sex'])
+        self.assertEqual(register_data['family_name'], patient_data['family_name'],
+                         msg="Patient Register: wrong patient data registered")
+        self.assertEqual(register_data['given_name'], patient_data['given_name'],
+                         msg="Patient Register: wrong patient data registered")
+        self.assertEqual(register_data['other_identifier'], patient_data['other_identifier'],
+                         msg="Patient Register: wrong patient data registered")
+        self.assertEqual(register_data['dob'], patient_data['dob'],
+                         msg="Patient Register: wrong patient data registered")
+        self.assertEqual(register_data['gender'], patient_data['gender'],
+                         msg="Patient Register: wrong patient data registered")
+        self.assertEqual(register_data['sex'], patient_data['sex'],
+                         msg="Patient Register: wrong patient data registered")
 
-        # test register activity data
-        self.assertTrue(check_register.data_ref.family_name == family_name, msg="Patient Register: Family name was not submitted correctly")
-        self.assertTrue(check_register.data_ref.given_name == given_name, msg="Patient Register: Given name was not submitted correctly")
-        self.assertTrue(check_register.data_ref.other_identifier == other_identifier, msg="Patient Register: Hospital number was not submitted correctly")
-        self.assertTrue(check_register.data_ref.dob == dob, msg="Patient Register: Date of birth was not submitted correctly")
-        self.assertTrue(check_register.data_ref.gender == gender, msg="Patient Register: Gender was not submitted correctly")
-        self.assertTrue(check_register.data_ref.sex == gender, msg="Patient Register: Sex was not submitted correctly")
-        self.assertTrue(check_register.data_ref.pos_id.id == self.pos_id, msg="Patient Register: Point of Service was not submitted correctly")
-        self.assertFalse(check_register.data_ref.middle_names, msg="Patient Register: Middle name was not submitted correctly")
-        self.assertFalse(check_register.data_ref.patient_identifier, msg="Patient Register: NHS number was not submitted correctly")
-        self.assertFalse(check_register.data_ref.title, msg="Patient Register: Title was not submitted correctly")
-        
-        # Complete Patient Register
-        self.activity_pool.complete(cr, self.adt_id, register_activity_id)
-        check_register = self.activity_pool.browse(cr, uid, register_activity_id)
-        self.assertTrue(check_register.state == 'completed', msg="Patient Register not completed successfully")
-        self.assertTrue(check_register.date_terminated, msg="Patient Register Completed: Date terminated not registered")
-        # test patient data
-        patient_id = self.patient_pool.search(cr, uid, [['other_identifier', '=', other_identifier]])
-        self.assertTrue(patient_id, msg="Patient Register: Patient not created successfully")
-        self.assertTrue(check_register.data_ref.patient_id.id == patient_id[0], msg="Patient Register: Patient was not registered correctly")
-        check_patient = self.patient_pool.browse(cr, uid, patient_id[0])
-        self.assertTrue(check_patient.family_name == family_name, msg="Patient Register Completed: Family name is not correct")
-        self.assertTrue(check_patient.given_name == given_name, msg="Patient Register Completed: Given name is not correct")
-        self.assertTrue(check_patient.other_identifier == other_identifier, msg="Patient Register Completed: Hospital number is not correct")
-        self.assertTrue(check_patient.dob == dob, msg="Patient Register Completed: Date of birth is not correct")
-        self.assertTrue(check_patient.gender == gender, msg="Patient Register Completed: Gender is not correct")
-        self.assertTrue(check_patient.sex == gender, msg="Patient Register Completed: Sex is not correct")
-        self.assertFalse(check_patient.middle_names, msg="Patient Register Completed: Middle name is not correct")
-        self.assertFalse(check_patient.patient_identifier, msg="Patient Register Completed: NHS number is not correct")
-        self.assertFalse(check_patient.title, msg="Patient Register Completed: Title is not correct")
+        # Scenario 2: Register a new patient with NHS Number
+        register_data = {
+            'family_name': 'Family',
+            'given_name': 'Given',
+            'patient_identifier': 'TEST001',
+            'dob': '1984-10-01 00:00:00',
+            'gender': 'M',
+            'sex': 'M'
+        }
+        register_activity_id = self.register_pool.create_activity(cr, self.adt_id, {}, {})
+        self.activity_pool.submit(cr, self.adt_id, register_activity_id, register_data)
+        patient_id = self.activity_pool.complete(cr, self.adt_id, register_activity_id)
+        self.assertTrue(patient_id, msg="Patient Register: patient id not returned")
 
-        # Patient Update
+        # Scenario 3: Try to Register a patient with incorrect data. Create failure
+        register_data = {
+            'family_name': 'Family',
+            'given_name': 'Given',
+            'other_identifier': 'TEST001',
+            'dob': '1984-10-01 00:00:00',
+            'gender': 'M',
+            'sex': 'M'
+        }
+
+        with self.assertRaises(except_orm):
+            self.register_pool.create_activity(cr, self.adt_id, {}, register_data)
+
+        # Scenario 4: Try to Register a patient with incorrect data. Submit failure
+        register_data = {
+            'family_name': 'Family',
+            'given_name': 'Given',
+            'other_identifier': 'TEST001',
+            'dob': '1984-10-01 00:00:00',
+            'gender': 'M',
+            'sex': 'M'
+        }
+
+        register_activity_id = self.register_pool.create_activity(cr, self.adt_id, {}, {})
+        with self.assertRaises(except_orm):
+            self.activity_pool.submit(cr, self.adt_id, register_activity_id, register_data)
+
+    def test_02_adt_patient_update(self):
+        cr, uid = self.cr, self.uid
+
+        # Scenario 1: Update a patient using Hospital Number
         update_data = {
-            'family_name': fake.last_name(),
-            'given_name': fake.first_name(),
-            'other_identifier': other_identifier,
-            'dob': fake.date_time_between(start_date="-80y", end_date="-10y").strftime("%Y-%m-%d %H:%M:%S"),
-            'gender': gender,
-            'sex': gender}
+            'family_name': 'Fupdate',
+            'given_name': 'Gupdate',
+            'other_identifier': 'TEST001',
+            'patient_identifier': 'TESTNHS1',
+            'dob': '2000-10-01 00:00:00',
+            'gender': 'F',
+            'sex': 'F'
+        }
         update_activity_id = self.update_pool.create_activity(cr, self.adt_id, {}, {})
         self.activity_pool.submit(cr, self.adt_id, update_activity_id, update_data)
-        check_update = self.activity_pool.browse(cr, self.adt_id, update_activity_id)
+        self.assertTrue(self.activity_pool.complete(cr, self.adt_id, update_activity_id))
+        patient_id = self.patient_pool.search(cr, uid, [['other_identifier', '=', 'TEST001']])[0]
+        patient_data = self.patient_pool.read(cr, uid, patient_id, ['family_name', 'given_name', 'other_identifier',
+                                                                    'dob', 'gender', 'sex'])
+        self.assertEqual(update_data['family_name'], patient_data['family_name'],
+                         msg="Patient Update: wrong patient data")
+        self.assertEqual(update_data['given_name'], patient_data['given_name'],
+                         msg="Patient Update: wrong patient data")
+        self.assertEqual(update_data['other_identifier'], patient_data['other_identifier'],
+                         msg="Patient Update: wrong patient data")
+        self.assertEqual(update_data['dob'], patient_data['dob'],
+                         msg="Patient Update: wrong patient data")
+        self.assertEqual(update_data['gender'], patient_data['gender'],
+                         msg="Patient Update: wrong patient data")
+        self.assertEqual(update_data['sex'], patient_data['sex'],
+                         msg="Patient Update: wrong patient data")
 
-        # test Patient Update activity data
-        self.assertTrue(check_update.data_ref.family_name == update_data['family_name'], msg="Patient Update: Family name was not submitted correctly")
-        self.assertTrue(check_update.data_ref.given_name == update_data['given_name'], msg="Patient Update: Given name was not submitted correctly")
-        self.assertTrue(check_update.data_ref.other_identifier == other_identifier, msg="Patient Update: Hospital number was not submitted correctly")
-        self.assertTrue(check_update.data_ref.dob == update_data['dob'], msg="Patient Update: Date of birth was not submitted correctly")
-        self.assertTrue(check_update.data_ref.gender == gender, msg="Patient Update: Gender was not submitted correctly")
-        self.assertTrue(check_update.data_ref.sex == gender, msg="Patient Update: Sex was not submitted correctly")
-        self.assertTrue(check_update.data_ref.patient_id.id == patient_id[0], msg="Patient Update: Patient id was not registered correctly")
-        self.assertFalse(check_update.data_ref.middle_names, msg="Patient Update: Middle name was not submitted correctly")
-        self.assertFalse(check_update.data_ref.patient_identifier, msg="Patient Update: NHS number was not submitted correctly")
-        self.assertFalse(check_update.data_ref.title, msg="Patient Update: Title was not registered correctly")
-        # Complete Patient Update
-        self.activity_pool.complete(cr, self.adt_id, update_activity_id)
-        check_update = self.activity_pool.browse(cr, uid, update_activity_id)
-        self.assertTrue(check_update.state == 'completed', msg="Patient Update not completed successfully")
-        self.assertTrue(check_update.date_terminated, msg="Patient Update Completed: Date terminated not registered")
-        # test patient data
-        check_patient = self.patient_pool.browse(cr, uid, patient_id[0])
-        self.assertTrue(check_patient.family_name == update_data['family_name'], msg="Patient Update Completed: Family name is not correct")
-        self.assertTrue(check_patient.given_name == update_data['given_name'], msg="Patient Update Completed: Given name is not correct")
-        self.assertTrue(check_patient.other_identifier == other_identifier, msg="Patient Update Completed: Hospital number is not correct")
-        self.assertTrue(check_patient.dob == update_data['dob'], msg="Patient Update Completed: Date of birth is not correct")
-        self.assertTrue(check_patient.gender == gender, msg="Patient Update Completed: Gender is not correct")
-        self.assertTrue(check_patient.sex == gender, msg="Patient Update Completed: Sex is not correct")
-        self.assertFalse(check_patient.middle_names, msg="Patient Update Completed: Middle name is not correct")
-        self.assertFalse(check_patient.patient_identifier, msg="Patient Update Completed: NHS number is not correct")
-        self.assertFalse(check_patient.title, msg="Patient Update Completed: Title is not correct")
+        # Scenario 2: Update a patient using NHS Number
+        update_data = {
+            'family_name': 'Fupdate',
+            'given_name': 'Gupdate',
+            'other_identifier': 'TEST002',
+            'patient_identifier': 'TEST001',
+            'dob': '2000-10-01 00:00:00',
+            'gender': 'F',
+            'sex': 'F'
+        }
+        update_activity_id = self.update_pool.create_activity(cr, self.adt_id, {}, {})
+        self.activity_pool.submit(cr, self.adt_id, update_activity_id, update_data)
+        self.assertTrue(self.activity_pool.complete(cr, self.adt_id, update_activity_id))
 
-        # Register patient with wrong user test
-        # try:
-        #     register_activity_id = self.register_pool.create_activity(cr, self.adt_id, {}, {})
-        #     self.activity_pool.submit(cr, uid, register_activity_id, register_data)
-        # except Exception as e:
-        #     self.assertTrue(e.args[1].startswith("POS location is not set for user"), msg="Unexpected reaction to attempt to register with wrong user!")
-        # else:
-        #     assert False, "Unexpected reaction to attempt to register with wrong user!"
+        # Scenario 3: Try to Update a patient with incorrect data. Create failure
+        update_data = {
+            'family_name': 'Fupdate',
+            'given_name': 'Gupdate',
+            'other_identifier': 'TESTERROR',
+            'dob': '2000-10-01 00:00:00',
+            'gender': 'F',
+            'sex': 'F'
+        }
 
-        # Register patient without Hospital number/NHS number
-        try:
-            register_activity_id = self.register_pool.create_activity(cr, self.adt_id, {}, {})
-            self.activity_pool.submit(cr, self.adt_id, register_activity_id, {})
-        except Exception as e:
-            self.assertTrue(e.args[1].startswith("patient_identifier or other_identifier not found in submitted data!"), msg="Unexpected reaction to attempt to register without required data!")
-        else:
-            assert False, "Unexpected reaction to attempt to register without required data!"
+        with self.assertRaises(except_orm):
+            self.update_pool.create_activity(cr, self.adt_id, {}, update_data)
 
-        # Register existing patient
-        try:
-            register_activity_id = self.register_pool.create_activity(cr, self.adt_id, {}, {})
-            self.activity_pool.submit(cr, self.adt_id, register_activity_id, register_data)
-        except Exception as e:
-            self.assertTrue(e.args[1].startswith("Patient already exists!"), msg="Unexpected reaction to attempt to register an existing patient!")
-        else:
-            assert False, "Unexpected reaction to attempt to register an existing patient!"
-        
-    def test_adt_Admit_SpellUpdate_Transfer_CancelTransfer_Discharge_CancelDischarge_and_CancelAdmit(self):
+        # Scenario 4: Try to Update a patient with incorrect data. Submit failure
+        update_activity_id = self.update_pool.create_activity(cr, self.adt_id, {}, {})
+        with self.assertRaises(except_orm):
+            self.activity_pool.submit(cr, self.adt_id, update_activity_id, update_data)
+
+    def test_03_adt_patient_admit(self):
         cr, uid = self.cr, self.uid
-        # edge cases MISSING (try/except)
-        fake.seed(next_seed())        
-        patient_id = fake.random_element(self.patient_ids)
-        other_identifier = self.patient_pool.browse(cr, uid, patient_id).other_identifier
-        code = str(fake.random_int(min=1000001, max=9999999))
-        start_date = dt.now().strftime(dtf)
-        doctors = [{
-            'type': 'c', 
-            'code': 'C1', 
-            'title': 'Dr', 
-            'given_name': fake.first_name(), 
-            'family_name': fake.last_name()
-        }, {
-            'type': 'r', 
-            'code': 'R1', 
-            'title': 'Dr', 
-            'given_name': fake.first_name(), 
-            'family_name': fake.last_name()
-        }]        
-                
-        admit_data = {
-            'other_identifier': other_identifier,
-            'location': 'U',
-            'code': code,
-            'start_date': start_date, 
-            'doctors': doctors}
-        
-        admit_activity_id = self.admit_pool.create_activity(cr, self.adt_id, {}, {})
-        self.activity_pool.submit(cr, self.adt_id, admit_activity_id, admit_data)
-        check_admit = self.activity_pool.browse(cr, self.adt_id, admit_activity_id)
-        
-        # test admit activity submitted data
-        self.assertTrue(check_admit.data_ref.other_identifier == other_identifier, msg="Patient Admit: Hospital number was not submitted correctly")
-        self.assertTrue(check_admit.data_ref.location == 'U', msg="Patient Admit: Location was not submitted correctly")
-        self.assertTrue(check_admit.data_ref.code == code, msg="Patient Admit: Visit code was not submitted correctly")
-        self.assertTrue(check_admit.data_ref.start_date == start_date, msg="Patient Admit: Admission date was not submitted correctly")
-        self.assertTrue(eval(check_admit.data_ref.doctors) == doctors, msg="Patient Admit: Doctors information was not submitted correctly")
-        # test admit activity computed data
-        self.assertTrue(check_admit.data_ref.suggested_location_id.id == self.wu_id, msg="Patient Admit: Location id not registered correctly")
-        self.assertTrue(check_admit.data_ref.pos_id.id == self.pos_id, msg="Patient Admit: Point of Service was not registered correctly")
-        self.assertTrue(check_admit.data_ref.patient_id.id == patient_id, msg="Patient Admit: Patient id was not registered correctly")        
-        ref_doctors = [refd for refd in check_admit.data_ref.ref_doctor_ids]
-        con_doctors = [cond for cond in check_admit.data_ref.con_doctor_ids]
-        self.assertTrue(len(ref_doctors) == 1, msg="Patient Admit: Ref Doctors not registered correctly")
-        self.assertTrue(len(con_doctors) == 1, msg="Patient Admit: Consultant Doctors not registered correctly")
-        self.assertTrue(ref_doctors[0].name == "%s, %s" % (doctors[1]['family_name'], doctors[1]['given_name']), msg="Patient Admit: Ref Doctors data not registered correctly")
-        self.assertTrue(con_doctors[0].name == "%s, %s" % (doctors[0]['family_name'], doctors[0]['given_name']), msg="Patient Admit: Consultant Doctors data not registered correctly")
-        admit_ref_doctor = ref_doctors[0].id
-        admit_con_doctor = con_doctors[0].id
 
-        # Complete Patient Admit
-        self.activity_pool.complete(cr, self.adt_id, admit_activity_id)
-        check_admit = self.activity_pool.browse(cr, uid, admit_activity_id)
-        self.assertTrue(check_admit.state == 'completed', msg="Patient Admit not completed successfully")
-        self.assertTrue(check_admit.date_terminated, msg="Patient Admit Completed: Date terminated not registered")
-        # test admission and spell data
-        admission_id = self.admission_pool.search(cr, uid, [['code', '=', code]])
-        self.assertTrue(admission_id, msg="Patient Admit: Admission not created successfully")
-        spell_id = self.spell_pool.search(cr, uid, [['code', '=', code]])
-        self.assertTrue(spell_id, msg="Patient Admit: Spell not created successfully")
-        check_spell = self.spell_pool.browse(cr, uid, spell_id[0])
-        self.assertTrue(check_admit.parent_id.id == check_spell.activity_id.id, msg="Patient Admit: Spell was not registered correctly")
-        self.assertTrue(check_spell.patient_id.id == patient_id, msg= "Patient Admit Completed: Spell patient not registered correctly")
-        self.assertTrue(check_spell.pos_id.id == self.pos_id, msg= "Patient Admit Completed: Spell point of service not registered correctly")
-        self.assertTrue(check_spell.code == code, msg= "Patient Admit Completed: Spell code not registered correctly")
-        self.assertTrue(check_spell.start_date == start_date, msg= "Patient Admit Completed: Spell start date not registered correctly")
-        self.assertTrue(check_spell.activity_id.state == 'started', msg= "Patient Admit Completed: Spell state incorrect")
-        ref_doctors = [refd.id for refd in check_spell.ref_doctor_ids]
-        con_doctors = [cond.id for cond in check_spell.con_doctor_ids]
-        self.assertTrue(len(ref_doctors) == 1, msg="Patient Admit Completed: Spell Ref Doctors not registered correctly")
-        self.assertTrue(len(con_doctors) == 1, msg="Patient Admit Completed: Spell Consultant Doctors not registered correctly")
-        self.assertTrue(ref_doctors[0] == admit_ref_doctor, msg="Patient Admit Completed: Spell Ref Doctors not registered correctly")
-        self.assertTrue(con_doctors[0] == admit_con_doctor, msg="Patient Admit Completed: Spell Consultant Doctors not registered correctly")
-
-        # Spell Update
-        update_doctors = [{
+        # Scenario 1: Admit a Patient
+        doctors = """[{
             'type': 'c',
-            'code': 'C2',
-            'title': 'Dr',
-            'given_name': fake.first_name(),
-            'family_name': fake.last_name()
+            'code': 'CON01',
+            'title': 'Dr.',
+            'given_name': 'Consulting',
+            'family_name': 'Doctor',
+            'gender': 'F'
         }, {
             'type': 'r',
-            'code': 'R2',
-            'title': 'Dr',
-            'given_name': fake.first_name(),
-            'family_name': fake.last_name()
-        }]
+            'code': 'REF01',
+            'title': 'dr.',
+            'given_name': 'Referring',
+            'family_name': 'Doctor',
+            'gender': 'M'
+        }]"""
+
+        admit_data = {
+            'other_identifier': 'TEST001',
+            'start_date': '2015-04-30 17:00:00',
+            'doctors': doctors,
+            'code': 'TESTADMISSION01',
+            'location': 'U'
+        }
+        patient_id = self.patient_pool.search(cr, uid, [['other_identifier', '=', 'TEST001']])[0]
+        activity_id = self.admit_pool.create_activity(cr, self.adt_id, {}, admit_data)
+        activity = self.activity_pool.browse(cr, uid, activity_id)
+        self.assertEqual(patient_id,
+                         activity.data_ref.patient_id.id, msg="Wrong patient id")
+        self.assertEqual(self.wu_id, activity.data_ref.location_id.id, msg="Wrong location id")
+        self.assertEqual(self.pos_id, activity.data_ref.pos_id.id, msg="Wrong POS id")
+        self.activity_pool.complete(cr, uid, activity_id)
+        admission_id = self.activity_pool.search(cr, uid, [
+            ['data_model', '=', 'nh.clinical.patient.admission'],
+            ['state', '=', 'completed'], ['creator_id', '=', activity_id]])
+        self.assertTrue(admission_id, msg="Admission not found!")
+        admission = self.activity_pool.browse(cr, uid, admission_id[0])
+        self.assertEqual(admission.data_ref.con_doctor_ids[0].code, 'CON01', msg="Wrong doctor data")
+        self.assertEqual(admission.data_ref.ref_doctor_ids[0].code, 'REF01', msg="Wrong doctor data")
+        activity = self.activity_pool.browse(cr, uid, activity_id)
+        self.assertEqual(activity.parent_id.data_model, 'nh.clinical.spell')
+        self.assertEqual(activity.parent_id.patient_id.id, patient_id)
+
+        # Scenario 2: Admit a Patient with no POS related user
+        admit_data = {
+            'other_identifier': 'TEST002',
+            'location': 'U'
+        }
+        with self.assertRaises(except_orm):
+            self.admit_pool.create_activity(cr, uid, {}, admit_data)
+
+        # Scenario 3: Admit a Patient with no Location
+        admit_data = {
+            'other_identifier': 'TEST002'
+        }
+        with self.assertRaises(except_orm):
+            self.admit_pool.create_activity(cr, self.adt_id, {}, admit_data)
+
+        # Scenario 4: Admit a Patient with no patient hospital number
+        admit_data = {
+            'location': 'U'
+        }
+        with self.assertRaises(except_orm):
+            self.admit_pool.create_activity(cr, self.adt_id, {}, admit_data)
+
+    def test_04_adt_patient_cancel_admit(self):
+        cr, uid = self.cr, self.uid
+
+        # Scenario 1: Cancel an admission with no patient information
+        activity_id = self.cancel_admit_pool.create_activity(cr, self.adt_id, {}, {})
+        with self.assertRaises(except_orm):
+            self.activity_pool.submit(cr, uid, activity_id, {})
+
+        # Scenario 2: Cancel an admission with incorrect patient information
+        cancel_admit_data = {'other_identifier': 'TESTERROR'}
+        with self.assertRaises(except_orm):
+            self.cancel_admit_pool.create_activity(cr, self.adt_id, {}, cancel_admit_data)
+
+        # Scenario 3: Cancel an admission with not admitted patient
+        cancel_admit_data = {'other_identifier': 'TEST002'}
+        with self.assertRaises(except_orm):
+            self.cancel_admit_pool.create_activity(cr, self.adt_id, {}, cancel_admit_data)
+
+        # Scenario 4: Cancel an admission
+        cancel_admit_data = {'other_identifier': 'TEST001'}
+        activity_id = self.cancel_admit_pool.create_activity(cr, self.adt_id, {}, cancel_admit_data)
+        self.activity_pool.complete(cr, self.adt_id, activity_id)
+        activity = self.activity_pool.browse(cr, uid, activity_id)
+        self.assertEqual(activity.data_ref.admission_id.state, 'cancelled')
+
+    def test_05_adt_patient_discharge(self):
+        cr, uid = self.cr, self.uid
+
+        admit_data = {
+            'other_identifier': 'TEST001',
+            'start_date': '2015-04-30 17:00:00',
+            'code': 'TESTADMISSION02',
+            'location': 'U'
+        }
+        activity_id = self.admit_pool.create_activity(cr, self.adt_id, {}, admit_data)
+        self.activity_pool.complete(cr, uid, activity_id)
+
+        # Scenario 1: Discharge a Patient
+        discharge_data = {
+            'other_identifier': 'TEST001',
+            'discharge_date': '2015-05-02 18:00:00'
+        }
+        activity_id = self.discharge_pool.create_activity(cr, self.adt_id, {}, discharge_data)
+        activity = self.activity_pool.browse(cr, uid, activity_id)
+        patient_id = self.patient_pool.search(cr, uid, [['other_identifier', '=', 'TEST001']])[0]
+        self.assertEqual(patient_id,
+                         activity.data_ref.patient_id.id, msg="Wrong patient id")
+        self.assertEqual(activity.parent_id.data_model, 'nh.clinical.spell')
+        self.assertEqual(activity.parent_id.patient_id.id, patient_id)
+        self.activity_pool.complete(cr, uid, activity_id)
+        discharge_id = self.activity_pool.search(cr, uid, [
+            ['data_model', '=', 'nh.clinical.patient.discharge'],
+            ['state', '=', 'completed'], ['creator_id', '=', activity_id]])
+        self.assertTrue(discharge_id, msg="Discharge not found!")
+
+        # Scenario 2: Discharge a Patient with no patient information
+        discharge_data = {
+            'discharge_date': '2015-05-02 18:00:00'
+        }
+        with self.assertRaises(except_orm):
+            self.discharge_pool.create_activity(cr, self.adt_id, {}, discharge_data)
+    
+    def test_06_adt_patient_cancel_discharge(self):
+        cr, uid = self.cr, self.uid
+        
+        # Scenario 1: Cancel discharge with no patient information
+        activity_id = self.cancel_discharge_pool.create_activity(cr, self.adt_id, {}, {})
+        with self.assertRaises(except_orm):
+            self.activity_pool.submit(cr, uid, activity_id, {})
+
+        # Scenario 2: Cancel discharge with incorrect patient information
+        cancel_discharge_data = {'other_identifier': 'TESTERROR'}
+        with self.assertRaises(except_orm):
+            self.cancel_discharge_pool.create_activity(cr, self.adt_id, {}, cancel_discharge_data)
+
+        # Scenario 3: Cancel discharge with not discharged patient
+        cancel_discharge_data = {'other_identifier': 'TEST002'}
+        with self.assertRaises(except_orm):
+            self.cancel_discharge_pool.create_activity(cr, self.adt_id, {}, cancel_discharge_data)
+
+        # Scenario 4: Cancel Discharge
+        cancel_discharge_data = {'other_identifier': 'TEST001'}
+        activity_id = self.cancel_discharge_pool.create_activity(cr, self.adt_id, {}, cancel_discharge_data)
+        self.activity_pool.complete(cr, self.adt_id, activity_id)
+        activity = self.activity_pool.browse(cr, uid, activity_id)
+        self.assertEqual(activity.data_ref.discharge_id.state, 'cancelled')
+    
+    def test_07_adt_patient_transfer(self):
+        cr, uid = self.cr, self.uid
+        
+        # Scenario 1: Transfer a Patient
+        transfer_data = {
+            'other_identifier': 'TEST001',
+            'location': 'T'
+        }
+        activity_id = self.transfer_pool.create_activity(cr, self.adt_id, {}, transfer_data)
+        activity = self.activity_pool.browse(cr, uid, activity_id)
+        patient_id = self.patient_pool.search(cr, uid, [['other_identifier', '=', 'TEST001']])[0]
+        self.assertEqual(patient_id,
+                         activity.data_ref.patient_id.id, msg="Wrong patient id")
+        self.assertEqual(activity.data_ref.location_id.id, self.wt_id, msg="Wrong location id")
+        self.assertEqual(activity.parent_id.data_model, 'nh.clinical.spell')
+        self.assertEqual(activity.parent_id.patient_id.id, patient_id)
+        self.activity_pool.complete(cr, uid, activity_id)
+        transfer_id = self.activity_pool.search(cr, uid, [
+            ['data_model', '=', 'nh.clinical.patient.transfer'],
+            ['state', '=', 'completed'], ['creator_id', '=', activity_id]])
+        self.assertTrue(transfer_id, msg="Discharge not found!")
+
+        # Scenario 2: Transfer a Patient with no patient information
+        transfer_data = {
+            'location': 'T'
+        }
+        with self.assertRaises(except_orm):
+            self.transfer_pool.create_activity(cr, self.adt_id, {}, transfer_data)
+            
+        # Scenario 3: Transfer a Patient with no location information
+        transfer_data = {
+            'other_identifier': 'TEST001'
+        }
+        with self.assertRaises(except_orm):
+            self.transfer_pool.create_activity(cr, self.adt_id, {}, transfer_data)
+            
+        # Scenario 4: Transfer a Patient with no POS related user
+        transfer_data = {
+            'other_identifier': 'TEST001',
+            'location': 'T'
+        }
+        with self.assertRaises(except_orm):
+            self.admit_pool.create_activity(cr, uid, {}, transfer_data)
+    
+    def test_08_adt_patient_cancel_transfer(self):
+        cr, uid = self.cr, self.uid
+        
+        # Scenario 1: Cancel transfer with no patient information
+        activity_id = self.cancel_transfer_pool.create_activity(cr, self.adt_id, {}, {})
+        with self.assertRaises(except_orm):
+            self.activity_pool.submit(cr, uid, activity_id, {})
+
+        # Scenario 2: Cancel transfer with incorrect patient information
+        cancel_transfer_data = {'other_identifier': 'TESTERROR'}
+        with self.assertRaises(except_orm):
+            self.cancel_transfer_pool.create_activity(cr, self.adt_id, {}, cancel_transfer_data)
+
+        # Scenario 3: Cancel transfer with not transferred patient
+        cancel_transfer_data = {'other_identifier': 'TEST002'}
+        with self.assertRaises(except_orm):
+            self.cancel_transfer_pool.create_activity(cr, self.adt_id, {}, cancel_transfer_data)
+
+        # Scenario 4: Cancel Transfer
+        cancel_transfer_data = {'other_identifier': 'TEST001'}
+        activity_id = self.cancel_transfer_pool.create_activity(cr, self.adt_id, {}, cancel_transfer_data)
+        self.activity_pool.complete(cr, self.adt_id, activity_id)
+        activity = self.activity_pool.browse(cr, uid, activity_id)
+        self.assertEqual(activity.data_ref.transfer_id.state, 'cancelled')
+
+    def test_09_adt_patient_spell_update(self):
+        cr, uid = self.cr, self.uid
+
+        # Scenario 1: Update a Spell
+        doctors = """[{
+            'type': 'c',
+            'code': 'CON02',
+            'title': 'Dr.',
+            'given_name': 'Consulting',
+            'family_name': 'Doctor',
+            'gender': 'F'
+        }, {
+            'type': 'r',
+            'code': 'REF02',
+            'title': 'dr.',
+            'given_name': 'Referring',
+            'family_name': 'Doctor',
+            'gender': 'M'
+        }]"""
 
         update_data = {
-            'other_identifier': other_identifier,
-            'location': 'T',
-            'doctors': update_doctors}
+            'other_identifier': 'TEST001',
+            'start_date': '2015-05-05 17:00:00',
+            'doctors': doctors,
+            'code': 'TESTADMISSION03',
+            'location': 'T'
+        }
+        patient_id = self.patient_pool.search(cr, uid, [['other_identifier', '=', 'TEST001']])[0]
+        activity_id = self.spell_update_pool.create_activity(cr, self.adt_id, {}, update_data)
+        activity = self.activity_pool.browse(cr, uid, activity_id)
+        self.assertEqual(patient_id,
+                         activity.data_ref.patient_id.id, msg="Wrong patient id")
+        self.assertEqual(self.wt_id, activity.data_ref.location_id.id, msg="Wrong location id")
+        self.assertEqual(self.pos_id, activity.data_ref.pos_id.id, msg="Wrong POS id")
+        self.activity_pool.complete(cr, uid, activity_id)
+        spell = self.activity_pool.browse(cr, uid, activity.parent_id.id)
+        self.assertEqual(spell.data_ref.con_doctor_ids[0].code, 'CON02', msg="Wrong doctor data")
+        self.assertEqual(spell.data_ref.ref_doctor_ids[0].code, 'REF02', msg="Wrong doctor data")
+        self.assertEqual(spell.data_ref.start_date, '2015-05-05 17:00:00')
+        self.assertEqual(spell.data_ref.code, 'TESTADMISSION03')
+        self.assertEqual(spell.data_ref.location_id.id, self.wt_id, msg="Patient was not moved")
 
-        update_activity_id = self.spell_update_pool.create_activity(cr, self.adt_id, {}, {})
-        self.activity_pool.submit(cr, self.adt_id, update_activity_id, update_data)
-        check_update = self.activity_pool.browse(cr, self.adt_id, update_activity_id)
-        # test Spell Update activity data
-        self.assertTrue(check_update.data_ref.other_identifier == other_identifier, msg="Spell Update: Hospital number not submitted correctly")
-        self.assertTrue(check_update.data_ref.location == 'T', msg="Spell Update: Location was not submitted correctly")
-        self.assertTrue(eval(check_update.data_ref.doctors) == update_doctors, msg="Spell Update: Doctors was not submitted correctly")
-        self.assertFalse(check_update.data_ref.code, msg="Spell Update: Code was not submitted correctly")
-        self.assertFalse(check_update.data_ref.start_date, msg="Spell Update: Start date was not submitted correctly")        
-        self.assertTrue(check_update.data_ref.patient_id.id == patient_id, msg="Spell Update: Patient id was not registered correctly")
-        self.assertTrue(check_update.data_ref.pos_id.id == self.pos_id, msg="Spell Update: Point of Service was not registered correctly")
-        self.assertTrue(check_update.data_ref.suggested_location_id.id == self.wt_id, msg="Spell Update: Location id not registered correctly")
-        ref_doctors = [refd for refd in check_update.data_ref.ref_doctor_ids]
-        con_doctors = [cond for cond in check_update.data_ref.con_doctor_ids]
-        self.assertTrue(len(ref_doctors) == 1, msg="Spell Update: Ref Doctors not registered correctly")
-        self.assertTrue(len(con_doctors) == 1, msg="Spell Update: Consultant Doctors not registered correctly")
-        self.assertTrue(ref_doctors[0].name == "%s, %s" % (update_doctors[1]['family_name'], update_doctors[1]['given_name']), msg="Spell Update: Ref Doctors data not registered correctly")
-        self.assertTrue(con_doctors[0].name == "%s, %s" % (update_doctors[0]['family_name'], update_doctors[0]['given_name']), msg="Spell Update: Consultant Doctors data not registered correctly")
-        update_ref_doctor = ref_doctors[0].id
-        update_con_doctor = con_doctors[0].id        
-        # Complete Spell Update
-        self.activity_pool.complete(cr, self.adt_id, update_activity_id)
-        check_update = self.activity_pool.browse(cr, uid, update_activity_id)
-        self.assertTrue(check_update.state == 'completed', msg="Spell Update not completed successfully")
-        self.assertTrue(check_update.date_terminated, msg="Spell Update Completed: Date terminated not registered")
-        # test spell data
-        check_spell = self.spell_pool.browse(cr, uid, spell_id[0])
-        self.assertTrue(check_spell.activity_id.state == 'started', msg="Spell Update Completed: Spell state incorrect")
-        ref_doctors = [refd.id for refd in check_spell.ref_doctor_ids]
-        con_doctors = [cond.id for cond in check_spell.con_doctor_ids]
-        self.assertTrue(len(ref_doctors) == 1, msg="Spell Update Completed: Spell Ref Doctors not registered correctly")
-        self.assertTrue(len(con_doctors) == 1, msg="Spell Update Completed: Spell Consultant Doctors not registered correctly")
-        self.assertTrue(ref_doctors[0] == update_ref_doctor, msg="Spell Update Completed: Spell Ref Doctors not registered correctly")
-        self.assertTrue(con_doctors[0] == update_con_doctor, msg="Spell Update Completed: Spell Consultant Doctors not registered correctly")
-        
-        # Patient Transfer
-        transfer_data = {
-            'other_identifier': other_identifier,
-            'location': 'U'}
-        transfer_activity_id = self.transfer_pool.create_activity(cr, self.adt_id, {}, {})
-        self.activity_pool.submit(cr, self.adt_id, transfer_activity_id, transfer_data)
-        check_transfer = self.activity_pool.browse(cr, self.adt_id, transfer_activity_id)
-        
-        # test Patient Transfer activity data
-        self.assertTrue(check_transfer.data_ref.other_identifier == other_identifier, msg="Patient Transfer: Hospital number not submitted correctly")
-        self.assertTrue(check_transfer.data_ref.location == 'U', msg="Patient Transfer: Location was not submitted correctly")
-        self.assertFalse(check_transfer.data_ref.patient_identifier, msg="Patient Transfer: NHS number was not submitted correctly")
-        self.assertTrue(check_transfer.data_ref.patient_id.id == patient_id, msg="Patient Transfer: Patient id was not registered correctly")
-        self.assertTrue(check_transfer.data_ref.location_id.id == self.wu_id, msg="Patient Transfer: Transfer location was not registered correctly")
-        self.assertTrue(check_transfer.data_ref.from_location_id.id == self.wt_id, msg="Patient Transfer: Origin location was not registered correctly")
-        # Complete Patient Transfer
-        self.activity_pool.complete(cr, self.adt_id, transfer_activity_id)
-        check_transfer = self.activity_pool.browse(cr, uid, transfer_activity_id)
-        self.assertTrue(check_transfer.state == 'completed', msg="Patient Transfer not completed successfully")
-        self.assertTrue(check_transfer.date_terminated, msg="Patient Transfer Completed: Date terminated not registered")
-        # test spell data
-        check_spell = self.spell_pool.browse(cr, uid, spell_id[0])
-        self.assertTrue(check_spell.activity_id.state == 'started', msg="Patient Transfer Completed: Spell state incorrect")
-        
-        # Cancel Transfer
-        cancel_transfer_activity_id = self.cancel_transfer_pool.create_activity(cr, self.adt_id, {}, {})
-        self.activity_pool.submit(cr, self.adt_id, cancel_transfer_activity_id, {'other_identifier': other_identifier})
-        check_cancel_transfer = self.activity_pool.browse(cr, self.adt_id, cancel_transfer_activity_id)
-        
-        # test Cancel Transfer activity data
-        self.assertTrue(check_cancel_transfer.data_ref.other_identifier == other_identifier, msg="Cancel Transfer: Hospital number not submitted correctly")
-        self.assertTrue(check_cancel_transfer.data_ref.patient_id.id == patient_id, msg="Cancel Transfer: Patient id was not registered correctly")
-        self.assertTrue(check_cancel_transfer.data_ref.last_location_id.id == self.wt_id, msg="Cancel Transfer: Origin location was not registered correctly")
-        # Complete Cancel Transfer
-        self.activity_pool.complete(cr, self.adt_id, cancel_transfer_activity_id)
-        check_cancel_transfer = self.activity_pool.browse(cr, uid, cancel_transfer_activity_id)
-        self.assertTrue(check_cancel_transfer.state == 'completed', msg="Cancel Transfer not completed successfully")
-        self.assertTrue(check_cancel_transfer.date_terminated, msg="Cancel Transfer Completed: Date terminated not registered")
-        # test spell data
-        check_spell = self.spell_pool.browse(cr, uid, spell_id[0])
-        self.assertTrue(check_spell.activity_id.state == 'started', msg="Cancel Transfer Completed: Spell state incorrect")
-        
-        # Patient Discharge
-        discharge_date = dt.now().strftime(dtf)
-        discharge_activity_id = self.discharge_pool.create_activity(cr, self.adt_id, {}, {})
-        self.activity_pool.submit(cr, self.adt_id, discharge_activity_id, {'other_identifier': other_identifier, 'discharge_date': discharge_date})
-        check_discharge = self.activity_pool.browse(cr, self.adt_id, discharge_activity_id)
-        
-        # test Patient Discharge activity data
-        self.assertTrue(check_discharge.data_ref.other_identifier == other_identifier, msg="Patient Discharge: Hospital number not submitted correctly")
-        self.assertTrue(check_discharge.data_ref.discharge_date == discharge_date, msg="Patient Discharge: Discharge date was not submitted correctly")
-        self.assertTrue(check_discharge.data_ref.patient_id.id == patient_id, msg="Patient Discharge: Patient id was not registered correctly")
-        self.assertTrue(check_discharge.data_ref.pos_id.id == self.pos_id, msg="Patient Discharge: Point of Service was not registered correctly")
-        # Complete Patient Discharge
-        self.activity_pool.complete(cr, self.adt_id, discharge_activity_id)
-        check_discharge = self.activity_pool.browse(cr, uid, discharge_activity_id)
-        self.assertTrue(check_discharge.state == 'completed', msg="Patient Discharge not completed successfully")
-        self.assertTrue(check_discharge.date_terminated, msg="Patient Discharge Completed: Date terminated not registered")
-        # test spell data
-        check_spell = self.spell_pool.browse(cr, uid, spell_id[0])
-        self.assertTrue(check_spell.activity_id.state == 'completed', msg= "Patient Discharge Completed: Spell state incorrect")
-        
-        # Cancel Discharge
-        cancel_discharge_activity_id = self.cancel_discharge_pool.create_activity(cr, self.adt_id, {}, {})
-        self.activity_pool.submit(cr, self.adt_id, cancel_discharge_activity_id, {'other_identifier': other_identifier})
-        check_cancel_discharge = self.activity_pool.browse(cr, self.adt_id, cancel_discharge_activity_id)
-        
-        # test Cancel Discharge activity data
-        self.assertTrue(check_cancel_discharge.data_ref.other_identifier == other_identifier, msg="Cancel Discharge: Hospital number not submitted correctly")
-        self.assertTrue(check_cancel_discharge.data_ref.patient_id.id == patient_id, msg="Cancel Discharge: Patient id was not registered correctly")
-        self.assertTrue(check_cancel_discharge.data_ref.pos_id.id == self.pos_id, msg="Cancel Discharge: Point of Service was not registered correctly")
-        self.assertTrue(check_cancel_discharge.data_ref.last_location_id.id == self.wt_id, msg="Cancel Discharge: Origin location was not registered correctly")
-        # Complete Cancel Discharge
-        self.activity_pool.complete(cr, self.adt_id, cancel_discharge_activity_id)
-        check_cancel_discharge = self.activity_pool.browse(cr, uid, cancel_discharge_activity_id)
-        self.assertTrue(check_cancel_discharge.state == 'completed', msg="Cancel Discharge not completed successfully")
-        self.assertTrue(check_cancel_discharge.date_terminated, msg="Cancel Discharge Completed: Date terminated not registered")
-        # test spell data
-        check_spell = self.spell_pool.browse(cr, uid, spell_id[0])
-        self.assertTrue(check_spell.activity_id.state == 'started', msg= "Cancel Discharge Completed: Spell state incorrect")
-        
-        # Cancel Admit
-        cancel_admit_activity_id = self.cancel_admit_pool.create_activity(cr, self.adt_id, {}, {})
-        self.activity_pool.submit(cr, self.adt_id, cancel_admit_activity_id, {'other_identifier': other_identifier})
-        check_cancel_admit = self.activity_pool.browse(cr, self.adt_id, cancel_admit_activity_id)
-        
-        # test cancel admit activity data
-        self.assertTrue(check_cancel_admit.data_ref.other_identifier == other_identifier, msg="Cancel Admit: Hospital number not submitted correctly")
-        self.assertTrue(check_cancel_admit.data_ref.patient_id.id == patient_id, msg="Cancel Admit: Patient id was not registered correctly")
-        self.assertTrue(check_cancel_admit.data_ref.pos_id.id == self.pos_id, msg="Cancel Admit: Point of Service was not registered correctly")
-        # Complete Cancel Admit
-        self.activity_pool.complete(cr, self.adt_id, cancel_admit_activity_id)
-        check_cancel_admit = self.activity_pool.browse(cr, uid, cancel_admit_activity_id)
-        self.assertTrue(check_cancel_admit.state == 'completed', msg="Cancel Admit not completed successfully")
-        self.assertTrue(check_cancel_admit.date_terminated, msg="Cancel Admit Completed: Date terminated not registered")
-        # test spell data
-        check_spell = self.spell_pool.browse(cr, uid, spell_id[0])
-        self.assertTrue(check_spell.activity_id.state == 'cancelled', msg= "Cancel Admit Completed: Spell state incorrect")
+        # Scenario 2: Update a Spell with no POS related user
+        update_data = {
+            'other_identifier': 'TEST001',
+            'location': 'U'
+        }
+        with self.assertRaises(except_orm):
+            self.spell_update_pool.create_activity(cr, uid, {}, update_data)
+
+        # Scenario 3: Update a Spell with no Location
+        update_data = {
+            'other_identifier': 'TEST001'
+        }
+        with self.assertRaises(except_orm):
+            self.spell_update_pool.create_activity(cr, self.adt_id, {}, update_data)
+
+        # Scenario 4: Update a Spell with no patient hospital number
+        update_data = {
+            'location': 'U'
+        }
+        with self.assertRaises(except_orm):
+            self.spell_update_pool.create_activity(cr, self.adt_id, {}, update_data)
 

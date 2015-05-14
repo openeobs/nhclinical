@@ -35,6 +35,17 @@ class nh_clinical_patient_move(orm.Model):
             res.append( [move.id, "%s to %s" % ("patient", "location")] )
         return res
 
+    def submit(self, cr, uid, activity_id, vals, context=None):
+        data = vals.copy()
+        if 'patient_id' in vals and 'parent_id' not in vals:
+            spell_pool = self.pool['nh.clinical.spell']
+            activity_pool = self.pool['nh.activity']
+            spell_id = spell_pool.get_by_patient_id(cr, uid, vals['patient_id'], context=context)
+            if spell_id:
+                spell = spell_pool.browse(cr, uid, spell_id, context=context)
+                activity_pool.write(cr, uid, activity_id, {'parent_id': spell.activity_id.id}, context=context)
+        return super(nh_clinical_patient_move, self).submit(cr, uid, activity_id, data, context=context)
+
     def complete(self, cr, uid, activity_id, context=None):
         activity_pool = self.pool['nh.activity']
         patient_pool = self.pool['nh.clinical.patient']
@@ -49,10 +60,12 @@ class nh_clinical_patient_move(orm.Model):
         last_movement = activity_pool.browse(cr, uid, last_movement_id, context=context) if last_movement_id else False
         self.write(cr, uid, activity.data_ref.id, {'from_location_id': last_movement.data_ref.location_id.id if last_movement else False})
         # FIXME having both current_location_id in PATIENT and location_id in SPELL seems redundant.
-        patient_pool.write(cr, uid, activity.data_ref.patient_id.id, {'current_location_id': activity.data_ref.location_id.id}, context)
-        activity_pool.write(cr, uid, activity.parent_id.id, {'location_id': activity.data_ref.location_id.id}, context)
-        super(nh_clinical_patient_move, self).complete(cr, uid, activity_id, context)
-        return {}
+        patient_pool.write(cr, uid, activity.data_ref.patient_id.id, {
+            'current_location_id': activity.data_ref.location_id.id}, context=context)
+        if activity.parent_id:
+            activity_pool.submit(cr, uid, activity.parent_id.id, {
+                'location_id': activity.data_ref.location_id.id}, context=context)
+        return super(nh_clinical_patient_move, self).complete(cr, uid, activity_id, context)
 
 
 class nh_clinical_patient_swap_beds(orm.Model):
@@ -218,40 +231,98 @@ class nh_clinical_patient_discharge(orm.Model):
 
     _columns = {
         'patient_id': fields.many2one('nh.clinical.patient', 'Patient', required=True),
-        'location_id': fields.related('activity_id', 'location_id', type='many2one', relation='nh.clinical.location', string='Location'),
+        'location_id': fields.many2one('nh.clinical.location', 'Discharged from Location'),
         'discharge_date': fields.datetime('Discharge Date')
     }
 
-    def get_activity_location_id(self, cr, uid, activity_id, context=None):
-        activity_pool = self.pool['nh.activity']
-        activity = activity_pool.browse(cr, uid, activity_id, context)
-        patient_id = activity.data_ref.patient_id.id
-        # discharge from current or permanent location ??
-        location_id = self.pool['nh.clinical.api'].patient_map(cr, uid, patient_ids=[patient_id])[patient_id]['location_id']
-        return location_id
+    def submit(self, cr, uid, activity_id, vals, context=None):
+        data = vals.copy()
+        if 'patient_id' in vals:
+            spell_pool = self.pool['nh.clinical.spell']
+            activity_pool = self.pool['nh.activity']
+            spell_id = spell_pool.get_by_patient_id(cr, uid, vals['patient_id'], exception='False', context=context)
+            spell = spell_pool.browse(cr, uid, spell_id, context=context)
+            data.update({'location_id': spell.location_id.id})
+            activity_pool.write(cr, uid, activity_id, {'parent_id': spell.activity_id.id}, context=context)
+        return super(nh_clinical_patient_discharge, self).submit(cr, uid, activity_id, data, context=context)
 
     def complete(self, cr, uid, activity_id, context=None):
-        super(nh_clinical_patient_discharge, self).complete(cr, uid, activity_id, context)
-        api_pool = self.pool['nh.clinical.api']
+        res = super(nh_clinical_patient_discharge, self).complete(cr, uid, activity_id, context=context)
         activity_pool = self.pool['nh.activity']
-        activity = activity_pool.browse(cr, SUPERUSER_ID, activity_id, context)
-        spell_activity = api_pool.get_patient_spell_activity_browse(cr, uid, activity.data_ref.patient_id.id, context=context)
-        except_if(not spell_activity, msg="Patient id=%s has no started spell!" % activity.patient_id.id)
-        # move
-        move_pool = self.pool['nh.clinical.patient.move']
-        move_activity_id = move_pool.create_activity(cr, uid,
-            {'parent_id': activity_id, 'creator_id': activity_id},
-            {'patient_id': activity.data_ref.patient_id.id,
-             'location_id':activity.pos_id and activity.pos_id.lot_discharge_id.id or activity.pos_id.location_id.id},
-            context)
-        activity_pool.complete(cr, uid, move_activity_id, context)
-        # complete spell
+        activity = activity_pool.browse(cr, SUPERUSER_ID, activity_id, context=context)
 
-        activity_pool.complete(cr, uid, spell_activity.id, context)
+        move_pool = self.pool['nh.clinical.patient.move']
+        move_activity_id = move_pool.create_activity(cr, uid, {
+            'parent_id': activity.parent_id.id,
+            'creator_id': activity_id
+        }, {
+            'patient_id': activity.data_ref.patient_id.id,
+            'location_id': activity.parent_id.data_ref.pos_id.lot_discharge_id.id
+            if activity.parent_id.data_ref.pos_id.lot_discharge_id
+            else activity.parent_id.data_ref.pos_id.location_id.id
+        }, context=context)
+        activity_pool.complete(cr, uid, move_activity_id, context=context)
+
+        activity_pool.complete(cr, uid, activity.parent_id.id, context=context)
         if activity.data_ref.discharge_date:
-            activity_pool.write(cr, SUPERUSER_ID, activity_id, {'date_terminated': activity.data_ref.discharge_date})
-            activity_pool.write(cr, SUPERUSER_ID, spell_activity.id, {'date_terminated': activity.data_ref.discharge_date})
-        return {}
+            activity_pool.write(cr, SUPERUSER_ID, activity.parent_id.id, {
+                'date_terminated': activity.data_ref.discharge_date}, context=context)
+        return res
+
+    def cancel(self, cr, uid, activity_id, context=None):
+        activity_pool = self.pool['nh.activity']
+        activity = activity_pool.browse(cr, uid, activity_id, context=context)
+        admission_pool = self.pool['nh.clinical.patient.admission']
+        admission_pool.get_last(cr, uid, activity.data_ref.patient_id.id, exception='True', context=context)
+        res = super(nh_clinical_patient_discharge, self).cancel(cr, uid, activity_id, context=context)
+        # reopening spell
+        activity_pool.write(cr, uid, activity.parent_id.id, {'state': 'started', 'date_terminated': False},
+                            context=context)
+        # move to previous location
+        move_pool = self.pool['nh.clinical.patient.move']
+        move_activity_id = move_pool.create_activity(cr, uid, {
+            'parent_id': activity.parent_id.id,
+            'creator_id': activity_id
+        }, {
+            'patient_id': activity.data_ref.patient_id.id,
+            'location_id': activity.data_ref.location_id.id
+        }, context=context)
+        location_pool = self.pool['nh.clinical.location']
+        # check if the previous bed is still available
+        if activity.data_ref.location_id.usage == 'bed':
+            if activity.data_ref.location_id.is_available:
+                activity_pool.complete(cr, uid, move_activity_id, context=context)
+                return res
+        ward_id = location_pool.get_closest_parent_id(cr, uid, activity.data_ref.location_id.id, 'ward',
+                                                      context=context) \
+            if activity.data_ref.location_id.usage != 'ward' else activity.data_ref.location_id.id
+        activity_pool.submit(cr, uid, move_activity_id, {'location_id': ward_id}, context=context)
+        activity_pool.complete(cr, uid, move_activity_id, context=context)
+        self.trigger_policy(cr, uid, activity_id, location_id=ward_id, context=context)
+        return res
+
+    def get_last(self, cr, uid, patient_id, exception=False, context=None):
+        """
+        Checks if there is a completed discharge for the provided Patient
+        :param exception: String with value 'True' or 'False'
+        :return: if no exception parameter is provided: activity id of the most recent completed discharge if exists.
+                False if not.
+                if exception 'True': Patien Already Discharged exception is raised if discharge found.
+                if exception 'False': No Discharge Found exception is raised if no discharge found.
+        """
+        domain = [['patient_id', '=', patient_id], ['data_model', '=', 'nh.clinical.patient.discharge'],
+                  ['state', '=', 'completed'], ['parent_id.state', '=', 'completed']]
+        activity_pool = self.pool['nh.activity']
+        discharge_ids = activity_pool.search(cr, uid, domain, order='date_terminated desc, sequence desc',
+                                             context=context)
+        if exception:
+            if discharge_ids and eval(exception):
+                raise osv.except_osv('Patient Already Discharged!', 'Patient with id %s has already been discharged'
+                                     % patient_id)
+            if not discharge_ids and not eval(exception):
+                raise osv.except_osv('Discharge Not Found!', 'There is no completed discharge for patient with id %s' %
+                                     patient_id)
+        return discharge_ids[0] if discharge_ids else False
 
 
 class nh_clinical_patient_admission(orm.Model):
@@ -260,63 +331,184 @@ class nh_clinical_patient_admission(orm.Model):
     _columns = {
         'patient_id': fields.many2one('nh.clinical.patient', 'Patient', required=True),
         'pos_id': fields.many2one('nh.clinical.pos', 'POS', required=True),
-        'suggested_location_id': fields.many2one('nh.clinical.location', 'Suggested Location'),
-        'location_id': fields.related('activity_id', 'location_id', type='many2one', relation='nh.clinical.location', string='Location'),
+        'location_id': fields.many2one('nh.clinical.location', 'Admission Location', required=True),
         'start_date': fields.datetime("Admission Start Date"),
-        'code': fields.text('Code')
+        'code': fields.text('Code'),
+        'ref_doctor_ids': fields.many2many('nh.clinical.doctor', 'ref_doctor_admission_rel', 'admission_id',
+                                           'doctor_id', "Referring Doctors"),
+        'con_doctor_ids': fields.many2many('nh.clinical.doctor', 'con_doctor_admission_rel', 'admission_id',
+                                           'doctor_id', "Consulting Doctors")
     }
 
-    def get_activity_location_id(self, cr, uid, activity_id, context=None):
-        activity_pool = self.pool['nh.activity']
-        activity = activity_pool.browse(cr, uid, activity_id, context)
-        location_id = activity.data_ref.pos_id.lot_admission_id.id #or activity.data_ref.pos_id.location_id.id
-        return location_id
+    def submit(self, cr, uid, activity_id, vals, context=None):
+        if 'patient_id' in vals:
+            spell_pool = self.pool['nh.clinical.spell']
+            spell_pool.get_by_patient_id(cr, uid, vals['patient_id'], exception='True', context=context)
+        return super(nh_clinical_patient_admission, self).submit(cr, uid, activity_id, vals, context=context)
 
     def complete(self, cr, uid, activity_id, context=None):
-        res = {}
-        super(nh_clinical_patient_admission, self).complete(cr, uid, activity_id, context)
-        api_pool = self.pool['nh.clinical.api']
+        res = super(nh_clinical_patient_admission, self).complete(cr, uid, activity_id, context=context)
         activity_pool = self.pool['nh.activity']
-        activity = activity_pool.browse(cr, SUPERUSER_ID, activity_id, context)
+        activity = activity_pool.browse(cr, SUPERUSER_ID, activity_id, context=context)
         admission = activity.data_ref
 
-        # spell
-        spell_activity_id = api_pool.get_patient_spell_activity_id(cr, SUPERUSER_ID, admission.patient_id.id, context=context)
-        # FIXME! hadle multiple POS
-        except_if(spell_activity_id, msg="Patient id=%s has started spell!" % admission.patient_id.id)
         spell_pool = self.pool['nh.clinical.spell']
-        spell_activity_id = spell_pool.create_activity(cr, SUPERUSER_ID,
-           {'creator_id': activity_id},
-           {'patient_id': admission.patient_id.id,
+        spell_activity_id = spell_pool.create_activity(cr, SUPERUSER_ID, {
+            'creator_id': activity_id
+        }, {
+            'patient_id': admission.patient_id.id,
             'location_id': admission.location_id.id,
             'pos_id': admission.pos_id.id,
             'code': admission.code,
-            'start_date': admission.start_date},
-           context=None)
-        # copy doctors
-        if activity.creator_id.data_model == "nh.clinical.adt.patient.admit":
-            doctor_data = {
-                'con_doctor_ids': [[6, False, [d.id for d in activity.creator_id.data_ref.con_doctor_ids]]],
-                'ref_doctor_ids': [[6, False, [d.id for d in activity.creator_id.data_ref.ref_doctor_ids]]]
-            }
-            activity_pool.submit(cr, uid, spell_activity_id, doctor_data, context)
-
-        res[spell_pool._name] = spell_activity_id
-        activity_pool.start(cr, SUPERUSER_ID, spell_activity_id, context)
-        activity_pool.write(cr, SUPERUSER_ID, admission.activity_id.id, {'parent_id': spell_activity_id}, context)
+            'start_date': admission.start_date,
+            'con_doctor_ids': [[6, False, [d.id for d in admission.con_doctor_ids]]],
+            'ref_doctor_ids': [[6, False, [d.id for d in admission.ref_doctor_ids]]]
+        }, context=context)
+        activity_pool.start(cr, SUPERUSER_ID, spell_activity_id, context=context)
+        activity_pool.write(cr, SUPERUSER_ID, activity_id, {'parent_id': spell_activity_id}, context=context)
 
         move_pool = self.pool['nh.clinical.patient.move']
-        move_activity_id = move_pool.create_activity(cr, SUPERUSER_ID,
-            {'parent_id': spell_activity_id, 'creator_id': activity_id},
-            {'patient_id': admission.patient_id.id,
-             'location_id': admission.suggested_location_id.id},
-            context)
-        res[move_pool._name] = move_activity_id
-        activity_pool.complete(cr, SUPERUSER_ID, move_activity_id, context)
-        activity_pool.submit(cr, SUPERUSER_ID, spell_activity_id, {'location_id': admission.suggested_location_id.id})
+        move_activity_id = move_pool.create_activity(cr, SUPERUSER_ID, {
+            'parent_id': spell_activity_id,
+            'creator_id': activity_id
+        }, {
+            'patient_id': admission.patient_id.id,
+            'location_id': admission.location_id.id
+        }, context=context)
+        activity_pool.complete(cr, SUPERUSER_ID, move_activity_id, context=context)
         # trigger admission policy activities
-        self.trigger_policy(cr, uid, activity_id, location_id=admission.suggested_location_id.id, context=context)
+        self.trigger_policy(cr, uid, activity_id, location_id=admission.location_id.id, context=context)
         return res
+
+    def cancel(self, cr, uid, activity_id, context=None):
+        res = super(nh_clinical_patient_admission, self).cancel(cr, uid, activity_id, context=context)
+        activity_pool = self.pool['nh.activity']
+        activity = activity_pool.browse(cr, uid, activity_id, context=context)
+        activity_ids = activity_pool.search(cr, uid, [
+            ['state', 'not in', ['completed', 'cancelled']],
+            ['id', 'child_of', activity.parent_id.id]], context=context)
+        for aid in activity_ids:
+            activity_pool.cancel(cr, uid, aid, context=context)
+        return res
+
+    def get_last(self, cr, uid, patient_id, exception=False, context=None):
+        """
+        Checks if there is a completed admission for the provided Patient
+        :param exception: String with value 'True' or 'False'
+        :return: if no exception parameter is provided: activity id of the most recent completed admission if exists.
+                False if not.
+                if exception 'True': Patien Already Admitted exception is raised if admission found.
+                if exception 'False': No Admission Found exception is raised if no admission found.
+        """
+        domain = [['patient_id', '=', patient_id], ['data_model', '=', 'nh.clinical.patient.admission'],
+                  ['state', '=', 'completed'], ['parent_id.state', '=', 'started']]
+        activity_pool = self.pool['nh.activity']
+        admission_ids = activity_pool.search(cr, uid, domain, order='date_terminated desc, sequence desc',
+                                             context=context)
+        if exception:
+            if admission_ids and eval(exception):
+                raise osv.except_osv('Patient Already Admitted!', 'There is already an active admission '
+                                                                  'for patient with id %s' % patient_id)
+            if not admission_ids and not eval(exception):
+                raise osv.except_osv('Admission Not Found!', 'There is no active admission for patient with id %s' %
+                                     patient_id)
+        return admission_ids[0] if admission_ids else False
+
+
+class nh_clinical_patient_transfer(orm.Model):
+    _name = 'nh.clinical.patient.transfer'
+    _inherit = ['nh.activity.data']
+    _columns = {
+        'patient_id': fields.many2one('nh.clinical.patient', 'Patient', required=True),
+        'origin_loc_id': fields.many2one('nh.clinical.location', 'Origin Location'),
+        'location_id': fields.many2one('nh.clinical.location', 'Transfer Location', required=True)
+    }
+    
+    def submit(self, cr, uid, activity_id, vals, context=None):
+        data = vals.copy()
+        if 'patient_id' in vals:
+            spell_pool = self.pool['nh.clinical.spell']
+            activity_pool = self.pool['nh.activity']
+            spell_id = spell_pool.get_by_patient_id(cr, uid, vals['patient_id'], exception='False', context=context)
+            spell = spell_pool.browse(cr, uid, spell_id, context=context)
+            data.update({'origin_loc_id': spell.location_id.id})
+            activity_pool.write(cr, uid, activity_id, {'parent_id': spell.activity_id.id}, context=context)
+        return super(nh_clinical_patient_transfer, self).submit(cr, uid, activity_id, data, context=context)
+    
+    def complete(self, cr, uid, activity_id, context=None):
+        res = super(nh_clinical_patient_transfer, self).complete(cr, uid, activity_id, context=context)
+        activity_pool = self.pool['nh.activity']
+        activity = activity_pool.browse(cr, SUPERUSER_ID, activity_id, context=context)
+        transfer = activity.data_ref
+        location_pool = self.pool['nh.clinical.location']
+        if not location_pool.is_child_of(cr, uid, transfer.origin_loc_id.id, transfer.location_id.code, context=context):
+            move_pool = self.pool['nh.clinical.patient.move']
+            move_activity_id = move_pool.create_activity(cr, SUPERUSER_ID, {
+                'parent_id': activity.parent_id.id,
+                'creator_id': activity_id
+            }, {
+                'patient_id': transfer.patient_id.id,
+                'location_id': transfer.location_id.id
+            }, context=context)
+            activity_pool.complete(cr, SUPERUSER_ID, move_activity_id, context=context)
+            # trigger transfer policy activities
+            self.trigger_policy(cr, uid, activity_id, location_id=transfer.location_id.id, case=1, context=context)
+        return res
+
+    def cancel(self, cr, uid, activity_id, context=None):
+        res = super(nh_clinical_patient_transfer, self).cancel(cr, uid, activity_id, context=context)
+        activity_pool = self.pool['nh.activity']
+        spell_pool = self.pool['nh.clinical.spell']
+        activity = activity_pool.browse(cr, uid, activity_id, context=context)
+        transfer = activity.data_ref
+        spell_id = spell_pool.get_by_patient_id(cr, uid, transfer.patient_id.id, exception='False', context=context)
+        if activity.parent_id.data_ref.id != spell_id:
+            raise osv.except_osv('Integrity Error!', 'Cannot cancel a transfer from a not active spell!')
+        location_pool = self.pool['nh.clinical.location']
+        if not location_pool.is_child_of(cr, uid, transfer.origin_loc_id.id, transfer.location_id.code, context=context):
+            move_pool = self.pool['nh.clinical.patient.move']
+            move_activity_id = move_pool.create_activity(cr, uid, {
+                'parent_id': activity.parent_id.id,
+                'creator_id': activity_id
+            }, {
+                'patient_id': transfer.patient_id.id,
+                'location_id': transfer.origin_loc_id.id
+            }, context=context)
+            location_pool = self.pool['nh.clinical.location']
+            # check if the previous bed is still available
+            if transfer.origin_loc_id.usage == 'bed' and transfer.origin_loc_id.is_available:
+                activity_pool.complete(cr, uid, move_activity_id, context=context)
+                return res
+            ward_id = location_pool.get_closest_parent_id(cr, uid, transfer.origin_loc_id.id, 'ward',
+                                                          context=context) \
+                if transfer.origin_loc_id.usage != 'ward' else transfer.origin_loc_id.id
+            activity_pool.submit(cr, uid, move_activity_id, {'location_id': ward_id}, context=context)
+            activity_pool.complete(cr, uid, move_activity_id, context=context)
+            self.trigger_policy(cr, uid, activity_id, location_id=ward_id, case=2, context=context)
+        return res
+    
+    def get_last(self, cr, uid, patient_id, exception=False, context=None):
+        """
+        Checks if there is a completed transfer for the provided Patient
+        :param exception: String with value 'True' or 'False'
+        :return: if no exception parameter is provided: activity id of the most recent completed transfer if exists.
+                False if not.
+                if exception 'True': Patien Already Transferred exception is raised if transfer found.
+                if exception 'False': No Transfer Found exception is raised if no transfer found.
+        """
+        domain = [['patient_id', '=', patient_id], ['data_model', '=', 'nh.clinical.patient.transfer'],
+                  ['state', '=', 'completed'], ['parent_id.state', '=', 'started']]
+        activity_pool = self.pool['nh.activity']
+        transfer_ids = activity_pool.search(cr, uid, domain, order='date_terminated desc, sequence desc',
+                                            context=context)
+        if exception:
+            if transfer_ids and eval(exception):
+                raise osv.except_osv('Patient Already Transferred!', 'There is already a transfer '
+                                                                     'for patient with id %s' % patient_id)
+            if not transfer_ids and not eval(exception):
+                raise osv.except_osv('Transfer Not Found!', 'There is no transfer for patient with id %s' %
+                                     patient_id)
+        return transfer_ids[0] if transfer_ids else False
 
 
 class nh_clinical_patient_follow(orm.Model):

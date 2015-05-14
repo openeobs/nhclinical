@@ -586,9 +586,9 @@ class nh_clinical_patient(osv.Model):
     def create(self, cr, uid, vals, context=None):
         if not vals.get('name'):
             vals.update({'name': self._get_fullname(vals)})
-        if 'other_identifier' in vals:
+        if vals.get('other_identifier'):
             self.check_hospital_number(cr, uid, vals.get('other_identifier'), exception='True', context=context)
-        if 'patient_identifier' in vals:
+        if vals.get('patient_identifier'):
             self.check_nhs_number(cr, uid, vals.get('patient_identifier'), exception='True', context=context)
         return super(nh_clinical_patient, self).create(cr, uid, vals,
                                                        context=dict(context or {}, mail_create_nosubscribe=True))
