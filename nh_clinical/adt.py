@@ -43,7 +43,7 @@ class nh_clinical_adt_patient_register(orm.Model):
     _columns = { 
         'patient_id': fields.many2one('nh.clinical.patient', 'Patient'),
         'patient_identifier': fields.char('NHS Number', size=10),
-        'other_identifier': fields.char('Hospital Number', size=20),
+        'other_identifier': fields.char('Hospital Number', size=50),
         'family_name': fields.char('Last Name', size=200),
         'given_name': fields.char('First Name', size=200),
         'middle_names': fields.char('Middle Names', size=200),
@@ -105,7 +105,7 @@ class nh_clinical_adt_patient_update(orm.Model):
     _columns = {
         'patient_id': fields.many2one('nh.clinical.patient', 'Patient', required=True),
         'patient_identifier': fields.char('NHS Number', size=10),
-        'other_identifier': fields.char('Hospital Number', size=20),
+        'other_identifier': fields.char('Hospital Number', size=50),
         'family_name': fields.char('Last Name', size=200),
         'given_name': fields.char('First Name', size=200),
         'middle_names': fields.char('Middle Names', size=200),
@@ -169,7 +169,7 @@ class nh_clinical_adt_patient_admit(orm.Model):
         'location': fields.char('Location', size=256),
         'code': fields.char("Code", size=256),
         'start_date': fields.datetime("Admission Date"),
-        'other_identifier': fields.char('Hospital Number', size=20),
+        'other_identifier': fields.char('Hospital Number', size=50),
         'doctors': fields.text("Doctors")
     }
 
@@ -229,7 +229,7 @@ class nh_clinical_adt_patient_cancel_admit(orm.Model):
     _inherit = ['nh.activity.data']  
     _description = 'ADT Cancel Patient Admit'    
     _columns = {
-        'other_identifier': fields.char('Hospital Number', size=20, required=True),
+        'other_identifier': fields.char('Hospital Number', size=50, required=True),
         'patient_id': fields.many2one('nh.clinical.patient', 'Patient', required=True),
         'admission_id': fields.many2one('nh.activity', 'Admission Activity')
     }
@@ -268,7 +268,7 @@ class nh_clinical_adt_patient_discharge(orm.Model):
     _inherit = ['nh.activity.data']  
     _description = 'ADT Patient Discharge'
     _columns = {
-        'other_identifier': fields.char('Hospital Number', size=20, required=True),
+        'other_identifier': fields.char('Hospital Number', size=50, required=True),
         'discharge_date': fields.datetime('Discharge Date'),
         'patient_id': fields.many2one('nh.clinical.patient', 'Patient', required=True)
     }
@@ -314,7 +314,7 @@ class nh_clinical_adt_patient_cancel_discharge(orm.Model):
     _inherit = ['nh.activity.data']
     _description = 'ADT Cancel Patient Discharge'
     _columns = {
-        'other_identifier': fields.char('Hospital Number', size=20, required=True),
+        'other_identifier': fields.char('Hospital Number', size=50, required=True),
         'patient_id': fields.many2one('nh.clinical.patient', 'Patient', required=True),
         'discharge_id': fields.many2one('nh.activity', 'Discharge Activity')
     }
@@ -351,7 +351,7 @@ class nh_clinical_adt_patient_transfer(orm.Model):
     _inherit = ['nh.activity.data']
     _description = 'ADT Patient Transfer'      
     _columns = {
-        'other_identifier': fields.char('Hospital Number', size=20, required=True),
+        'other_identifier': fields.char('Hospital Number', size=50, required=True),
         'location': fields.char('Location', size=256),
         'location_id': fields.many2one('nh.clinical.location', 'Transfer Location'),
         'patient_id': fields.many2one('nh.clinical.patient', 'Patient', required=True)
@@ -407,7 +407,7 @@ class nh_clinical_adt_patient_cancel_transfer(orm.Model):
     _inherit = ['nh.activity.data']
     _description = 'ADT Cancel Patient Transfer'
     _columns = {
-        'other_identifier': fields.char('Hospital Number', size=20, required=True),
+        'other_identifier': fields.char('Hospital Number', size=50, required=True),
         'patient_id': fields.many2one('nh.clinical.patient', 'Patient', required=True),
         'transfer_id': fields.many2one('nh.activity', 'Transfer Activity')
     }
@@ -450,7 +450,7 @@ class nh_clinical_adt_spell_update(orm.Model):
         'location': fields.char('Location', size=256),
         'code': fields.char("Code", size=256),
         'start_date': fields.datetime("Admission Date"),
-        'other_identifier': fields.char('Hospital Number', size=20),
+        'other_identifier': fields.char('Hospital Number', size=50),
         'doctors': fields.text("Doctors"),
     }
 
