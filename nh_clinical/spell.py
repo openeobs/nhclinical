@@ -88,7 +88,7 @@ class nh_clinical_spell(orm.Model):
         return [('id', 'in', spell_ids)]   
      
     _columns = {
-        'patient_id': fields.many2one('nh.clinical.patient', 'Patient', required=True),
+        'patient_id': fields.many2one('nh.clinical.patient', 'Patient', required=True, ondelete='cascade'),
         'location_id': fields.many2one('nh.clinical.location', 'Placement Location'),
         'pos_id': fields.many2one('nh.clinical.pos', 'Placement Location', required=True),
         'code': fields.char("Code", size=256),
