@@ -555,7 +555,7 @@ class nh_clinical_patient(osv.Model):
 
     _columns = {
         'current_location_id': fields.many2one('nh.clinical.location', 'Current Location'),
-        'partner_id': fields.many2one('res.partner', 'Partner', required=True, ondelete='restrict'),
+        'partner_id': fields.many2one('res.partner', 'Partner', required=True, ondelete='cascade'),
         'dob': fields.datetime('Date Of Birth'),  # Partner birthdate is NOT a date.
         'sex': fields.selection(_gender, 'Sex'),
         'gender': fields.selection(_gender, 'Gender'),
