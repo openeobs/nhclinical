@@ -1,5 +1,5 @@
 from openerp.osv import osv, fields
-
+from lxml import etree
 
 class allocating_user(osv.TransientModel):
     _name = 'nh.clinical.allocating.user'
@@ -38,8 +38,10 @@ class allocating_user(osv.TransientModel):
         allocation_pool = self.pool['nh.clinical.user.allocation']
         al_id = allocation_pool.search(cr, uid, [['create_uid', '=', uid]], order='id desc')
         if not al_id or not res['fields'].get('location_ids'):
+            # TODO: need to put view into edit mode to add items?
             return res
         else:
+            # TODO: need to out view into edit mode to add items?
             location_pool = self.pool['nh.clinical.location']
             allocation = allocation_pool.browse(cr, uid, al_id[0], context=context)
             ward_ids = [w.id for w in allocation.ward_ids]
@@ -80,7 +82,7 @@ class user_allocation_wizard(osv.TransientModel):
             'res_model': 'nh.clinical.user.allocation',
             'res_id': ids[0],
             'view_mode': 'form',
-            'target': 'new',
+            'target': 'current',
         }
 
     def complete(self, cr, uid, ids, context=None):
@@ -93,4 +95,22 @@ class user_allocation_wizard(osv.TransientModel):
             activity_id = respallocation_pool.create_activity(cr, uid, {}, {
                 'responsible_user_id': auser.user_id.id, 'location_ids': [[6, 0, location_ids]]}, context=context)
             activity_pool.complete(cr, uid, activity_id, context=context)
+        # TODO: If view target is current then need to set to go back a page?
         return {'type': 'ir.actions.act_window_close'}
+
+    def fields_view_get(self, cr, uid, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
+        if view_type == 'form' and toolbar:
+            res = super(user_allocation_wizard, self).fields_view_get(cr, uid, view_id, view_type, context, toolbar, submenu)
+            doc = etree.XML(res['arch'])
+            form_nodes = doc.xpath("//form")
+            for form_node in form_nodes:
+                form_node.set('edit', '0')
+                form_node.set('create', '0')
+                form_node.set('delete', '0')
+            close_nodes = doc.xpath("//button[@string='Close']")
+            for close_node in close_nodes:
+                close_node.getparent().remove(close_node)
+            res['arch'] = etree.tostring(doc)
+            return res
+        else:
+            return super(user_allocation_wizard, self).fields_view_get(cr, uid, view_id, view_type, context, toolbar, submenu)
