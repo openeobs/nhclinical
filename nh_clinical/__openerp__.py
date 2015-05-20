@@ -20,6 +20,7 @@
              'views/doctor_view.xml',
              'wizard/placement_wizard_view.xml',
              'wizard/responsibility_allocation_wizard.xml',
+             'wizard/user_allocation_view.xml',
              'views/menuitem.xml',
              'security/ir.model.access.csv',
              'security/adt/ir.model.access.csv',

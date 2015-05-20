@@ -323,6 +323,7 @@ class nh_clinical_location(orm.Model):
                 result[location.id] = '{0} [{1}]'.format(location.name, parent['name']) if parent else location.name
         return result
 
+
     def _is_available_search(self, cr, uid, obj, name, args, domain=None, context=None):
         """
         Allows to search through the method _is_available so the field is_available can be searched.
