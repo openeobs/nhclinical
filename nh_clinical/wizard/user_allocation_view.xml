@@ -9,7 +9,7 @@
                     <group>
                         <field name="roles"/>
                     </group>
-                    <field name="location_ids" nolabel="1" options="{'no_create': True}"/>
+                    <field name="location_ids" nolabel="1" no_open="1" options="{'no_create': True}"/>
                 </form>
             </field>
         </record>
@@ -38,8 +38,8 @@
                                 <field name="location_ids"/>
                             </tree>
                         </field>
-                        <field name="allocating_user_ids" nolabel="1" options="{'no_create': True}" colspan="2"
-                               attrs="{'invisible': [['stage','!=','allocation']]}" readonly="1">
+                        <field name="allocating_user_ids" nolabel="1" options="{'no_create': True}" no_open="1"
+                               colspan="2" attrs="{'invisible': [['stage','!=','allocation']]}" readonly="1">
                             <tree>
                                 <field name="user_id"/>
                                 <field name="roles"/>
