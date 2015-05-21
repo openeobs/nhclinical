@@ -82,7 +82,7 @@ class user_allocation_wizard(osv.TransientModel):
             'res_model': 'nh.clinical.user.allocation',
             'res_id': ids[0],
             'view_mode': 'form',
-            'target': 'current',
+            'target': 'new', # change to current to make it look like Joe's design
         }
 
     def complete(self, cr, uid, ids, context=None):
