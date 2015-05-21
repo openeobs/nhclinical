@@ -602,7 +602,7 @@ class nh_clinical_patient(osv.Model):
         Checks create / update data for patients.
         Either the Hospital Number (other_identifier) or the NHS Number (patient_identifier) is required.
         On create: Hospital Number must be unique and NHS Number must be unique.
-        On update: At patient must exist with either the Hospital Number or the NHS Number provided.
+        On update: A patient must exist with either the Hospital Number or the NHS Number provided.
         changes title to res.partner.title id. Will create a new one if it does not exist.
         :return: True if successful
         """
