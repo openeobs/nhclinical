@@ -43,7 +43,7 @@
                             <tree>
                                 <field name="user_id"/>
                                 <field name="roles"/>
-                                <button string="Allocate" type="action" name="%(action_allocate)d" icon="oe_cancel" class="oe_highlight"/>
+                                <button string="Allocate" type="action" name="%(action_allocate)d" nh_icon="allocate_btn" class="oe_highlight"/>
                                 <field name="location_ids"/>
                             </tree>
                         </field>
