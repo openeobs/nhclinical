@@ -26,7 +26,7 @@
             <field name="name">User Allocation Wizard Form</field>
             <field name="model">nh.clinical.user.allocation</field>
             <field name="arch" type="xml">
-                <form string="User Allocation Wizard" version="7.0">
+                <form string="User Allocation Wizard" version="7.0" class="nh-user-allocation-form">
                     <group>
                         <field name="stage" invisible="1"/>
                         <field name="ward_ids" options="{'no_create': True}" colspan="2" widget="many2many_tags"
