@@ -386,7 +386,7 @@ class nh_activity_data(orm.AbstractModel):
                 frequency = activity_pool.browse(cr, SUPERUSER_ID, ta_activity_id, context=context).data_ref.frequency
                 date_schedule = (dt.now()+td(minutes=frequency)).strftime(DTF)
             else:
-                date_schedule = dt.now().replace(minute=0, second=0, microsecond=0)
+                date_schedule = dt.now()+td(minutes=30)
             if trigger_activity['type'] == 'start':
                 activity_pool.start(cr, SUPERUSER_ID, ta_activity_id, context=context)
             elif trigger_activity['type'] == 'complete':
