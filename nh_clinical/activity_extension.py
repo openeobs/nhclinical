@@ -9,6 +9,19 @@ from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
 _logger = logging.getLogger(__name__)
 
 
+def list2sqlstr(lst):
+    res = []
+    lst = isinstance(lst, (list, tuple)) and lst or [lst]
+    for l in lst:
+        if isinstance(l, (int, long)):
+            res.append("%s" % int(l))
+        elif isinstance(l, basestring):
+            res.append("'%s'" % l)
+        elif l is None:
+            res.append("0")
+    return ",".join(res)
+
+
 class nh_cancel_reason(orm.Model):
     """cancellation reason
     """
@@ -48,6 +61,90 @@ class nh_activity(orm.Model):
             if location:
                 self.write(cr, uid, ids, {'user_ids': [[6, False, location['user_ids']]]}, context=context)
         return res
+
+    def cancel_open_activities(self, cr, uid, parent_id, model, context=None):
+        domain = [('parent_id', '=', parent_id),
+                  ('data_model', '=', model),
+                  ('state', 'not in', ['completed', 'cancelled'])]
+        open_activity_ids = self.search(cr, uid, domain, context=context)
+        return all([self.cancel(cr, uid, a, context=context) for a in open_activity_ids])
+
+    def update_users(self, cr, uid, user_ids=[]):
+        """
+        Deletes all passed user_ids from all activities and
+        Updates activities with user_ids who are responsible for activity location
+        """
+        if not user_ids:
+            return True
+
+        where_clause = "where user_id in (%s)" % list2sqlstr(user_ids)
+
+        sql = """
+            delete from activity_user_rel {where_clause};
+            insert into activity_user_rel
+            select activity_id, user_id from
+                (select distinct on (activity.id, ulr.user_id)
+                        activity.id as activity_id,
+                        ulr.user_id
+                from user_location_rel ulr
+                inner join res_groups_users_rel gur on ulr.user_id = gur.uid
+                inner join ir_model_access access on access.group_id = gur.gid and access.perm_responsibility = true
+                inner join ir_model model on model.id = access.model_id
+                inner join nh_activity activity on model.model = activity.data_model
+                            and activity.location_id = ulr.location_id and activity.state not in ('completed','cancelled')
+                where not exists (select 1 from activity_user_rel where activity_id=activity.id and user_id=ulr.user_id )) pairs
+            {where_clause}
+        """.format(where_clause=where_clause)
+        cr.execute(sql)
+        self.update_spell_users(cr, uid, user_ids)
+
+        return True
+
+    def update_spell_users(self, cr, uid, user_ids=[]):
+        """
+        Updates spell activities with user_ids who are responsible for parent locations of spell location
+        """
+
+        if not user_ids:
+            return True
+
+        where_clause = "where user_id in (%s)" % list2sqlstr(user_ids)
+        sql = """
+           with
+               recursive route(level, path, parent_id, id) as (
+                       select 0, id::text, parent_id, id
+                       from nh_clinical_location
+                       where parent_id is null
+                   union
+                       select level + 1, path||','||location.id, location.parent_id, location.id
+                       from nh_clinical_location location
+                       join route on location.parent_id = route.id
+               ),
+               parent_location as (
+                   select
+                       id as location_id,
+                       ('{'||path||'}')::int[] as ids
+                   from route
+                   order by path
+               )
+           insert into activity_user_rel
+           select activity_id, user_id from (
+               select distinct on (activity.id, ulr.user_id)
+                   activity.id as activity_id,
+                   ulr.user_id
+               from user_location_rel ulr
+               inner join res_groups_users_rel gur on ulr.user_id = gur.uid
+               inner join ir_model_access access on access.group_id = gur.gid and access.perm_responsibility = true
+               inner join ir_model model on model.id = access.model_id and model.model = 'nh.clinical.spell'
+               inner join parent_location on parent_location.ids  && array[ulr.location_id]
+               inner join nh_activity activity on model.model = activity.data_model
+                   and activity.location_id = parent_location.location_id
+               where not exists (select 1 from activity_user_rel where activity_id=activity.id and user_id=ulr.user_id )) pairs
+           %s
+        """ % where_clause
+
+        cr.execute(sql)
+        return True
  
     
 class nh_activity_data(orm.AbstractModel):
@@ -105,72 +202,60 @@ class nh_activity_data(orm.AbstractModel):
         return res
 
     def update_activity(self, cr, uid, activity_id, context=None):
-        api = self.pool['nh.clinical.api']
-        activity = api.browse(cr, uid, 'nh.activity', activity_id, context)
+        activity_pool = self.pool['nh.activity']
+        activity = activity_pool.browse(cr, uid, activity_id, context=context)
         activity_vals = {}
         location_id = self.get_activity_location_id(cr, uid, activity_id)
         patient_id = self.get_activity_patient_id(cr, uid, activity_id)
-        device_id = self.get_activity_device_id(cr, uid, activity_id)
         pos_id = self.get_activity_pos_id(cr, uid, activity_id)
 
         if 'patient_id' in self._columns.keys():
             activity_vals.update({'patient_id': patient_id})
 
         activity_vals.update({'location_id': location_id,
-                              # 'device_id': device_id,
                               'pos_id': pos_id})
-        api.write(cr, uid, 'nh.activity', activity_id, activity_vals)
-        activities = api.activity_map(cr, uid, pos_ids=[pos_id], patient_ids=[patient_id],
-                         data_models=['nh.clinical.spell'], states=['started'])
-        spell_activity_id = activities and activities.keys()[0] or False
+        activity_pool.write(cr, uid, activity_id, activity_vals, context=context)
+        activity_ids = activity_pool.search(cr, uid, [
+            ['patient_id', '=', patient_id], ['data_model', '=', 'nh.clinical.spell'],
+            ['state', '=', 'started']], context=context)
+        spell_activity_id = activity_ids[0] if activity_ids else False
         # user_ids depend on location_id, thus separate updates
-        user_ids = self.get_activity_user_ids(cr, uid, activity_id)
-        api.write(cr, uid, 'nh.activity', activity_id, {'user_ids': [(6, 0, user_ids)], 'spell_activity_id': spell_activity_id})
+        user_ids = self.get_activity_user_ids(cr, uid, activity_id, context=context)
+        activity_pool.write(cr, uid, activity_id, {'user_ids': [(6, 0, user_ids)],
+                                                   'spell_activity_id': spell_activity_id}, context=context)
         _logger.debug(
             "activity '%s', activity.id=%s updated with: %s" % (activity.data_model, activity.id, activity_vals))
-        return {}
+        return True
 
     def get_activity_pos_id(self, cr, uid, activity_id, context=None):
         """
         Returns pos_id for activity calculated based on activity data
-        Logic:
-        10. If data has 'pos_id' field and it is not False, returns value of the field
-        20. If get_activity_location_id() returns location_id, returns location.pos_id.id
-        30. If get_activity_patient_id() returns patient_id and api_pool.get_patient_spell_activity_browse, returns spell_activity.data_ref.pos_id.id
         """
-        _logger.debug("Calculating pos_id for activity.id=%s" % (activity_id))        
         pos_id = False
-        api_pool = self.pool['nh.clinical.api']
+        patient_pool = self.pool['nh.clinical.patient']
 
         data_ids = self.search(cr, uid, [('activity_id', '=', activity_id)])
-        data = self.browse(cr, uid, data_ids, context)[0]
+        data = self.browse(cr, uid, data_ids, context=context)[0]
 
         if 'pos_id' in self._columns.keys():
-            pos_id = data.pos_id and data.pos_id.id or False
+            pos_id = data.pos_id.id if data.pos_id else False
         if pos_id:
-            _logger.debug("Returning self based pos_id = %s" % (pos_id))
             return pos_id
         location_id = self.get_activity_location_id(cr, uid, activity_id)
         patient_id = self.get_activity_patient_id(cr, uid, activity_id)
 
         if not location_id:
-            patient_map = api_pool.patient_map(cr, uid, patient_ids=[patient_id]).get(patient_id)  
-            location_id = patient_map and patient_map['location_id']
-            # get_patient_current_location_id(cr, uid, patient_id, context)
+            patient = patient_pool.browse(cr, uid, patient_id, context=context)
+            location_id = patient.current_location_id.id if patient.current_location_id else False
             if location_id:
                 location = self.pool['nh.clinical.location'].browse(cr, uid, location_id, context)
-                pos_id = location.pos_id and location.pos_id.id or False
+                pos_id = location.pos_id.id if location.pos_id else False
                 if pos_id:
-                    _logger.debug("Returning location_id based pos_id = %s" % (pos_id))
                     return pos_id
-        # 30
-        patient_id = self.get_activity_patient_id(cr, uid, activity_id)
-        spell_activity = api_pool.get_patient_spell_activity_browse(cr, uid, patient_id, context=None)
-        pos_id = spell_activity and spell_activity.data_ref.pos_id.id
-        if pos_id:
-            _logger.debug("Returning patient_id based pos_id = %s" % (pos_id))
-        else:
-            _logger.debug("Unable to calculate pos_id, returning False")
+        spell_pool = self.pool['nh.clinical.spell']
+        spell_id = spell_pool.get_by_patient_id(cr, uid, patient_id, context=context)
+        spell = spell_pool.browse(cr, uid, spell_id, context=context) if spell_id else False
+        pos_id = spell.pos_id.id if spell else False
         return pos_id
 
     def get_activity_device_id(self, cr, uid, activity_id, context=None):       
@@ -259,11 +344,12 @@ class nh_activity_data(orm.AbstractModel):
                 the current activity. i.e. 'location_id': 'data_ref.location_id.id' will add vals {'location_id': activity.data_ref.location_id.id}
         """
         activity_pool = self.pool['nh.activity']
-        api_pool = self.pool['nh.clinical.api']
+        spell_pool = self.pool['nh.clinical.spell']
         location_pool = self.pool['nh.clinical.location']
         if self._POLICY.get('activities', []):
             activity = activity_pool.browse(cr, SUPERUSER_ID, activity_id, context)
-            spell_activity_id = api_pool.get_patient_spell_activity_id(cr, SUPERUSER_ID, activity.data_ref.patient_id.id, context=context)
+            spell_id = spell_pool.get_by_patient_id(cr, SUPERUSER_ID, activity.data_ref.patient_id.id, context=context)
+            spell_activity_id = spell_pool.browse(cr, uid, spell_id, context=context).activity_id.id if spell_id else False
         else:
             return True
         for trigger_activity in self._POLICY.get('activities', []):
@@ -284,7 +370,7 @@ class nh_activity_data(orm.AbstractModel):
                 if break_trigger:
                     continue
             if trigger_activity.get('cancel_others'):
-                api_pool.cancel_open_activities(cr, uid, spell_activity_id, pool._name, context=context)
+                activity_pool.cancel_open_activities(cr, uid, spell_activity_id, pool._name, context=context)
             data = {
                 'patient_id': activity.data_ref.patient_id.id
             }

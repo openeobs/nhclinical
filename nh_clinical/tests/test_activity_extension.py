@@ -20,7 +20,6 @@ class TestActivityExtension(common.SingleTransactionCase):
         cls.location_pool = cls.registry('nh.clinical.location')
         cls.pos_pool = cls.registry('nh.clinical.pos')
         cls.spell_pool = cls.registry('nh.clinical.spell')
-        cls.api_pool = cls.registry('nh.clinical.api')
 
         cls.apidemo = cls.registry('nh.clinical.api.demo')
 

@@ -2,7 +2,7 @@
 
 import logging
 
-from openerp.osv import orm, fields
+from openerp.osv import orm, fields, osv
 from openerp import SUPERUSER_ID
 
 from openerp.addons.nh_activity.activity import except_if
@@ -93,7 +93,20 @@ class nh_clinical_device_session(orm.Model):
         if activity.data_ref.device_id:
             device_pool = self.pool['nh.clinical.device']
             device_pool.write(cr, uid, activity.data_ref.device_id.id, {'is_available': True})
-        super(nh_clinical_device_session, self).complete(cr, uid, activity_id, context)        
+        super(nh_clinical_device_session, self).complete(cr, uid, activity_id, context)
+
+    def get_activity_id(self, cr, uid, patient_id, device_type_id, context=None):
+        domain = [
+            ['patient_id', '=', patient_id],
+            ['device_type_id', '=', device_type_id],
+            ['activity_id.state', '=', 'started']]
+        session_id = self.search(cr, uid, domain, context=context)
+        if not session_id:
+            return False
+        if len(session_id) > 1:
+            _logger.warn("For device_type_id=%s found more than 1 started device session activity_ids"
+                         % device_type_id)
+        return self.browse(cr, uid, session_id[0], context=context).activity_id.id
         
     
 class nh_clinical_device_connect(orm.Model):
@@ -121,18 +134,20 @@ class nh_clinical_device_connect(orm.Model):
 
     def complete(self, cr, uid, activity_id, context=None):
         activity_pool = self.pool['nh.activity']
-        api_pool = self.pool['nh.clinical.api']
+        spell_pool = self.pool['nh.clinical.spell']
         device_session_pool = self.pool['nh.clinical.device.session']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
-        spell_activity_id = api_pool.get_patient_spell_activity_id(cr, uid, activity.data_ref.patient_id.id)
-        except_if(not spell_activity_id, msg="No started spell found for patient_id=%s" % activity.data_ref.patient_id.id)
+        spell_id = spell_pool.get_by_patient_id(cr, uid, activity.data_ref.patient_id.id, context=context)
+        if not spell_id:
+            raise osv.except_osv('No started spell found for patient_id=%s' % activity.data_ref.patient_id.id)
+        spell_activity_id = spell_pool.browse(cr, uid, spell_id, context=context).activity_id.id
         session_activity_id = device_session_pool.create_activity(cr, uid, 
                                             {'creator_id': activity_id, 'parent_id': spell_activity_id},
                                             {'patient_id': activity.data_ref.patient_id.id,
                                              'device_type_id': activity.data_ref.device_type_id.id,
                                              'device_id': activity.data_ref.device_id.id if activity.data_ref.device_id else False})
-        activity_pool.start(cr, uid, session_activity_id)
-        return super(nh_clinical_device_connect, self).complete(cr, SUPERUSER_ID, activity_id, context)
+        activity_pool.start(cr, uid, session_activity_id, context=context)
+        return super(nh_clinical_device_connect, self).complete(cr, SUPERUSER_ID, activity_id, context=context)
 
 
 class nh_clinical_device_disconnect(orm.Model):
@@ -160,12 +175,16 @@ class nh_clinical_device_disconnect(orm.Model):
 
     def complete(self, cr, uid, activity_id, context=None):
         activity_pool = self.pool['nh.activity']
-        api_pool = self.pool['nh.clinical.api']
+        session_pool = self.pool['nh.clinical.device.session']
+        spell_pool = self.pool['nh.clinical.spell']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
-        spell_activity_id = api_pool.get_patient_spell_activity_id(cr, uid, activity.data_ref.patient_id.id)
-        except_if(not spell_activity_id, msg="No started spell found for patient_id=%s" % activity.data_ref.patient_id.id)
-        session_activity_id = api_pool.get_device_session_activity_id(cr, uid, activity.data_ref.patient_id.id, activity.data_ref.device_type_id.id)
-        except_if(not session_activity_id, msg="No started session found for device_type_id=%s" % activity.data_ref.device_type_id.id)
+        spell_id = spell_pool.get_by_patient_id(cr, uid, activity.data_ref.patient_id.id, context=context)
+        if not spell_id:
+            raise osv.except_osv('No started spell found for patient_id=%s' % activity.data_ref.patient_id.id)
+        session_activity_id = session_pool.get_activity_id(cr, uid, activity.data_ref.patient_id.id,
+                                                           activity.data_ref.device_type_id.id, context=context)
+        if not session_activity_id:
+            raise osv.except_osv('No started session found for device_type_id=%s' % activity.data_ref.device_type_id.id)
         activity_pool.complete(cr, uid, session_activity_id)
         return super(nh_clinical_device_disconnect, self).complete(cr, SUPERUSER_ID, activity_id, context)
 

@@ -100,8 +100,8 @@ class res_users(orm.Model):
     def write(self, cr, uid, ids, values, context=None):
         res = super(res_users, self).write(cr, uid, ids, values, context)
         if values.get('location_ids') or values.get('groups_id'):
-            api = self.pool['nh.clinical.api']
-            api.update_activity_users(cr, uid, ids)
+            activity_pool = self.pool['nh.activity']
+            activity_pool.update_users(cr, uid, ids)
         if 'doctor_id' in values:
             self.pool['nh.clinical.doctor'].write(cr, uid, values['doctor_id'], {'user_id': ids[0]}, context=context)
         return res
@@ -114,11 +114,11 @@ class res_groups(orm.Model):
     def write(self, cr, uid, ids, values, context=None):
         res = super(res_groups, self).write(cr, uid, ids, values, context)
         if values.get('users'):
-            api = self.pool['nh.clinical.api']
+            activity_pool = self.pool['nh.activity']
             user_ids = []
             for group in self.browse(cr, uid, isinstance(ids, (list, tuple)) and ids or [ids]):
                 user_ids.extend([u.id for u in group.users])
-            api.update_activity_users(cr, uid, user_ids)
+            activity_pool.update_users(cr, uid, user_ids)
         return res
 
 

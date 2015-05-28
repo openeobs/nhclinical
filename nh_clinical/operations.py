@@ -73,8 +73,8 @@ class nh_clinical_patient_swap_beds(orm.Model):
     _inherit = ['nh.activity.data']
     _description = "Patient Swap"
     _columns = {
-        'location1_id': fields.many2one('nh.clinical.location', 'Location 1', domain=[['usage','=','bed']], required=True),
-        'location2_id': fields.many2one('nh.clinical.location', 'Location 2', domain=[['usage','=','bed']], required=True),
+        'location1_id': fields.many2one('nh.clinical.location', 'Location 1', domain=[['usage', '=', 'bed']], required=True),
+        'location2_id': fields.many2one('nh.clinical.location', 'Location 2', domain=[['usage', '=', 'bed']], required=True),
     }
 
     # activity.location_id -> bed1, bed2 or closest common parent
@@ -191,29 +191,27 @@ class nh_clinical_patient_placement(orm.Model):
 
     def complete(self, cr, uid, activity_id, context=None):
         activity_pool = self.pool['nh.activity']
-        api_pool = self.pool['nh.clinical.api']
+        spell_pool = self.pool['nh.clinical.spell']
         move_pool = self.pool['nh.clinical.patient.move']
         placement_activity = activity_pool.browse(cr, uid, activity_id, context)
-        except_if(not placement_activity.data_ref.location_id,
-                  msg="Location is not set, placement can't be completed! activity.id = %s" % placement_activity.id)
+        if not placement_activity.data_ref.location_id:
+            osv.except_osv('Placement Error!', 'Placement cannot be completed without location')
         res = super(nh_clinical_patient_placement, self).complete(cr, uid, activity_id, context)
-
         placement_activity = activity_pool.browse(cr, uid, activity_id, context)
-        # set spell location
-        spell_activity_id = api_pool.get_patient_spell_activity_id(cr, SUPERUSER_ID, placement_activity.data_ref.patient_id.id, context=context)
-        except_if(not spell_activity_id,
-                  cap="Spell in state 'started' is not found for patient_id=%s" % placement_activity.data_ref.patient_id.id,
-                  msg="Placement can not be completed")
+        patient_id = placement_activity.data_ref.patient_id.id
+        location_id = placement_activity.data_ref.location_id.id
+        spell_id = spell_pool.get_by_patient_id(cr, uid, patient_id, context=context)
+        if not spell_id:
+            raise osv.except_osv('Placement Error!', 'No open spell found for patient_id %s' % patient_id)
+        spell_activity_id = spell_pool.browse(cr, uid, spell_id, context=context).activity_id.id
         # move to location
-        move_activity_id = move_pool.create_activity(cr, SUPERUSER_ID,
-                                                    {'parent_id': spell_activity_id,
-                                                     'creator_id': activity_id},
-                                                    {'patient_id': placement_activity.data_ref.patient_id.id,
-                                                     'location_id': placement_activity.data_ref.location_id.id})
+        move_activity_id = move_pool.create_activity(cr, SUPERUSER_ID, {
+            'parent_id': spell_activity_id, 'creator_id': activity_id}, {
+            'patient_id': patient_id, 'location_id': location_id}, context=context)
         activity_pool.complete(cr, SUPERUSER_ID, move_activity_id)
-        activity_pool.submit(cr, SUPERUSER_ID, spell_activity_id, {'location_id': placement_activity.data_ref.location_id.id})
+        activity_pool.submit(cr, SUPERUSER_ID, spell_activity_id, {'location_id': location_id}, context=context)
         # trigger placement policy activities
-        self.trigger_policy(cr, uid, activity_id, location_id=placement_activity.data_ref.location_id.id, context=context)
+        self.trigger_policy(cr, uid, activity_id, location_id=location_id, context=context)
         return res
 
     def submit(self, cr, uid, activity_id, vals, context=None):
@@ -221,8 +219,7 @@ class nh_clinical_patient_placement(orm.Model):
             location_pool = self.pool['nh.clinical.location']
             available_bed_location_ids = location_pool.get_available_location_ids(cr, uid, ['bed'], context=context)
             except_if(vals['location_id'] not in available_bed_location_ids, msg="Location id=%s is not available" % vals['location_id'])
-        super(nh_clinical_patient_placement, self).submit(cr, uid, activity_id, vals, context)
-        return {}
+        return super(nh_clinical_patient_placement, self).submit(cr, uid, activity_id, vals, context)
 
 
 class nh_clinical_patient_discharge(orm.Model):

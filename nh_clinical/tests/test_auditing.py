@@ -21,7 +21,6 @@ class TestAuditing(common.SingleTransactionCase):
         cls.location_pool = cls.registry('nh.clinical.location')
         cls.pos_pool = cls.registry('nh.clinical.pos')
         cls.spell_pool = cls.registry('nh.clinical.spell')
-        cls.api_pool = cls.registry('nh.clinical.api')
         cls.activate_pool = cls.registry('nh.clinical.location.activate')
         cls.deactivate_pool = cls.registry('nh.clinical.location.deactivate')
         cls.allocation_pool = cls.registry('nh.clinical.user.responsibility.allocation')
