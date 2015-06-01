@@ -151,7 +151,7 @@ class nh_clinical_spell(orm.Model):
             inner join nh_activity activity on model.model = activity.data_model 
                 and activity.location_id = parent_location.location_id
                 and activity.id = %s
-            group by activity_id               
+            group by activity.id
                 """ % activity_id
         cr.execute(sql)
         res = cr.dictfetchone()
