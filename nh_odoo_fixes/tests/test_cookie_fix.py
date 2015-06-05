@@ -38,7 +38,7 @@ class TestCookieFix(SingleTransactionCase):
         cookie = [h for h in response.headers if h[0] == 'Set-Cookie'][0]
         cookie_data = [kv.split('=') for kv in [l for l in cookie[1].split('; ')]]
         cookie_age = [int(c[1]) for c in cookie_data if c[0] == 'Max-Age'][0]
-        self.assertEqual(cookie_age, 3600*12, 'Our cookie fix is not funtioning as expected')
+        self.assertEqual(cookie_age, 3600*12, 'Our cookie fix is not functioning as expected')
 
     def test_original_cookie_fix(self):
         root = openerp.http.OldRoot()

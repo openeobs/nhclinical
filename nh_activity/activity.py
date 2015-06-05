@@ -105,9 +105,15 @@ class nh_activity(orm.Model):
         'sequence': fields.integer("State Switch Sequence"),
     }
 
-    _sql_constrints = {
-        ('data_ref_unique', 'unique(data_ref)', 'Data reference must be unique!'),
-    }
+    # Fixing the '_sql_constraints' attribute below doesn't automatically change the database structure.
+    # While creating a brand new database, no error should be risen (despite this specific case was not tested).
+    # To update an existing database structure, this SQL instruction needs to be manually entered into the database:
+    #
+    # ALTER TABLE nh_activity ADD CONSTRAINT data_ref_unique UNIQUE (data_ref);
+    #
+    # (N.B: no single or double quotes are needed, but the semicolon at the end of the instruction is needed)
+    #
+    _sql_constraints = [('data_ref_unique', 'unique(data_ref)', 'Data reference must be unique!')]
 
     _defaults = {
         'state': 'new',
