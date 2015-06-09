@@ -73,64 +73,51 @@ class nh_clinical_patient_swap_beds(orm.Model):
     _inherit = ['nh.activity.data']
     _description = "Patient Swap"
     _columns = {
-        'location1_id': fields.many2one('nh.clinical.location', 'Location 1', domain=[['usage', '=', 'bed']], required=True),
-        'location2_id': fields.many2one('nh.clinical.location', 'Location 2', domain=[['usage', '=', 'bed']], required=True),
+        'location1_id': fields.many2one('nh.clinical.location', 'Location 1', domain=[['usage', '=', 'bed']],
+                                        required=True),
+        'location2_id': fields.many2one('nh.clinical.location', 'Location 2', domain=[['usage', '=', 'bed']],
+                                        required=True),
     }
 
-    # activity.location_id -> bed1, bed2 or closest common parent
-    # cross-POS allowed? no
-    # FIXME: implementation simple, but wrong
-    # consider 'move policies'
+    def submit(self, cr, uid, activity_id, vals, context=None):
+        res = super(nh_clinical_patient_swap_beds, self).submit(cr, uid, activity_id, vals, context=context)
+        activity_pool = self.pool['nh.activity']
+        location_pool = self.pool['nh.clinical.location']
+        activity = activity_pool.browse(cr, uid, activity_id, context=context)
+        location1 = activity.data_ref.location1_id
+        location2 = activity.data_ref.location2_id
+        if location1 and not location1.patient_ids:
+            osv.except_osv('Swap Patients Error!', 'No patient in location %s' % location1.name)
+        if location2 and not location2.patient_ids:
+            osv.except_osv('Swap Patients Error!', 'No patient in location %s' % location2.name)
+        ward1_id = location_pool.get_closest_parent_id(cr, uid, location1.id, 'ward', context=context)
+        ward2_id = location_pool.get_closest_parent_id(cr, uid, location2.id, 'ward', context=context)
+        if ward1_id != ward2_id:
+            osv.except_osv('Swap Patients Error!',
+                           'Trying to swap locations from different wards, should be using transfer instead')
+        return res
+
     def complete(self, cr, uid, activity_id, context=None):
-        api = self.pool['nh.clinical.api']
-        swap_activity_id = activity_id
-        activity = api.browse(cr, uid, 'nh.activity', activity_id)
-        location1_id = activity.data_ref.location1_id.id
-        location2_id = activity.data_ref.location2_id.id
+        activity_pool = self.pool['nh.activity']
+        move_pool = self.pool['nh.clinical.patient.move']
+        spell_pool = self.pool['nh.clinical.spell']
+        activity = activity_pool.browse(cr, uid, activity_id, context=context)
+        location1 = activity.data_ref.location1_id
+        location2 = activity.data_ref.location2_id
+        patient1 = location1.patient_ids[0]
+        patient2 = location2.patient_ids[0]
+        spell1_id = spell_pool.get_by_patient_id(cr, uid, patient1.id, context=context)
+        spell2_id = spell_pool.get_by_patient_id(cr, uid, patient2.id, context=context)
+        spell1 = spell_pool.browse(cr, uid, spell1_id, context=context)
+        spell2 = spell_pool.browse(cr, uid, spell2_id, context=context)
 
-        locations = api.location_map(cr, uid, location_ids=[location1_id, location2_id])
-        except_if(not (location1_id in locations and location2_id in locations), msg="Locations not found!")
-        except_if(not locations[location1_id]['patient_ids'], msg="No patient in location '%s'" % activity.data_ref.location1_id.name)
-        except_if(not locations[location2_id]['patient_ids'], msg="No patient in location '%s'" % activity.data_ref.location2_id.name)
-        except_if(not (locations[location2_id]['parent_id'] and locations[location2_id]['parent_id']),
-                        msg="At least one of the beds have no parent location!")
-        parent_location_id = locations[location2_id]['parent_id']
-        patient1_id = locations[location1_id]['patient_ids'][0]
-        patient2_id = locations[location2_id]['patient_ids'][0]
-        patients = api.patient_map(cr, uid, patient_ids=[patient1_id, patient2_id])
-        except_if(not (patient1_id in patients and patient2_id in patients), msg="Patients not found!")
-        pos_id = patients[patient1_id]['pos_id']
-        spell1_activity_id = patients[patient1_id]['spell_activity_id']
-        spell2_activity_id = patients[patient2_id]['spell_activity_id']
-
-        obs_data_models = api.get_submodels(cr, uid, ['nh.clinical.patient.observation'])
-
-        obs1_activity_ids = api.activity_map(cr, uid, pos_ids=[pos_id],
-                                            patient_ids=[patient1_id], states=['new','scheduled'],
-                                            data_models=obs_data_models).keys()
-
-        obs2_activity_ids = api.activity_map(cr, uid, pos_ids=[pos_id],
-                                            patient_ids=[patient2_id], states=['new','scheduled'],
-                                            data_models=obs_data_models).keys()
-
-
-        for activity_id in obs1_activity_ids + obs2_activity_ids:
-            api.cancel(cr, uid, activity_id)
-
-        api.create_complete(cr, SUPERUSER_ID, 'nh.clinical.patient.move',
-                            {'parent_id': spell1_activity_id},
-                            {'location_id': parent_location_id, 'patient_id': patient1_id})
-        api.create_complete(cr, SUPERUSER_ID, 'nh.clinical.patient.placement',
-                            {'parent_id': spell2_activity_id},
-                            {'location_id': location1_id, 'patient_id': patient2_id,
-                             'suggested_location_id': locations[location1_id]['parent_id']})
-        api.create_complete(cr, SUPERUSER_ID, 'nh.clinical.patient.placement',
-                            {'parent_id': spell1_activity_id},
-                            {'location_id': location2_id, 'patient_id': patient1_id,
-                             'suggested_location_id': locations[location2_id]['parent_id']})
-        api.submit(cr, uid, spell1_activity_id, {'location_id': location2_id})
-        api.submit(cr, uid, spell2_activity_id, {'location_id': location1_id})
-        return super(nh_clinical_patient_swap_beds, self).complete(cr, uid, swap_activity_id, context)
+        move1_id = move_pool.create_activity(cr, uid, {'parent_id': spell1.activity_id.id}, {
+            'location_id': location2.id, 'patient_id': patient1.id}, context=context)
+        move2_id = move_pool.create_activity(cr, uid, {'parent_id': spell2.activity_id.id}, {
+            'location_id': location1.id, 'patient_id': patient2.id}, context=context)
+        activity_pool.complete(cr, uid, move1_id, context=context)
+        activity_pool.complete(cr, uid, move2_id, context=context)
+        return super(nh_clinical_patient_swap_beds, self).complete(cr, uid, activity_id, context=context)
 
 
 class nh_clinical_patient_placement(orm.Model):
