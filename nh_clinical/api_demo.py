@@ -127,7 +127,7 @@ class nh_clinical_api_demo(orm.AbstractModel):
         pos = self.pool['ir.model.data'].get_object(cr, uid, 'nh_eobs_default', 'nhc_def_conf_pos_hospital')
         pos = pos.id
         
-        api = self.pool['nh.clinical.api']
+        activity_pool = self.pool['nh.activity']
         user_pool = self.pool['res.users']
         location_pool = self.pool['nh.clinical.location']
         # CHECK PARAMETERS
@@ -145,35 +145,34 @@ class nh_clinical_api_demo(orm.AbstractModel):
         nurse_uid = nurse_exists[0]
         # GENERATE ENVIRONMENT
         admit_activity_ids = [self.create_activity(cr, adt_uid, 'nh.clinical.adt.patient.admit', data_values={'location': ward}) for i in range(patients)]
-        [api.complete(cr, uid, id) for id in admit_activity_ids]
+        [activity_pool.complete(cr, uid, id) for id in admit_activity_ids]
         temp_bed_ids = location_pool.search(cr, uid, [('parent_id.code', '=', ward), ('usage', '=', 'bed'), ('is_available', '=', True)], context=context)
-        temp_placement_activity_ids = api.activity_map(cr, wm_uid,
-                                                       data_models=['nh.clinical.patient.placement'],
-                                                       pos_ids=[pos],
-                                                       states=['new', 'scheduled']).keys()
+        temp_placement_activity_ids = activity_pool.search(cr, wm_uid, [
+            ['data_model', '=', 'nh.clinical.patient.placement'],
+            ['state', 'in', ['new', 'scheduled']]], context=context)
+
         for i in range(placements):
             if not temp_bed_ids or not temp_placement_activity_ids:
                 break
             placement_activity_id = fake.random_element(temp_placement_activity_ids)
             bed_location_id = fake.random_element(temp_bed_ids)
-            api.submit_complete(cr, wm_uid, placement_activity_id, {'location_id': bed_location_id})
+            activity_pool.submit(cr, wm_uid, placement_activity_id, {'location_id': bed_location_id}, context=context)
+            activity_pool.complete(cr, wm_uid, placement_activity_id, context=context)
             temp_placement_activity_ids.remove(placement_activity_id)
             temp_bed_ids.remove(bed_location_id)
-
-        ews_activities = api.activity_map(cr, uid,
-                                          data_models=['nh.clinical.patient.observation.ews'],
-                                          pos_ids=[pos],
-                                          states=['new', 'scheduled']).values()
+        ews_ids = activity_pool.search(cr, uid, [
+            ['data_model', '=', 'nh.clinical.patient.observation.ews'],
+            ['state', 'in', ['new', 'scheduled']]], context=context)
 
         #EWS
         for i in range(ews):
-            for ews in ews_activities:
-                api.assign(cr, uid, ews['id'], nurse_uid)
-                api.submit_complete(cr, nurse_uid, ews['id'], self.demo_data(cr, uid, 'nh.clinical.patient.observation.ews'))
-            ews_activities = api.activity_map(cr, uid,
-                                          data_models=['nh.clinical.patient.observation.ews'],
-                                          pos_ids=[pos],
-                                          states=['new', 'scheduled']).values()
+            for ews in ews_ids:
+                activity_pool.assign(cr, uid, ews, nurse_uid, context=context)
+                activity_pool.submit(cr, nurse_uid, ews, self.demo_data(cr, uid, 'nh.clinical.patient.observation.ews'), context=context)
+                activity_pool.complete(cr, nurse_uid, ews, context=context)
+            ews_ids = activity_pool.search(cr, uid, [
+                ['data_model', '=', 'nh.clinical.patient.observation.ews'],
+                ['state', 'in', ['new', 'scheduled']]], context=context)
 
         return True
 
@@ -264,11 +263,12 @@ class nh_clinical_api_demo(orm.AbstractModel):
         """
         Method    
         """
-        api = self.pool['nh.clinical.api']
+        location_pool = self.pool['nh.clinical.location']
         fake = self.next_seed_fake()
         # find available in passed location_ids
         if location_ids:
-            location_ids = api.location_map(cr, uid, location_ids=location_ids, usages=['bed'], available_range=[1,1]).keys()
+            location_ids = location_pool.search(cr, uid, [
+                ['id', 'in', location_ids], ['usage', '=', 'bed'], ['is_available', '=', True]])
             if location_ids:
                 return fake.random_element(location_ids)
         # ensure pos_id is set
@@ -279,26 +279,27 @@ class nh_clinical_api_demo(orm.AbstractModel):
             else:
                 raise orm.except_orm('POS not found!', 'pos_id was not passed and existing POS is not found.') 
         # try to find existing locations
-        location_ids = api.location_map(cr, uid, location_ids=location_ids, pos_ids=[pos_id], usages=['bed'], available_range=[1,1]).keys()
+        location_ids = location_pool.search(cr, uid, [
+            ['id', 'in', location_ids], ['usage', '=', 'bed'], ['is_available', '=', True]])
         if location_ids:
             return fake.random_element(location_ids)
         # create new location
-        ward_location_ids = api.location_map(cr, uid, pos_ids=[pos_id], usages=['ward']).keys()
+        ward_location_ids = location_pool.search(cr, uid, [['usage', '=', 'ward'], ['pos_id', '=', pos_id]])
         if not ward_location_ids:
-            pos_location_ids = api.location_map(cr, uid, pos_ids=[pos_id], usages=['pos']).keys()[0]
+            pos_location_ids = location_pool.search(cr, uid, [['usage', '=', 'pos'], ['pos_id', '=', pos_id]])[0]
             ward_location_id = self.create(cr, uid, 'nh.clinical.location', 'location_ward', {'parent_id': pos_location_ids[0]})
         else:
             ward_location_id = fake.random_element(ward_location_ids)
         location_id = self.create(cr, uid, 'nh.clinical.location', 'location_bed', {'parent_id': ward_location_id})
         return location_id
     
-    def get_nurse(self, cr, uid):    
-        api = self.pool['nh.clinical.api']
-        nurse_uid = api.user_map(cr, uid, group_xmlids=['group_nhc_nurse']).keys()
+    def get_nurse(self, cr, uid):
+        user_pool = self.pool['res.users']
+        nurse_uid = user_pool.search(cr, uid, [['groups_id.name', 'in', ['NH Clinical Nurse Group']]])
         if uid in nurse_uid:
             nurse_uid = uid
         else:
-            nurse_uid = nurse_uid and nurse_uid[0] or self.create(cr, uid, 'res.users', 'user_nurse')    
+            nurse_uid = nurse_uid[0] if nurse_uid else self.create(cr, uid, 'res.users', 'user_nurse')
         return nurse_uid
     
     def user_add_location(self, cr, uid, user_id, location_id):
@@ -313,19 +314,18 @@ class nh_clinical_api_demo(orm.AbstractModel):
         Returns ADT user id for pos_id
         If uid appears to be ADT user id, returns uid
         """
-        api = self.pool['nh.clinical.api']
-        adt_uid = api.user_map(cr, uid, group_xmlids=['group_nhc_adt'], pos_ids=[pos_id]).keys()
+        user_pool = self.pool['res.users']
+        adt_uid = user_pool.search(cr, uid, [['groups_id.name', 'in', ['NH Clinical ADT Group']]])
         if uid in adt_uid:
             adt_uid = uid
         else:
-            adt_uid = adt_uid and adt_uid[0] or self.create(cr, uid, 'res.users', 'user_adt', {'pos_id': pos_id})    
+            adt_uid = adt_uid[0] if adt_uid else self.create(cr, uid, 'res.users', 'user_adt', {'pos_id': pos_id})
         return adt_uid
     
     def register_admit(self, cr, uid, pos_id, register_values={}, admit_values={}, return_id=False):
         """
         Registers and admits patient to POS. Missing data will be generated
         """
-        api = self.pool['nh.clinical.api']
         activity_pool = self.pool['nh.activity']
         # ensure pos_id is set
         if not pos_id:
@@ -337,36 +337,36 @@ class nh_clinical_api_demo(orm.AbstractModel):
         adt_uid = self.get_adt_user(cr, uid, pos_id)
         reg_activity_id = self.create_activity(cr, adt_uid, 'nh.clinical.adt.patient.register', None, {}, register_values)
         activity_pool.complete(cr, adt_uid, reg_activity_id)
-        reg_data = api.get_activity_data(cr, uid, reg_activity_id)
+        reg_data = activity_pool.browse(cr, uid, reg_activity_id)
         
         admit_data = {
-            'other_identifier': reg_data['other_identifier'],
+            'other_identifier': reg_data.data_ref.other_identifier,
         }
         admit_data.update(admit_values)
         admit_activity_id = self.create_activity(cr, adt_uid, 'nh.clinical.adt.patient.admit', None, {}, admit_data)     
-        #api.complete(cr, uid, admit_activity_id)   
         if return_id:
             return admit_activity_id
         else:
-            return api.browse(cr, uid, 'nh.activity', admit_activity_id)
+            return activity_pool.browse(cr, uid, admit_activity_id)
              
     def register_admission(self, cr, uid, ward_location_id, register_values={}, admit_values={}, return_id=False):
         """
         Registers and admits patient to POS. Missing data will be generated
         """
-        api = self.pool['nh.clinical.api']
+        location_pool = self.pool['nh.clinical.location']
+        activity_pool = self.pool['nh.activity']
         # ensure pos_id is set
-        ward_location = api.browse(cr, uid, 'nh.clinical.location', ward_location_id)     
+        ward_location = location_pool.browse(cr, uid, ward_location_id)
         pos_id = ward_location.pos_id.id
         admit_activity = self.register_admit(cr, uid, pos_id, register_values, admit_values={'location': ward_location.code})
-        api.complete(cr, uid, admit_activity.id)
-        admission_activity_id = api.activity_map(cr, uid, 
-                                                  data_models=['nh.clinical.patient.admission'],
-                                                  creator_ids=[admit_activity.id]).keys()[0]       
+        activity_pool.complete(cr, uid, admit_activity.id)
+        admission_activity_id = activity_pool.search(cr, uid, [
+            ['data_mode', '=', 'nh.clinical.patient.admission'],
+            ['creator_id', '=', admit_activity.id]])[0]
         if return_id:
             return admission_activity_id
         else:    
-            return api.browse(cr, uid, 'nh.activity', admission_activity_id)
+            return activity_pool.browse(cr, uid, admission_activity_id)
 
     def _find_ward(self, location_browse):
         if location_browse.usage == 'ward':
@@ -381,236 +381,73 @@ class nh_clinical_api_demo(orm.AbstractModel):
         Registers, admits and places patient into bed_location_id if vacant 
         otherwise found among existing ones or created.
         Missing data will be generated
-        """        
-        api = self.pool['nh.clinical.api']
-        bed_location = api.browse(cr, uid, 'nh.clinical.location', bed_location_id)     
+        """
+        activity_pool = self.pool['nh.activity']
+        location_pool = self.pool['nh.clinical.location']
+        bed_location = location_pool.browse(cr, uid, bed_location_id)
         pos_id = bed_location.pos_id.id
         ward_code = self._find_ward(bed_location)
         if ward_code:
             admit_values['location'] = ward_code
         admit_activity = self.register_admit(cr, uid, pos_id, register_values, admit_values)
-        api.complete(cr, uid, admit_activity.id) 
-        admission_activity_id = api.activity_map(cr, uid, 
-                                                  data_models=['nh.clinical.patient.admission'],
-                                                  creator_ids=[admit_activity.id]).keys()[0]
-                        
-        placement_activity_id = api.activity_map(cr, uid, 
-                                                  data_models=['nh.clinical.patient.placement'],
-                                                  creator_ids=[admission_activity_id]).keys()[0]
+        activity_pool.complete(cr, uid, admit_activity.id)
+        admission_activity_id = activity_pool.search(cr, uid, [
+            ['data_model', '=', 'nh.clinical.patient.admission'],
+            ['creator_id', '=', admit_activity.id]])[0]
+        placement_activity_id = activity_pool.search(cr, uid, [
+            ['data_model', '=', 'nh.clinical.patient.placement'],
+            ['creator_id', '=', admission_activity_id]])[0]
 
-        api.submit_complete(cr, uid, placement_activity_id, {'location_id': bed_location_id})  
+        activity_pool.submit(cr, uid, placement_activity_id, {'location_id': bed_location_id})
+        activity_pool.complete(cr, uid, placement_activity_id)
         if return_id:
             return placement_activity_id
         else:           
-            return api.browse(cr, uid, 'nh.activity', placement_activity_id)     
-    
+            return activity_pool.browse(cr, uid, placement_activity_id)
+
     def submit_ews_observations(self, cr, uid, bed_codes=[], ews_count=3):
-        api = self.pool['nh.clinical.api']
-        imd_ids = api.search(cr, uid, 'ir.model.data', [['model', '=', 'nh.clinical.pos'], ['name', 'ilike', '%hospital%']])
-        pos = api.read(cr, uid, 'ir.model.data', imd_ids, ['res_id'])
+        location_pool = self.pool['nh.clinical.location']
+        activity_pool = self.pool['nh.activity']
+        user_pool = self.pool['res.users']
+        imd_pool = self.pool['ir.model.data']
+        imd_ids = imd_pool.search(cr, uid, [['model', '=', 'nh.clinical.pos'], ['name', 'ilike', '%hospital%']])
+        pos = imd_pool.read(cr, uid, imd_ids, ['res_id'])
         if not pos:
             print "POS hospital is not found. Exiting..."
             exit(1) 
         pos_id = pos[0]['res_id']    
         print bed_codes
         if not bed_codes:
-            beds = api.location_map(cr, uid, pos_ids=[pos_id], usages=['bed'])
+            bed_ids = location_pool.search(cr, uid, [['pos_id', '=', pos_id], ['usage', '=', 'bed']])
         else:
-            beds = api.location_map(cr, uid, codes=bed_codes)
+            bed_ids = location_pool.search(cr, uid, [['code', 'in', bed_codes]])
+        beds = location_pool.browse(cr, uid, bed_ids)
         #setting up admin as a nurse
-
-        imd_ids = api.search(cr, uid, 'ir.model.data', [['model', '=', 'res.groups'], ['name', '=', 'group_nhc_nurse']])
-        nurse_group_id = api.read(cr, uid, 'ir.model.data', imd_ids[0], ['res_id'])['res_id']        
-        api.write(cr, uid, 'res.users', SUPERUSER_ID, {'groups_id': [(4, nurse_group_id)]})
+        imd_ids = imd_pool.search(cr, uid, [['model', '=', 'res.groups'], ['name', '=', 'group_nhc_nurse']])
+        nurse_group_id = imd_pool.read(cr, uid, imd_ids[0], ['res_id'])['res_id']
+        user_pool.write(cr, uid, SUPERUSER_ID, {'groups_id': [(4, nurse_group_id)]})
         nurse_uid = SUPERUSER_ID        
-        for bed_id, bed_data in beds.items():
-            if not bed_data['patient_ids']:
+        for bed in beds:
+            if not bed.patient_ids:
                 # Patient is not placed into bed. Skipping...
                 continue
             else:
-                patient_id = bed_data['patient_ids'][0]
-                ews_activities = api.activity_map(cr, uid,
-                                                  data_models=['nh.clinical.patient.observation.ews'],
-                                                  patient_ids=[patient_id],
-                                                  states=['new', 'scheduled']).values()  
-             
+                patient_id = bed.patient_ids[0]
+                ews_ids = activity_pool.search(cr, uid, [
+                    ['data_model', '=', 'nh.clinical.patient.observation.ews'],
+                    ['patient_id', '=', patient_id], ['state', 'in', ['new', 'scheduled']]])
+
                 for i in range(ews_count):
-                    for ews in ews_activities:
-                        api.assign(cr, uid, ews['id'], nurse_uid)
-                        api.submit_complete(cr, nurse_uid, ews['id'], self.demo_data(cr, uid, 'nh.clinical.patient.observation.ews'))
-                    ews_activities = api.activity_map(cr, uid, 
-                                                  data_models=['nh.clinical.patient.observation.ews'],
-                                                  patient_ids=[patient_id],
-                                                  states=['new', 'scheduled']).values() 
-        api.write(cr, uid, 'res.users', SUPERUSER_ID, {'groups_id': [(3, nurse_group_id)]})               
+                    for ews in ews_ids:
+                        activity_pool.assign(cr, uid, ews, nurse_uid)
+                        activity_pool.submit(cr, nurse_uid, ews, self.demo_data(cr, uid, 'nh.clinical.patient.observation.ews'))
+                        activity_pool.complete(cr, nurse_uid, ews)
+                    ews_ids = activity_pool.search(cr, uid, [
+                        ['data_model', '=', 'nh.clinical.patient.observation.ews'],
+                        ['patient_id', '=', patient_id], ['state', 'in', ['new', 'scheduled']]])
+        user_pool.write(cr, uid, SUPERUSER_ID, {'groups_id': [(3, nurse_group_id)]})
         return True
-        
-    def build_patient(self, cr, uid, bed_location_id=None, nurse_user_id=None, wm_user_id=None,
-                      ews_count=3, gcs_count=2):
-        """
-        Patients-centric method. Places patient and builds patient-related environment. 
-        """    
-        api = self.pool['nh.clinical.api']
-        placement_activity_id = self.register_admit_place(cr, uid)
-        placement_activity = api.browse(cr, uid, 'nh.activity', placement_activity_id)
-        patient_id = placement_activity.patient_id.id
-        pos_id = placement_activity.pos_id.id
-        if not nurse_user_id:
-            nurse_user_id = self.get_nurse(cr, uid)
-        self.user_add_location(cr, uid, nurse_user_id, placement_activity.location_id.id)
-        if wm_user_id:
-            self.user_add_location(cr, uid, wm_user_id, placement_activity.location_id.id)
-        while ews_count + gcs_count > 0:
-            if ews_count:
-                ews_count -= 1
-                ews = api.activity_map(cr, uid, 
-                                      data_models=['nh.clinical.patient.observation.ews'],
-                                      pos_ids=[pos_id],
-                                      patient_ids=[patient_id],
-                                      states=['new', 'scheduled']).values()[0]
-                api.submit_complete(cr, nurse_user_id, ews['id'], self.demo_data(cr, uid, 'nh.clinical.patient.observation.ews'))
-      
-            if gcs_count:
-                gcs_count -= 1
-        
-        return True
-        
-    
-    def build_bed(self, cr, uid, bed_location_id=None, pos_id=None, parent_location_id=None, nurse_user_id=None,
-                   ews=3, gcs=3, blood_sugar=2):
-        """
-        Bed-centric method. Builds environment related to bed location. 
-        """
-    
-    
-    
-    def build_ward(self, cr, uid, ward_location_id=None, pos_id=None, parent_location_id=None, nurse_user_id=None, wm_user_id=None,
-                   ews=3, gcs=3, blood_sugar=2):
-        """
-        Ward-centric method. Builds environment related to bed location.
-        """
-    
-    
-    
-    def build_uat_pos(self, cr, uid, bed_count=5, ward_count=2,
-                      patient_admit_count=10, patient_placement_count=5,
-                      ews_count=3, weight_count=3, blood_sugar_count=3,
-                      height_count=3, o2target_count=3, mrsa_count=3,
-                      diabetes_count=3):
-        # adt_user_count=1, hca_count=2, nurse_count=2, doctor_count=2, ward_manager_count=2):
-        """
-        Creates UAT POS with set names, wards, beds
-        Returns pos_id
-        """
-        # set user names. password == name
-        hca_names = ['harold', 'helen']
-        nurse_names = ['neil', 'norah']
-        ward_manager_names = ['walter', 'wanda']
-        doctor_names = ['dean', 'dana']
-        
-        assert patient_admit_count >= patient_placement_count, "%s >= %s" % (patient_admit_count, patient_placement_count)
-        assert bed_count >= patient_placement_count, "%s >= %s" % (bed_count, patient_placement_count)
-        
-        fake = self.next_seed_fake()
-        api = self.pool['nh.clinical.api']
-        pos_id = self.create(cr, uid, 'nh.clinical.pos')  
-        
-        adt_uid = self.create(cr, uid, 'res.users', 'user_adt', {'pos_id': pos_id})
 
-        ward_ids = [self.create(cr, uid, 'nh.clinical.location', 'location_ward') for i in range(ward_count)]
-        bed_ids = [self.create(cr, uid, 'nh.clinical.location', 'location_bed', {'parent_id': fake.random_element(ward_ids)}) 
-                   for i in range(bed_count)]
-        
-        hca_ids = [self.create(cr, uid, 'res.users', 'user_hca', 
-                     {'name': name, 'location_ids': [6, 0, bed_ids]}) 
-                   for name in hca_names]
-        nurse_ids = [self.create(cr, uid, 'res.users', 'user_nurse', 
-                        {'name': name, 'location_ids': [6, 0, ward_ids]}) 
-                     for name in nurse_names]
-        ward_manager_ids = [self.create(cr, uid, 'res.users', 'user_ward_manager', 
-                            {'name': name, 'location_ids': [6, 0, bed_ids+ward_ids]}) 
-                            for name in ward_manager_names]
-        doctor_ids = [self.create(cr, uid, 'res.users', 'user_doctor', 
-                        {'name': name}) 
-                      for name in doctor_names]
-        
-        admit_activity_ids = [self.create_activity(cr, adt_uid, 'nh.clinical.adt.patient.admit') for i in range(patient_admit_count)]
-        [api.complete(cr, uid, id) for id in admit_activity_ids]
-        temp_bed_ids = [i for i in bed_ids]
-        temp_placement_activity_ids = api.activity_map(cr, uid, 
-                                                  data_models=['nh.clinical.patient.placement'],
-                                                  pos_ids=[pos_id],
-                                                  states=['new', 'scheduled']).keys()
-                                                  
-
-        
-        for i in range(patient_placement_count):
-            placement_activity_id = fake.random_element(temp_placement_activity_ids)
-            bed_location_id = fake.random_element(temp_bed_ids)
-            api.submit_complete(cr, uid, placement_activity_id, {'location_id': bed_location_id})
-            temp_placement_activity_ids.remove(placement_activity_id)
-            temp_bed_ids.remove(bed_location_id)
-            
-        ews_activities = api.activity_map(cr, uid, 
-                                          data_models=['nh.clinical.patient.observation.ews'],
-                                          pos_ids=[pos_id],
-                                          states=['new', 'scheduled']).values()
-
-        nurse_uid = fake.random_element(nurse_ids)
-        #EWS
-        for i in range(ews_count):
-            for ews in ews_activities:
-                api.assign(cr, uid, ews['id'], nurse_uid)
-                api.submit_complete(cr, nurse_uid, ews['id'], self.demo_data(cr, uid, 'nh.clinical.patient.observation.ews'))
-            ews_activities = api.activity_map(cr, uid, 
-                                          data_models=['nh.clinical.patient.observation.ews'],
-                                          pos_ids=[pos_id],
-                                          states=['new', 'scheduled']).values()              
-        
-        spell_activities = api.activity_map(cr, uid, 
-                                          data_models=['nh.clinical.spell'],
-                                          pos_ids=[pos_id],
-                                          states=['started']).values()
-        # WEIGHT
-        for i in range(weight_count):
-            for spell in spell_activities:
-                vals = self.demo_data(cr, uid, 'nh.clinical.patient.observation.weight', values={'patient_id': spell['patient_id']})
-                api.create_complete(cr, uid,'nh.clinical.patient.observation.weight', {'parent_id': spell['id']}, vals)
-
-        # BLOOD SUGAR
-        for i in range(blood_sugar_count):
-            for spell in spell_activities:
-                vals = self.demo_data(cr, uid, 'nh.clinical.patient.observation.blood_sugar', values={'patient_id': spell['patient_id']})
-                api.create_complete(cr, uid, 'nh.clinical.patient.observation.blood_sugar', {'parent_id': spell['id']}, vals)            
-
-        # HEIGHT
-        for i in range(height_count):
-            for spell in spell_activities:
-                vals = self.demo_data(cr, uid, 'nh.clinical.patient.observation.height', values={'patient_id': spell['patient_id']})
-                api.create_complete(cr, uid,'nh.clinical.patient.observation.height', {'parent_id': spell['id']}, vals)
-
-        # DIABETES
-        for i in range(diabetes_count):
-            for spell in spell_activities:
-                vals = self.demo_data(cr, uid, 'nh.clinical.patient.diabetes', values={'patient_id': spell['patient_id']})
-                api.create_complete(cr, uid,'nh.clinical.patient.diabetes', {'parent_id': spell['id']}, vals)
-
-#         # O2TARGET
-#         for i in range(o2target_count):
-#             for spell in spell_activities:
-#                 vals = self.demo_data(cr, uid, 'nh.clinical.patient.o2target', values={'patient_id': spell['patient_id']})
-#                 api.create_complete(cr, uid,'nh.clinical.patient.o2target', {'parent_id': spell['id']}, vals)        
-        
-        return True
-#     def create_placement(self, cr, uid, values={}):
-#         """
-#         Must use adt user
-#         """
-#         fake = self.next_seed_fake()
-#         api =self.pool['nh.clinical.api']
-#         admit_activity_id = self.create_activity(cr, uid, 'nh.clinical.adt.patient.admit')    
-    
-    
 
 class nh_clinical_api_demo_data(orm.AbstractModel):
     _name = 'nh.clinical.api.demo.data'
@@ -905,37 +742,41 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
     
     def adt_admit(self, cr, uid, values={}):
         fake = self.next_seed_fake()
-        api =self.pool['nh.clinical.api']
         api_demo = self.pool['nh.clinical.api.demo']
         activity_pool = self.pool['nh.activity']
+        location_pool = self.pool['nh.clinical.location']
+        user_pool = self.pool['res.users']
+        user = user_pool.browse(cr, uid, uid)
         v = {}
         # if 'other_identifier' not passed register new patient and use it's data
         pos_id = 'pos_id' in values and values.pop('pos_id') or False
         if 'other_identifier' not in values:
             reg_activity_id = api_demo.create_activity(cr, uid, 'nh.clinical.adt.patient.register')
             activity_pool.complete(cr, uid, reg_activity_id)
-            reg_data = api.get_activity_data(cr, uid, reg_activity_id)
-            v.update({'other_identifier': reg_data['other_identifier']})
-            pos_id = reg_data['pos_id']
+            reg_data = activity_pool.browse(cr, uid, reg_activity_id)
+            v.update({'other_identifier': reg_data.data_ref.other_identifier})
+            pos_id = reg_data.data_ref.pos_id.id
         if 'location' not in values:
-            ward_ids = api.location_map(cr, uid, pos_ids=[pos_id], usages=['wards']).keys()
+            ward_ids = location_pool.search(cr, uid, [['pos_id', '=', pos_id], ['usage', '=', 'ward']])
             if not ward_ids:
-                pos = self.pool['nh.clinical.pos'].browse(cr, uid, api.user_map(cr, uid, user_ids=[uid])[uid]['pos_id'])
+                pos = self.pool['nh.clinical.pos'].browse(cr, uid, user.pos_id.id)
                 ward_location_id = api_demo.create(cr, uid, 'nh.clinical.location', 'location_ward', {'parent_id': pos.location_id.id})
                 ward_ids = [ward_location_id]
-                ward_id = fake.random_element(ward_ids)
-                ward = api.location_map(cr, uid, location_ids=[ward_id]).values()[0]
-            v.update({'location': ward['code']})
+            ward_id = fake.random_element(ward_ids)
+            ward = location_pool.browse(cr, uid, ward_id)
+            v.update({'location': ward.code})
         v.update(values)
         return v      
     
     def adt_discharge(self, cr, uid, values={}):
         fake = self.next_seed_fake()
-        api =self.pool['nh.clinical.api']
-        patient_ids = [a['patient_id'] for a in api.activity_map(cr, uid, data_models=['nh.clinical.spell'], states=['started']).values()]
-        patient = fake.random_element(api.patient_map(cr, uid, patient_ids=patient_ids).values()) 
+        activity_pool = self.pool['nh.activity']
+        patient_pool = self.pool['nh.clinical.patient']
+        spell_ids = activity_pool.search(cr, uid, [['data_model', '=', 'nh.clinical.spell'], ['state', '=', 'started']])
+        patient_ids = [s.patient_id.id for s in activity_pool.browse(cr, uid, spell_ids)]
+        patient = fake.random_element(patient_pool.browse(cr, uid, patient_ids))
         v = {
-            'other_identifier': patient.get('other_identifier', "No patients to discharge!"),
+            'other_identifier': patient.other_identifier,
         }
         v.update(values)
         return v
@@ -977,24 +818,8 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         return v          
         
     def observation_weight(self, cr, uid, values={}):
-        api = self.pool['nh.clinical.api']
-        api_demo = self.pool['nh.clinical.api.demo']
         fake = self.next_seed_fake()
         v = {}
-#         pos_id = 'pos_id' in values and values.pop('pos_id') or False
-#         
-#         assert 'patient_id' in values or pos_id, "patient_id and pos_id are not in values, can't provide patient_id!"
-#         assert 'parent_id' in values or pos_id, "parent_id and pos_id are not in values, can't provide parent_id!"
-#         if 'patient_id' not in values or 'parent_id' not in values:
-#             spells = api.activity_map(cr, uid, pos_ids=[pos_id], data_models=['nh.clinical.spell'], states=['started'])
-#             weights = api.activity_map(cr, uid, pos_ids=[pos_id], data_models=['nh.clinical.patient.observation.weight'], states=['new', 'started'])
-#             weight_patient_ids = [w['pateint_id'] for w in weights]
-#             spells = [s for s in spells if s['patient_id'] not in weight_patient_ids]
-#             if not spells:
-#                 api_demo.place_patient(cr, uid, pos_id)
-#                 spells = api.activity_map(cr, uid, pos_ids=[pos_id], data_models=['nh.clinical.spell'], states=['started'])
-#             update_vals = [{'patient_id': s['patient_id'], 'parent_id': s['id']}  for s in spells]
-#             v.update(fake.random_element(update_vals))
         assert 'patient_id' in values, "'patient_id' is not in values!"
         v.update({'weight': float(fake.random_int(min=40, max=200))})
         v.update(values)
@@ -1024,4 +849,3 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         }
         v.update(values)
         return v
-        
