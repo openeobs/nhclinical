@@ -361,7 +361,7 @@ class nh_clinical_api_demo(orm.AbstractModel):
         admit_activity = self.register_admit(cr, uid, pos_id, register_values, admit_values={'location': ward_location.code})
         activity_pool.complete(cr, uid, admit_activity.id)
         admission_activity_id = activity_pool.search(cr, uid, [
-            ['data_mode', '=', 'nh.clinical.patient.admission'],
+            ['data_model', '=', 'nh.clinical.patient.admission'],
             ['creator_id', '=', admit_activity.id]])[0]
         if return_id:
             return admission_activity_id
