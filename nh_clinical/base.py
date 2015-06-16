@@ -106,6 +106,32 @@ class res_users(orm.Model):
             self.pool['nh.clinical.doctor'].write(cr, uid, values['doctor_id'], {'user_id': ids[0]}, context=context)
         return res
 
+    def name_get(self, cr, uid, ids, context=None):
+        if context is None:
+            context = {}
+        if isinstance(ids, (int, long)):
+            ids = [ids]
+        res = []
+        for record in self.browse(cr, uid, ids, context=context):
+            doctor_groups = ['NH Clinical Doctor Group', 'NH Clinical Registrar Group',
+                             'NH Clinical Consultant Group', 'NH Clinical Junior Doctor Group']
+            if set(doctor_groups).intersection([g.name for g in record.groups_id]):
+                name = record.title.name + ' ' + record.name if record.title else record.name
+            else:
+                name = record.name
+            if record.parent_id and not record.is_company:
+                name = "%s, %s" % (record.parent_name, name)
+            if context.get('show_address_only'):
+                name = self._display_address(cr, uid, record, without_company=True, context=context)
+            if context.get('show_address'):
+                name = name + "\n" + self._display_address(cr, uid, record, without_company=True, context=context)
+            name = name.replace('\n\n','\n')
+            name = name.replace('\n\n','\n')
+            if context.get('show_email') and record.email:
+                name = "%s <%s>" % (name, record.email)
+            res.append((record.id, name))
+        return res
+
 
 class res_groups(orm.Model):
     _name = 'res.groups'
