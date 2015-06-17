@@ -160,7 +160,7 @@ class nh_clinical_admin_userboard(orm.Model):
                'ward_manager': ['NH Clinical Ward Manager Group', 'Contact Creation'],
                'senior_manager': ['NH Clinical Senior Manager Group', 'Contact Creation'],
                'admin': ['NH Clinical Admin Group', 'Contact Creation'],
-               'kiosk': ['NH Clinical Nurse Group'],
+               'kiosk': ['NH Clinical Kiosk Group'],
                'doctor': ['NH Clinical Doctor Group']}
 
     _columns = {
