@@ -95,6 +95,8 @@ class res_users(orm.Model):
         res = super(res_users, self).create(cr, user, vals, context=dict(context or {}, mail_create_nosubscribe=True))
         if 'doctor_id' in vals:
             self.pool['nh.clinical.doctor'].write(cr, user, vals['doctor_id'], {'user_id': res}, context=context)
+        if 'groups_id' in vals:
+            self.update_doctor_status(cr, user, res, context=context)
         return res
 
     def write(self, cr, uid, ids, values, context=None):
@@ -102,8 +104,8 @@ class res_users(orm.Model):
         if values.get('location_ids') or values.get('groups_id'):
             activity_pool = self.pool['nh.activity']
             activity_pool.update_users(cr, uid, ids)
-        if 'doctor_id' in values:
-            self.pool['nh.clinical.doctor'].write(cr, uid, values['doctor_id'], {'user_id': ids[0]}, context=context)
+        if 'groups_id' in values:
+            self.update_doctor_status(cr, uid, ids, context=context)
         return res
 
     def name_get(self, cr, uid, ids, context=None):
@@ -132,6 +134,16 @@ class res_users(orm.Model):
             res.append((record.id, name))
         return res
 
+    def update_doctor_status(self, cr, uid, ids, context=None):
+        doctor_groups = ['NH Clinical Doctor Group', 'NH Clinical Registrar Group',
+                         'NH Clinical Consultant Group', 'NH Clinical Junior Doctor Group']
+        partner_pool = self.pool['res.partner']
+        for record in self.browse(cr, uid, ids, context=context):
+            if set(doctor_groups).intersection([g.name for g in record.groups_id]):
+                partner_pool.write(cr, uid, record.partner_id.id, {'doctor': True}, context=context)
+            elif record.partner_id.doctor:
+                partner_pool.write(cr, uid, record.partner_id.id, {'doctor': False}, context=context)
+        return True
 
 class res_groups(orm.Model):
     _name = 'res.groups'
@@ -719,7 +731,7 @@ class nh_clinical_doctor(orm.Model):
     def write(self, cr, uid, ids, vals, context=None):
         res = super(nh_clinical_doctor, self).write(cr, uid, ids, vals, context=context)
         if 'user_id' in vals:
-            self.pool['res.users'].write(cr, uid, vals['user_id'], {'doctor_id': ids[0]}, context=context)
+            self.pool['res.users'].write(cr, uid, vals['user_id'], {'doctor_id': ids[0] if isinstance(ids, list) else ids}, context=context)
         return res
 
     def evaluate_doctors_dict(self, cr, uid, data, context=None):
