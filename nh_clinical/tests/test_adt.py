@@ -123,6 +123,18 @@ class testADT(common.SingleTransactionCase):
         with self.assertRaises(except_orm):
             self.activity_pool.submit(cr, self.adt_id, register_activity_id, register_data)
 
+        register_data = {
+            'family_name': 'FamilyX',
+            'given_name': 'GivenX',
+            'other_identifier': 'TEST00X',
+            'dob': '1984-10-01 00:00:00',
+            'gender': 'F',
+            'sex': 'F'
+        }
+        register_activity_id = self.register_pool.create_activity(cr, self.adt_id, {}, {})
+        self.activity_pool.submit(cr, self.adt_id, register_activity_id, register_data)
+        self.activity_pool.complete(cr, self.adt_id, register_activity_id)
+
     def test_02_adt_patient_update(self):
         cr, uid = self.cr, self.uid
 
@@ -362,23 +374,43 @@ class testADT(common.SingleTransactionCase):
         transfer_id = self.activity_pool.search(cr, uid, [
             ['data_model', '=', 'nh.clinical.patient.transfer'],
             ['state', '=', 'completed'], ['creator_id', '=', activity_id]])
-        self.assertTrue(transfer_id, msg="Discharge not found!")
+        self.assertTrue(transfer_id, msg="Transfer not found!")
 
-        # Scenario 2: Transfer a Patient with no patient information
+        # Scenario 2: Transfer a not admitted Patient providing origin location
+        transfer_data = {
+            'other_identifier': 'TEST00X',
+            'original_location': 'X',
+            'location': 'T'
+        }
+        activity_id = self.transfer_pool.create_activity(cr, self.adt_id, {}, transfer_data)
+        activity = self.activity_pool.browse(cr, uid, activity_id)
+        patient_id = self.patient_pool.search(cr, uid, [['other_identifier', '=', 'TEST00X']])[0]
+        self.assertEqual(patient_id,
+                         activity.data_ref.patient_id.id, msg="Wrong patient id")
+        self.assertEqual(activity.data_ref.location_id.id, self.wt_id, msg="Wrong location id")
+        self.assertEqual(activity.parent_id.data_model, 'nh.clinical.spell')
+        self.assertEqual(activity.parent_id.patient_id.id, patient_id)
+        self.activity_pool.complete(cr, uid, activity_id)
+        transfer_id = self.activity_pool.search(cr, uid, [
+            ['data_model', '=', 'nh.clinical.patient.transfer'],
+            ['state', '=', 'completed'], ['creator_id', '=', activity_id]])
+        self.assertTrue(transfer_id, msg="Transfer not found!")
+
+        # Scenario 3: Transfer a Patient with no patient information
         transfer_data = {
             'location': 'T'
         }
         with self.assertRaises(except_orm):
             self.transfer_pool.create_activity(cr, self.adt_id, {}, transfer_data)
             
-        # Scenario 3: Transfer a Patient with no location information
+        # Scenario 4: Transfer a Patient with no location information
         transfer_data = {
             'other_identifier': 'TEST001'
         }
         with self.assertRaises(except_orm):
             self.transfer_pool.create_activity(cr, self.adt_id, {}, transfer_data)
             
-        # Scenario 4: Transfer a Patient with no POS related user
+        # Scenario 5: Transfer a Patient with no POS related user
         transfer_data = {
             'other_identifier': 'TEST001',
             'location': 'T'

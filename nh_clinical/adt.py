@@ -352,6 +352,8 @@ class nh_clinical_adt_patient_transfer(orm.Model):
     _description = 'ADT Patient Transfer'      
     _columns = {
         'other_identifier': fields.char('Hospital Number', size=50, required=True),
+        'original_location': fields.char('Location of Origin', size=256),
+        'origin_location_id': fields.many2one('nh.clinical.location', 'Origin Location'),
         'location': fields.char('Location', size=256),
         'location_id': fields.many2one('nh.clinical.location', 'Transfer Location'),
         'patient_id': fields.many2one('nh.clinical.patient', 'Patient', required=True)
@@ -367,18 +369,28 @@ class nh_clinical_adt_patient_transfer(orm.Model):
             raise osv.except_osv('Transfer Error!', 'Patient must be set for transfer!')
         location_pool = self.pool['nh.clinical.location']
         location_id = location_pool.get_by_code(cr, uid, vals['location'], auto_create=True, context=context)
+        olocation_id = location_pool.get_by_code(cr, uid, vals['original_location'], auto_create=True, context=context) \
+            if vals.get('original_location') else False
         patient_pool = self.pool['nh.clinical.patient']
         patient_pool.check_hospital_number(cr, uid, vals['other_identifier'], exception='False', context=context)
         patient_id = patient_pool.search(cr, uid, [['other_identifier', '=', vals['other_identifier']]],
                                          context=context)[0]
         spell_pool = self.pool['nh.clinical.spell']
         activity_pool = self.pool['nh.activity']
-        spell_id = spell_pool.get_by_patient_id(cr, uid, patient_id, exception='False', context=context)
+        spell_id = spell_pool.get_by_patient_id(cr, uid, patient_id, context=context)
+        if not spell_id:
+            if olocation_id:
+                api = self.pool['nh.clinical.api']
+                api.admit(cr, uid, vals['other_identifier'], {'location': vals['original_location']}, context=context)
+                spell_id = spell_pool.get_by_patient_id(cr, uid, patient_id, context=context)
+            else:
+                osv.except_osv('Transfer Error!', 'Patient does not have an open spell. No origin location provided.')
         spell = spell_pool.browse(cr, uid, spell_id, context=context)
         activity_pool.write(cr, uid, activity_id, {'parent_id': spell.activity_id.id}, context=context)
         data = vals.copy()
         data.update({
             'location_id': location_id,
+            'origin_location_id': olocation_id,
             'patient_id': patient_id
         })
         return super(nh_clinical_adt_patient_transfer, self).submit(cr, uid, activity_id, data, context=context)
