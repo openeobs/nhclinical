@@ -47,10 +47,12 @@ class nh_clinical_spell(orm.Model):
                         spell_activity.id as activity_id,
                         array_agg(move.from_location_id) as location_ids
                     from nh_clinical_patient_move move
-                    inner join nh_activity move_activity on move.activity_id = move_activity.id 
+                    inner join nh_activity move_activity on move.activity_id = move_activity.id
                         and move.from_location_id is not null 
                         and move_activity.state = 'completed'
                     inner join nh_activity spell_activity on move_activity.parent_id = spell_activity.id
+                    inner join nh_activity transfer_activity on move_activity.creator_id = transfer_activity.id
+                        and transfer_activity.data_model = 'nh.clinical.patient.transfer'
                     inner join nh_clinical_spell spell on spell.activity_id = spell_activity.id
                     where now() at time zone 'UTC' - move_activity.date_terminated < interval '1d'
                         and spell_activity.state = 'started'
