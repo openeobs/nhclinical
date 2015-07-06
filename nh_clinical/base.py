@@ -652,16 +652,16 @@ class nh_clinical_patient(osv.Model):
             raise osv.except_osv('Patient Data Error!', 'Either the Hospital Number or the NHS Number is required to '
                                                         'register/update a patient.')
         if create:
-            if 'other_identifier' in data.keys():
+            if data.get('other_identifier'):
                 self.check_hospital_number(cr, uid, data['other_identifier'], exception='True', context=context)
-            if 'patient_identifier' in data.keys():
+            if data.get('patient_identifier'):
                 self.check_nhs_number(cr, uid, data['patient_identifier'], exception='True', context=context)
         else:
-            if 'other_identifier' in data.keys() and 'patient_identifier' in data.keys():
+            if data.get('other_identifier') and data.get('patient_identifier'):
                 domain = ['|',
                           ['other_identifier', '=', data['other_identifier']],
                           ['patient_identifier', '=', data['patient_identifier']]]
-            elif 'other_identifier' in data.keys():
+            elif data.get('other_identifier'):
                 domain = [['other_identifier', '=', data['other_identifier']]]
             else:
                 domain = [['patient_identifier', '=', data['patient_identifier']]]
