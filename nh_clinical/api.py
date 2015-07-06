@@ -76,6 +76,8 @@ class nh_clinical_api(orm.AbstractModel):
             nhs_data['other_identifier'] = hospital_number
             if patient_pool.check_nhs_number(cr, uid, data.get('patient_identifier'), context=context):
                 patient_pool.update(cr, uid, hospital_number, nhs_data, context=context)
+            else:
+                self.register(cr, uid, hospital_number, data, context=context)
         data.update({'other_identifier': hospital_number})
         admit_activity = admit_pool.create_activity(cr, uid, {}, {}, context=context)
         activity_pool.submit(cr, uid, admit_activity, data, context=context)
@@ -196,6 +198,8 @@ class nh_clinical_api(orm.AbstractModel):
             nhs_data['other_identifier'] = hospital_number
             if patient_pool.check_nhs_number(cr, uid, data.get('patient_identifier'), context=context):
                 patient_pool.update(cr, uid, hospital_number, nhs_data, context=context)
+            else:
+                self.register(cr, uid, hospital_number, data, context=context)
         patientdb_id = patient_pool.search(cr, uid, [('other_identifier', '=', hospital_number)], context=context)
         data.update({'other_identifier': hospital_number})
         transfer_activity = transfer_pool.create_activity(cr, uid, {'patient_id': patientdb_id[0]}, {}, context=context)
