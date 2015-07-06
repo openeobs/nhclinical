@@ -17,7 +17,7 @@ class Event(object):
     def __init__(self, **kwargs):
         self.model = kwargs.get('model', None)
         self.method = kwargs.get('method', None)
-        self.activity =kwargs.get('activity', None)
+        self.activity = kwargs.get('activity', None)
         self.data = kwargs.get('data', None)
         self.args = kwargs.get('args', [])
         self.kwargs = kwargs.get('kwargs', {})
