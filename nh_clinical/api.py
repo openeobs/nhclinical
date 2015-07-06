@@ -22,8 +22,10 @@ class nh_clinical_api(orm.AbstractModel):
                 _logger.warn("Patient registered from an update call - data available:%s" % data)
                 self.register(cr, uid, hospital_number, data, context=context)
             else:
-                patient_pool.update(cr, uid, hospital_number, data, context=context)
-        data.update({'other_identifier': hospital_number})
+                patient_pool.update(cr, uid, data.get('patient_identifier'), data, selection='patient_identifier',
+                                    context=context)
+        if hospital_number:
+            data.update({'other_identifier': hospital_number})
         update_activity = update_pool.create_activity(cr, uid, {}, {}, context=context)
         res = activity_pool.submit(cr, uid, update_activity, data, context=context)
         activity_pool.complete(cr, uid, update_activity, context=context)
@@ -46,7 +48,8 @@ class nh_clinical_api(orm.AbstractModel):
         activity_pool = self.pool['nh.activity']
         register_pool = self.pool['nh.clinical.adt.patient.register']
         register_activity = register_pool.create_activity(cr, uid, {}, {}, context=context)
-        data.update({'other_identifier': hospital_number})
+        if hospital_number:
+            data.update({'other_identifier': hospital_number})
         activity_pool.submit(cr, uid, register_activity, data, context=context)
         res = activity_pool.complete(cr, uid, register_activity, context=context)
         _logger.debug("Patient registered\n data: %s" % data)
@@ -75,7 +78,8 @@ class nh_clinical_api(orm.AbstractModel):
             nhs_data = data.copy()
             nhs_data['other_identifier'] = hospital_number
             if patient_pool.check_nhs_number(cr, uid, data.get('patient_identifier'), context=context):
-                patient_pool.update(cr, uid, hospital_number, nhs_data, context=context)
+                patient_pool.update(cr, uid, data.get('patient_identifier'), data, selection='patient_identifier',
+                                    context=context)
             else:
                 self.register(cr, uid, hospital_number, data, context=context)
         data.update({'other_identifier': hospital_number})
@@ -96,7 +100,8 @@ class nh_clinical_api(orm.AbstractModel):
             nhs_data = data.copy()
             nhs_data['other_identifier'] = hospital_number
             if patient_pool.check_nhs_number(cr, uid, data.get('patient_identifier'), context=context):
-                patient_pool.update(cr, uid, hospital_number, nhs_data, context=context)
+                patient_pool.update(cr, uid, data.get('patient_identifier'), data, selection='patient_identifier',
+                                    context=context)
         data.update({'other_identifier': hospital_number})
         update_activity = update_pool.create_activity(cr, uid, {}, {}, context=context)
         activity_pool.submit(cr, uid, update_activity, data, context=context)
@@ -133,7 +138,8 @@ class nh_clinical_api(orm.AbstractModel):
             nhs_data = data.copy()
             nhs_data['other_identifier'] = hospital_number
             if patient_pool.check_nhs_number(cr, uid, data.get('patient_identifier'), context=context):
-                patient_pool.update(cr, uid, hospital_number, nhs_data, context=context)
+                patient_pool.update(cr, uid, data.get('patient_identifier'), data, selection='patient_identifier',
+                                    context=context)
         patientdb_id = patient_pool.search(cr, uid, [('other_identifier', '=', hospital_number)], context=context)
         spell_id = activity_pool.search(cr, uid, [['patient_id', '=', patientdb_id[0]],
                                                   ['state', 'not in', ['completed', 'cancelled']],
@@ -197,7 +203,8 @@ class nh_clinical_api(orm.AbstractModel):
             nhs_data = data.copy()
             nhs_data['other_identifier'] = hospital_number
             if patient_pool.check_nhs_number(cr, uid, data.get('patient_identifier'), context=context):
-                patient_pool.update(cr, uid, hospital_number, nhs_data, context=context)
+                patient_pool.update(cr, uid, data.get('patient_identifier'), data, selection='patient_identifier',
+                                    context=context)
             else:
                 self.register(cr, uid, hospital_number, data, context=context)
         patientdb_id = patient_pool.search(cr, uid, [('other_identifier', '=', hospital_number)], context=context)
