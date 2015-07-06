@@ -634,6 +634,13 @@ class nh_clinical_patient(osv.Model):
         return super(nh_clinical_patient, self).create(cr, uid, vals,
                                                        context=dict(context or {}, mail_create_nosubscribe=True))
 
+    def write(self, cr, uid, ids, vals, context=None):
+        title_pool = self.pool['res.partner.title']
+        if 'title' in vals.keys():
+            if not isinstance(vals.get('title'), int):
+                vals['title'] = title_pool.get_title_by_name(cr, uid, vals['title'], context=context)
+        return super(nh_clinical_patient, self).write(cr, uid, ids, vals, context=context)
+
     def unlink(self, cr, uid, ids, context=None):
         return super(nh_clinical_patient, self).write(cr, uid, ids, {'active': False}, context=context)
 
