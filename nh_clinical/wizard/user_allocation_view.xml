@@ -50,6 +50,19 @@
             <field name="target">new</field>
         </record>
 
+        <record id="view_nhc_allocating" model="ir.ui.view">
+            <field name="name">Allocating Form</field>
+            <field name="model">nh.clinical.allocating</field>
+            <field name="arch" type="xml">
+                <form string="Allocating" version="7.0">
+                    <group>
+                        <field name="nurse_id" widget="nh_many2one"/>
+                        <field name="hca_id" widget="nh_many2one"/>
+                    </group>
+                </form>
+            </field>
+        </record>
+
         <record id="action_allocate" model="ir.actions.act_window">
             <field name="name">Allocation</field>
             <field name="res_model">nh.clinical.allocating</field>
@@ -101,19 +114,6 @@
                                 attrs="{'invisible': [['stage','!=','allocation']]}"/>
                         <button string="Close" special="cancel" class="oe_link"/>
                     </footer>
-                </form>
-            </field>
-        </record>
-
-        <record id="view_nhc_allocating" model="ir.ui.view">
-            <field name="name">Allocating Form</field>
-            <field name="model">nh.clinical.allocating</field>
-            <field name="arch" type="xml">
-                <form string="Allocating" version="7.0">
-                    <group>
-                        <field name="nurse_id" widget="nh_many2one"/>
-                        <field name="hca_id" widget="nh_many2one"/>
-                    </group>
                 </form>
             </field>
         </record>
