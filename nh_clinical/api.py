@@ -82,7 +82,8 @@ class nh_clinical_api(orm.AbstractModel):
                                     context=context)
             else:
                 self.register(cr, uid, hospital_number, data, context=context)
-        data.update({'other_identifier': hospital_number})
+        if hospital_number:
+            data.update({'other_identifier': hospital_number})
         admit_activity = admit_pool.create_activity(cr, uid, {}, {}, context=context)
         activity_pool.submit(cr, uid, admit_activity, data, context=context)
         activity_pool.complete(cr, uid, admit_activity, context=context)
@@ -102,7 +103,8 @@ class nh_clinical_api(orm.AbstractModel):
             if patient_pool.check_nhs_number(cr, uid, data.get('patient_identifier'), context=context):
                 patient_pool.update(cr, uid, data.get('patient_identifier'), nhs_data, selection='patient_identifier',
                                     context=context)
-        data.update({'other_identifier': hospital_number})
+        if hospital_number:
+            data.update({'other_identifier': hospital_number})
         update_activity = update_pool.create_activity(cr, uid, {}, {}, context=context)
         activity_pool.submit(cr, uid, update_activity, data, context=context)
         activity_pool.complete(cr, uid, update_activity, context=context)
@@ -208,7 +210,8 @@ class nh_clinical_api(orm.AbstractModel):
             else:
                 self.register(cr, uid, hospital_number, data, context=context)
         patientdb_id = patient_pool.search(cr, uid, [('other_identifier', '=', hospital_number)], context=context)
-        data.update({'other_identifier': hospital_number})
+        if hospital_number:
+            data.update({'other_identifier': hospital_number})
         transfer_activity = transfer_pool.create_activity(cr, uid, {'patient_id': patientdb_id[0]}, {}, context=context)
         activity_pool.submit(cr, uid, transfer_activity, data, context=context)
         activity_pool.complete(cr, uid, transfer_activity, context=context)
