@@ -43,6 +43,13 @@
             <field name="target">new</field>
         </record>
 
+        <record id="action_nhc_staff_reallocation" model="ir.actions.act_window">
+            <field name="name">Nursing Re-Allocation</field>
+            <field name="res_model">nh.clinical.staff.reallocation</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
         <record id="action_nhc_doctor_allocation" model="ir.actions.act_window">
             <field name="name">Medical Shift Management</field>
             <field name="res_model">nh.clinical.doctor.allocation</field>
@@ -56,6 +63,7 @@
             <field name="arch" type="xml">
                 <form string="Allocating" version="7.0">
                     <group>
+                        <field name="id"/>
                         <field name="nurse_id" widget="nh_many2one"/>
                         <field name="hca_id" widget="nh_many2one"/>
                     </group>
@@ -109,6 +117,48 @@
                         <button string="Deallocate" type="object" name="deallocate" class="oe_highlight"
                                 attrs="{'invisible': [['stage','!=','review']]}"/>
                         <button string="Select" type="object" name="submit_users" class="oe_highlight"
+                                attrs="{'invisible': [['stage','!=','users']]}"/>
+                        <button string="Confirm Allocation" type="object" name="complete" class="oe_highlight"
+                                attrs="{'invisible': [['stage','!=','allocation']]}"/>
+                        <button string="Close" special="cancel" class="oe_link"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_nhc_staff_reallocation_wizard" model="ir.ui.view">
+            <field name="name">Staff Re-Allocation Wizard Form</field>
+            <field name="model">nh.clinical.staff.reallocation</field>
+            <field name="arch" type="xml">
+                <form string="Staff Re-Allocation Wizard" version="7.0">
+                    <header>
+                        <field name="stage" readonly="1" widget="statusbar" clickable="False" options="{'fold_field': 'fold'}"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <field name="ward_id" no_open="1" readonly="1"
+                                   attrs="{'invisible': [['stage','!=','users']]}"/>
+                            <field name="user_ids" nolabel="1" no_open="1" colspan="2" readonly="1"
+                                    attrs="{'invisible': [['stage','!=','users']]}">
+                                <tree>
+                                    <field name="partner_id" readonly="1" string="Staff"/>
+                                </tree>
+                            </field>
+                            <field name="allocating_ids" nolabel="1" options="{'no_create': True}" no_open="1"
+                               colspan="2" readonly="1" attrs="{'invisible': [['stage','!=','allocation']]}">
+                                <tree>
+                                    <field name="id" readonly="1"/>
+                                    <field name="location_id" readonly="1"/>
+                                    <field name="patient_ids" readonly="1"/>
+                                    <field name="nurse_name" widget="nh_many2one"/>
+                                    <field name="hca_name" widget="nh_many2one"/>
+                                    <button string="Allocate" type="action" name="%(action_allocate)d" nh_icon="allocate_btn" class="oe_highlight"/>
+                                </tree>
+                            </field>
+                        </group>
+                    </sheet>
+                    <footer>
+                        <button string="Re-Allocate" type="object" name="reallocate" class="oe_highlight"
                                 attrs="{'invisible': [['stage','!=','users']]}"/>
                         <button string="Confirm Allocation" type="object" name="complete" class="oe_highlight"
                                 attrs="{'invisible': [['stage','!=','allocation']]}"/>

@@ -10,6 +10,7 @@ class staff_allocation_wizard(osv.TransientModel):
 
     _columns = {
         'create_uid': fields.many2one('res.users', 'User Executing the Wizard'),
+        'create_date': fields.datetime('Create Date'),
         'stage': fields.selection(_stages, string='Stage'),
         'ward_id': fields.many2one('nh.clinical.location', string='Ward', domain=[['usage', '=', 'ward']]),
         'location_ids': fields.many2many('nh.clinical.location', 'alloc_loc_rel', 'allocation_id', 'location_id',
@@ -95,6 +96,102 @@ class staff_allocation_wizard(osv.TransientModel):
         return {'type': 'ir.actions.act_window_close'}
 
 
+class staff_reallocation_wizard(osv.TransientModel):
+    _name = 'nh.clinical.staff.reallocation'
+    _rec_name = 'create_uid'
+
+    _stages = [['users', 'Current Roll Call'], ['allocation', 'Allocation']]
+
+    def _get_default_ward(self, cr, uid, context=None):
+        location_pool = self.pool['nh.clinical.location']
+        ward_ids = location_pool.search(cr, uid, [['usage', '=', 'ward'], ['user_ids', 'in', [uid]]], context=context)
+        if not ward_ids:
+            raise osv.except_osv('Shift Management Error!', 'You must be in charge of a ward to do this task!')
+        return ward_ids[0]
+
+    def _get_default_users(self, cr, uid, context=None):
+        location_pool = self.pool['nh.clinical.location']
+        user_pool = self.pool['res.users']
+        groups = ['NH Clinical Nurse Group', 'NH Clinical HCA Group']
+        ward_ids = location_pool.search(cr, uid, [['usage', '=', 'ward'], ['user_ids', 'in', [uid]]], context=context)
+        if not ward_ids:
+            raise osv.except_osv('Shift Management Error!', 'You must be in charge of a ward to do this task!')
+        location_ids = location_pool.search(cr, uid, [['id', 'child_of', ward_ids[0]]], context=context)
+        user_ids = user_pool.search(cr, uid, [['groups_id.name', 'in', groups], ['location_ids', 'in', location_ids]],
+                                    context=context)
+        return user_ids
+
+    def _get_default_allocatings(self, cr, uid, context=None):
+        location_pool = self.pool['nh.clinical.location']
+        allocating_pool = self.pool['nh.clinical.allocating']
+        ward_ids = location_pool.search(cr, uid, [['usage', '=', 'ward'], ['user_ids', 'in', [uid]]], context=context)
+        if not ward_ids:
+            raise osv.except_osv('Shift Management Error!', 'You must be in charge of a ward to do this task!')
+        location_ids = location_pool.search(cr, uid, [['id', 'child_of', ward_ids[0]]], context=context)
+        locations = location_pool.browse(cr, uid, location_ids, context=context)
+        allocating_ids = []
+        for l in locations:
+            if l.usage != 'bed':
+                continue
+            nurse_id = False
+            hca_id = False
+            for u in l.user_ids:
+                groups = [g.name for g in u.groups_id]
+                nurse_id = u.id if 'NH Clinical Nurse Group' in groups else nurse_id
+                hca_id = u.id if 'NH Clinical HCA Group' in groups else hca_id
+            allocating_ids.append(allocating_pool.create(cr, uid, {
+                'location_id': l.id,
+                'nurse_id': nurse_id,
+                'hca_id': hca_id
+            }, context=context))
+        return allocating_ids
+
+    _columns = {
+        'create_uid': fields.many2one('res.users', 'User Executing the Wizard'),
+        'create_date': fields.datetime('Create Date'),
+        'stage': fields.selection(_stages, string='Stage'),
+        'ward_id': fields.many2one('nh.clinical.location', string='Ward', domain=[['usage', '=', 'ward']]),
+        'user_ids': fields.many2many('res.users', 'realloc_user_rel', 'allocation_id', 'user_id', string='Users',
+                                     domain=[['groups_id.name', 'in', ['NH Clinical HCA Group', 'NH Clinical Nurse Group']]]),
+        'allocating_ids': fields.many2many('nh.clinical.allocating', 'real_allocating_rel', 'reallocation_id',
+                                           'allocating_id', string='Allocating Locations')
+    }
+    _defaults = {
+        'stage': 'users',
+        'ward_id': _get_default_ward,
+        'user_ids': _get_default_users,
+        'allocating_ids': _get_default_allocatings
+    }
+
+    def reallocate(self, cr, uid, ids, context=None):
+        self.write(cr, uid, ids, {'stage': 'allocation'}, context=context)
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Nursing Re-Allocation',
+            'res_model': 'nh.clinical.staff.reallocation',
+            'res_id': ids[0],
+            'view_mode': 'form',
+            'target': 'new',
+        }
+
+    def complete(self, cr, uid, ids, context=None):
+        allocating_pool = self.pool['nh.clinical.allocating']
+        respallocation_pool = self.pool['nh.clinical.user.responsibility.allocation']
+        activity_pool = self.pool['nh.activity']
+        wizard = self.browse(cr, uid, ids[0], context=context)
+        allocation = {u.id: [] for u in wizard.user_ids}
+        for allocating in allocating_pool.browse(cr, uid, [a.id for a in wizard.allocating_ids], context=context):
+            if allocating.nurse_id:
+                allocation[allocating.nurse_id.id].append(allocating.location_id.id)
+            if allocating.hca_id:
+                allocation[allocating.hca_id.id].append(allocating.location_id.id)
+        for key in allocation.keys():
+            activity_id = respallocation_pool.create_activity(cr, uid, {}, {
+                'responsible_user_id': key, 'location_ids': [[6, 0, allocation[key]]]}, context=context)
+            activity_pool.complete(cr, uid, activity_id, context=context)
+        return {'type': 'ir.actions.act_window_close'}
+
+
 class doctor_allocation_wizard(osv.TransientModel):
     _name = 'nh.clinical.doctor.allocation'
     _rec_name = 'create_uid'
@@ -130,6 +227,7 @@ class doctor_allocation_wizard(osv.TransientModel):
 
     _columns = {
         'create_uid': fields.many2one('res.users', 'User Executing the Wizard'),
+        'create_date': fields.datetime('Create Date'),
         'stage': fields.selection(_stages, string='Stage'),
         'ward_id': fields.many2one('nh.clinical.location', string='Ward', domain=[['usage', '=', 'ward']]),
         'doctor_ids': fields.many2many('res.users', 'docalloc_doc_rel', 'allocation_id', 'user_id',
@@ -193,16 +291,27 @@ class allocating_user(osv.TransientModel):
     def fields_view_get(self, cr, uid, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
         res = super(allocating_user, self).fields_view_get(cr, uid, view_id, view_type, context, toolbar, submenu)
         allocation_pool = self.pool['nh.clinical.staff.allocation']
+        reallocation_pool = self.pool['nh.clinical.staff.reallocation']
         al_id = allocation_pool.search(cr, uid, [['create_uid', '=', uid]], order='id desc')
-        if not al_id or view_type != 'form':
-            # TODO: need to put view into edit mode to add items?
+        real_id = reallocation_pool.search(cr, uid, [['create_uid', '=', uid]], order='id desc')
+        allocation = True if al_id else False
+        if al_id and real_id:
+            al = allocation_pool.browse(cr, uid, al_id[0], context=context)
+            real = reallocation_pool.browse(cr, uid, real_id[0], context=context)
+            allocation = True if al.create_date > real.create_date else False
+        if not (al_id or real_id) or view_type != 'form':
             return res
         else:
-            # TODO: need to put view into edit mode to add items?
-            allocation = allocation_pool.browse(cr, uid, al_id[0], context=context)
-            user_ids = [u.id for u in allocation.user_ids]
-            res['fields']['nurse_id']['domain'] = [['id', 'in', user_ids], ['groups_id.name', 'in', ['NH Clinical Nurse Group']]]
-            res['fields']['hca_id']['domain'] = [['id', 'in', user_ids], ['groups_id.name', 'in', ['NH Clinical HCA Group']]]
+            if allocation:
+                allocation = allocation_pool.browse(cr, uid, al_id[0], context=context)
+                user_ids = [u.id for u in allocation.user_ids]
+                res['fields']['nurse_id']['domain'] = [['id', 'in', user_ids], ['groups_id.name', 'in', ['NH Clinical Nurse Group']]]
+                res['fields']['hca_id']['domain'] = [['id', 'in', user_ids], ['groups_id.name', 'in', ['NH Clinical HCA Group']]]
+            else:
+                reallocation = reallocation_pool.browse(cr, uid, real_id[0], context=context)
+                user_ids = [u.id for u in reallocation.user_ids]
+                res['fields']['nurse_id']['domain'] = [['id', 'in', user_ids], ['groups_id.name', 'in', ['NH Clinical Nurse Group']]]
+                res['fields']['hca_id']['domain'] = [['id', 'in', user_ids], ['groups_id.name', 'in', ['NH Clinical HCA Group']]]
         return res
 
 
