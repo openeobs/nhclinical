@@ -11,3 +11,4 @@ import test_patient
 import test_base_extensions
 import test_doctor
 import test_spell
+import test_allocation_wizards

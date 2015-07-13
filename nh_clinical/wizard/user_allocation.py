@@ -30,6 +30,8 @@ class staff_allocation_wizard(osv.TransientModel):
     }
 
     def submit_wards(self, cr, uid, ids, context=None):
+        if not isinstance(ids, list):
+            ids = [ids]
         wiz = self.browse(cr, uid, ids[0], context=context)
         ward_ids = [wiz.ward_id.id]
         location_pool = self.pool['nh.clinical.location']
@@ -45,6 +47,8 @@ class staff_allocation_wizard(osv.TransientModel):
         }
 
     def deallocate(self, cr, uid, ids, context=None):
+        if not isinstance(ids, list):
+            ids = [ids]
         wiz = self.browse(cr, uid, ids[0], context=context)
         user_pool = self.pool['res.users']
         activity_pool = self.pool['nh.activity']
@@ -72,7 +76,8 @@ class staff_allocation_wizard(osv.TransientModel):
         }
 
     def submit_users(self, cr, uid, ids, context=None):
-        wiz = self.browse(cr, uid, ids[0], context=context)
+        if not isinstance(ids, list):
+            ids = [ids]
         self.write(cr, uid, ids, {'stage': 'allocation'}, context=context)
         return {
             'type': 'ir.actions.act_window',
@@ -84,6 +89,8 @@ class staff_allocation_wizard(osv.TransientModel):
         }
 
     def complete(self, cr, uid, ids, context=None):
+        if not isinstance(ids, list):
+            ids = [ids]
         allocating_pool = self.pool['nh.clinical.allocating']
         respallocation_pool = self.pool['nh.clinical.user.responsibility.allocation']
         activity_pool = self.pool['nh.activity']
@@ -180,6 +187,8 @@ class staff_reallocation_wizard(osv.TransientModel):
     }
 
     def reallocate(self, cr, uid, ids, context=None):
+        if not isinstance(ids, list):
+            ids = [ids]
         user_pool = self.pool['res.users']
         respallocation_pool = self.pool['nh.clinical.user.responsibility.allocation']
         activity_pool = self.pool['nh.activity']
@@ -212,6 +221,8 @@ class staff_reallocation_wizard(osv.TransientModel):
         }
 
     def complete(self, cr, uid, ids, context=None):
+        if not isinstance(ids, list):
+            ids = [ids]
         allocating_pool = self.pool['nh.clinical.allocating']
         respallocation_pool = self.pool['nh.clinical.user.responsibility.allocation']
         activity_pool = self.pool['nh.activity']
@@ -282,6 +293,8 @@ class doctor_allocation_wizard(osv.TransientModel):
     }
 
     def deallocate(self, cr, uid, ids, context=None):
+        if not isinstance(ids, list):
+            ids = [ids]
         wiz = self.browse(cr, uid, ids[0], context=context)
         user_pool = self.pool['res.users']
         location_ids = [location.id for location in wiz.location_ids]
@@ -298,6 +311,8 @@ class doctor_allocation_wizard(osv.TransientModel):
         }
 
     def submit_users(self, cr, uid, ids, context=None):
+        if not isinstance(ids, list):
+            ids = [ids]
         wiz = self.browse(cr, uid, ids[0], context=context)
         respallocation_pool = self.pool['nh.clinical.user.responsibility.allocation']
         activity_pool = self.pool['nh.activity']

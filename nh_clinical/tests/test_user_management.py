@@ -16,7 +16,7 @@ class TestUsers(SingleTransactionCase):
         self.userboard_admin = self.registry('nh.clinical.admin.userboard')
         self.apidemo = self.registry('nh.clinical.api.demo')
 
-    def test_responsibility_allocation(self):
+    def test_01_responsibility_allocation(self):
         cr, uid = self.cr, self.uid
         users = {
             'ward_managers': {
@@ -67,7 +67,7 @@ class TestUsers(SingleTransactionCase):
         for activity_id in observation_ids+notification_ids:
             self.assertFalse(self.activity_pool.search(cr, uid, [('id', '=', activity_id), ('user_ids', 'in', [nurse1_id])]))
 
-    def test_staff_management_create_and_update(self):
+    def test_02_staff_management_create_and_update(self):
         cr, uid = self.cr, self.uid
 
         # STAFF MANAGEMENT CREATE
@@ -133,7 +133,7 @@ class TestUsers(SingleTransactionCase):
         self.assertTrue('NH Clinical Nurse Group' in check_groups, msg='Nurse user does not have Nurse group (after 2nd update)')
         self.assertTrue('NH Clinical Doctor Group' in check_groups, msg='Nurse user does not have Doctor group (after 2nd update)')
         
-    def test_admin_user_management_create_and_update(self):
+    def test_03_admin_user_management_create_and_update(self):
         cr, uid = self.cr, self.uid
 
         # STAFF MANAGEMENT CREATE
