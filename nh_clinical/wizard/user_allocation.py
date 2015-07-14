@@ -7,6 +7,11 @@ def list_diff(a, b):
     return [aa for aa in a if aa not in b]
 
 
+def list_intersect(a, b):
+    b = set(b)
+    return [aa for aa in a if aa in b]
+
+
 class staff_allocation_wizard(osv.TransientModel):
     _name = 'nh.clinical.staff.allocation'
     _rec_name = 'create_uid'
@@ -52,16 +57,28 @@ class staff_allocation_wizard(osv.TransientModel):
         wiz = self.browse(cr, uid, ids[0], context=context)
         user_pool = self.pool['res.users']
         activity_pool = self.pool['nh.activity']
+        patient_pool = self.pool['nh.clinical.patient']
+        unfollow_pool = self.pool['nh.clinical.patient.unfollow']
         respallocation_pool = self.pool['nh.clinical.user.responsibility.allocation']
         allocating_pool = self.pool['nh.clinical.allocating']
+
         location_ids = [location.id for location in wiz.location_ids]
         user_ids = user_pool.search(cr, uid, [
             ['groups_id.name', 'in', ['NH Clinical HCA Group', 'NH Clinical Nurse Group',
                                       'NH Clinical Ward Manager Group']]], context=context)
         user_pool.write(cr, uid, user_ids, {'location_ids': [[5, location_ids]]}, context=context)
+
         activity_id = respallocation_pool.create_activity(cr, uid, {}, {
                 'responsible_user_id': uid, 'location_ids': [[6, 0, [wiz.ward_id.id]]]}, context=context)
         activity_pool.complete(cr, uid, activity_id, context=context)
+
+        # Remove patient followers
+        patient_ids = patient_pool.search(cr, uid, [['current_location_id', 'in', location_ids]], context=context)
+        if patient_ids:
+            unfollow_activity_id = unfollow_pool.create_activity(cr, uid, {}, {
+                'patient_ids': [[6, 0, patient_ids]]}, context=context)
+            activity_pool.complete(cr, uid, unfollow_activity_id, context=context)
+
         allocating_ids = [allocating_pool.create(cr, uid, {
             'location_id': l.id
         }, context=context) for l in wiz.location_ids if l.usage == 'bed']
@@ -190,6 +207,8 @@ class staff_reallocation_wizard(osv.TransientModel):
         if not isinstance(ids, list):
             ids = [ids]
         user_pool = self.pool['res.users']
+        patient_pool = self.pool['nh.clinical.patient']
+        unfollow_pool = self.pool['nh.clinical.patient.unfollow']
         respallocation_pool = self.pool['nh.clinical.user.responsibility.allocation']
         activity_pool = self.pool['nh.activity']
         wiz = self.browse(cr, uid, ids[0], context=context)
@@ -207,6 +226,13 @@ class staff_reallocation_wizard(osv.TransientModel):
                 activity_id = respallocation_pool.create_activity(cr, uid, {}, {
                     'responsible_user_id': u_id, 'location_ids': [[6, 0, loc_ids]]}, context=context)
                 activity_pool.complete(cr, uid, activity_id, context=context)
+                # Remove patient followers
+                loc_ids = list_intersect(uloc_ids, location_ids)
+                patient_ids = patient_pool.search(cr, uid, [['current_location_id', 'in', loc_ids]], context=context)
+                if patient_ids:
+                    unfollow_activity_id = unfollow_pool.create_activity(cr, uid, {}, {
+                        'patient_ids': [[6, 0, patient_ids]]}, context=context)
+                    activity_pool.complete(cr, uid, unfollow_activity_id, context=context)
         self.write(cr, uid, ids, {'stage': 'allocation'}, context=context)
         if recompute:
             allocating_ids = self._get_default_allocatings(cr, uid, context=context)

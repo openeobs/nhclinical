@@ -12,12 +12,16 @@ class TestAllocationWizards(SingleTransactionCase):
         cls.groups_pool = cls.registry('res.groups')
         cls.activity_pool = cls.registry('nh.activity')
         cls.location_pool = cls.registry('nh.clinical.location')
+        cls.patient_pool = cls.registry('nh.clinical.patient')
+        cls.api_pool = cls.registry('nh.clinical.api')
         cls.pos_pool = cls.registry('nh.clinical.pos')
         cls.responsibility_allocation = cls.registry('nh.clinical.responsibility.allocation')
         cls.staff_allocation = cls.registry('nh.clinical.staff.allocation')
         cls.staff_reallocation = cls.registry('nh.clinical.staff.reallocation')
         cls.doctor_allocation = cls.registry('nh.clinical.doctor.allocation')
         cls.allocating = cls.registry('nh.clinical.allocating')
+        cls.follow_pool = cls.registry('nh.clinical.patient.follow')
+        cls.unfollow_pool = cls.registry('nh.clinical.patient.unfollow')
         
         cls.wm_group_id = cls.groups_pool.search(cr, uid, [['name', '=', 'NH Clinical Ward Manager Group']])
         cls.nurse_group_id = cls.groups_pool.search(cr, uid, [['name', '=', 'NH Clinical Nurse Group']])
@@ -59,6 +63,8 @@ class TestAllocationWizards(SingleTransactionCase):
                                                                    'password': 'DR'+str(i),
                                                                    'groups_id': [[4, cls.doctor_group_id[0]]],
                                                                    'pos_id': cls.pos_id}))
+        cls.patients = [cls.patient_pool.create(cr, uid, {
+            'given_name': 'p'+str(k), 'family_name': 'f'+str(k), 'other_identifier': 'hn'+str(k)}) for k in range(5)]
 
     def test_01_nursing_staff_allocation(self):
         cr, uid = self.cr, self.uid
@@ -69,7 +75,7 @@ class TestAllocationWizards(SingleTransactionCase):
         self.assertEqual(self.staff_allocation.read(cr, uid, sawiz_id, ['stage'])['stage'], 'wards')
 
         # Step 2: Selecting the Ward
-        ward_id = self.locations.keys()[0]
+        ward_id = self.location_pool.search(cr, uid, [['code', '=', 'WARD0']])[0]
         self.staff_allocation.write(cr, wm_uid, sawiz_id, {'ward_id': ward_id})
         self.staff_allocation.submit_wards(cr, wm_uid, sawiz_id)
         self.assertEqual(self.staff_allocation.read(cr, uid, sawiz_id, ['stage'])['stage'], 'review')
@@ -128,7 +134,7 @@ class TestAllocationWizards(SingleTransactionCase):
     def test_02_nursing_staff_reallocation(self):
         cr, uid = self.cr, self.uid
         wm_uid = self.users['wm'][0]
-        ward_id = self.locations.keys()[0]
+        ward_id = self.location_pool.search(cr, uid, [['code', '=', 'WARD0']])[0]
 
         # Step 1: The Ward Manager opens the wizard
         srwiz_id = self.staff_reallocation.create(cr, wm_uid, {})
@@ -194,12 +200,20 @@ class TestAllocationWizards(SingleTransactionCase):
     def test_03_nursing_new_shift_allocation(self):
         cr, uid = self.cr, self.uid
         wm_uid = self.users['wm'][1]
+
+        # Step 0: Follow some Patients
+        self.api_pool.admit(cr, self.admin_uid, 'hn0', {'location': 'WARD0'})
+        self.api_pool.admit(cr, self.admin_uid, 'hn1', {'location': 'WARD0'})
+        follow_id = self.follow_pool.create_activity(cr, uid, {'user_id': self.users['ns'][2]},
+                                                              {'patient_ids': [[6, 0, self.patients[:2]]]})
+        self.activity_pool.complete(cr, uid, follow_id)
+
         # Step 1: The Ward Manager opens the wizard
         sawiz_id = self.staff_allocation.create(cr, wm_uid, {})
         self.assertTrue(sawiz_id, msg="Staff Allocation wizard not created")
 
         # Step 2: Selecting the Ward
-        ward_id = self.locations.keys()[0]
+        ward_id = self.location_pool.search(cr, uid, [['code', '=', 'WARD0']])[0]
         self.staff_allocation.write(cr, wm_uid, sawiz_id, {'ward_id': ward_id})
         self.staff_allocation.submit_wards(cr, wm_uid, sawiz_id)
         location_ids = self.staff_allocation.read(cr, uid, sawiz_id, ['location_ids'])['location_ids']
@@ -209,6 +223,8 @@ class TestAllocationWizards(SingleTransactionCase):
         self.assertEqual(self.staff_allocation.read(cr, uid, sawiz_id, ['stage'])['stage'], 'users')
         self.assertEqual(len(self.users_pool.search(cr, uid, [['location_ids', 'in', location_ids]])), 1)
         allocating_ids = self.staff_allocation.read(cr, uid, sawiz_id, ['allocating_ids'])['allocating_ids']
+        self.assertFalse(self.users_pool.search(cr, uid, [['following_ids', 'in', self.patients]]),
+                         msg="Patients still being followed after de-allocationg")
 
         # Step 4: Selecting the Nursing Staff
         user_ids = [self.users['ns'][0], self.users['ns'][1], self.users['hc'][0]]
@@ -240,7 +256,7 @@ class TestAllocationWizards(SingleTransactionCase):
     def test_04_medical_staff_allocation(self):
         cr, uid = self.cr, self.uid
         wm_uid = self.users['wm'][1]
-        ward_id = self.locations.keys()[0]
+        ward_id = self.location_pool.search(cr, uid, [['code', '=', 'WARD0']])[0]
         
         # Step 1: The Ward Manager opens the wizard
         dawiz_id = self.doctor_allocation.create(cr, wm_uid, {})
@@ -276,7 +292,7 @@ class TestAllocationWizards(SingleTransactionCase):
     def test_05_medical_staff_new_shift_allocation(self):
         cr, uid = self.cr, self.uid
         wm_uid = self.users['wm'][1]
-        ward_id = self.locations.keys()[0]
+        ward_id = self.location_pool.search(cr, uid, [['code', '=', 'WARD0']])[0]
 
         # Step 1: The Ward Manager opens the wizard
         dawiz_id = self.doctor_allocation.create(cr, wm_uid, {})
