@@ -234,11 +234,21 @@ class nh_clinical_location(orm.Model):
             res[loc.id] = patient_pool.search(cr, uid, [('current_location_id', 'child_of', loc.id)], context=context)
         return res
 
-    def _get_follower_ids(self, cr, uid, ids, field, args, context=None):
+    def _get_nurse_follower_ids(self, cr, uid, ids, field, args, context=None):
         res = {}
         user_pool = self.pool['res.users']
         for loc in self.browse(cr, uid, ids, context=context):
-            res[loc.id] = user_pool.search(cr, uid, [['following_ids', 'in', [p.id for p in loc.patient_ids]]],
+            res[loc.id] = user_pool.search(cr, uid, [['following_ids', 'in', [p.id for p in loc.patient_ids]],
+                                                     ['groups_id.name', 'in', ['NH Clinical Nurse Group']]],
+                                           context=context)
+        return res
+
+    def _get_hca_follower_ids(self, cr, uid, ids, field, args, context=None):
+        res = {}
+        user_pool = self.pool['res.users']
+        for loc in self.browse(cr, uid, ids, context=context):
+            res[loc.id] = user_pool.search(cr, uid, [['following_ids', 'in', [p.id for p in loc.patient_ids]],
+                                                     ['groups_id.name', 'in', ['NH Clinical HCA Group']]],
                                            context=context)
         return res
 
@@ -411,7 +421,8 @@ class nh_clinical_location(orm.Model):
         'patient_ids': fields.function(_get_patient_ids, type='many2many', relation='nh.clinical.patient', string="Patients"),
         'user_ids': fields.many2many('res.users', 'user_location_rel', 'location_id', 'user_id', 'Responsible Users'),
         # aux fields for the view, worth having a SQL model instead?
-        'patient_follower_ids': fields.function(_get_follower_ids, type='many2many', relation='res.users', string="Stand-Ins"),
+        'nurse_follower_ids': fields.function(_get_nurse_follower_ids, type='many2many', relation='res.users', string="Nurse Stand-Ins"),
+        'hca_follower_ids': fields.function(_get_hca_follower_ids, type='many2many', relation='res.users', string="HCA Stand-Ins"),
         'assigned_hca_ids': fields.function(_get_hca_ids, type='many2many', relation='res.users', string="Assigned HCAs"),
         'assigned_nurse_ids': fields.function(_get_nurse_ids, type='many2many', relation='res.users', string="Assigned Nurses"),
         'assigned_wm_ids': fields.function(_get_wm_ids, type='many2many', relation='res.users', string="Assigned Ward Managers"),
