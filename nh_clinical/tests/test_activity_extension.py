@@ -20,6 +20,7 @@ class TestActivityExtension(common.SingleTransactionCase):
         cls.location_pool = cls.registry('nh.clinical.location')
         cls.pos_pool = cls.registry('nh.clinical.pos')
         cls.spell_pool = cls.registry('nh.clinical.spell')
+        cls.test_pool = cls.registry('test.activity.data.model')
 
         cls.apidemo = cls.registry('nh.clinical.api.demo')
 
@@ -61,11 +62,14 @@ class TestActivityExtension(common.SingleTransactionCase):
         cls.patient_id = patient_id
         cls.patient2_id = patient2_id
 
-    def test_audit_ward_manager(self):
+    def test_01_audit_ward_manager(self):
         cr, uid = self.cr, self.uid
 
         self.assertFalse(self.spell_pool._audit_ward_manager(cr, uid, self.spell_id), msg="Audit Ward Manager should return False when the activity has no location")
-        self.activity_pool.write(cr, uid, self.spell_id, {'location_id': self.wu_id})
+        # try to write without data
+        self.assertTrue(self.activity_pool.write(cr, uid, self.spell_id, False), msg="Error on activity write")
+        # include location_id in data
+        self.assertTrue(self.activity_pool.write(cr, uid, self.spell_id, {'location_id': self.wu_id}))
         self.assertTrue(self.spell_pool._audit_ward_manager(cr, uid, self.spell_id), msg="Audit Ward Manager failed")
         spell = self.activity_pool.browse(cr, uid, self.spell_id)
         self.assertEqual(spell.ward_manager_id.id, self.wmu_id, msg="Audit Ward Manager recorded the wrong user id")
@@ -73,3 +77,10 @@ class TestActivityExtension(common.SingleTransactionCase):
         self.activity_pool.complete(cr, uid, self.spell_id)
         spell = self.activity_pool.browse(cr, uid, self.spell_id)
         self.assertEqual(spell.ward_manager_id.id, self.wmt_id, msg="Audit Ward Manager failed or recorded the wrong user id on Complete")
+
+    def test_02_cancel_open_activities(self):
+        cr, uid = self.cr, self.uid
+
+        activity_id = self.test_pool.create_activity(cr, uid, {'parent_id': self.spell2_id}, {})
+        self.assertTrue(self.activity_pool.cancel_open_activities(cr, uid, self.spell2_id, 'test.activity.data.model'))
+        self.assertEqual(self.activity_pool.read(cr, uid, activity_id, ['state'])['state'], 'cancelled')
