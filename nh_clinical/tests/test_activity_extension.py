@@ -102,3 +102,14 @@ class TestActivityExtension(common.SingleTransactionCase):
         self.activity_pool.write(cr, uid, activity_id, {'location_id': self.wu_id})
         self.assertTrue(self.wmu_id in self.activity_pool.read(cr, uid, activity_id, ['user_ids'])['user_ids'],
                         msg="Responsible users not updated correctly after location assigned to the activity")
+
+    def test_04_update_spell_users(self):
+        cr, uid = self.cr, self.uid
+
+        # Scenario 1: Update spell users with empty user_ids parameter - does nothing
+        self.assertTrue(self.activity_pool.update_spell_users(cr, uid))
+
+        # Scenario 2: Update spell location
+        self.activity_pool.write(cr, uid, self.spell2_id, {'location_id': self.wu_id})
+        self.assertTrue(self.wmu_id in self.activity_pool.read(cr, uid, self.spell2_id, ['user_ids'])['user_ids'],
+                        msg="Responsible users not updated correctly after location assigned to the spell")
