@@ -84,3 +84,21 @@ class TestActivityExtension(common.SingleTransactionCase):
         activity_id = self.test_pool.create_activity(cr, uid, {'parent_id': self.spell2_id}, {})
         self.assertTrue(self.activity_pool.cancel_open_activities(cr, uid, self.spell2_id, 'test.activity.data.model'))
         self.assertEqual(self.activity_pool.read(cr, uid, activity_id, ['state'])['state'], 'cancelled')
+
+    def test_03_update_users(self):
+        cr, uid = self.cr, self.uid
+        activity_id = self.test_pool.create_activity(cr, uid, {'parent_id': self.spell2_id}, {})
+        self.activity_pool.write(cr, uid, activity_id, {'user_ids': [[6, 0, [self.nu_id]]]})
+
+        # Scenario 1: Update users with empty user_ids parameter - does nothing
+        self.assertTrue(self.activity_pool.update_users(cr, uid))
+
+        # Scenario 2: Update user nu_id
+        self.assertTrue(self.activity_pool.update_users(cr, uid, [self.nu_id]))
+        self.assertFalse(self.activity_pool.read(cr, uid, activity_id, ['user_ids'])['user_ids'],
+                         msg="The activity should not have any responsible users")
+
+        # Scenario 3: Update activity location
+        self.activity_pool.write(cr, uid, activity_id, {'location_id': self.wu_id})
+        self.assertTrue(self.wmu_id in self.activity_pool.read(cr, uid, activity_id, ['user_ids'])['user_ids'],
+                        msg="Responsible users not updated correctly after location assigned to the activity")
