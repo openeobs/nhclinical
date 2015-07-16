@@ -8,11 +8,6 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-def except_if(test=True, cap="Exception!", msg="Message is not defined..."):
-    if test:
-        raise orm.except_orm(cap, msg)
-
-
 class Event(object):
     def __init__(self, **kwargs):
         self.model = kwargs.get('model', None)
@@ -321,12 +316,14 @@ class nh_activity_data(orm.AbstractModel):
         imd_pool = self.pool['ir.model.data']
         model_xmlid = "model_%s" % activity.data_ref._name.replace(".","_")
         model_id = imd_pool.search(cr, uid, [['name','=',model_xmlid]])
-        except_if(not model_id, msg="Model with xmlid %s is not found in ir.model.data" % model_xmlid)
+        if not model_id:
+            raise osv.except_osv("Error!", "Model with xmlid %s is not found in ir.model.data" % model_xmlid)
         model_id = model_id[0]
         model_imd = imd_pool.browse(cr, uid, model_id)
         view_xmlid = eval("activity.data_ref._%s_view_xmlid" % command)
         view = imd_pool.get_object(cr, uid, model_imd.module, view_xmlid, context)
-        except_if(not view, msg="View with xmlid='%s' not found" % view_xmlid)
+        if not view:
+            raise osv.except_osv('Error!', "View with xmlid='%s' not found" % view_xmlid)
         ctx = context or {}
         ctx.update({'nh_source': 'nh.activity'})
         aw = {
