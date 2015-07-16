@@ -67,4 +67,16 @@ class TestCookieFix(SingleTransactionCase):
         self.assertNotEqual(cookie_age, 3600*12, 'Original cookie fix is not functioning as expected')
 
 
-
+    def test_sending_string_response(self):
+        root = Root()
+        self.req.app = root
+        explicit_session = root.setup_session(self.req)
+        root.setup_db(self.req)
+        root.setup_lang(self.req)
+        request = root.get_request(self.req)
+        result = 'This is an example basestring response'
+        response = root.get_response(request, result, explicit_session)
+        cookie = [h for h in response.headers if h[0] == 'Set-Cookie'][0]
+        cookie_data = [kv.split('=') for kv in [l for l in cookie[1].split('; ')]]
+        cookie_age = [int(c[1]) for c in cookie_data if c[0] == 'Max-Age'][0]
+        self.assertEqual(cookie_age, 3600*12, 'Our cookie fix is not functioning as expected')

@@ -1,5 +1,6 @@
 from openerp.http import *
 from werkzeug import exceptions
+from werkzeug.wrappers import Response
 
 
 def get_response(self, httprequest, result, explicit_session):
