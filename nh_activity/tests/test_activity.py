@@ -113,6 +113,9 @@ class TestActivity(common.SingleTransactionCase):
         with self.assertRaises(except_orm):
             self.activity_pool.update_activity(cr, uid, 0)
 
+        # Scenario 4: Calling an activity method wrapped with @data_model_event using [id] instead of id as parameter.
+        self.assertTrue(self.activity_pool.update_activity(cr, uid, [activity_id]), msg="Event call failed")
+
     def test_submit(self):
         cr, uid = self.cr, self.uid
 
@@ -158,7 +161,12 @@ class TestActivity(common.SingleTransactionCase):
         self.assertEqual(activity.state, 'scheduled', msg="Activity state not updated after schedule")
         self.assertEqual(activity.date_scheduled, test_date[0], msg="Activity date_scheduled not updated after schedule")
 
-        # Scenario 2: Schedule an activity writing the date beforehand
+        # Scenario 2: Scheduling an activity sending wrong formatted parameter as schedule date
+        with self.assertRaises(except_orm):
+            self.activity_pool.schedule(cr, uid, activity_id, 2015)
+            self.activity_pool.schedule(cr, uid, activity_id, 'Not A Date')
+
+        # Scenario 3: Schedule an activity writing the date beforehand
         activity2_id = self.activity_pool.create(cr, uid, {'data_model': 'test.activity.data.model'})
         self.activity_pool.write(cr, uid, activity2_id, {'date_scheduled': test_date[0]})
         self.assertTrue(self.activity_pool.schedule(cr, uid, activity2_id), msg="Activity Schedule failed")
@@ -166,17 +174,17 @@ class TestActivity(common.SingleTransactionCase):
         self.assertEqual(activity.state, 'scheduled', msg="Activity state not updated after schedule")
         self.assertEqual(activity.date_scheduled, test_date[0], msg="Activity date_scheduled not updated after schedule")
 
-        # Scenario 3: Scheduling an activity without date
+        # Scenario 4: Scheduling an activity without date
         activity3_id = self.activity_pool.create(cr, uid, {'data_model': 'test.activity.data.model'})
         with self.assertRaises(except_orm):
             self.activity_pool.schedule(cr, uid, activity3_id)
 
-        # Scenario 4: Scheduling an activity with a datetime date
+        # Scenario 5: Scheduling an activity with a datetime date
         self.assertTrue(self.activity_pool.schedule(cr, uid, activity_id, test_date[1]), msg="Activity Schedule failed")
         activity = self.activity_pool.browse(cr, uid, activity_id)
         self.assertEqual(activity.date_scheduled, '2015-10-10 13:00:00', msg="Activity date_scheduled not updated after schedule")
 
-        # Scenario 5: Scheduling an activity with different date formats
+        # Scenario 6: Scheduling an activity with different date formats
         self.assertTrue(self.activity_pool.schedule(cr, uid, activity_id, test_date[2]), msg="Activity Schedule failed")
         activity = self.activity_pool.browse(cr, uid, activity_id)
         self.assertEqual(activity.date_scheduled, '2015-10-09 12:00:00', msg="Activity date_scheduled not updated after schedule")
@@ -184,7 +192,7 @@ class TestActivity(common.SingleTransactionCase):
         activity = self.activity_pool.browse(cr, uid, activity_id)
         self.assertEqual(activity.date_scheduled, '2015-10-07 00:00:00', msg="Activity date_scheduled not updated after schedule")
 
-        # Scenario 6: Scheduling activities on not allowed states
+        # Scenario 7: Scheduling activities on not allowed states
         self.activity_pool.schedule(cr, uid, activity3_id, test_date[0])
         self.activity_pool.write(cr, uid, activity_id, {'state': 'started'})
         self.activity_pool.write(cr, uid, activity2_id, {'state': 'completed'})

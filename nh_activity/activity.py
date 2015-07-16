@@ -8,20 +8,6 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-class Event(object):
-    def __init__(self, **kwargs):
-        self.model = kwargs.get('model', None)
-        self.method = kwargs.get('method', None)
-        self.activity = kwargs.get('activity', None)
-        self.data = kwargs.get('data', None)
-        self.args = kwargs.get('args', [])
-        self.kwargs = kwargs.get('kwargs', {})
-    
-    def __repr__(self):
-        res = "%s::%s()" % (self.model, self.method)
-        return res
-
-
 def data_model_event(callback=None):
     def decorator(f):
         def wrapper(*args, **kwargs):
@@ -52,12 +38,6 @@ class nh_activity(orm.Model):
     
     _handlers = []
 
-    def _register_handler(self, trigger_model, trigger_method, handler_model, handler_method, when='after'):
-        h = {'trigger_model': trigger_model, 'trigger_method': trigger_method,
-                               'handler_model': handler_model, 'handler_method': handler_method,
-                               'when': when}
-        if h not in self._handlers:self._handlers.append(h)
-        
     def _get_data_type_selection(self, cr, uid, context=None):
         res = [(model_name, model._description) for model_name, model in self.pool.models.items()
                            if hasattr(model, '_description')]        
@@ -145,26 +125,6 @@ class nh_activity(orm.Model):
             return created_ids
 
     # DATA API
-
-    @data_model_event(callback="start_act_window")
-    def start_act_window(self, cr, uid, activity_id, fields, context=None):
-        return True
-
-    @data_model_event(callback="schedule_act_window")
-    def schedule_act_window(self, cr, uid, activity_id, fields, context=None):
-        return True
-
-    @data_model_event(callback="submit_act_window")
-    def submit_act_window(self, cr, uid, activity_id, fields, context=None):
-        return True
-
-    @data_model_event(callback="complete_act_window")
-    def complete_act_window(self, cr, uid, activity_id, fields, context=None):
-        return True
-
-    @data_model_event(callback="cancel_act_window")
-    def cancel_act_window(self, cr, uid, activity_id, fields, context=None):
-        return True
 
     @data_model_event(callback="update_activity")
     def update_activity(self, cr, uid, activity_id, context=None):
@@ -273,71 +233,6 @@ class nh_activity_data(orm.AbstractModel):
         if vals_data:
             activity_pool.submit(cr, uid, new_activity_id, vals_data, context)
         return new_activity_id
-
-    def submit_ui(self, cr, uid, ids, context=None):
-        if context.get('active_id'):
-            activity_pool = self.pool['nh.activity']
-            activity_pool.write(cr, uid, context['active_id'], {'data_ref': "%s,%s" % (self._name, str(ids[0]))})
-            activity = activity_pool.browse(cr, uid, context['active_id'], context)
-            activity_pool.update_activity(cr, SUPERUSER_ID, activity.id, context)
-            _logger.debug("activity '%s', activity.id=%s data submitted via UI" % (activity.data_model, activity.id))
-        return {'type': 'ir.actions.act_window_close'}
-
-    def complete_ui(self, cr, uid, ids, context=None):
-        if context.get('active_id'):
-            active_id = context['active_id']
-            activity_pool = self.pool['nh.activity']
-            activity_pool.write(cr, uid, active_id, {'data_ref': "%s,%s" % (self._name, str(ids[0]))})
-            activity = activity_pool.browse(cr, uid, active_id, context)
-            activity_pool.update_activity(cr, SUPERUSER_ID, activity.id, context)
-            activity_pool.complete(cr, uid, activity.id, context)
-            _logger.debug("activity '%s', activity.id=%s data completed via UI" % (activity.data_model, activity.id))
-        return {'type': 'ir.actions.act_window_close'}
-
-    def start_act_window(self, cr, uid, activity_id, context=None):
-        return self.act_window(cr, uid, activity_id, "start", context)
-
-    def schedule_act_window(self, cr, uid, activity_id, context=None):
-        return self.act_window(cr, uid, activity_id, "schedule", context)
-
-    def submit_act_window(self, cr, uid, activity_id, context=None):
-        return self.act_window(cr, uid, activity_id, "submit", context)
-
-    def complete_act_window(self, cr, uid, activity_id, context=None):
-        return self.act_window(cr, uid, activity_id, "complete", context)
-
-    def cancel_act_window(self, cr, uid, activity_id, context=None):
-        return self.act_window(cr, uid, activity_id, "cancel", context)
-
-    def act_window(self, cr, uid, activity_id, command, context=None):
-        activity_id = isinstance(activity_id, (list, tuple)) and activity_id[0] or activity_id      
-        activity_pool = self.pool['nh.activity']
-        activity = activity_pool.browse(cr, uid, activity_id, context)        
-        imd_pool = self.pool['ir.model.data']
-        model_xmlid = "model_%s" % activity.data_ref._name.replace(".","_")
-        model_id = imd_pool.search(cr, uid, [['name','=',model_xmlid]])
-        if not model_id:
-            raise osv.except_osv("Error!", "Model with xmlid %s is not found in ir.model.data" % model_xmlid)
-        model_id = model_id[0]
-        model_imd = imd_pool.browse(cr, uid, model_id)
-        view_xmlid = eval("activity.data_ref._%s_view_xmlid" % command)
-        view = imd_pool.get_object(cr, uid, model_imd.module, view_xmlid, context)
-        if not view:
-            raise osv.except_osv('Error!', "View with xmlid='%s' not found" % view_xmlid)
-        ctx = context or {}
-        ctx.update({'nh_source': 'nh.activity'})
-        aw = {
-            'type': 'ir.actions.act_window',
-            'view_id': view.id,
-            'res_model': view.model,
-            'res_id': activity.data_ref.id,
-            'view_type': view.type,
-            'view_mode': view.type,
-            'target': "new",
-            'context': ctx,
-            'name': view.name
-        }
-        return aw
 
     def start(self, cr, uid, activity_id, context=None):
         activity_pool = self.pool['nh.activity']
