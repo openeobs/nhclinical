@@ -1,11 +1,7 @@
-from datetime import datetime as dt
 import logging
 
 from openerp.osv import orm, fields, osv
-from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as dtf
 from openerp import SUPERUSER_ID
-
-from openerp.addons.nh_activity.activity import except_if
 
 _logger = logging.getLogger(__name__)
 
@@ -50,7 +46,8 @@ class nh_clinical_patient_move(orm.Model):
         activity_pool = self.pool['nh.activity']
         patient_pool = self.pool['nh.clinical.patient']
         activity = activity_pool.browse(cr, uid, activity_id, context)
-        except_if(not activity.location_id, 'There is no destination location!')
+        if not activity.location_id:
+            raise osv.except_osv("Patient Move Error!", 'There is no destination location!')
 
         last_movement_id = activity_pool.search(cr, uid, [
             ['data_model', '=', 'nh.clinical.patient.move'],
@@ -87,14 +84,14 @@ class nh_clinical_patient_swap_beds(orm.Model):
         location1 = activity.data_ref.location1_id
         location2 = activity.data_ref.location2_id
         if location1 and not location1.patient_ids:
-            osv.except_osv('Swap Patients Error!', 'No patient in location %s' % location1.name)
+            raise osv.except_osv('Swap Patients Error!', 'No patient in location %s' % location1.name)
         if location2 and not location2.patient_ids:
-            osv.except_osv('Swap Patients Error!', 'No patient in location %s' % location2.name)
+            raise osv.except_osv('Swap Patients Error!', 'No patient in location %s' % location2.name)
         ward1_id = location_pool.get_closest_parent_id(cr, uid, location1.id, 'ward', context=context)
         ward2_id = location_pool.get_closest_parent_id(cr, uid, location2.id, 'ward', context=context)
         if ward1_id != ward2_id:
-            osv.except_osv('Swap Patients Error!',
-                           'Trying to swap locations from different wards, should be using transfer instead')
+            raise osv.except_osv('Swap Patients Error!',
+                                 'Trying to swap locations from different wards, should be using transfer instead')
         return res
 
     def complete(self, cr, uid, activity_id, context=None):
@@ -182,7 +179,7 @@ class nh_clinical_patient_placement(orm.Model):
         move_pool = self.pool['nh.clinical.patient.move']
         placement_activity = activity_pool.browse(cr, uid, activity_id, context)
         if not placement_activity.data_ref.location_id:
-            osv.except_osv('Placement Error!', 'Placement cannot be completed without location')
+            raise osv.except_osv('Placement Error!', 'Placement cannot be completed without location')
         res = super(nh_clinical_patient_placement, self).complete(cr, uid, activity_id, context)
         placement_activity = activity_pool.browse(cr, uid, activity_id, context)
         patient_id = placement_activity.data_ref.patient_id.id
@@ -205,7 +202,8 @@ class nh_clinical_patient_placement(orm.Model):
         if vals.get('location_id'):
             location_pool = self.pool['nh.clinical.location']
             available_bed_location_ids = location_pool.get_available_location_ids(cr, uid, ['bed'], context=context)
-            except_if(vals['location_id'] not in available_bed_location_ids, msg="Location id=%s is not available" % vals['location_id'])
+            if vals['location_id'] not in available_bed_location_ids:
+                raise osv.except_osv("Patient Placement Error!", "Location id=%s is not available" % vals['location_id'])
         return super(nh_clinical_patient_placement, self).submit(cr, uid, activity_id, vals, context)
 
 

@@ -1,9 +1,7 @@
 import logging
 
-from openerp.osv import orm
+from openerp.osv import orm, osv
 from openerp import SUPERUSER_ID
-
-from openerp.addons.nh_activity.activity import except_if
 
 _logger = logging.getLogger(__name__)
 
@@ -30,7 +28,8 @@ class nh_clinical_api_demo(orm.AbstractModel):
     def demo_data(self, cr, uid, model, values_method=None, values={}):
         api_demo_data = self.pool['nh.clinical.api.demo.data']
         values_method = values_method or api_demo_data._default_values_methods.get(model)
-        except_if(not values_method, msg="Values method is not passed and default method is not set!")
+        if not values_method:
+            osv.except_osv('API demo error!', 'Values method is not passed and default method is not set!')
         v = eval("api_demo_data.{method}(cr, uid, values)".format(method=values_method))
         return v        
     

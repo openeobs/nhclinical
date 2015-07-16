@@ -7,8 +7,6 @@ from openerp.osv import orm, fields, osv
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
 from openerp import SUPERUSER_ID
 
-from openerp.addons.nh_activity.activity import except_if
-
 _logger = logging.getLogger(__name__)
 
 
@@ -544,11 +542,13 @@ class nh_clinical_adt_patient_merge(orm.Model):
         super(nh_clinical_adt_patient_merge, self).complete(cr, uid, activity_id, context=context)
         activity_pool = self.pool['nh.activity']
         merge_activity = activity_pool.browse(cr, SUPERUSER_ID, activity_id, context=context)
-        except_if(not (merge_activity.data_ref.from_identifier and merge_activity.data_ref.into_identifier), msg="from_identifier or into_identifier not found in submitted data!")
+        if not (merge_activity.data_ref.from_identifier and merge_activity.data_ref.into_identifier):
+            raise osv.except_osv('Patient Merge Error!', "from_identifier or into_identifier not found in submitted data!")
         patient_pool = self.pool['nh.clinical.patient']
         from_id = patient_pool.search(cr, uid, [('other_identifier', '=', merge_activity.data_ref.from_identifier)])
         into_id = patient_pool.search(cr, uid, [('other_identifier', '=', merge_activity.data_ref.into_identifier)])
-        except_if(not(from_id and into_id), msg="Source or destination patient not found!")
+        if not(from_id and into_id):
+            raise osv.except_osv('Patient Merge Error!', "Source or destination patient not found!")
         from_id = from_id[0]
         into_id = into_id[0]
         # compare and combine data. may need new cursor to have the update in one transaction

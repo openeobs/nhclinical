@@ -5,8 +5,6 @@ import logging
 from openerp.osv import orm, fields, osv
 from openerp import SUPERUSER_ID
 
-from openerp.addons.nh_activity.activity import except_if
-
 _logger = logging.getLogger(__name__)
 
 class nh_clinical_device_category(orm.Model):
@@ -124,8 +122,10 @@ class nh_clinical_device_connect(orm.Model):
 
     def submit(self, cr, uid, activity_id, vals, context=None):
         device_pool = self.pool['nh.clinical.device']
-        except_if(not vals.get('patient_id'), msg="Patient missing in submitted values!")
-        except_if(not (vals.get('device_id') or vals.get('device_type_id')), msg="Device information missing in submitted values!")
+        if not vals.get('patient_id'):
+            raise osv.except_osv('Device Connect Error!', "Patient missing in submitted values!")
+        if not (vals.get('device_id') or vals.get('device_type_id')):
+            raise osv.except_osv('Device Connect Error!', "Device information missing in submitted values!")
         vals_copy = vals.copy()
         if vals.get('device_id'):
             device = device_pool.browse(cr, uid, vals['device_id'], context=context)
@@ -165,8 +165,10 @@ class nh_clinical_device_disconnect(orm.Model):
 
     def submit(self, cr, uid, activity_id, vals, context=None):
         device_pool = self.pool['nh.clinical.device']
-        except_if(not vals.get('patient_id'), msg="Patient missing in submitted values!")
-        except_if(not (vals.get('device_id') or vals.get('device_type_id')), msg="Device information missing in submitted values!")
+        if not vals.get('patient_id'):
+            osv.except_osv('Device Disconnect Error!', "Patient missing in submitted values!")
+        if not (vals.get('device_id') or vals.get('device_type_id')):
+            osv.except_osv('Device Disconnect Error!', "Device information missing in submitted values!")
         vals_copy = vals.copy()
         if vals.get('device_id'):
             device = device_pool.browse(cr, uid, vals['device_id'], context=context)
