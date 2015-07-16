@@ -70,7 +70,7 @@ class TestActivityExtension(common.SingleTransactionCase):
         self.assertTrue(self.activity_pool.write(cr, uid, self.spell_id, False), msg="Error on activity write")
         # include location_id in data
         self.assertTrue(self.activity_pool.write(cr, uid, self.spell_id, {'location_id': self.wu_id}))
-        self.assertTrue(self.spell_pool._audit_ward_manager(cr, uid, self.spell_id), msg="Audit Ward Manager failed")
+        self.assertTrue(self.spell_pool._audit_ward_manager(cr, uid, [self.spell_id]), msg="Audit Ward Manager failed")
         spell = self.activity_pool.browse(cr, uid, self.spell_id)
         self.assertEqual(spell.ward_manager_id.id, self.wmu_id, msg="Audit Ward Manager recorded the wrong user id")
         self.activity_pool.write(cr, uid, self.spell_id, {'location_id': self.wt_id})

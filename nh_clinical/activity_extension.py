@@ -258,18 +258,7 @@ class nh_activity_data(orm.AbstractModel):
         pos_id = spell.pos_id.id if spell else False
         return pos_id
 
-    def get_activity_device_id(self, cr, uid, activity_id, context=None):       
-        """
-        """
-        device_id = False
-        data_ids = self.search(cr, uid, [('activity_id', '=', activity_id)])
-        data = self.browse(cr, uid, data_ids, context)[0]
-
-        if 'device_id' in self._columns.keys():
-            device_id = data.device_id and data.device_id.id or False
-        return device_id
-
-    def get_activity_location_id(self, cr, uid, activity_id, context=None):       
+    def get_activity_location_id(self, cr, uid, activity_id, context=None):
         """
         Returns pos_id for activity calculated based on activity data
         Logic:
