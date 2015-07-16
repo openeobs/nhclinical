@@ -164,6 +164,7 @@ class TestActivity(common.SingleTransactionCase):
         # Scenario 2: Scheduling an activity sending wrong formatted parameter as schedule date
         with self.assertRaises(except_orm):
             self.activity_pool.schedule(cr, uid, activity_id, 2015)
+        with self.assertRaises(except_orm):
             self.activity_pool.schedule(cr, uid, activity_id, 'Not A Date')
 
         # Scenario 3: Schedule an activity writing the date beforehand
