@@ -1,10 +1,13 @@
+from datetime import datetime
+import logging
+
 from openerp.osv import orm, fields
 import openerp.modules.registry as registry
 import openerp
-from datetime import datetime
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
-import logging
+
 import pytz
+from pytz.exceptions import UnknownTimeZoneError, NonExistentTimeError
 
 
 _logger = logging.getLogger(__name__)
@@ -22,11 +25,12 @@ def utc_timestamp(cr, uid, timestamp, context=None):
             utc = pytz.timezone('UTC')
             context_tz = pytz.timezone(tz_name)
             tz_timestamp = context_tz.localize(timestamp)
+        except (UnknownTimeZoneError, NonExistentTimeError):
+            _logger.debug("Failed to compute context/client-specific timestamp"
+                          "Using the UTC value.", exc_info=True)
+        else:
             return tz_timestamp.astimezone(utc).strftime(DTF)
-        except Exception:
-            _logger.debug("failed to compute context/client-specific timestamp, "
-                          "using the UTC value",
-                          exc_info=True)
+
     return timestamp.strftime(DTF)
 
 fields.datetime.utc_timestamp = utc_timestamp
