@@ -8,7 +8,7 @@ class test_activity_data_model(orm.Model):
     _name = 'test.activity.data.model'
     _inherit = ['nh.activity.data']
     _description = 'Test Activity Model'
-    
+
     _columns = {
         'field1': fields.text('Field1')
     }
