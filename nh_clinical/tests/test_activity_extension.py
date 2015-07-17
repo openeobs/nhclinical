@@ -1,5 +1,5 @@
 from openerp.tests import common
-from datetime import datetime as dt
+from datetime import datetime as dt, timedelta as td
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as dtf
 
 from faker import Faker
@@ -18,9 +18,12 @@ class TestActivityExtension(common.SingleTransactionCase):
         cls.activity_pool = cls.registry('nh.activity')
         cls.patient_pool = cls.registry('nh.clinical.patient')
         cls.location_pool = cls.registry('nh.clinical.location')
+        cls.context_pool = cls.registry('nh.clinical.context')
         cls.pos_pool = cls.registry('nh.clinical.pos')
         cls.spell_pool = cls.registry('nh.clinical.spell')
-        cls.test_pool = cls.registry('test.activity.data.model')
+        cls.test_pool = cls.registry('test.activity.data.model0')
+        cls.test2_pool = cls.registry('test.activity.data.model1')
+        cls.test3_pool = cls.registry('test.activity.data.model3')
 
         cls.apidemo = cls.registry('nh.clinical.api.demo')
 
@@ -61,6 +64,8 @@ class TestActivityExtension(common.SingleTransactionCase):
         cls.spell2_id = spell_activity_id
         cls.patient_id = patient_id
         cls.patient2_id = patient2_id
+        cls.context_id = cls.context_pool.create(cr, uid, {'name': 'test', 'models': "['nh.clinical.location']"})
+        cls.location_pool.write(cr, uid, cls.wu_id, {'context_ids': [[6, 0, [cls.context_id]]]})
 
     def test_01_audit_ward_manager(self):
         cr, uid = self.cr, self.uid
@@ -82,7 +87,7 @@ class TestActivityExtension(common.SingleTransactionCase):
         cr, uid = self.cr, self.uid
 
         activity_id = self.test_pool.create_activity(cr, uid, {'parent_id': self.spell2_id}, {})
-        self.assertTrue(self.activity_pool.cancel_open_activities(cr, uid, self.spell2_id, 'test.activity.data.model'))
+        self.assertTrue(self.activity_pool.cancel_open_activities(cr, uid, self.spell2_id, 'test.activity.data.model0'))
         self.assertEqual(self.activity_pool.read(cr, uid, activity_id, ['state'])['state'], 'cancelled')
 
     def test_03_update_users(self):
@@ -113,3 +118,90 @@ class TestActivityExtension(common.SingleTransactionCase):
         self.activity_pool.write(cr, uid, self.spell2_id, {'location_id': self.wu_id})
         self.assertTrue(self.wmu_id in self.activity_pool.read(cr, uid, self.spell2_id, ['user_ids'])['user_ids'],
                         msg="Responsible users not updated correctly after location assigned to the spell")
+
+    def test_05_trigger_policy(self):
+        cr, uid = self.cr, self.uid
+        activity_id = self.test2_pool.create_activity(cr, uid, {
+            'parent_id': self.spell2_id}, {'field1': 'TEST0', 'patient_id': self.patient2_id})
+        activity2_id = self.test_pool.create_activity(cr, uid, {
+            'parent_id': self.spell2_id}, {'field1': 'TEST1', 'frequency': 30, 'patient_id': self.patient2_id})
+        activity3_id = self.test3_pool.create_activity(cr, uid, {
+            'parent_id': self.spell2_id}, {'field1': 'TEST2', 'patient_id': self.patient2_id})
+
+        # Scenario 1: Trigger empty policy - does nothing
+        self.assertTrue(self.test2_pool.trigger_policy(cr, uid, activity_id), msg="Error triggering policy")
+
+        # Scenario 2: Trigger simple policy. No case. No context. Domains not true
+        self.assertTrue(self.test_pool.trigger_policy(cr, uid, activity2_id), msg="Error triggering policy")
+        # According to policy, activity 1 and 2 should be cancelled due to cancel_others parameter, activity 3 should
+        # still be open
+        self.assertEqual(self.activity_pool.read(cr, uid, activity_id, ['state'])['state'], 'cancelled')
+        self.assertEqual(self.activity_pool.read(cr, uid, activity2_id, ['state'])['state'], 'cancelled')
+        self.assertEqual(self.activity_pool.read(cr, uid, activity3_id, ['state'])['state'], 'new')
+        # The policy should have triggered the creation of 4 new activities, 1 of each data type
+        activity_ids = self.activity_pool.search(cr, uid, [['creator_id', '=', activity2_id]])
+        self.assertEqual(len(activity_ids), 4)
+        self.assertEqual(len(self.activity_pool.search(cr, uid, [['creator_id', '=', activity2_id],
+                                                                 ['data_model', '=', 'test.activity.data.model0']])), 1)
+        self.assertEqual(len(self.activity_pool.search(cr, uid, [['creator_id', '=', activity2_id],
+                                                                 ['data_model', '=', 'test.activity.data.model1']])), 1)
+        self.assertEqual(len(self.activity_pool.search(cr, uid, [['creator_id', '=', activity2_id],
+                                                                 ['data_model', '=', 'test.activity.data.model3']])), 1)
+        self.assertEqual(len(self.activity_pool.search(cr, uid, [['creator_id', '=', activity2_id],
+                                                                 ['data_model', '=', 'test.activity.data.model4']])), 1)
+        for activity in self.activity_pool.browse(cr, uid, activity_ids):
+            if activity.data_model == 'test.activity.data.model0':
+                # activity should be scheduled, due in 1 hour with initialized values TEST1 and frequency 30
+                self.assertEqual(activity.state, 'scheduled')
+                self.assertAlmostEqual(activity.date_scheduled, (dt.now() + td(minutes=60)).strftime(dtf))
+                self.assertEqual(activity.data_ref.field1, 'TEST1')
+                self.assertEqual(activity.data_ref.frequency, 30)
+                activity_id = activity.id
+            elif activity.data_model == 'test.activity.data.model1':
+                # activity should be started with initialized value TEST1
+                self.assertEqual(activity.state, 'started')
+                self.assertEqual(activity.data_ref.field1, 'TEST1')
+            elif activity.data_model == 'test.activity.data.model3':
+                # activity should be scheduled, due in 30 minutes with initialized value TEST1 and frequency 30
+                self.assertEqual(activity.state, 'scheduled')
+                self.assertAlmostEqual(activity.date_scheduled, (dt.now() + td(minutes=30)).strftime(dtf))
+                self.assertEqual(activity.data_ref.field1, 'TEST1')
+                self.assertEqual(activity.data_ref.frequency, 30)
+            elif activity.data_model == 'test.activity.data.model4':
+                # activity should be completed with initialized value TESTCOMPLETE
+                self.assertEqual(activity.state, 'completed')
+                self.assertEqual(activity.data_ref.field1, 'TESTCOMPLETE')
+
+        # Scenario 3: Using case to control what to trigger
+        self.assertTrue(self.test_pool.trigger_policy(cr, uid, activity_id, case=1), msg="Error triggering policy")
+        # The policy should have triggered the creation of 1 activity of test.activity.data.model type
+        activity_ids = self.activity_pool.search(cr, uid, [['creator_id', '=', activity_id]])
+        self.assertEqual(len(activity_ids), 1)
+
+        # Scenario 4: Using context and location to control what to trigger
+        activity_id = activity_ids[0]
+        self.assertTrue(self.test_pool.trigger_policy(cr, uid, activity_id, location_id=self.wu_id),
+                        msg="Error triggering policy")
+        # The policy should have triggered the creation of 2 activities
+        activity_ids = self.activity_pool.search(cr, uid, [['creator_id', '=', activity_id]])
+        self.assertEqual(len(activity_ids), 2)
+        self.assertEqual(len(self.activity_pool.search(cr, uid, [['creator_id', '=', activity2_id],
+                                                                 ['data_model', '=', 'test.activity.data.model0']])), 1)
+        self.assertEqual(len(self.activity_pool.search(cr, uid, [['creator_id', '=', activity2_id],
+                                                                 ['data_model', '=', 'test.activity.data.model4']])), 1)
+        for activity in self.activity_pool.browse(cr, uid, activity_ids):
+            activity_id = activity.id if activity.data_model == 'test.activity.data.model0' else activity_id
+        self.assertTrue(self.test_pool.trigger_policy(cr, uid, activity_id, location_id=self.wt_id),
+                        msg="Error triggering policy")
+        # The policy should have triggered the creation of 1 activity of test.activity.data.model type
+        activity_ids = self.activity_pool.search(cr, uid, [['creator_id', '=', activity_id]])
+        self.assertEqual(len(activity_ids), 1)
+
+        # Scenario 5: Using domain to control the activity trigger. The second activity won't be triggered if we have
+        # a completed test.activity.data.model type
+        activity_id = activity_ids[0]
+        self.activity_pool.complete(cr, uid, activity_id)
+        self.assertTrue(self.test_pool.trigger_policy(cr, uid, activity_id, case=2), msg="Error triggering policy")
+        # The policy should have triggered nothing
+        activity_ids = self.activity_pool.search(cr, uid, [['creator_id', '=', activity_id]])
+        self.assertEqual(len(activity_ids), 0)

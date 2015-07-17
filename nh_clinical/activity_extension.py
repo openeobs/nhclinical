@@ -493,9 +493,3 @@ inner join user_location_parents on user_location_parents.user_id = user_access.
 inner join user_parent_location_activity on user_parent_location_activity.user_id = user_access.user_id
             );                 
         """)
-
-
-
-
-
-
