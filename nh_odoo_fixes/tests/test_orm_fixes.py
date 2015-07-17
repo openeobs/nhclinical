@@ -26,13 +26,12 @@ class TestORMFixes(TransactionCase):
     def test_02_utc_timestamp_with_tz_in_context(self, timezone):
         cr, uid = self.cr, self.uid
         context = {'tz': 'GB'}
-        date = datetime.now()
 
-        fields.datetime.utc_timestamp(cr, uid, date, context=context)
+        fields.datetime.utc_timestamp(cr, uid, self.date, context=context)
         self.assertEquals(timezone.call_count, 2)
         timezone.assert_any_call('UTC')
         timezone.assert_any_call('GB')
-        timezone.localize.called_with(date)
+        timezone.localize.called_with(self.date)
 
 
 
