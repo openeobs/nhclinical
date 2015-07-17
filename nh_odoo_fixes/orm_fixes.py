@@ -1,7 +1,7 @@
 from datetime import datetime
 import logging
 
-from openerp.osv import orm, fields
+from openerp.osv import fields
 import openerp.modules.registry as registry
 import openerp
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
