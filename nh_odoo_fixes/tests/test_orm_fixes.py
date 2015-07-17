@@ -1,7 +1,6 @@
 __author__ = 'wearp'
 from datetime import datetime
 import re
-import pytz
 from mock import patch
 
 from openerp.osv import fields
@@ -39,6 +38,3 @@ class TestORMFixes(TransactionCase):
         timestamp = fields.datetime.utc_timestamp(cr, uid, self.date, context={'tz': '??'})
         result = re.match(self.pattern, timestamp)
         self.assertEquals(result.string, timestamp)
-
-
-
