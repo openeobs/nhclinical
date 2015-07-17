@@ -382,7 +382,7 @@ class nh_clinical_adt_patient_transfer(orm.Model):
                 api.admit(cr, uid, vals['other_identifier'], {'location': vals['original_location']}, context=context)
                 spell_id = spell_pool.get_by_patient_id(cr, uid, patient_id, context=context)
             else:
-                osv.except_osv('Transfer Error!', 'Patient does not have an open spell. No origin location provided.')
+                raise osv.except_osv('Transfer Error!', 'Patient does not have an open spell. No origin location provided.')
         spell = spell_pool.browse(cr, uid, spell_id, context=context)
         activity_pool.write(cr, uid, activity_id, {'parent_id': spell.activity_id.id}, context=context)
         data = vals.copy()

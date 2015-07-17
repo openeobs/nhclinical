@@ -376,7 +376,15 @@ class testADT(common.SingleTransactionCase):
             ['state', '=', 'completed'], ['creator_id', '=', activity_id]])
         self.assertTrue(transfer_id, msg="Transfer not found!")
 
-        # Scenario 2: Transfer a not admitted Patient providing origin location
+        # Scenario 2.1: Transfer a not admitted Patient not providing origin location
+        transfer_data = {
+            'other_identifier': 'TEST00X',
+            'location': 'T'
+        }
+        with self.assertRaises(except_orm):
+            self.transfer_pool.create_activity(cr, self.adt_id, {}, transfer_data)
+
+        # Scenario 2.2: Transfer a not admitted Patient providing origin location
         transfer_data = {
             'other_identifier': 'TEST00X',
             'original_location': 'X',
@@ -416,7 +424,7 @@ class testADT(common.SingleTransactionCase):
             'location': 'T'
         }
         with self.assertRaises(except_orm):
-            self.admit_pool.create_activity(cr, uid, {}, transfer_data)
+            self.transfer_pool.create_activity(cr, uid, {}, transfer_data)
     
     def test_08_adt_patient_cancel_transfer(self):
         cr, uid = self.cr, self.uid
@@ -507,3 +515,15 @@ class testADT(common.SingleTransactionCase):
         with self.assertRaises(except_orm):
             self.spell_update_pool.create_activity(cr, self.adt_id, {}, update_data)
 
+        # Scenario 5: Update a Spell with no doctor data
+        update_data = {
+            'other_identifier': 'TEST001',
+            'start_date': '2015-05-05 17:00:00',
+            'code': 'TESTADMISSION03',
+            'location': 'T'
+        }
+        activity_id = self.spell_update_pool.create_activity(cr, self.adt_id, {}, update_data)
+        self.activity_pool.complete(cr, uid, activity_id)
+        spell = self.activity_pool.browse(cr, uid, activity.parent_id.id)
+        self.assertFalse(spell.data_ref.con_doctor_ids, msg="Wrong doctor data")
+        self.assertFalse(spell.data_ref.ref_doctor_ids, msg="Wrong doctor data")
