@@ -439,4 +439,4 @@ def parse(self, cr, uid, context):
     for leaf in self.result:
         joins |= set(leaf.get_join_conditions())
     self.joins = list(joins)
-openerp.osv.expression.expression.parse = parse
+# openerp.osv.expression.expression.parse = parse
