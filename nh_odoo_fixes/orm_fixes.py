@@ -21,15 +21,16 @@ def utc_timestamp(cr, uid, timestamp, context=None):
         reg = registry.RegistryManager.get(cr.dbname)
         tz_name = reg.get('res.users').read(cr, openerp.SUPERUSER_ID, uid, ['tz'])['tz']
 
-    try:
-        utc = pytz.timezone('UTC')
-        context_tz = pytz.timezone(tz_name)
-        tz_timestamp = context_tz.localize(timestamp)
-    except (UnknownTimeZoneError, NonExistentTimeError):
-        _logger.debug("Failed to compute context/client-specific timestamp"
-                      "Using the UTC value.", exc_info=True)
-    else:
-        return tz_timestamp.astimezone(utc).strftime(DTF)
+    if tz_name:
+        try:
+            utc = pytz.timezone('UTC')
+            context_tz = pytz.timezone(tz_name)
+            tz_timestamp = context_tz.localize(timestamp)
+        except (UnknownTimeZoneError, NonExistentTimeError):
+            _logger.debug("Failed to compute context/client-specific timestamp"
+                          "Using the UTC value.", exc_info=True)
+        else:
+            return tz_timestamp.astimezone(utc).strftime(DTF)
 
     return timestamp.strftime(DTF)
 
