@@ -28,17 +28,17 @@ def new_set(self, cr, model, id, name, values, user=None, context=None):
             cr.execute('delete from '+rel+' where ' + id1 + ' = %s', (id,))
         elif act[0] == 6:
               
-            d1, d2,tables = obj.pool.get('ir.rule').domain_get(cr, user, obj._name, context=context)
+            d1, d2, tables = obj.pool.get('ir.rule').domain_get(cr, user, obj._name, context=context)
             if d1:
                 d1 = ' and ' + ' and '.join(d1)
             else:
                 d1 = ''
             cr.execute('delete from '+rel+' where '+id1+'=%s AND '+id2+' IN (SELECT '+rel+'.'+id2+' FROM '+rel+', '+','.join(tables)+' WHERE '+rel+'.'+id1+'=%s AND '+rel+'.'+id2+' = '+obj._table+'.id '+ d1 +')', [id, id]+d2)
-# NHC BEGIN
-#             for act_nbr in act[2]: # original
+            # NHC BEGIN
+            # Original: for act_nbr in act[2]
             # duplicate ids have to be removed
             for act_nbr in set(act[2]):
-# NHC END
+            # NHC END
                 cr.execute('insert into '+rel+' ('+id1+','+id2+') values (%s, %s)', (id, act_nbr))
 
 many2many.set = new_set
