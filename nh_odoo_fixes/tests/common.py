@@ -6,6 +6,7 @@ class test_model_a(orm.Model):
 
     _columns = {
         'name': fields.char(),
+        'description': fields.text(),
         'a_ids': fields.many2many('test_model_b', 'b_a_rel',
                                   'test_model_a_id', 'test_model_b_id')
     }
