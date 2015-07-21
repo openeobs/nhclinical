@@ -75,6 +75,7 @@ class nh_clinical_adt_patient_register(orm.Model):
             'ethnicity': activity.data_ref.ethnicity
         }
         patient_id = patient_pool.create(cr, uid, vals, context)
+        activity_pool.write(cr, uid, activity_id, {'patient_id': patient_id}, context=context)
         self.write(cr, uid, activity.data_ref.id, {'patient_id': patient_id}, context=context)
         super(nh_clinical_adt_patient_register, self).complete(cr, uid, activity_id, context)
         return patient_id
