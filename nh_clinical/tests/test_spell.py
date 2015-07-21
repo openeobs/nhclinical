@@ -105,7 +105,7 @@ class TestClinicalSpell(common.SingleTransactionCase):
         self.assertEquals(result, [])
         del cr.fetchone
 
-    def test_06_test_get_activity_user_ids_when_activity_id(self):
+    def test_06_test_get_activity_user_ids_when_activity_id_and_user_ids(self):
         cr, uid = self.cr, self.uid
         cr.fetchone = MagicMock(return_value=(1, 2))
         cr.dictfetchone = MagicMock(return_value={'activity_id': 1, 'user_ids': [2, 3, 4]})
