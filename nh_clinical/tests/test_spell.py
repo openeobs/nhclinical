@@ -1,4 +1,5 @@
 import logging
+from mock import MagicMock
 
 from openerp.tests import common
 from openerp.osv.orm import except_orm
@@ -19,6 +20,7 @@ class TestClinicalSpell(common.SingleTransactionCase):
         cls.pos_pool = cls.registry('nh.clinical.pos')
         cls.group_pool = cls.registry('res.groups')
         cls.user_pool = cls.registry('res.users')
+        cls.api_pool = cls.registry('nh.clinical.api')
 
         cls.hospital_id = cls.location_pool.create(cr, uid, {'name': 'Test Hospital', 'code': 'TESTHOSP',
                                                              'usage': 'hospital'})
@@ -58,3 +60,19 @@ class TestClinicalSpell(common.SingleTransactionCase):
         # Scenario 4: Exception 'False', Spell does not exist
         with self.assertRaises(except_orm):
             self.spell_pool.get_by_patient_id(cr, uid, self.patient2_id, exception='False')
+
+    def test_02_get_transferred_user_ids(self):
+        cr, uid = self.cr, self.uid
+        spell_id_1 = 1
+        spell_id_2 = 2
+        spell_ids = [spell_id_1, spell_id_2]
+        return_value = [
+            {'activity_id': 1, 'spell_id': spell_id_1, 'user_ids': (3, 4, 5)},
+            {'activity_id': 2, 'spell_id': spell_id_2, 'user_ids': (2, 2, 5)}
+        ]
+        cr.dictfetchall = MagicMock(return_value=return_value)
+
+        result = self.spell_pool._get_transferred_user_ids(cr, uid, spell_ids, 'transferred_user_ids', None)
+        self.assertEquals(result, {1: [3, 4, 5], 2: [2, 5]})
+
+        del cr.dictfetchall
