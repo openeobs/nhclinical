@@ -1,4 +1,5 @@
 from openerp.tests.common import SingleTransactionCase
+from openerp.osv.orm import except_orm
 from datetime import datetime as dt, timedelta as td
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as dtf
 
@@ -239,3 +240,19 @@ class TestCoreAPI(SingleTransactionCase):
         self.assertTrue(activity_id, msg="Admit Activity not generated")
         activity = self.activity_pool.browse(cr, uid, activity_id[0])
         self.assertEqual(activity.state, 'completed')
+
+    def test_05_cancel_admit(self):
+        cr, uid = self.cr, self.uid
+
+        # Scenario 1: Cancel an admission
+        self.api.cancel_admit(cr, self.adt_uid, 'TESTP0004')
+        patient_id = self.patient_pool.search(cr, uid, [('other_identifier', '=', 'TESTP0004')])[0]
+        activity_id = self.activity_pool.search(cr, uid, [
+            ['data_model', '=', 'nh.clinical.adt.patient.cancel_admit'], ['patient_id', '=', patient_id]])
+        self.assertTrue(activity_id, msg="Cancel Admission Activity not generated")
+        activity = self.activity_pool.browse(cr, uid, activity_id[0])
+        self.assertEqual(activity.state, 'completed')
+
+        # Scenario 2: Cancel an admission of patient that does not exist
+        with self.assertRaises(except_orm):
+            self.api.cancel_admit(cr, self.adt_uid, 'TESTP0006')
