@@ -86,4 +86,13 @@ class TestClinicalSpell(common.SingleTransactionCase):
 
         result = self.spell_pool._transferred_user_ids_search(cr, uid, None, None, args)
         self.assertEquals([('id', 'in', [1, 2])], result)
+        del self.spell_pool._get_transferred_user_ids
 
+    def test_04_test_create_when_patients_is_started_spell(self):
+        cr, uid = self.cr, self.uid
+        values = {'patient_id': 2}
+        self.spell_pool.search = MagicMock(return_value=[1])
+
+        result = self.spell_pool.create(cr, uid, values)
+        self.assertEquals(1, result)
+        del self.spell_pool.search
