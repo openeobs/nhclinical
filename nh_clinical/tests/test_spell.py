@@ -34,6 +34,15 @@ class TestClinicalSpell(common.SingleTransactionCase):
         cls.patient_id = cls.patient_pool.create(cr, uid, {'other_identifier': 'TESTHN01'})
         cls.patient2_id = cls.patient_pool.create(cr, uid, {'other_identifier': 'TESTHN02'})
 
+        cls.spell_id_1 = 1
+
+        cls.spell_id_2 = 2
+        cls.spell_ids = [cls.spell_id_1, cls.spell_id_2]
+        cls.return_value = [
+            {'activity_id': 1, 'spell_id': cls.spell_id_1, 'user_ids': (3, 4, 5)},
+            {'activity_id': 2, 'spell_id': cls.spell_id_2, 'user_ids': (2, 2, 5)}
+        ]
+
     def test_01_get_by_patient_id(self):
         cr, uid = self.cr, self.uid
 
@@ -63,16 +72,18 @@ class TestClinicalSpell(common.SingleTransactionCase):
 
     def test_02_get_transferred_user_ids(self):
         cr, uid = self.cr, self.uid
-        spell_id_1 = 1
-        spell_id_2 = 2
-        spell_ids = [spell_id_1, spell_id_2]
-        return_value = [
-            {'activity_id': 1, 'spell_id': spell_id_1, 'user_ids': (3, 4, 5)},
-            {'activity_id': 2, 'spell_id': spell_id_2, 'user_ids': (2, 2, 5)}
-        ]
-        cr.dictfetchall = MagicMock(return_value=return_value)
+        cr.dictfetchall = MagicMock(return_value=self.return_value)
 
-        result = self.spell_pool._get_transferred_user_ids(cr, uid, spell_ids, 'transferred_user_ids', None)
+        result = self.spell_pool._get_transferred_user_ids(cr, uid, self.spell_ids, 'transferred_user_ids', None)
         self.assertEquals(result, {1: [3, 4, 5], 2: [2, 5]})
-
         del cr.dictfetchall
+
+    def test_03_transferred_user_ids_search_with_multiple_user_ids(self):
+        cr, uid = self.cr, self.uid
+        args = [('user_id', 'in', [3, 4, 5])]
+        return_value = {1: [3, 4, 5], 2: [2, 5], 3: [6, 7]}
+        self.spell_pool._get_transferred_user_ids = MagicMock(return_value=return_value)
+
+        result = self.spell_pool._transferred_user_ids_search(cr, uid, None, None, args)
+        self.assertEquals([('id', 'in', [1, 2])], result)
+
