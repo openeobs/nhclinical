@@ -103,6 +103,8 @@ class nh_clinical_api(orm.AbstractModel):
             if patient_pool.check_nhs_number(cr, uid, data.get('patient_identifier'), context=context):
                 patient_pool.update(cr, uid, data.get('patient_identifier'), nhs_data, selection='patient_identifier',
                                     context=context)
+            else:
+                self.register(cr, uid, hospital_number, data, context=context)
         if hospital_number:
             data.update({'other_identifier': hospital_number})
         update_activity = update_pool.create_activity(cr, uid, {}, {}, context=context)

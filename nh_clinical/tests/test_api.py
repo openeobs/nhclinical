@@ -126,7 +126,7 @@ class TestCoreAPI(SingleTransactionCase):
 
         # Scenario 3: Update a patient that does not exist. Automatic register
         patient_data = {
-            'patient_identifier': 'TESTNHS002',
+            'patient_identifier': 'TESTNHS003',
             'family_name': "Fname30",
             'given_name': 'Gname30',
             'dob': '1988-08-14 18:00:00',
@@ -141,5 +141,101 @@ class TestCoreAPI(SingleTransactionCase):
         activity_id = self.activity_pool.search(cr, uid, [
             ['data_model', '=', 'nh.clinical.adt.patient.update'], ['patient_id', '=', patient_id[0]]])
         self.assertTrue(activity_id, msg="Update Activity not generated")
+        activity = self.activity_pool.browse(cr, uid, activity_id[0])
+        self.assertEqual(activity.state, 'completed')
+
+    def test_03_admit(self):
+        cr, uid = self.cr, self.uid
+
+        # Scenario 1: Admit a patient using Hospital Number
+        admit_data = {'location': "WARD0"}
+
+        self.api.admit(cr, self.adt_uid, 'TESTP0001', admit_data)
+
+        patient_id = self.patient_pool.search(cr, uid, [('other_identifier', '=', 'TESTP0001')])[0]
+        activity_id = self.activity_pool.search(cr, uid, [
+            ['data_model', '=', 'nh.clinical.adt.patient.admit'], ['patient_id', '=', patient_id]])
+        self.assertTrue(activity_id, msg="Admit Activity not generated")
+        activity = self.activity_pool.browse(cr, uid, activity_id[0])
+        self.assertEqual(activity.state, 'completed')
+
+        # Scenario 2: Admit a patient using NHS Number
+        admit_data = {'location': "WARD1", 'patient_identifier': 'TESTNHS001'}
+
+        self.api.admit(cr, self.adt_uid, '', admit_data)
+
+        patient_id = self.patient_pool.search(cr, uid, [('patient_identifier', '=', 'TESTNHS001')])[0]
+        activity_id = self.activity_pool.search(cr, uid, [
+            ['data_model', '=', 'nh.clinical.adt.patient.admit'], ['patient_id', '=', patient_id]])
+        self.assertTrue(activity_id, msg="Admit Activity not generated")
+        activity = self.activity_pool.browse(cr, uid, activity_id[0])
+        self.assertEqual(activity.state, 'completed')
+
+        # Scenario 3: Admit a patient that does not exist. Automatic register
+        admit_data = {
+            'location': "WARD2",
+            'patient_identifier': 'TESTNHS004',
+            'family_name': "Fname400",
+            'given_name': 'Gname400',
+            'dob': '1988-08-14 18:00:00',
+            'gender': 'M',
+            'sex': 'M'
+            }
+
+        self.api.admit(cr, self.adt_uid, 'TESTP0004', admit_data)
+
+        patient_id = self.patient_pool.search(cr, uid, [('other_identifier', '=', 'TESTP0004')])
+        self.assertTrue(patient_id, msg="Patient was not created")
+        activity_id = self.activity_pool.search(cr, uid, [
+            ['data_model', '=', 'nh.clinical.adt.patient.admit'], ['patient_id', '=', patient_id[0]]])
+        self.assertTrue(activity_id, msg="Admit Activity not generated")
+        activity = self.activity_pool.browse(cr, uid, activity_id[0])
+        self.assertEqual(activity.state, 'completed')
+
+    def test_04_admit_update(self):
+        cr, uid = self.cr, self.uid
+
+        # Scenario 1: Update admission using Hospital Number
+        update_data = {'location': "WARD1"}
+
+        self.api.admit_update(cr, self.adt_uid, 'TESTP0001', update_data)
+
+        patient_id = self.patient_pool.search(cr, uid, [('other_identifier', '=', 'TESTP0001')])[0]
+        activity_id = self.activity_pool.search(cr, uid, [
+            ['data_model', '=', 'nh.clinical.adt.spell.update'], ['patient_id', '=', patient_id]])
+        self.assertTrue(activity_id, msg="Spell Update Activity not generated")
+        activity = self.activity_pool.browse(cr, uid, activity_id[0])
+        self.assertEqual(activity.state, 'completed')
+
+        # Scenario 2: Update admission using NHS Number
+        update_data = {'location': "WARD2", 'patient_identifier': 'TESTNHS001'}
+
+        self.api.admit_update(cr, self.adt_uid, '', update_data)
+
+        patient_id = self.patient_pool.search(cr, uid, [('patient_identifier', '=', 'TESTNHS001')])[0]
+        activity_id = self.activity_pool.search(cr, uid, [
+            ['data_model', '=', 'nh.clinical.adt.spell.update'], ['patient_id', '=', patient_id]])
+        self.assertTrue(activity_id, msg="Spell Update Activity not generated")
+        activity = self.activity_pool.browse(cr, uid, activity_id[0])
+        self.assertEqual(activity.state, 'completed')
+
+        # Scenario 3: Update admission of a patient that does not exist. Automatic register and admission
+        update_data = {
+            'location': "WARD0",
+            'patient_identifier': 'TESTNHS005',
+            'family_name': "Fname5000",
+            'given_name': 'Gname5000',
+            'dob': '1988-08-14 18:00:00',
+            'gender': 'F',
+            'sex': 'F'
+            }
+
+        self.api.admit_update(cr, self.adt_uid, 'TESTP0005', update_data)
+
+        patient_id = self.patient_pool.search(cr, uid, [('other_identifier', '=', 'TESTP0005')])
+        self.assertTrue(patient_id, msg="Patient was not created")
+        activity_id = self.activity_pool.search(cr, uid, [
+            ['data_model', '=', 'nh.clinical.adt.spell.update'], ['patient_id', '=', patient_id[0]]])
+        self.assertTrue(activity_id, msg="Admit Activity not generated")
         activity = self.activity_pool.browse(cr, uid, activity_id[0])
         self.assertEqual(activity.state, 'completed')
