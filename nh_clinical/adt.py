@@ -75,6 +75,7 @@ class nh_clinical_adt_patient_register(orm.Model):
             'ethnicity': activity.data_ref.ethnicity
         }
         patient_id = patient_pool.create(cr, uid, vals, context)
+        activity_pool.write(cr, uid, activity_id, {'patient_id': patient_id}, context=context)
         self.write(cr, uid, activity.data_ref.id, {'patient_id': patient_id}, context=context)
         super(nh_clinical_adt_patient_register, self).complete(cr, uid, activity_id, context)
         return patient_id
@@ -533,28 +534,43 @@ class nh_clinical_adt_patient_merge(orm.Model):
     _inherit = ['nh.activity.data'] 
     _description = 'ADT Patient Merge'
     _columns = {
-        'from_identifier': fields.text('From patient Identifier'),
-        'into_identifier': fields.text('Into Patient Identifier'),        
+        'from_identifier': fields.char('Source Identifier', size=100),
+        'source_patient_id': fields.many2one('nh.clinical.patient', 'Source Patient'),
+        'into_identifier': fields.char('Destination Identifier', size=100),        
+        'dest_patient_id': fields.many2one('nh.clinical.patient', 'Destination Patient'),
     }
-
+    
+    def submit(self, cr, uid, activity_id, vals, context=None):
+        patient_pool = self.pool['nh.clinical.patient']
+        data = vals.copy()
+        if data.get('from_identifier'):
+            patient_pool.check_hospital_number(cr, uid, data['from_identifier'], exception='False', context=context)
+            from_id = patient_pool.search(cr, uid, [('other_identifier', '=', data['from_identifier'])])[0]
+            data.update({'source_patient_id': from_id})
+        if data.get('into_identifier'):
+            patient_pool.check_hospital_number(cr, uid, data['into_identifier'], exception='False', context=context)
+            into_id = patient_pool.search(cr, uid, [('other_identifier', '=', data['into_identifier'])])[0]
+            data.update({'dest_patient_id': into_id})
+        return super(nh_clinical_adt_patient_merge, self).submit(cr, uid, activity_id, data, context=context)
+        
     def complete(self, cr, uid, activity_id, context=None):
         res = {}
-        super(nh_clinical_adt_patient_merge, self).complete(cr, uid, activity_id, context=context)
         activity_pool = self.pool['nh.activity']
         merge_activity = activity_pool.browse(cr, SUPERUSER_ID, activity_id, context=context)
-        if not (merge_activity.data_ref.from_identifier and merge_activity.data_ref.into_identifier):
-            raise osv.except_osv('Patient Merge Error!', "from_identifier or into_identifier not found in submitted data!")
+        if not merge_activity.data_ref.source_patient_id:
+            raise osv.except_osv('Patient Merge Error!', "Source patient not found in submitted data!")
+        if not merge_activity.data_ref.dest_patient_id:
+            raise osv.except_osv('Patient Merge Error!', "Destination patient not found in submitted data!")
+        super(nh_clinical_adt_patient_merge, self).complete(cr, uid, activity_id, context=context)        
         patient_pool = self.pool['nh.clinical.patient']
-        from_id = patient_pool.search(cr, uid, [('other_identifier', '=', merge_activity.data_ref.from_identifier)])
-        into_id = patient_pool.search(cr, uid, [('other_identifier', '=', merge_activity.data_ref.into_identifier)])
-        if not(from_id and into_id):
-            raise osv.except_osv('Patient Merge Error!', "Source or destination patient not found!")
-        from_id = from_id[0]
-        into_id = into_id[0]
+        from_id = merge_activity.data_ref.source_patient_id.id
+        into_id = merge_activity.data_ref.dest_patient_id.id        
         # compare and combine data. may need new cursor to have the update in one transaction
         for model_name in self.pool.models.keys():
             model_pool = self.pool[model_name]
-            if model_name.startswith("nh.clinical") and model_pool._auto and 'patient_id' in model_pool._columns.keys() and model_name != self._name and model_name != 'nh.clinical.notification' and model_name != 'nh.clinical.patient.observation':
+            if model_name.startswith("nh.clinical") and model_pool._auto and 'patient_id' in model_pool._columns.keys() \
+                    and model_name != self._name and model_name != 'nh.clinical.notification' \
+                    and model_name != 'nh.clinical.patient.observation':
                 ids = model_pool.search(cr, uid, [('patient_id', '=', from_id)], context=context)
                 if ids:
                     model_pool.write(cr, uid, ids, {'patient_id': into_id}, context=context)
