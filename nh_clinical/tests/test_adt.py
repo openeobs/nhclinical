@@ -136,6 +136,32 @@ class testADT(common.SingleTransactionCase):
         self.activity_pool.submit(cr, self.adt_id, register_activity_id, register_data)
         self.activity_pool.complete(cr, self.adt_id, register_activity_id)
 
+        register_data = {
+            'family_name': 'FamilyY',
+            'given_name': 'GivenY',
+            'other_identifier': 'TEST00Y',
+            'patient_identifier': 'TESTNHSY',
+            'dob': '1984-10-01 00:00:00',
+            'gender': 'M',
+            'sex': 'M'
+        }
+        register_activity_id = self.register_pool.create_activity(cr, self.adt_id, {}, {})
+        self.activity_pool.submit(cr, self.adt_id, register_activity_id, register_data)
+        self.activity_pool.complete(cr, self.adt_id, register_activity_id)
+
+        register_data = {
+            'family_name': 'FamilyZ',
+            'given_name': 'GivenZ',
+            'other_identifier': 'TEST00Z',
+            'patient_identifier': 'TESTNHSZ',
+            'dob': '1984-10-01 00:00:00',
+            'gender': 'F',
+            'sex': 'F'
+        }
+        register_activity_id = self.register_pool.create_activity(cr, self.adt_id, {}, {})
+        self.activity_pool.submit(cr, self.adt_id, register_activity_id, register_data)
+        self.activity_pool.complete(cr, self.adt_id, register_activity_id)
+
     def test_02_adt_patient_update(self):
         cr, uid = self.cr, self.uid
 
@@ -262,12 +288,35 @@ class testADT(common.SingleTransactionCase):
         with self.assertRaises(except_orm):
             self.admit_pool.create_activity(cr, self.adt_id, {}, admit_data)
 
-        # Scenario 4: Admit a Patient with no patient hospital number
+        # Scenario 4: Admit a Patient with no patient identifiers
         admit_data = {
             'location': 'U'
         }
         with self.assertRaises(except_orm):
             self.admit_pool.create_activity(cr, self.adt_id, {}, admit_data)
+
+        # Scenario 5: Admit a Patient using NHS Number as identifier
+        admit_data = {
+            'patient_identifier': 'TESTNHSY',
+            'start_date': '2015-04-30 17:00:00',
+            'doctors': doctors,
+            'code': 'TESTADMISSION02',
+            'location': 'U'
+        }
+
+        patient_id = self.patient_pool.search(cr, uid, [['patient_identifier', '=', 'TESTNHSY']])[0]
+        activity_id = self.admit_pool.create_activity(cr, self.adt_id, {}, admit_data)
+        activity = self.activity_pool.browse(cr, uid, activity_id)
+        self.assertEqual(patient_id,
+                         activity.data_ref.patient_id.id, msg="Wrong patient id")
+        self.activity_pool.complete(cr, uid, activity_id)
+        admission_id = self.activity_pool.search(cr, uid, [
+            ['data_model', '=', 'nh.clinical.patient.admission'],
+            ['state', '=', 'completed'], ['creator_id', '=', activity_id]])
+        self.assertTrue(admission_id, msg="Admission not found!")
+        activity = self.activity_pool.browse(cr, uid, activity_id)
+        self.assertEqual(activity.parent_id.data_model, 'nh.clinical.spell')
+        self.assertEqual(activity.parent_id.patient_id.id, patient_id)
 
     def test_04_adt_patient_cancel_admit(self):
         cr, uid = self.cr, self.uid
@@ -510,7 +559,7 @@ class testADT(common.SingleTransactionCase):
         with self.assertRaises(except_orm):
             self.spell_update_pool.create_activity(cr, self.adt_id, {}, update_data)
 
-        # Scenario 4: Update a Spell with no patient hospital number
+        # Scenario 4: Update a Spell with no patient identifiers
         update_data = {
             'location': 'U'
         }
@@ -530,6 +579,33 @@ class testADT(common.SingleTransactionCase):
         self.assertFalse(spell.data_ref.con_doctor_ids, msg="Wrong doctor data")
         self.assertFalse(spell.data_ref.ref_doctor_ids, msg="Wrong doctor  data")
 
+        # Scenario 6: Update a Spell using NHS Number as identifier
+        update_data = {
+            'patient_identifier': 'TESTNHSY',
+            'start_date': '2015-04-30 17:00:00',
+            'doctors': doctors,
+            'code': 'TESTADMISSION02',
+            'location': 'T'
+        }
+
+        patient_id = self.patient_pool.search(cr, uid, [['patient_identifier', '=', 'TESTNHSY']])[0]
+        activity_id = self.spell_update_pool.create_activity(cr, self.adt_id, {}, update_data)
+        activity = self.activity_pool.browse(cr, uid, activity_id)
+        self.assertEqual(patient_id,
+                         activity.data_ref.patient_id.id, msg="Wrong patient id")
+        self.activity_pool.complete(cr, uid, activity_id)
+
+        # Scenario 6: Update a Spell with not admitted patient
+        update_data = {
+            'other_identifier': 'TEST00Z',
+            'start_date': '2015-04-30 17:00:00',
+            'doctors': doctors,
+            'code': 'TESTADMISSION0Z',
+            'location': 'T'
+        }
+        activity_id = self.spell_update_pool.create_activity(cr, self.adt_id, {}, update_data)
+
+
     def test_10_adt_patient_merge(self):
         cr, uid = self.cr, self.uid
 
@@ -548,6 +624,8 @@ class testADT(common.SingleTransactionCase):
             self.activity_pool.complete(cr, self.adt_id, activity_id)
 
         # Scenario: Merge two patients
+        source_patient_id = self.patient_pool.search(cr, uid, [['other_identifier', '=', 'TEST001']])
+        self.patient_pool.write(cr, uid, source_patient_id, {'current_location_id': self.wu_id})
         merge_data = {
             'from_identifier': 'TEST001',
             'into_identifier': 'TEST00X',
