@@ -59,10 +59,10 @@ class TestCoreAPI(SingleTransactionCase):
 
         patient_id = self.patient_pool.search(cr, uid, [('other_identifier', '=', 'TESTP0001')])
         self.assertTrue(patient_id, msg="Patient was not created")
-        register_id = self.activity_pool.search(cr, uid, [
+        activity_id = self.activity_pool.search(cr, uid, [
             ['data_model', '=', 'nh.clinical.adt.patient.register'], ['patient_id', '=', patient_id[0]]])
-        self.assertTrue(register_id, msg="Register Activity not generated")
-        activity = self.activity_pool.browse(cr, uid, register_id[0])
+        self.assertTrue(activity_id, msg="Register Activity not generated")
+        activity = self.activity_pool.browse(cr, uid, activity_id[0])
         self.assertEqual(activity.state, 'completed')
 
         # Scenario 2: Register a patient with NHS Number
@@ -78,8 +78,68 @@ class TestCoreAPI(SingleTransactionCase):
 
         patient_id = self.patient_pool.search(cr, uid, [('patient_identifier', '=', 'TESTNHS001')])
         self.assertTrue(patient_id, msg="Patient was not created")
-        register_id = self.activity_pool.search(cr, uid, [
+        activity_id = self.activity_pool.search(cr, uid, [
             ['data_model', '=', 'nh.clinical.adt.patient.register'], ['patient_id', '=', patient_id[0]]])
-        self.assertTrue(register_id, msg="Register Activity not generated")
-        activity = self.activity_pool.browse(cr, uid, register_id[0])
+        self.assertTrue(activity_id, msg="Register Activity not generated")
+        activity = self.activity_pool.browse(cr, uid, activity_id[0])
+        self.assertEqual(activity.state, 'completed')
+
+    def test_02_update(self):
+        cr, uid = self.cr, self.uid
+
+        # Scenario 1: Update a patient using Hospital Number
+        patient_data = {
+            'family_name': "Fname0",
+            'given_name': 'Gname0',
+            'dob': '1988-08-14 18:00:00',
+            'gender': 'M',
+            'sex': 'M'
+        }
+        
+        self.api.update(cr, self.adt_uid, 'TESTP0001', patient_data)
+        
+        patient_id = self.patient_pool.search(cr, uid, [('other_identifier', '=', 'TESTP0001')])[0]
+        activity_id = self.activity_pool.search(cr, uid, [
+            ['data_model', '=', 'nh.clinical.adt.patient.update'], ['patient_id', '=', patient_id]])
+        self.assertTrue(activity_id, msg="Update Activity not generated")
+        activity = self.activity_pool.browse(cr, uid, activity_id[0])
+        self.assertEqual(activity.state, 'completed')
+
+        # Scenario 2: Update a patient using NHS Number
+        patient_data = {
+            'patient_identifier': 'TESTNHS001',
+            'family_name': "Fname20",
+            'given_name': 'Gname20',
+            'dob': '1988-08-14 18:00:00',
+            'gender': 'F',
+            'sex': 'F'
+        }
+
+        self.api.update(cr, self.adt_uid, '', patient_data)
+
+        patient_id = self.patient_pool.search(cr, uid, [('patient_identifier', '=', 'TESTNHS001')])[0]
+        activity_id = self.activity_pool.search(cr, uid, [
+            ['data_model', '=', 'nh.clinical.adt.patient.update'], ['patient_id', '=', patient_id]])
+        self.assertTrue(activity_id, msg="Update Activity not generated")
+        activity = self.activity_pool.browse(cr, uid, activity_id[0])
+        self.assertEqual(activity.state, 'completed')
+
+        # Scenario 3: Update a patient that does not exist. Automatic register
+        patient_data = {
+            'patient_identifier': 'TESTNHS002',
+            'family_name': "Fname30",
+            'given_name': 'Gname30',
+            'dob': '1988-08-14 18:00:00',
+            'gender': 'M',
+            'sex': 'M'
+        }
+
+        self.api.update(cr, self.adt_uid, 'TESTP0003', patient_data)
+
+        patient_id = self.patient_pool.search(cr, uid, [('other_identifier', '=', 'TESTP0003')])
+        self.assertTrue(patient_id, msg="Patient was not created")
+        activity_id = self.activity_pool.search(cr, uid, [
+            ['data_model', '=', 'nh.clinical.adt.patient.update'], ['patient_id', '=', patient_id[0]]])
+        self.assertTrue(activity_id, msg="Update Activity not generated")
+        activity = self.activity_pool.browse(cr, uid, activity_id[0])
         self.assertEqual(activity.state, 'completed')
