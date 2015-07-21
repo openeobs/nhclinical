@@ -57,6 +57,7 @@ class testADT(common.SingleTransactionCase):
         # Scenario 1: Register a new patient with Hospital Number
         register_data = {
             'family_name': 'Family',
+            'middle_names': 'Middle',
             'given_name': 'Given',
             'other_identifier': 'TEST001',
             'dob': '1984-10-01 00:00:00',
@@ -143,6 +144,7 @@ class testADT(common.SingleTransactionCase):
             'family_name': 'Fupdate',
             'given_name': 'Gupdate',
             'other_identifier': 'TEST001',
+            'middle_names': 'Mupdate',
             'patient_identifier': 'TESTNHS1',
             'dob': '2000-10-01 00:00:00',
             'gender': 'F',
@@ -526,4 +528,39 @@ class testADT(common.SingleTransactionCase):
         self.activity_pool.complete(cr, uid, activity_id)
         spell = self.activity_pool.browse(cr, uid, activity.parent_id.id)
         self.assertFalse(spell.data_ref.con_doctor_ids, msg="Wrong doctor data")
-        self.assertFalse(spell.data_ref.ref_doctor_ids, msg="Wrong doctor data")
+        self.assertFalse(spell.data_ref.ref_doctor_ids, msg="Wrong doctor  data")
+
+    def test_10_adt_patient_merge(self):
+        cr, uid = self.cr, self.uid
+
+        # Scenario 1: Create merge activity with incorrect patient data
+        with self.assertRaises(except_orm):
+            self.merge_pool.create_activity(cr, self.adt_id, {}, {'from_identifier': 'TESTERROR'})
+        with self.assertRaises(except_orm):
+            self.merge_pool.create_activity(cr, self.adt_id, {}, {'into_identifier': 'TESTERROR'})
+
+        # Scenario 2: Try to merge with missing source or destination patients
+        activity_id = self.merge_pool.create_activity(cr, self.adt_id, {}, {'from_identifier': 'TEST001'})
+        with self.assertRaises(except_orm):
+            self.activity_pool.complete(cr, self.adt_id, activity_id)
+        activity_id = self.merge_pool.create_activity(cr, self.adt_id, {}, {'into_identifier': 'TEST00X'})
+        with self.assertRaises(except_orm):
+            self.activity_pool.complete(cr, self.adt_id, activity_id)
+
+        # Scenario: Merge two patients
+        merge_data = {
+            'from_identifier': 'TEST001',
+            'into_identifier': 'TEST00X',
+        }
+        activity_id = self.merge_pool.create_activity(cr, self.adt_id, {}, merge_data)
+        activity_ids = self.activity_pool.search(cr, uid, [('patient_id.other_identifier', '=', 'TEST001')])
+        self.assertTrue(len(activity_ids), msg="There are no activities to be given to destination patient")
+        self.activity_pool.complete(cr, self.adt_id, activity_id)
+        activity = self.activity_pool.browse(cr, uid, activity_id)
+        self.assertFalse(activity.data_ref.source_patient_id.active, msg="Source patient was not deactivated")
+        for a in self.activity_pool.browse(cr, uid, activity_ids):
+            self.assertEqual(a.patient_id.other_identifier, 'TEST00X')
+        self.assertEqual(activity.data_ref.dest_patient_id.given_name,  'GivenX',
+                         msg="Destination patient data wrong update")
+        self.assertEqual(activity.data_ref.dest_patient_id.middle_names,  'Mupdate',
+                         msg="Destination patient data wrong update")
