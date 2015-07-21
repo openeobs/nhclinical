@@ -120,7 +120,6 @@ class nh_clinical_spell(orm.Model):
         return super(nh_clinical_spell, self).write(cr, uid, ids, vals, context=context)
 
     def get_activity_user_ids(self, cr, uid, activity_id, context=None):
-
         cr.execute("select location_id from nh_activity where id = %s" % activity_id)
         if not cr.fetchone()[0]:
             return []

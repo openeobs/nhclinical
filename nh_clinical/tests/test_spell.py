@@ -105,4 +105,22 @@ class TestClinicalSpell(common.SingleTransactionCase):
         self.assertEquals(result, [])
         del cr.fetchone
 
+    def test_06_test_get_activity_user_ids_when_activity_id(self):
+        cr, uid = self.cr, self.uid
+        cr.fetchone = MagicMock(return_value=(1, 2))
+        cr.dictfetchone = MagicMock(return_value={'activity_id': 1, 'user_ids': [2, 3, 4]})
+
+        result = self.spell_pool.get_activity_user_ids(cr, uid, 2)
+        self.assertEquals(result, [2, 3, 4])
+        del cr.fetchone, cr.dictfetchone
+
+    def test_07_test_get_activity_user_ids_when_no_user_ids(self):
+        cr, uid = self.cr, self.uid
+        cr.fetchone = MagicMock(return_value=(1, 2))
+        cr.dictfetchone = MagicMock(return_value={'activity_id': 1, 'user_ids': []})
+
+        result = self.spell_pool.get_activity_user_ids(cr, uid, 2)
+        self.assertEquals(result, [])
+        del cr.fetchone, cr.dictfetchone
+
 
