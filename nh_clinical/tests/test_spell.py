@@ -96,3 +96,13 @@ class TestClinicalSpell(common.SingleTransactionCase):
         result = self.spell_pool.create(cr, uid, values)
         self.assertEquals(1, result)
         del self.spell_pool.search
+
+    def test_05_test_get_activity_user_ids_when_no_activity_id(self):
+        cr, uid = self.cr, self.uid
+        cr.fetchone = MagicMock(return_value=(None,))
+
+        result = self.spell_pool.get_activity_user_ids(cr, uid, 2)
+        self.assertEquals(result, [])
+        del cr.fetchone
+
+
