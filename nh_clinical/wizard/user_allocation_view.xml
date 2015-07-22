@@ -1,6 +1,27 @@
 <openerp>
     <data>
 
+        <record id="view_nhc_allocating_user" model="ir.ui.view">
+            <field name="name">Allocating User Form</field>
+            <field name="model">nh.clinical.allocating.user</field>
+            <field name="arch" type="xml">
+                <form string="Allocating User" version="7.0">
+                    <group>
+                        <field name="roles"/>
+                    </group>
+                    <field name="location_ids" nolabel="1" no_open="1" options="{'no_create': True}"/>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_allocate" model="ir.actions.act_window">
+            <field name="name">Allocation</field>
+            <field name="res_model">nh.clinical.allocating.user</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_nhc_allocating_user"/>
+            <field name="target">new</field>
+        </record>
+
         <record id="view_nhc_user_allocation_wizard" model="ir.ui.view">
             <field name="name">User Allocation Wizard Form</field>
             <field name="model">nh.clinical.user.allocation</field>
@@ -14,6 +35,15 @@
                                attrs="{'invisible': [['stage','=','allocation']]}" domain="[['groups_id.name','ilike','NH Clinical%']]">
                             <tree>
                                 <field name="name"/>
+                                <field name="location_ids"/>
+                            </tree>
+                        </field>
+                        <field name="allocating_user_ids" nolabel="1" options="{'no_create': True}" no_open="1"
+                               colspan="2" attrs="{'invisible': [['stage','!=','allocation']]}" readonly="1">
+                            <tree>
+                                <field name="user_id"/>
+                                <field name="roles"/>
+                                <button string="Allocate" type="action" name="%(action_allocate)d" nh_icon="allocate_btn" class="oe_highlight"/>
                                 <field name="location_ids"/>
                             </tree>
                         </field>
@@ -36,80 +66,6 @@
             <field name="target">new</field>
         </record>
 
-        <record id="action_nhc_staff_allocation" model="ir.actions.act_window">
-            <field name="name">Nursing Shift Management</field>
-            <field name="res_model">nh.clinical.staff.allocation</field>
-            <field name="view_mode">form</field>
-            <field name="target">new</field>
-        </record>
-
-        <record id="view_nhc_staff_allocation_wizard" model="ir.ui.view">
-            <field name="name">Staff Allocation Wizard Form</field>
-            <field name="model">nh.clinical.staff.allocation</field>
-            <field name="arch" type="xml">
-                <form string="Staff Allocation Wizard" version="7.0">
-                    <header>
-                        <field name="stage" readonly="1" widget="statusbar" clickable="False" options="{'fold_field': 'fold'}"/>
-                    </header>
-                    <sheet>
-                        <group>
-                            <field name="ward_ids" options="{'no_create': True}" colspan="2" widget="many2many_tags"
-                                   attrs="{'invisible': [['stage','!=','wards']]}"/>
-                            <field name="user_ids" options="{'no_create': True}" colspan="2" widget="many2many_tags"
-                                   attrs="{'invisible': [['stage','!=','users']]}"/>
-                            <field name="location_ids" no_open="1" readonly="1" nolabel="1" attrs="{'invisible': [['stage','!=','review']]}">
-                                <tree>
-                                    <field name="name"/>
-                                    <field name="user_ids" widget="many2many_tags"/>
-                                </tree>
-                            </field>
-                            <field name="allocating_ids" nolabel="1" options="{'no_create': True}" no_open="1"
-                               colspan="2" attrs="{'invisible': [['stage','!=','allocation']]}" readonly="1">
-                                <tree>
-                                    <field name="location_id" readonly="1"/>
-                                    <field name="patient_ids" readonly="1"/>
-                                    <field name="nurse_name" widget="nh_many2one"/>
-                                    <field name="hca_name" widget="nh_many2one"/>
-                                    <button string="Allocate" type="action" name="%(action_allocate)d" nh_icon="allocate_btn" class="oe_highlight"/>
-                                </tree>
-                            </field>
-                        </group>
-                    </sheet>
-                    <footer>
-                        <button string="Start" type="object" name="submit_wards" class="oe_highlight"
-                                attrs="{'invisible': [['stage','!=','wards']]}"/>
-                        <button string="Deallocate" type="object" name="deallocate" class="oe_highlight"
-                                attrs="{'invisible': [['stage','!=','review']]}"/>
-                        <button string="Select" type="object" name="submit_users" class="oe_highlight"
-                                attrs="{'invisible': [['stage','!=','users']]}"/>
-                        <button string="Confirm Allocation" type="object" name="complete" class="oe_highlight"
-                                attrs="{'invisible': [['stage','!=','allocation']]}"/>
-                        <button string="Close" special="cancel" class="oe_link"/>
-                    </footer>
-                </form>
-            </field>
-        </record>
-
-        <record id="view_nhc_allocating" model="ir.ui.view">
-            <field name="name">Allocating Form</field>
-            <field name="model">nh.clinical.allocating</field>
-            <field name="arch" type="xml">
-                <form string="Allocating" version="7.0">
-                    <group>
-                        <field name="nurse_id" widget="nh_many2one"/>
-                        <field name="hca_id" widget="nh_many2one"/>
-                    </group>
-                </form>
-            </field>
-        </record>
-
-        <record id="action_allocate" model="ir.actions.act_window">
-            <field name="name">Allocation</field>
-            <field name="res_model">nh.clinical.allocating</field>
-            <field name="view_mode">form</field>
-            <field name="view_id" ref="view_nhc_allocating"/>
-            <field name="target">new</field>
-        </record>
 
     </data>
 </openerp>
