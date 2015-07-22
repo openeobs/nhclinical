@@ -16,13 +16,13 @@ class nh_clinical_patient_placement_wizard(orm.TransientModel):
     }
     
     def _get_placement_ids(self, cr, uid, context=None):
-        domain=[('state','in',['draft','scheduled','started'])]
+        domain = [('state', 'in', ['draft', 'scheduled', 'started'])]
         placement_pool = self.pool['nh.clinical.patient.placement']
-        placement_ids = placement_pool.search(cr, uid, domain)
+        placement_ids = placement_pool.search(cr, uid, domain, context=context)
         return placement_ids
     
     def _get_recent_placement_ids(self, cr, uid, context=None):
-        domain=[('state','in',['completed'])]
+        domain = [('state', 'in', ['completed'])]
         placement_pool = self.pool['nh.clinical.patient.placement']
         placement_ids = placement_pool.search(cr, uid, domain, limit=3, order="date_terminated desc")
         return placement_ids    
@@ -40,8 +40,8 @@ class nh_clinical_patient_placement_wizard(orm.TransientModel):
                 activity_pool.submit(cr, uid, placement.activity_id.id, {'location': placement.location_id.id}, context)
                 activity_pool.complete(cr, uid, placement.activity_id.id, context)
                 
-        self.write(cr, uid, ids, {'placement_ids': [(6,0,self._get_placement_ids(cr, uid))],
-                                  'recent_placement_ids': [(6,0,self._get_recent_placement_ids(cr, uid))]})
+        self.write(cr, uid, ids, {'placement_ids': [(6, 0, self._get_placement_ids(cr, uid))],
+                                  'recent_placement_ids': [(6, 0, self._get_recent_placement_ids(cr, uid))]})
         
         aw = {'type': 'ir.actions.act_window',
               'res_model': self._name,
