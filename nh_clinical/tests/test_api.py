@@ -296,3 +296,20 @@ class TestCoreAPI(SingleTransactionCase):
         self.assertTrue(activity_id, msg="Admit Activity not generated")
         activity = self.activity_pool.browse(cr, uid, activity_id[0])
         self.assertEqual(activity.state, 'completed')
+
+    def test_07_cancel_discharge(self):
+        cr, uid = self.cr, self.uid
+
+        # Scenario 1: Cancel a discharge
+        self.api.cancel_discharge(cr, self.adt_uid, 'TESTP0001')
+
+        patient_id = self.patient_pool.search(cr, uid, [('other_identifier', '=', 'TESTP0001')])[0]
+        activity_id = self.activity_pool.search(cr, uid, [
+            ['data_model', '=', 'nh.clinical.adt.patient.cancel_discharge'], ['patient_id', '=', patient_id]])
+        self.assertTrue(activity_id, msg="Cancel Discharge Activity not generated")
+        activity = self.activity_pool.browse(cr, uid, activity_id[0])
+        self.assertEqual(activity.state, 'completed')
+
+        # Scenario 2: Cancel a discharge without patient information
+        with self.assertRaises(except_orm):
+            self.api.cancel_discharge(cr, self.adt_uid, '')
