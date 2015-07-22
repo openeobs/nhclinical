@@ -18,8 +18,7 @@ class nh_clinical_api(orm.AbstractModel):
         if not patient_pool.check_hospital_number(cr, uid, hospital_number, context=context):
             nhs_data = data.copy()
             nhs_data['other_identifier'] = hospital_number
-            if not patient_pool.check_nhs_number(cr, uid, data.get('patient_identifier'), context=context) \
-                    and data.get('patient_identifier'):
+            if not patient_pool.check_nhs_number(cr, uid, data.get('patient_identifier'), context=context):
                 _logger.warn("Patient registered from an update call - data available:%s" % data)
                 self.register(cr, uid, hospital_number, data, context=context)
             else:
@@ -78,8 +77,7 @@ class nh_clinical_api(orm.AbstractModel):
         if not patient_pool.check_hospital_number(cr, uid, hospital_number, context=context):
             nhs_data = data.copy()
             nhs_data['other_identifier'] = hospital_number
-            if patient_pool.check_nhs_number(cr, uid, data.get('patient_identifier'), context=context) \
-                    and data.get('patient_identifier'):
+            if patient_pool.check_nhs_number(cr, uid, data.get('patient_identifier'), context=context):
                 patient_pool.update(cr, uid, data.get('patient_identifier'), nhs_data, selection='patient_identifier',
                                     context=context)
             else:
@@ -102,8 +100,7 @@ class nh_clinical_api(orm.AbstractModel):
         if not patient_pool.check_hospital_number(cr, uid, hospital_number, context=context):
             nhs_data = data.copy()
             nhs_data['other_identifier'] = hospital_number
-            if patient_pool.check_nhs_number(cr, uid, data.get('patient_identifier'), context=context)\
-                    and data.get('patient_identifier'):
+            if patient_pool.check_nhs_number(cr, uid, data.get('patient_identifier'), context=context):
                 patient_pool.update(cr, uid, data.get('patient_identifier'), nhs_data, selection='patient_identifier',
                                     context=context)
             else:
@@ -144,8 +141,7 @@ class nh_clinical_api(orm.AbstractModel):
         if not patient_pool.check_hospital_number(cr, uid, hospital_number, context=context):
             nhs_data = data.copy()
             nhs_data['other_identifier'] = hospital_number
-            if patient_pool.check_nhs_number(cr, uid, data.get('patient_identifier'), context=context) \
-                    and data.get('patient_identifier'):
+            if patient_pool.check_nhs_number(cr, uid, data.get('patient_identifier'), context=context):
                 patient_pool.update(cr, uid, data.get('patient_identifier'), nhs_data, selection='patient_identifier',
                                     context=context)
             else:
