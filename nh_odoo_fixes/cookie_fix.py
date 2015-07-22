@@ -1,6 +1,6 @@
 from openerp.http import *
 from werkzeug import exceptions
-from werkzeug.wrappers import Response
+from werkzeug.wrappers import Response as WerkzeugResponse
 
 
 def get_response(self, httprequest, result, explicit_session):
@@ -21,7 +21,7 @@ def get_response(self, httprequest, result, explicit_session):
                 raise
 
     if isinstance(result, basestring):
-        response = Response(result, mimetype='text/html')
+        response = WerkzeugResponse(result, mimetype='text/html')
     else:
         response = result
 
