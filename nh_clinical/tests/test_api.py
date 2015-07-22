@@ -313,3 +313,27 @@ class TestCoreAPI(SingleTransactionCase):
         # Scenario 2: Cancel a discharge without patient information
         with self.assertRaises(except_orm):
             self.api.cancel_discharge(cr, self.adt_uid, '')
+
+    def test_08_merge(self):
+        cr, uid = self.cr, self.uid
+
+        # Scenario 1: Merge 2 patients
+        merge_data = {'from_identifier': 'TESTP0003'}
+
+        self.api.merge(cr, self.adt_uid, 'TESTP0004', merge_data)
+
+        patient_id = self.patient_pool.search(cr, uid, [('other_identifier', '=', 'TESTP0004')])[0]
+        activity_id = self.activity_pool.search(cr, uid, [
+            ['data_model', '=', 'nh.clinical.adt.patient.merge'], ['patient_id', '=', patient_id]])
+        self.assertTrue(activity_id, msg="Merge Activity not generated")
+        activity = self.activity_pool.browse(cr, uid, activity_id[0])
+        self.assertEqual(activity.state, 'completed')
+
+        # Scenario 2: Merge a patient without source id
+        with self.assertRaises(except_orm):
+            self.api.merge(cr, self.adt_uid, 'TESTP0004', {})
+
+        # Scenario 3: Merge a patient without destination id
+        merge_data = {'from_identifier': 'TESTP0005'}
+        with self.assertRaises(except_orm):
+            self.api.merge(cr, self.adt_uid, '', merge_data)
