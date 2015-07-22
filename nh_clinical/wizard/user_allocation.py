@@ -11,7 +11,8 @@ class staff_allocation_wizard(osv.TransientModel):
     _columns = {
         'create_uid': fields.many2one('res.users', 'User Executing the Wizard'),
         'stage': fields.selection(_stages, string='Stage'),
-        'ward_id': fields.many2one('nh.clinical.location', string='Ward', domain=[['usage', '=', 'ward']]),
+        'ward_ids': fields.many2many('nh.clinical.location', 'alloc_ward_rel', 'allocation_id', 'location_id',
+                                     string='Wards', domain=[['usage', '=', 'ward']]),
         'location_ids': fields.many2many('nh.clinical.location', 'alloc_loc_rel', 'allocation_id', 'location_id',
                                          string='Locations'),
         'user_ids': fields.many2many('res.users', 'alloc_user_rel', 'allocation_id', 'user_id', string='Users',
@@ -25,13 +26,13 @@ class staff_allocation_wizard(osv.TransientModel):
 
     def submit_wards(self, cr, uid, ids, context=None):
         wiz = self.browse(cr, uid, ids[0], context=context)
-        ward_ids = [wiz.ward_id.id]
+        ward_ids = [ward.id for ward in wiz.ward_ids]
         location_pool = self.pool['nh.clinical.location']
         location_ids = location_pool.search(cr, uid, [['id', 'child_of', ward_ids]], context=context)
         self.write(cr, uid, ids, {'stage': 'review', 'location_ids': [[6, 0, location_ids]]}, context=context)
         return {
             'type': 'ir.actions.act_window',
-            'name': 'Nursing Shift Management',
+            'name': 'Staff Allocation',
             'res_model': 'nh.clinical.staff.allocation',
             'res_id': ids[0],
             'view_mode': 'form',
@@ -50,7 +51,7 @@ class staff_allocation_wizard(osv.TransientModel):
                                       'NH Clinical Ward Manager Group']]], context=context)
         user_pool.write(cr, uid, user_ids, {'location_ids': [[5, location_ids]]}, context=context)
         activity_id = respallocation_pool.create_activity(cr, uid, {}, {
-                'responsible_user_id': uid, 'location_ids': [[6, 0, [wiz.ward_id.id]]]}, context=context)
+                'responsible_user_id': uid, 'location_ids': [[6, 0, [w.id for w in wiz.ward_ids]]]}, context=context)
         activity_pool.complete(cr, uid, activity_id, context=context)
         allocating_ids = [allocating_pool.create(cr, uid, {
             'location_id': l.id
@@ -58,7 +59,7 @@ class staff_allocation_wizard(osv.TransientModel):
         self.write(cr, uid, ids, {'allocating_ids': [[6, 0, allocating_ids]], 'stage': 'users'}, context=context)
         return {
             'type': 'ir.actions.act_window',
-            'name': 'Nursing Shift Management',
+            'name': 'Staff Allocation',
             'res_model': 'nh.clinical.staff.allocation',
             'res_id': ids[0],
             'view_mode': 'form',
@@ -70,7 +71,7 @@ class staff_allocation_wizard(osv.TransientModel):
         self.write(cr, uid, ids, {'stage': 'allocation'}, context=context)
         return {
             'type': 'ir.actions.act_window',
-            'name': 'Nursing Shift Management',
+            'name': 'Staff Allocation',
             'res_model': 'nh.clinical.staff.allocation',
             'res_id': ids[0],
             'view_mode': 'form',
@@ -91,85 +92,6 @@ class staff_allocation_wizard(osv.TransientModel):
         for key in allocation.keys():
             activity_id = respallocation_pool.create_activity(cr, uid, {}, {
                 'responsible_user_id': key, 'location_ids': [[6, 0, allocation[key]]]}, context=context)
-            activity_pool.complete(cr, uid, activity_id, context=context)
-        return {'type': 'ir.actions.act_window_close'}
-
-
-class doctor_allocation_wizard(osv.TransientModel):
-    _name = 'nh.clinical.doctor.allocation'
-    _rec_name = 'create_uid'
-
-    _stages = [['review', 'De-allocate'], ['users', 'Medical Roll Call']]
-    _doctor_groups = ['NH Clinical Doctor Group', 'NH Clinical Junior Doctor Group', 'NH Clinical Consultant Group',
-                      'NH Clinical Registrar Group']
-
-    def _get_default_ward(self, cr, uid, context=None):
-        location_pool = self.pool['nh.clinical.location']
-        ward_ids = location_pool.search(cr, uid, [['usage', '=', 'ward'], ['user_ids', 'in', [uid]]], context=context)
-        if not ward_ids:
-            raise osv.except_osv('Shift Management Error!', 'You must be in charge of a ward to do this task!')
-        return ward_ids[0]
-
-    def _get_default_locations(self, cr, uid, context=None):
-        location_pool = self.pool['nh.clinical.location']
-        ward_ids = location_pool.search(cr, uid, [['usage', '=', 'ward'], ['user_ids', 'in', [uid]]], context=context)
-        if not ward_ids:
-            raise osv.except_osv('Shift Management Error!', 'You must be in charge of a ward to do this task!')
-        location_ids = location_pool.search(cr, uid, [['id', 'child_of', ward_ids[0]]], context=context)
-        return location_ids
-
-    def _get_current_doctors(self, cr, uid, context=None):
-        location_pool = self.pool['nh.clinical.location']
-        user_pool = self.pool['res.users']
-        ward_ids = location_pool.search(cr, uid, [['usage', '=', 'ward'], ['user_ids', 'in', [uid]]], context=context)
-        if not ward_ids:
-            raise osv.except_osv('Shift Management Error!', 'You must be in charge of a ward to do this task!')
-        doctor_ids = user_pool.search(cr, uid, [['groups_id.name', 'in', self._doctor_groups],
-                                                ['location_ids', 'in', ward_ids]], context=context)
-        return doctor_ids
-
-    _columns = {
-        'create_uid': fields.many2one('res.users', 'User Executing the Wizard'),
-        'stage': fields.selection(_stages, string='Stage'),
-        'ward_id': fields.many2one('nh.clinical.location', string='Ward', domain=[['usage', '=', 'ward']]),
-        'doctor_ids': fields.many2many('res.users', 'docalloc_doc_rel', 'allocation_id', 'user_id',
-                                       string='Current Doctors'),
-        'location_ids': fields.many2many('nh.clinical.location', 'docalloc_loc_rel', 'allocation_id', 'location_id',
-                                         string='Locations'),
-        'user_ids': fields.many2many('res.users', 'docalloc_user_rel', 'allocation_id', 'user_id', string='Users',
-                                     domain=[['groups_id.name', 'in', _doctor_groups]])
-    }
-    _defaults = {
-        'stage': 'review',
-        'ward_id': _get_default_ward,
-        'location_ids': _get_default_locations,
-        'doctor_ids': _get_current_doctors
-    }
-
-    def deallocate(self, cr, uid, ids, context=None):
-        wiz = self.browse(cr, uid, ids[0], context=context)
-        user_pool = self.pool['res.users']
-        location_ids = [location.id for location in wiz.location_ids]
-        user_ids = user_pool.search(cr, uid, [['groups_id.name', 'in', self._doctor_groups]], context=context)
-        user_pool.write(cr, uid, user_ids, {'location_ids': [[5, location_ids]]}, context=context)
-        self.write(cr, uid, ids, {'stage': 'users'}, context=context)
-        return {
-            'type': 'ir.actions.act_window',
-            'name': 'Medical Shift Management',
-            'res_model': 'nh.clinical.doctor.allocation',
-            'res_id': ids[0],
-            'view_mode': 'form',
-            'target': 'new',
-        }
-
-    def submit_users(self, cr, uid, ids, context=None):
-        wiz = self.browse(cr, uid, ids[0], context=context)
-        respallocation_pool = self.pool['nh.clinical.user.responsibility.allocation']
-        activity_pool = self.pool['nh.activity']
-        for doctor in wiz.user_ids:
-            activity_id = respallocation_pool.create_activity(cr, uid, {}, {
-                'responsible_user_id': doctor.id, 'location_ids': [[6, 0, [wiz.ward_id.id]]]
-            }, context=context)
             activity_pool.complete(cr, uid, activity_id, context=context)
         return {'type': 'ir.actions.act_window_close'}
 
