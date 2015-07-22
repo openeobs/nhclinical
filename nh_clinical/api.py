@@ -144,17 +144,12 @@ class nh_clinical_api(orm.AbstractModel):
             if patient_pool.check_nhs_number(cr, uid, data.get('patient_identifier'), context=context):
                 patient_pool.update(cr, uid, data.get('patient_identifier'), nhs_data, selection='patient_identifier',
                                     context=context)
-        patientdb_id = patient_pool.search(cr, uid, [('other_identifier', '=', hospital_number)], context=context)
-        spell_id = activity_pool.search(cr, uid, [['patient_id', '=', patientdb_id[0]],
-                                                  ['state', 'not in', ['completed', 'cancelled']],
-                                                  ['data_model', '=', 'nh.clinical.spell']], context=context)
-        if not spell_id:
-            raise osv.except_osv('Discharge Error!', 'Patient does not have an open spell!')
-        discharge_activity = discharge_pool.create_activity(cr, uid,{
-            'parent_id': spell_id[0],
-            'patient_id': patientdb_id[0]}, {
-            'other_identifier': hospital_number,
-            'discharge_date': data.get('discharge_date')}, context=context)
+            else:
+                self.register(cr, uid, hospital_number, data, context=context)
+        if hospital_number:
+            data.update({'other_identifier': hospital_number})
+        discharge_activity = discharge_pool.create_activity(cr, uid, {}, {}, context=context)
+        activity_pool.submit(cr, uid, discharge_activity, data, context=context)
         activity_pool.complete(cr, uid, discharge_activity, context=context)
         _logger.debug("Patient discharged: %s" % hospital_number)
         return True

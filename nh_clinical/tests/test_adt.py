@@ -379,32 +379,82 @@ class testADT(common.SingleTransactionCase):
         }
         with self.assertRaises(except_orm):
             self.discharge_pool.create_activity(cr, self.adt_id, {}, discharge_data)
-    
+
+        # Scenario 3: Discharge a Patient with no POS related user
+        discharge_data = {
+            'other_identifier': 'TEST002',
+            'discharge_date': '2015-05-02 18:00:00'
+        }
+        with self.assertRaises(except_orm):
+            self.discharge_pool.create_activity(cr, uid, {}, discharge_data)
+
+        # Scenario 4: Discharge a Patient using NHS Number
+        discharge_data = {
+            'patient_identifier': 'TESTNHSY',
+            'discharge_date': '2015-05-02 18:00:00'
+        }
+        activity_id = self.discharge_pool.create_activity(cr, self.adt_id, {}, discharge_data)
+        activity = self.activity_pool.browse(cr, uid, activity_id)
+        patient_id = self.patient_pool.search(cr, uid, [['patient_identifier', '=', 'TESTNHSY']])[0]
+        self.assertEqual(patient_id,
+                         activity.data_ref.patient_id.id, msg="Wrong patient id")
+        self.activity_pool.complete(cr, uid, activity_id)
+
+        # Scenario 5: Discharge a non admitted Patient without location information
+        discharge_data = {
+            'other_identifier': 'TEST00X',
+            'discharge_date': '2015-05-02 18:00:00'
+        }
+        with self.assertRaises(except_orm):
+            self.discharge_pool.create_activity(cr, self.adt_id, {}, discharge_data)
+
+        # Scenario 6: Discharge a non admitted Patient
+        discharge_data = {
+            'other_identifier': 'TEST00X',
+            'discharge_date': '2015-05-02 18:00:00',
+            'location': 'U'
+        }
+        activity_id = self.discharge_pool.create_activity(cr, self.adt_id, {}, discharge_data)
+        self.activity_pool.complete(cr, uid, activity_id)
+
+        # Scenario 7: Discharge an already discharged patient
+        discharge_data = {
+            'other_identifier': 'TEST00X',
+            'discharge_date': '2015-05-02 18:00:00',
+            'location': 'U'
+        }
+        with self.assertRaises(except_orm):
+            self.discharge_pool.create_activity(cr, self.adt_id, {}, discharge_data)
+
     def test_06_adt_patient_cancel_discharge(self):
         cr, uid = self.cr, self.uid
-        
-        # Scenario 1: Cancel discharge with no patient information
-        activity_id = self.cancel_discharge_pool.create_activity(cr, self.adt_id, {}, {})
-        with self.assertRaises(except_orm):
-            self.activity_pool.submit(cr, uid, activity_id, {})
 
-        # Scenario 2: Cancel discharge with incorrect patient information
-        cancel_discharge_data = {'other_identifier': 'TESTERROR'}
-        with self.assertRaises(except_orm):
-            self.cancel_discharge_pool.create_activity(cr, self.adt_id, {}, cancel_discharge_data)
-
-        # Scenario 3: Cancel discharge with not discharged patient
-        cancel_discharge_data = {'other_identifier': 'TEST002'}
-        with self.assertRaises(except_orm):
-            self.cancel_discharge_pool.create_activity(cr, self.adt_id, {}, cancel_discharge_data)
-
-        # Scenario 4: Cancel Discharge
-        cancel_discharge_data = {'other_identifier': 'TEST001'}
+        # Scenario 1: Cancel Discharge
+        cancel_discharge_data = {'other_identifier': 'TEST00Y'}
         activity_id = self.cancel_discharge_pool.create_activity(cr, self.adt_id, {}, cancel_discharge_data)
         self.activity_pool.complete(cr, self.adt_id, activity_id)
         activity = self.activity_pool.browse(cr, uid, activity_id)
         self.assertEqual(activity.data_ref.discharge_id.state, 'cancelled')
-    
+        
+        # Scenario 2: Cancel discharge with no patient information
+        activity_id = self.cancel_discharge_pool.create_activity(cr, self.adt_id, {}, {})
+        with self.assertRaises(except_orm):
+            self.activity_pool.submit(cr, uid, activity_id, {})
+
+        # Scenario 3: Cancel discharge with incorrect patient information
+        cancel_discharge_data = {'other_identifier': 'TESTERROR'}
+        with self.assertRaises(except_orm):
+            self.cancel_discharge_pool.create_activity(cr, self.adt_id, {}, cancel_discharge_data)
+
+        # Scenario 4: Cancel discharge with not discharged patient
+        cancel_discharge_data = {'other_identifier': 'TEST002'}
+        with self.assertRaises(except_orm):
+            self.cancel_discharge_pool.create_activity(cr, self.adt_id, {}, cancel_discharge_data)
+
+        cancel_discharge_data = {'other_identifier': 'TEST001'}
+        activity_id = self.cancel_discharge_pool.create_activity(cr, self.adt_id, {}, cancel_discharge_data)
+        self.activity_pool.complete(cr, self.adt_id, activity_id)
+
     def test_07_adt_patient_transfer(self):
         cr, uid = self.cr, self.uid
         

@@ -574,8 +574,11 @@ class nh_clinical_patient(osv.Model):
                 if exception = 'True': Integrity Error exception is raised if patient exists. False if not.
                 if exception = 'False': True if patient exists. Patient Not Found exception is raised if not.
         """
-        domain = [['other_identifier', '=', hospital_number]]
-        result = bool(self.search(cr, uid, domain, context=context))
+        if not hospital_number:
+            result = False
+        else:
+            domain = [['other_identifier', '=', hospital_number]]
+            result = bool(self.search(cr, uid, domain, context=context))
         if exception:
             if result and eval(exception):
                 raise osv.except_osv('Integrity Error!', 'Patient with Hospital Number %s already exists!'
@@ -593,8 +596,11 @@ class nh_clinical_patient(osv.Model):
                 if exception = 'True': Integrity Error exception is raised if patient exists. False if not.
                 if exception = 'False': True if patient exists. Patient Not Found exception is raised if not.
         """
-        domain = [['patient_identifier', '=', nhs_number]]
-        result = bool(self.search(cr, uid, domain, context=context))
+        if not nhs_number:
+            result = False
+        else:
+            domain = [['patient_identifier', '=', nhs_number]]
+            result = bool(self.search(cr, uid, domain, context=context))
         if exception:
             if result and eval(exception):
                 raise osv.except_osv('Integrity Error!', 'Patient with NHS Number %s already exists!'
