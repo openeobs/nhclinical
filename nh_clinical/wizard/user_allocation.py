@@ -2,11 +2,6 @@ from openerp.osv import osv, fields
 from lxml import etree
 
 
-def list_diff(a, b):
-    b = set(b)
-    return [aa for aa in a if aa not in b]
-
-
 class staff_allocation_wizard(osv.TransientModel):
     _name = 'nh.clinical.staff.allocation'
     _rec_name = 'create_uid'
@@ -37,7 +32,7 @@ class staff_allocation_wizard(osv.TransientModel):
         self.write(cr, uid, ids, {'stage': 'review', 'location_ids': [[6, 0, location_ids]]}, context=context)
         return {
             'type': 'ir.actions.act_window',
-            'name': 'Nursing Shift Change',
+            'name': 'Nursing Shift Management',
             'res_model': 'nh.clinical.staff.allocation',
             'res_id': ids[0],
             'view_mode': 'form',
@@ -64,7 +59,7 @@ class staff_allocation_wizard(osv.TransientModel):
         self.write(cr, uid, ids, {'allocating_ids': [[6, 0, allocating_ids]], 'stage': 'users'}, context=context)
         return {
             'type': 'ir.actions.act_window',
-            'name': 'Nursing Shift Change',
+            'name': 'Nursing Shift Management',
             'res_model': 'nh.clinical.staff.allocation',
             'res_id': ids[0],
             'view_mode': 'form',
@@ -76,7 +71,7 @@ class staff_allocation_wizard(osv.TransientModel):
         self.write(cr, uid, ids, {'stage': 'allocation'}, context=context)
         return {
             'type': 'ir.actions.act_window',
-            'name': 'Nursing Shift Change',
+            'name': 'Nursing Shift Management',
             'res_model': 'nh.clinical.staff.allocation',
             'res_id': ids[0],
             'view_mode': 'form',
@@ -105,7 +100,6 @@ class staff_reallocation_wizard(osv.TransientModel):
     _name = 'nh.clinical.staff.reallocation'
     _rec_name = 'create_uid'
 
-    _nursing_groups = ['NH Clinical Nurse Group', 'NH Clinical HCA Group']
     _stages = [['users', 'Current Roll Call'], ['allocation', 'Allocation']]
 
     def _get_default_ward(self, cr, uid, context=None):
@@ -118,21 +112,14 @@ class staff_reallocation_wizard(osv.TransientModel):
     def _get_default_users(self, cr, uid, context=None):
         location_pool = self.pool['nh.clinical.location']
         user_pool = self.pool['res.users']
+        groups = ['NH Clinical Nurse Group', 'NH Clinical HCA Group']
         ward_ids = location_pool.search(cr, uid, [['usage', '=', 'ward'], ['user_ids', 'in', [uid]]], context=context)
         if not ward_ids:
             raise osv.except_osv('Shift Management Error!', 'You must be in charge of a ward to do this task!')
         location_ids = location_pool.search(cr, uid, [['id', 'child_of', ward_ids[0]]], context=context)
-        user_ids = user_pool.search(cr, uid, [['groups_id.name', 'in', self._nursing_groups],
-                                              ['location_ids', 'in', location_ids]], context=context)
+        user_ids = user_pool.search(cr, uid, [['groups_id.name', 'in', groups], ['location_ids', 'in', location_ids]],
+                                    context=context)
         return user_ids
-
-    def _get_default_locations(self, cr, uid, context=None):
-        location_pool = self.pool['nh.clinical.location']
-        ward_ids = location_pool.search(cr, uid, [['usage', '=', 'ward'], ['user_ids', 'in', [uid]]], context=context)
-        if not ward_ids:
-            raise osv.except_osv('Shift Management Error!', 'You must be in charge of a ward to do this task!')
-        location_ids = location_pool.search(cr, uid, [['id', 'child_of', ward_ids[0]]], context=context)
-        return location_ids
 
     def _get_default_allocatings(self, cr, uid, context=None):
         location_pool = self.pool['nh.clinical.location']
@@ -166,8 +153,6 @@ class staff_reallocation_wizard(osv.TransientModel):
         'ward_id': fields.many2one('nh.clinical.location', string='Ward', domain=[['usage', '=', 'ward']]),
         'user_ids': fields.many2many('res.users', 'realloc_user_rel', 'allocation_id', 'user_id', string='Users',
                                      domain=[['groups_id.name', 'in', ['NH Clinical HCA Group', 'NH Clinical Nurse Group']]]),
-        'location_ids': fields.many2many('nh.clinical.location', 'realloc_loc_rel', 'reallocation_id', 'location_id',
-                                         string='Locations'),
         'allocating_ids': fields.many2many('nh.clinical.allocating', 'real_allocating_rel', 'reallocation_id',
                                            'allocating_id', string='Allocating Locations')
     }
@@ -175,33 +160,11 @@ class staff_reallocation_wizard(osv.TransientModel):
         'stage': 'users',
         'ward_id': _get_default_ward,
         'user_ids': _get_default_users,
-        'location_ids': _get_default_locations,
         'allocating_ids': _get_default_allocatings
     }
 
     def reallocate(self, cr, uid, ids, context=None):
-        user_pool = self.pool['res.users']
-        respallocation_pool = self.pool['nh.clinical.user.responsibility.allocation']
-        activity_pool = self.pool['nh.activity']
-        wiz = self.browse(cr, uid, ids[0], context=context)
-        location_ids = [l.id for l in wiz.location_ids]
-        loc_user_ids = user_pool.search(cr, uid, [['groups_id.name', 'in', self._nursing_groups],
-                                                  ['location_ids', 'in', location_ids]], context=context)
-        user_ids = [u.id for u in wiz.user_ids]
-        recompute = False
-        for u_id in loc_user_ids:
-            if u_id not in user_ids:
-                recompute = True
-                user = user_pool.browse(cr, uid, u_id, context=context)
-                uloc_ids = [l.id for l in user.location_ids]
-                loc_ids = list_diff(uloc_ids, location_ids)
-                activity_id = respallocation_pool.create_activity(cr, uid, {}, {
-                    'responsible_user_id': u_id, 'location_ids': [[6, 0, loc_ids]]}, context=context)
-                activity_pool.complete(cr, uid, activity_id, context=context)
         self.write(cr, uid, ids, {'stage': 'allocation'}, context=context)
-        if recompute:
-            allocating_ids = self._get_default_allocatings(cr, uid, context=context)
-            self.write(cr, uid, ids, {'allocating_ids': [[6, 0, allocating_ids]]}, context=context)
         return {
             'type': 'ir.actions.act_window',
             'name': 'Nursing Re-Allocation',
@@ -290,7 +253,7 @@ class doctor_allocation_wizard(osv.TransientModel):
         self.write(cr, uid, ids, {'stage': 'users'}, context=context)
         return {
             'type': 'ir.actions.act_window',
-            'name': 'Medical Shift Change',
+            'name': 'Medical Shift Management',
             'res_model': 'nh.clinical.doctor.allocation',
             'res_id': ids[0],
             'view_mode': 'form',
@@ -322,7 +285,7 @@ class allocating_user(osv.TransientModel):
         'hca_id': fields.many2one('res.users', 'Responsible HCA',
                                   domain=[['groups_id.name', 'in', ['NH Clinical HCA Group']]]),
         'nurse_name': fields.related('nurse_id', 'name', type='char', size=100, string='Responsible Nurse'),
-        'hca_name': fields.related('hca_id', 'name', type='char', size=100, string='Responsible HCA')
+        'hca_name': fields.related('hca_id', 'name', type='char', size=100, string='Responsible HCA'),
     }
 
     def fields_view_get(self, cr, uid, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
