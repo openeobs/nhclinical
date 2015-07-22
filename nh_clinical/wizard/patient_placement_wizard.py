@@ -18,13 +18,18 @@ class nh_clinical_patient_placement_wizard(orm.TransientModel):
     def _get_placement_ids(self, cr, uid, context=None):
         domain = [('state', 'in', ['draft', 'scheduled', 'started'])]
         placement_pool = self.pool['nh.clinical.patient.placement']
-        placement_ids = placement_pool.search(cr, uid, domain, context=context)
+        placement_ids = placement_pool.search(
+            cr, uid, domain, context=context
+        )
         return placement_ids
     
     def _get_recent_placement_ids(self, cr, uid, context=None):
         domain = [('state', 'in', ['completed'])]
         placement_pool = self.pool['nh.clinical.patient.placement']
-        placement_ids = placement_pool.search(cr, uid, domain, limit=3, order="date_terminated desc")
+        placement_ids = placement_pool.search(
+            cr, uid, domain, limit=3, order="date_terminated desc",
+            context=context
+        )
         return placement_ids    
     
     _defaults = {
