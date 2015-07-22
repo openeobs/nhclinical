@@ -477,7 +477,23 @@ class testADT(common.SingleTransactionCase):
             ['state', '=', 'completed'], ['creator_id', '=', activity_id]])
         self.assertTrue(transfer_id, msg="Transfer not found!")
 
-        # Scenario 2.1: Transfer a not admitted Patient not providing origin location
+        # Scenario 2: Transfer a Patient using NHS Number
+        transfer_data = {
+            'patient_identifier': 'TESTNHSY',
+            'location': 'T'
+        }
+        activity_id = self.transfer_pool.create_activity(cr, self.adt_id, {}, transfer_data)
+        activity = self.activity_pool.browse(cr, uid, activity_id)
+        patient_id = self.patient_pool.search(cr, uid, [['patient_identifier', '=', 'TESTNHSY']])[0]
+        self.assertEqual(patient_id,
+                         activity.data_ref.patient_id.id, msg="Wrong patient id")
+        self.activity_pool.complete(cr, uid, activity_id)
+        transfer_id = self.activity_pool.search(cr, uid, [
+            ['data_model', '=', 'nh.clinical.patient.transfer'],
+            ['state', '=', 'completed'], ['creator_id', '=', activity_id]])
+        self.assertTrue(transfer_id, msg="Transfer not found!")
+
+        # Scenario 3.1: Transfer a not admitted Patient not providing origin location
         transfer_data = {
             'other_identifier': 'TEST00X',
             'location': 'T'
@@ -485,7 +501,7 @@ class testADT(common.SingleTransactionCase):
         with self.assertRaises(except_orm):
             self.transfer_pool.create_activity(cr, self.adt_id, {}, transfer_data)
 
-        # Scenario 2.2: Transfer a not admitted Patient providing origin location
+        # Scenario 3.2: Transfer a not admitted Patient providing origin location
         transfer_data = {
             'other_identifier': 'TEST00X',
             'original_location': 'X',
@@ -505,21 +521,21 @@ class testADT(common.SingleTransactionCase):
             ['state', '=', 'completed'], ['creator_id', '=', activity_id]])
         self.assertTrue(transfer_id, msg="Transfer not found!")
 
-        # Scenario 3: Transfer a Patient with no patient information
+        # Scenario 4: Transfer a Patient with no patient information
         transfer_data = {
             'location': 'T'
         }
         with self.assertRaises(except_orm):
             self.transfer_pool.create_activity(cr, self.adt_id, {}, transfer_data)
             
-        # Scenario 4: Transfer a Patient with no location information
+        # Scenario 5: Transfer a Patient with no location information
         transfer_data = {
             'other_identifier': 'TEST001'
         }
         with self.assertRaises(except_orm):
             self.transfer_pool.create_activity(cr, self.adt_id, {}, transfer_data)
             
-        # Scenario 5: Transfer a Patient with no POS related user
+        # Scenario 6: Transfer a Patient with no POS related user
         transfer_data = {
             'other_identifier': 'TEST001',
             'location': 'T'

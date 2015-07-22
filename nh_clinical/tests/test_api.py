@@ -367,6 +367,7 @@ class TestCoreAPI(SingleTransactionCase):
 
         # Scenario 3: Update admission of a patient that does not exist. Automatic register and admission
         transfer_data = {
+            'original_location': 'WARD0',
             'location': "WARD2",
             'patient_identifier': 'TESTNHS009',
             'family_name': "Fname9000",
@@ -385,3 +386,20 @@ class TestCoreAPI(SingleTransactionCase):
         self.assertTrue(activity_id, msg="Transfer Activity not generated")
         activity = self.activity_pool.browse(cr, uid, activity_id[0])
         self.assertEqual(activity.state, 'completed')
+
+    def test_10_cancel_transfer(self):
+        cr, uid = self.cr, self.uid
+
+        # Scenario 1: Cancel a transfer
+        self.api.cancel_transfer(cr, self.adt_uid, 'TESTP0001')
+
+        patient_id = self.patient_pool.search(cr, uid, [('other_identifier', '=', 'TESTP0001')])[0]
+        activity_id = self.activity_pool.search(cr, uid, [
+            ['data_model', '=', 'nh.clinical.adt.patient.cancel_transfer'], ['patient_id', '=', patient_id]])
+        self.assertTrue(activity_id, msg="Cancel Transfer Activity not generated")
+        activity = self.activity_pool.browse(cr, uid, activity_id[0])
+        self.assertEqual(activity.state, 'completed')
+
+        # Scenario 2: Cancel a transfer without patient information
+        with self.assertRaises(except_orm):
+            self.api.cancel_transfer(cr, self.adt_uid, '')

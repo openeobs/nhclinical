@@ -391,7 +391,8 @@ class nh_clinical_adt_patient_transfer(orm.Model):
     _inherit = ['nh.activity.data']
     _description = 'ADT Patient Transfer'      
     _columns = {
-        'other_identifier': fields.char('Hospital Number', size=50, required=True),
+        'other_identifier': fields.char('Hospital Number', size=100),
+        'patient_identifier': fields.char('NHS Number', size=100),
         'original_location': fields.char('Location of Origin', size=256),
         'origin_location_id': fields.many2one('nh.clinical.location', 'Origin Location'),
         'location': fields.char('Location', size=256),
@@ -406,15 +407,21 @@ class nh_clinical_adt_patient_transfer(orm.Model):
         if not vals.get('location'):
             raise osv.except_osv('Transfer Error!', 'Location must be set for transfer!')
         if not vals.get('other_identifier'):
-            raise osv.except_osv('Transfer Error!', 'Patient must be set for transfer!')
+            if not vals.get('patient_identifier'):
+                raise osv.except_osv('Transfer Error!', 'Patient must be set for transfer!')
         location_pool = self.pool['nh.clinical.location']
         location_id = location_pool.get_by_code(cr, uid, vals['location'], auto_create=True, context=context)
         olocation_id = location_pool.get_by_code(cr, uid, vals['original_location'], auto_create=True, context=context) \
             if vals.get('original_location') else False
         patient_pool = self.pool['nh.clinical.patient']
-        patient_pool.check_hospital_number(cr, uid, vals['other_identifier'], exception='False', context=context)
-        patient_id = patient_pool.search(cr, uid, [['other_identifier', '=', vals['other_identifier']]],
-                                         context=context)[0]
+        if vals.get('other_identifier'):
+            patient_pool.check_hospital_number(cr, uid, vals['other_identifier'], exception='False', context=context)
+            patient_id = patient_pool.search(cr, uid, [['other_identifier', '=', vals['other_identifier']]],
+                                             context=context)[0]
+        else:
+            patient_pool.check_nhs_number(cr, uid, vals['patient_identifier'], exception='False', context=context)
+            patient_id = patient_pool.search(cr, uid, [['patient_identifier', '=', vals['patient_identifier']]],
+                                             context=context)[0]
         spell_pool = self.pool['nh.clinical.spell']
         activity_pool = self.pool['nh.activity']
         spell_id = spell_pool.get_by_patient_id(cr, uid, patient_id, context=context)
