@@ -256,3 +256,43 @@ class TestCoreAPI(SingleTransactionCase):
         # Scenario 2: Cancel an admission of patient that does not exist
         with self.assertRaises(except_orm):
             self.api.cancel_admit(cr, self.adt_uid, 'TESTP0006')
+
+    def test_06_discharge(self):
+        cr, uid = self.cr, self.uid
+
+        # Scenario 1: Discharge a patient using Hospital Number
+        discharge_data = {}
+
+        self.api.discharge(cr, self.adt_uid, 'TESTP0001', discharge_data)
+
+        patient_id = self.patient_pool.search(cr, uid, [('other_identifier', '=', 'TESTP0001')])[0]
+        activity_id = self.activity_pool.search(cr, uid, [
+            ['data_model', '=', 'nh.clinical.adt.patient.discharge'], ['patient_id', '=', patient_id]])
+        self.assertTrue(activity_id, msg="Discharge Activity not generated")
+        activity = self.activity_pool.browse(cr, uid, activity_id[0])
+        self.assertEqual(activity.state, 'completed')
+
+        # Scenario 2: Discharge a patient using NHS Number
+        discharge_data = {'patient_identifier': 'TESTNHS001'}
+
+        self.api.discharge(cr, self.adt_uid, '', discharge_data)
+
+        patient_id = self.patient_pool.search(cr, uid, [('patient_identifier', '=', 'TESTNHS001')])[0]
+        activity_id = self.activity_pool.search(cr, uid, [
+            ['data_model', '=', 'nh.clinical.adt.patient.discharge'], ['patient_id', '=', patient_id]])
+        self.assertTrue(activity_id, msg="Discharge Activity not generated")
+        activity = self.activity_pool.browse(cr, uid, activity_id[0])
+        self.assertEqual(activity.state, 'completed')
+
+        # Scenario 3: Discharge a patient that does not exist.
+        discharge_data = {'location': 'WARD0'}
+
+        self.api.discharge(cr, self.adt_uid, 'TESTP0007', discharge_data)
+
+        patient_id = self.patient_pool.search(cr, uid, [('other_identifier', '=', 'TESTP0007')])
+        self.assertTrue(patient_id, msg="Patient was not created")
+        activity_id = self.activity_pool.search(cr, uid, [
+            ['data_model', '=', 'nh.clinical.adt.patient.discharge'], ['patient_id', '=', patient_id[0]]])
+        self.assertTrue(activity_id, msg="Admit Activity not generated")
+        activity = self.activity_pool.browse(cr, uid, activity_id[0])
+        self.assertEqual(activity.state, 'completed')

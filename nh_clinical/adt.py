@@ -274,24 +274,58 @@ class nh_clinical_adt_patient_discharge(orm.Model):
     _inherit = ['nh.activity.data']  
     _description = 'ADT Patient Discharge'
     _columns = {
-        'other_identifier': fields.char('Hospital Number', size=50, required=True),
+        'other_identifier': fields.char('Hospital Number', size=100),
+        'patient_identifier': fields.char('NHS Number', size=100),
+        'location': fields.char('Pre-Discharge Location', size=256),
+        'location_id': fields.many2one('nh.clinical.location', 'Pre-Discharge Location'),
         'discharge_date': fields.datetime('Discharge Date'),
         'patient_id': fields.many2one('nh.clinical.patient', 'Patient', required=True)
     }
 
     def submit(self, cr, uid, activity_id, vals, context=None):
+        user = self.pool['res.users'].browse(cr, uid, uid, context=context)
+        if not user.pos_id or not user.pos_id.location_id:
+            raise osv.except_osv('POS Missing Error!', "POS location is not set for user.login = %s!" % user.login)
         if not vals.get('other_identifier'):
-            raise osv.except_osv('Discharge Error!', 'Patient must be set!')
+            if not vals.get('patient_identifier'):
+                raise osv.except_osv('Discharge Error!', 'Patient must be set!')
+        data = vals.copy()
         patient_pool = self.pool['nh.clinical.patient']
-        patient_pool.check_hospital_number(cr, uid, vals['other_identifier'], exception='False', context=context)
-        patient_id = patient_pool.search(cr, uid, [['other_identifier', '=', vals['other_identifier']]],
-                                         context=context)[0]
+        if vals.get('other_identifier'):
+            patient_pool.check_hospital_number(cr, uid, vals['other_identifier'], exception='False', context=context)
+            patient_id = patient_pool.search(cr, uid, [['other_identifier', '=', vals['other_identifier']]],
+                                             context=context)[0]
+        else:
+            patient_pool.check_nhs_number(cr, uid, vals['patient_identifier'], exception='False', context=context)
+            patient_id = patient_pool.search(cr, uid, [['patient_identifier', '=', vals['patient_identifier']]],
+                                             context=context)[0]
         discharge_date = vals.get('discharge_date') if vals.get('discharge_date') else dt.now().strftime(DTF)
         spell_pool = self.pool['nh.clinical.spell']
         activity_pool = self.pool['nh.activity']
-        spell_id = spell_pool.get_by_patient_id(cr, uid, patient_id, exception='False', context=context)
+        spell_id = spell_pool.get_by_patient_id(cr, uid, patient_id, context=context)
+        if not spell_id:
+            if not vals.get('location'):
+                raise osv.except_osv('Discharge Error!', 'Missing location and patient is not admitted!')
+            discharged = activity_pool.search(cr, uid, [['data_model', '=', 'nh.clinical.spell'],
+                                              ['patient_id', '=', patient_id], ['state', '=', 'completed']],
+                                              context=context)
+            if discharged:
+                raise osv.except_osv('Discharge Error!', 'Patient is already discharged!')
+            _logger.warn("Patient admitted from a discharge call!")
+            location_pool = self.pool['nh.clinical.location']
+            location_id = location_pool.get_by_code(cr, uid, vals['location'], auto_create=True, context=context)
+            data.update({'location_id': location_id})
+            admission_pool = self.pool['nh.clinical.patient.admission']
+            admission_data = {
+                'pos_id': user.pos_id.id,
+                'patient_id': patient_id,
+                'location_id': location_id,
+            }
+            admission_id = admission_pool.create_activity(cr, uid, {'creator_id': activity_id}, admission_data,
+                                                          context=context)
+            activity_pool.complete(cr, uid, admission_id, context=context)
+            spell_id = spell_pool.get_by_patient_id(cr, uid, patient_id, exception='False', context=context)
         spell = spell_pool.browse(cr, uid, spell_id, context=context)
-        data = vals.copy()
         data.update({'patient_id': patient_id, 'discharge_date': discharge_date})
         activity_pool.write(cr, uid, activity_id, {'parent_id': spell.activity_id.id}, context=context)
         return super(nh_clinical_adt_patient_discharge, self).submit(cr, uid, activity_id, data, context=context)
@@ -425,7 +459,8 @@ class nh_clinical_adt_patient_cancel_transfer(orm.Model):
     _inherit = ['nh.activity.data']
     _description = 'ADT Cancel Patient Transfer'
     _columns = {
-        'other_identifier': fields.char('Hospital Number', size=50, required=True),
+        'other_identifier': fields.char('Hospital Number', size=100),
+        'patient_identifier': fields.char('NHS Number', size=100),
         'patient_id': fields.many2one('nh.clinical.patient', 'Patient', required=True),
         'transfer_id': fields.many2one('nh.activity', 'Transfer Activity')
     }
@@ -496,7 +531,6 @@ class nh_clinical_adt_spell_update(orm.Model):
         spell_pool = self.pool['nh.clinical.spell']
         activity_pool = self.pool['nh.activity']
         spell_id = spell_pool.get_by_patient_id(cr, uid, patient_id, context=context)
-        # Automatically admit the patient if it's not admitted (?)
         if not spell_id:
             _logger.warn("Patient admitted from an update call!")
             admission_pool = self.pool['nh.clinical.patient.admission']
