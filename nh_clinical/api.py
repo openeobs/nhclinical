@@ -161,10 +161,8 @@ class nh_clinical_api(orm.AbstractModel):
         patient_pool = self.pool['nh.clinical.patient']
         patient_pool.check_hospital_number(cr, uid, hospital_number, exception='False', context=context)
         activity_pool = self.pool['nh.activity']
-        patient_pool = self.pool['nh.clinical.patient']
         cancel_pool = self.pool['nh.clinical.adt.patient.cancel_discharge']
-        patientdb_id = patient_pool.search(cr, uid, [('other_identifier', '=', hospital_number)], context=context)
-        cancel_discharge_activity = cancel_pool.create_activity(cr, uid, {'patient_id': patientdb_id[0]}, {}, context=context)
+        cancel_discharge_activity = cancel_pool.create_activity(cr, uid, {}, {}, context=context)
         activity_pool.submit(cr, uid, cancel_discharge_activity, {'other_identifier': hospital_number}, context=context)
         activity_pool.complete(cr, uid, cancel_discharge_activity, context=context)
         _logger.debug("Discharge cancelled for patient: %s" % hospital_number)

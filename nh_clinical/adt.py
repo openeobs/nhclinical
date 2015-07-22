@@ -650,6 +650,7 @@ class nh_clinical_adt_patient_merge(orm.Model):
                     vals_into.update({fk: fv[0]})
                 else:
                     vals_into.update({fk: fv})
-        res['merge_into_update'] = patient_pool.write(cr, uid, into_id, vals_into, context)
-        res['merge_from_deactivate'] = patient_pool.write(cr, uid, from_id, {'active': False}, context)
+        res['merge_into_update'] = patient_pool.write(cr, uid, into_id, vals_into, context=context)
+        res['merge_from_deactivate'] = patient_pool.write(cr, uid, from_id, {'active': False}, context=context)
+        activity_pool.write(cr, uid, activity_id, {'patient_id': into_id}, context=context)
         return res
