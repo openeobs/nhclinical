@@ -1,5 +1,5 @@
 __author__ = 'Will'
-from mock import MagicMock, patch
+from mock import MagicMock
 
 from openerp.tests.common import TransactionCase
 
