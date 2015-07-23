@@ -60,9 +60,9 @@
                             <!--<field name="senior_manager"/>-->
                             <!--<field name="doctor"/>-->
 	                    </group>
-                        <!--<div colspan="4">-->
-                            <!--<button name="responsibility_allocation" string="Responsibility Allocation" type="object"/>-->
-                        <!--</div>-->
+                        <div colspan="4">
+                            <button name="responsibility_allocation" string="Responsibility Allocation" type="object"/>
+                        </div>
                         <notebook>
                             <page string="Location responsibility">
                                 <field name="location_ids" readonly="1"/>
