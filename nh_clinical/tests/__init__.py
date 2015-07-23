@@ -13,3 +13,4 @@ import test_base_extensions
 import test_doctor
 import test_spell
 import test_patient_placement_wizard
+import test_responsibility_allocation_wizard
