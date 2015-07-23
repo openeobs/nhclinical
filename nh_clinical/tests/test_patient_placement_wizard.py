@@ -1,5 +1,5 @@
 __author__ = 'Will'
-from mock import MagicMock
+from mock import MagicMock, patch
 
 from openerp.tests.common import TransactionCase
 
@@ -65,10 +65,11 @@ class TestPatientPlacementWizard(TransactionCase):
         )
         self.activity_pool.complete(cr, uid, activity_id, None)
         self.assertEquals(result, None)
+        del self.activity_pool.start, self.activity_pool.submit, self.activity_pool.complete
 
     def test_06_get_placements(self):
         cr, uid = self.cr, self.uid
-        wiz_id = self.wizard_pool.create(cr, uid, {'name': 'test'})
+        wiz_id = self.wizard_pool.create(cr, uid, {})
         wiz = self.wizard_pool.browse(cr, uid, wiz_id)
         self.wizard_pool.browse = MagicMock(return_value=wiz)
 
@@ -76,3 +77,34 @@ class TestPatientPlacementWizard(TransactionCase):
         self.wizard_pool.browse.assert_called_with(cr, uid, 1, None)
         # check return value is type nh.clinical.patient.placement
         self.assertEqual(type(result), type(self.placement_pool))
+        del self.wizard_pool.browse
+
+    def test_07_apply(self):
+        cr, uid = self.cr, self.uid
+        write_args = {
+            'placement_ids': [(6, 0, [1, 2])],
+            'recent_placement_ids': [(6, 0, [2])]
+        }
+        self.wizard_pool.write = MagicMock()
+        self.wizard_pool._get_place_patients = MagicMock()
+        self.wizard_pool._get_placement_ids = MagicMock(return_value=[1, 2])
+        self.wizard_pool._get_recent_placement_ids = MagicMock(return_value=[2])
+
+        result = self.wizard_pool.apply(cr, uid, [1, 2])
+        self.wizard_pool._get_place_patients.assert_called_with(
+            cr, uid, [1, 2], None
+        )
+        self.assertTrue(self.wizard_pool._get_placement_ids.called)
+        self.assertTrue(self.wizard_pool._get_recent_placement_ids.called)
+        self.wizard_pool.write.assert_called_with(
+            cr, uid, [1, 2], write_args, None
+        )
+        self.assertEquals(
+            result['res_model'],
+            'nh.clinical.patient.placement.wizard'
+        )
+        del self.wizard_pool.write, self.wizard_pool._get_place_patients, \
+            self.wizard_pool._get_placement_ids,\
+            self.wizard_pool._get_recent_placement_ids
+
+

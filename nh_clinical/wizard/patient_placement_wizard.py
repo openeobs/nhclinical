@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
-
 import logging
 
 from openerp.osv import orm, fields
-
 
 _logger = logging.getLogger(__name__)
 
@@ -47,22 +45,27 @@ class nh_clinical_patient_placement_wizard(orm.TransientModel):
         wizard = self.browse(cr, uid, ids[0], context)
         return wizard.placement_ids
 
-    def apply(self, cr, uid, ids, context=None):
-        activity_pool = self.pool['nh.activity']
-        for placement in self.browse(cr, uid, ids[0], context).placement_ids:
+    def _get_place_patients(self, cr, uid, ids, context=None):
+        placements = self._get_placements(cr, uid, ids, context=context)
+        for placement in placements:
             if placement.location_id:
-                activity_pool.start(cr, uid, placement.activity_id.id, context)
-                activity_pool.submit(cr, uid, placement.activity_id.id, {'location': placement.location_id.id}, context)
-                activity_pool.complete(cr, uid, placement.activity_id.id, context)
+                self._place_patients(
+                    cr, uid, placement.activity_id.id,
+                    placement.location_id.id, context=context
+                )
 
-        self.write(cr, uid, ids, {'placement_ids': [(6, 0, self._get_placement_ids(cr, uid))],
-                                  'recent_placement_ids': [(6, 0, self._get_recent_placement_ids(cr, uid))]})
-        
-        aw = {'type': 'ir.actions.act_window',
-              'res_model': self._name,
-              'res_id': ids[0],
-              'view_type': "form",
-              'view_mode': "form",
-              'target': "inline",
-              }
+    def apply(self, cr, uid, ids, context=None):
+        self._get_place_patients(cr, uid, ids, context)
+        self.write(cr, uid, ids, {
+            'placement_ids': [(6, 0, self._get_placement_ids(cr, uid))],
+            'recent_placement_ids': [(6, 0, self._get_recent_placement_ids(cr, uid))]
+        }, context)
+        aw = {
+            'type': 'ir.actions.act_window',
+            'res_model': self._name,
+            'res_id': ids[0],
+            'view_type': "form",
+            'view_mode': "form",
+            'target': "inline",
+        }
         return aw
