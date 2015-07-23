@@ -43,6 +43,10 @@ class nh_clinical_patient_placement_wizard(orm.TransientModel):
         activity_pool.submit(cr, uid, activity_id, {'location': location_id}, context)
         activity_pool.complete(cr, uid, activity_id, context)
 
+    def _get_placements(self, cr, uid, ids, context=None):
+        wizard = self.browse(cr, uid, ids[0], context)
+        return wizard.placement_ids
+
     def apply(self, cr, uid, ids, context=None):
         activity_pool = self.pool['nh.activity']
         for placement in self.browse(cr, uid, ids[0], context).placement_ids:
@@ -50,7 +54,7 @@ class nh_clinical_patient_placement_wizard(orm.TransientModel):
                 activity_pool.start(cr, uid, placement.activity_id.id, context)
                 activity_pool.submit(cr, uid, placement.activity_id.id, {'location': placement.location_id.id}, context)
                 activity_pool.complete(cr, uid, placement.activity_id.id, context)
-                
+
         self.write(cr, uid, ids, {'placement_ids': [(6, 0, self._get_placement_ids(cr, uid))],
                                   'recent_placement_ids': [(6, 0, self._get_recent_placement_ids(cr, uid))]})
         

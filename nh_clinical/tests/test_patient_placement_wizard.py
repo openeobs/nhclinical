@@ -66,3 +66,13 @@ class TestPatientPlacementWizard(TransactionCase):
         self.activity_pool.complete(cr, uid, activity_id, None)
         self.assertEquals(result, None)
 
+    def test_06_get_placements(self):
+        cr, uid = self.cr, self.uid
+        wiz_id = self.wizard_pool.create(cr, uid, {'name': 'test'})
+        wiz = self.wizard_pool.browse(cr, uid, wiz_id)
+        self.wizard_pool.browse = MagicMock(return_value=wiz)
+
+        result = self.wizard_pool._get_placements(cr, uid, [1])
+        self.wizard_pool.browse.assert_called_with(cr, uid, 1, None)
+        # check return value is type nh.clinical.patient.placement
+        self.assertEqual(type(result), type(self.placement_pool))
