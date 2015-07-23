@@ -11,6 +11,7 @@ class TestPatientPlacementWizard(TransactionCase):
 
         self.wizard_pool = self.registry('nh.clinical.patient.placement.wizard')
         self.placement_pool = self.registry('nh.clinical.patient.placement')
+        self.activity_pool = self.registry('nh.activity')
 
     def test_01_get_placement_ids_calls_search_with_domain(self):
         cr, uid = self.cr, self.uid
@@ -44,3 +45,24 @@ class TestPatientPlacementWizard(TransactionCase):
 
         result = self.wizard_pool._get_recent_placement_ids(cr, uid)
         self.assertTrue(isinstance(result, list))
+
+    def test_05_place_patients_calls_start_submit_complete(self):
+        cr, uid = self.cr, self.uid
+        activity_id = 1
+        location_id = 2
+        self.activity_pool.start = MagicMock()
+        self.activity_pool.submit = MagicMock()
+        self.activity_pool.complete = MagicMock()
+
+        result = self.wizard_pool._place_patients(
+            cr, uid, activity_id, location_id
+        )
+        self.activity_pool.start.assert_called_with(
+            cr, uid, activity_id, None
+        )
+        self.activity_pool.submit.assert_called_with(
+            cr, uid, activity_id, {'location': location_id}, None
+        )
+        self.activity_pool.complete(cr, uid, activity_id, None)
+        self.assertEquals(result, None)
+
