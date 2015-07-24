@@ -321,3 +321,23 @@ class nh_activity_data(orm.AbstractModel):
         """
         return True
 
+    def submit_ui(self, cr, uid, ids, context=None):
+        if context.get('active_id'):
+            activity_pool = self.pool['nh.activity']
+            activity_pool.write(cr, uid, context['active_id'], {'data_ref': "%s,%s" % (self._name, str(ids[0]))})
+            activity = activity_pool.browse(cr, uid, context['active_id'], context)
+            activity_pool.update_activity(cr, SUPERUSER_ID, activity.id, context)
+            _logger.debug("activity '%s', activity.id=%s data submitted via UI" % (activity.data_model, activity.id))
+        return {'type': 'ir.actions.act_window_close'}
+
+    def complete_ui(self, cr, uid, ids, context=None):
+        if context.get('active_id'):
+            active_id = context['active_id']
+            activity_pool = self.pool['nh.activity']
+            activity_pool.write(cr, uid, active_id, {'data_ref': "%s,%s" % (self._name, str(ids[0]))})
+            activity = activity_pool.browse(cr, uid, active_id, context)
+            activity_pool.update_activity(cr, SUPERUSER_ID, activity.id, context)
+            activity_pool.complete(cr, uid, activity.id, context)
+            _logger.debug("activity '%s', activity.id=%s data completed via UI" % (activity.data_model, activity.id))
+        return {'type': 'ir.actions.act_window_close'}
+
