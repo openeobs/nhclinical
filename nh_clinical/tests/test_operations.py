@@ -42,39 +42,81 @@ class test_operations(common.SingleTransactionCase):
         cls.discharge_pool = cls.registry('nh.clinical.patient.discharge')
         cls.transfer_pool = cls.registry('nh.clinical.patient.transfer')
 
-        cls.apidemo = cls.registry('nh.clinical.api.demo')
+        cls.wm_group_id = cls.groups_pool.search(cr, uid, [['name', '=', 'NH Clinical Ward Manager Group']])
+        cls.nurse_group_id = cls.groups_pool.search(cr, uid, [['name', '=', 'NH Clinical Nurse Group']])
+        # cls.hca_group_id = cls.groups_pool.search(cr, uid, [['name', '=', 'NH Clinical HCA Group']])
+        # cls.doctor_group_id = cls.groups_pool.search(cr, uid, [['name', '=', 'NH Clinical Doctor Group']])
+        cls.admin_group_id = cls.groups_pool.search(cr, uid, [['name', '=', 'NH Clinical Admin Group']])
 
-        cls.patient_ids = cls.apidemo.build_unit_test_env1(cr, uid, bed_count=4, patient_count=4)
+        cls.hospital_id = cls.location_pool.create(cr, uid, {'name': 'Test Hospital', 'code': 'TESTHOSP',
+                                                             'usage': 'hospital'})
+        cls.pos_id = cls.pos_pool.create(cr, uid, {'name': 'Test POS', 'location_id': cls.hospital_id})
 
-        cls.patient_id = cls.patient_pool.create(cr, uid, {'other_identifier': 'TESTHN01'})
-        cls.patient2_id = cls.patient_pool.create(cr, uid, {'other_identifier': 'TESTHN02'})
+        cls.adt_uid = cls.users_pool.create(cr, uid, {'name': 'Admin 0', 'login': 'user_000',
+                                                        'password': 'user_000',
+                                                        'groups_id': [[4, cls.admin_group_id[0]]],
+                                                        'pos_id': cls.pos_id})
 
-        cls.wu_id = cls.location_pool.search(cr, uid, [('code', '=', 'U')])[0]
-        cls.wt_id = cls.location_pool.search(cr, uid, [('code', '=', 'T')])[0]
-        cls.pos_id = cls.location_pool.read(cr, uid, cls.wu_id, ['pos_id'])['pos_id'][0]
-        cls.pos_location_id = cls.pos_pool.read(cr, uid, cls.pos_id, ['location_id'])['location_id'][0]
+        cls.locations = {}
+        cls.users = {}
+        for i in range(3):
+            wid = cls.location_pool.create(cr, uid, {'name': 'Ward'+str(i), 'code': 'WARD'+str(i), 'usage': 'ward',
+                                                     'parent_id': cls.hospital_id, 'type': 'poc'})
+            cls.locations[wid] = [cls.location_pool.create(cr, uid, {'name': 'Bed'+str(i)+str(j),
+                                                                     'code': 'BED'+str(i)+str(j),
+                                                                     'usage': 'bed', 'parent_id': wid,
+                                                                     'type': 'poc'}) for j in range(3)]
+            cls.users[wid] = {
+                'wm': cls.users_pool.create(cr, uid, {'name': 'WM'+str(i), 'login': 'wm'+str(i),
+                                                      'password': 'wm'+str(i),
+                                                      'groups_id': [[4, cls.wm_group_id[0]]],
+                                                      'pos_id': cls.pos_id,
+                                                      'location_ids': [[6, 0, [wid]]]}),
+                'n': cls.users_pool.create(cr, uid, {'name': 'N'+str(i), 'login': 'n'+str(i),
+                                                     'password': 'n'+str(i),
+                                                     'groups_id': [[4, cls.nurse_group_id[0]]],
+                                                     'pos_id': cls.pos_id,
+                                                     'location_ids': [[6, 0, cls.locations[wid]]]})
+            }
 
-        cls.wmu_id = cls.users_pool.search(cr, uid, [('login', '=', 'WMU')])[0]
-        cls.wmt_id = cls.users_pool.search(cr, uid, [('login', '=', 'WMT')])[0]
-        cls.nu_id = cls.users_pool.search(cr, uid, [('login', '=', 'NU')])[0]
-        cls.nt_id = cls.users_pool.search(cr, uid, [('login', '=', 'NT')])[0]
-        cls.adt_id = cls.users_pool.search(cr, uid, [('groups_id.name', 'in', ['NH Clinical ADT Group']), ('pos_id', '=', cls.pos_id)])[0]
+        cls.patients = [cls.patient_pool.create(cr, uid, {
+            'other_identifier': 'TESTP000'+str(i), 'patient_identifier': 'TESTNHS0'+str(i)}) for i in range(7)]
 
-    def test_01_patient_admission_submit_complete(self):
+
+
+        # cls.apidemo = cls.registry('nh.clinical.api.demo')
+        #
+        # cls.patient_ids = cls.apidemo.build_unit_test_env1(cr, uid, bed_count=4, patient_count=4)
+        #
+        # cls.patient_id = cls.patient_pool.create(cr, uid, {'other_identifier': 'TESTHN01'})
+        # cls.patient2_id = cls.patient_pool.create(cr, uid, {'other_identifier': 'TESTHN02'})
+        #
+        # cls.wu_id = cls.location_pool.search(cr, uid, [('code', '=', 'U')])[0]
+        # cls.wt_id = cls.location_pool.search(cr, uid, [('code', '=', 'T')])[0]
+        # cls.pos_id = cls.location_pool.read(cr, uid, cls.wu_id, ['pos_id'])['pos_id'][0]
+        # cls.pos_location_id = cls.pos_pool.read(cr, uid, cls.pos_id, ['location_id'])['location_id'][0]
+        #
+        # cls.wmu_id = cls.users_pool.search(cr, uid, [('login', '=', 'WMU')])[0]
+        # cls.wmt_id = cls.users_pool.search(cr, uid, [('login', '=', 'WMT')])[0]
+        # cls.nu_id = cls.users_pool.search(cr, uid, [('login', '=', 'NU')])[0]
+        # cls.nt_id = cls.users_pool.search(cr, uid, [('login', '=', 'NT')])[0]
+        # cls.adt_id = cls.users_pool.search(cr, uid, [('groups_id.name', 'in', ['NH Clinical ADT Group']), ('pos_id', '=', cls.pos_id)])[0]
+
+    def test_01_admission_submit_complete(self):
         cr, uid = self.cr, self.uid
 
         # Scenario 1: Admit a patient
         admission_data = {
             'pos_id': self.pos_id,
-            'patient_id': self.patient_id,
-            'location_id': self.wu_id,
+            'patient_id': self.patients[0],
+            'location_id': self.locations.keys()[0],
             'code': 'TESTADMISSION01',
             'start_date': '2015-05-10 15:00:00'
         }
-        admission_id = self.admission_pool.create_activity(cr, uid, {}, admission_data)
-        self.activity_pool.complete(cr, uid, admission_id)
+        admission_id = self.admission_pool.create_activity(cr, self.adt_uid, {}, admission_data)
+        self.activity_pool.complete(cr, self.adt_uid, admission_id)
         spell_id = self.activity_pool.search(cr, uid, [['data_model', '=', 'nh.clinical.spell'],
-                                                       ['state', '=', 'started'], ['patient_id', '=', self.patient_id],
+                                                       ['state', '=', 'started'], ['patient_id', '=', self.patients[0]],
                                                        ['creator_id', '=', admission_id]])
         self.assertTrue(spell_id, msg="Spell not created correctly after Admission")
 
@@ -82,324 +124,581 @@ class test_operations(common.SingleTransactionCase):
         with self.assertRaises(except_orm):
             self.admission_pool.create_activity(cr, uid, {}, admission_data)
 
+        # Scenario 3: Admission without patient data
+        admission_data = {
+            'pos_id': self.pos_id,
+            'location_id': self.locations.keys()[0],
+            'code': 'TESTADMISSION01',
+            'start_date': '2015-05-10 15:00:00'
+        }
+        with self.assertRaises(except_orm):
+            self.admission_pool.create_activity(cr, uid, {}, admission_data)
+
+        admission_data = {
+            'pos_id': self.pos_id,
+            'location_id': self.locations.keys()[1],
+            'patient_id': self.patients[2],
+            'code': 'TESTADMISSION02',
+            'start_date': '2015-05-10 15:00:00'
+        }
+        admission_id = self.admission_pool.create_activity(cr, self.adt_uid, {}, admission_data)
+        self.activity_pool.complete(cr, self.adt_uid, admission_id)
+
+        admission_data = {
+            'pos_id': self.pos_id,
+            'location_id': self.locations.keys()[2],
+            'patient_id': self.patients[3],
+            'code': 'TESTADMISSION03',
+            'start_date': '2015-05-10 15:00:00'
+        }
+        admission_id = self.admission_pool.create_activity(cr, self.adt_uid, {}, admission_data)
+        self.activity_pool.complete(cr, self.adt_uid, admission_id)
+
+        admission_data = {
+            'pos_id': self.pos_id,
+            'location_id': self.locations.keys()[0],
+            'patient_id': self.patients[4],
+            'code': 'TESTADMISSION04',
+            'start_date': '2015-05-10 15:00:00'
+        }
+        admission_id = self.admission_pool.create_activity(cr, self.adt_uid, {}, admission_data)
+        self.activity_pool.complete(cr, self.adt_uid, admission_id)
+
+        admission_data = {
+            'pos_id': self.pos_id,
+            'location_id': self.locations.keys()[0],
+            'patient_id': self.patients[6],
+            'code': 'TESTADMISSION06',
+            'start_date': '2015-05-10 15:00:00'
+        }
+        admission_id = self.admission_pool.create_activity(cr, self.adt_uid, {}, admission_data)
+        self.activity_pool.complete(cr, self.adt_uid, admission_id)
+
     def test_02_get_last_admission(self):
         cr, uid = self.cr, self.uid
 
-        admission_id = self.activity_pool.search(cr, uid, [['patient_id.other_identifier', '=', 'TESTHN01'],
+        admission_id = self.activity_pool.search(cr, uid, [['patient_id', '=', self.patients[0]],
                                                            ['data_model', '=', 'nh.clinical.patient.admission']])
 
         # Scenario 1: Admission exists
-        self.assertEqual(self.admission_pool.get_last(cr, uid, self.patient_id), admission_id[0])
+        self.assertEqual(self.admission_pool.get_last(cr, uid, self.patients[0]), admission_id[0])
 
         # Scenario 2: Admission does not exist
-        self.assertFalse(self.admission_pool.get_last(cr, uid, self.patient2_id))
+        self.assertFalse(self.admission_pool.get_last(cr, uid, self.patients[1]))
 
         # Scenario 3: Exception 'True', Admission exists
         with self.assertRaises(except_orm):
-            self.admission_pool.get_last(cr, uid, self.patient_id, exception='True')
-            
+            self.admission_pool.get_last(cr, uid, self.patients[0], exception='True')
+
         # Scenario 4: Exception 'False', Admission does not exist
         with self.assertRaises(except_orm):
-            self.admission_pool.get_last(cr, uid, self.patient2_id, exception='False')
+            self.admission_pool.get_last(cr, uid, self.patients[1], exception='False')
 
-    def test_03_patient_admission_cancel(self):
+    def test_03_admission_cancel(self):
         cr, uid = self.cr, self.uid
 
-        admission_id = self.activity_pool.search(cr, uid, [['patient_id.other_identifier', '=', 'TESTHN01'],
+        admission_id = self.activity_pool.search(cr, uid, [['patient_id', '=', self.patients[0]],
                                                            ['data_model', '=', 'nh.clinical.patient.admission']])
         admission = self.activity_pool.browse(cr, uid, admission_id)
 
         # Scenario 1: Cancel an admission
-        self.activity_pool.cancel(cr, uid, admission_id[0])
+        self.activity_pool.cancel(cr, self.adt_uid, admission_id[0])
         activity_ids = self.activity_pool.search(cr, uid, [
             ['id', 'child_of', admission.parent_id.id], ['state', 'not in', ['completed', 'cancelled']]])
         self.assertFalse(activity_ids, msg="Spell activities not cancelled")
-    
-    def test_04_patient_discharge_submit_complete(self):
-        cr, uid = self.cr, self.uid
-        
+
+        # prepare for future tests
         admission_data = {
             'pos_id': self.pos_id,
-            'patient_id': self.patient_id,
-            'location_id': self.wu_id,
-            'code': 'TESTADMISSION02',
-            'start_date': '2015-05-12 15:00:00'
+            'patient_id': self.patients[0],
+            'location_id': self.locations.keys()[0],
+            'code': 'TESTADMISSION11',
+            'start_date': '2015-05-10 15:00:00'
         }
-        admission_id = self.admission_pool.create_activity(cr, uid, {}, admission_data)
-        self.activity_pool.complete(cr, uid, admission_id)
-        
+        admission_id = self.admission_pool.create_activity(cr, self.adt_uid, {}, admission_data)
+        self.activity_pool.complete(cr, self.adt_uid, admission_id)
+
+    def test_04_placement_submit_complete(self):
+        cr, uid = self.cr, self.uid
+
+        # Scenario 1: Place a patient into a bed
+        ward_id = self.locations.keys()[2]
+        bed_id = self.locations[ward_id][0]
+        wm_id = self.users[ward_id]['wm']
+        placement_data = {
+            'suggested_location_id': ward_id,
+            'patient_id': self.patients[3]
+        }
+        placement_id = self.placement_pool.create_activity(cr, self.adt_uid, {}, placement_data)
+        self.activity_pool.submit(cr, wm_id, placement_id, {'location_id': bed_id})
+        self.activity_pool.complete(cr, wm_id, placement_id)
+        move_ids = self.activity_pool.search(cr, uid, [
+            ['data_model', '=', 'nh.clinical.patient.move'], ['state', '=', 'completed'],
+            ['patient_id', '=', self.patients[3]], ['creator_id', '=', placement_id]])
+        self.assertTrue(move_ids, msg="Movement Activity not completed after placement")
+        spell_id = self.activity_pool.search(cr, uid, [['data_model', '=', 'nh.clinical.spell'],
+                                                       ['state', '=', 'started'],
+                                                       ['patient_id', '=', self.patients[3]]])
+        spell = self.activity_pool.browse(cr, uid, spell_id[0])
+        self.assertEqual(spell.data_ref.location_id.id, bed_id, msg="Placement did not update spell location")
+        patient = self.patient_pool.browse(cr, uid, self.patients[3])
+        self.assertEqual(patient.current_location_id.id, bed_id,
+                         msg="Placement did not update current patient location")
+
+        # Scenario 2: Try to place a patient into a ward
+        placement_data = {
+            'suggested_location_id': ward_id,
+            'patient_id': self.patients[4]
+        }
+        placement_id = self.placement_pool.create_activity(cr, self.adt_uid, {}, placement_data)
+        with self.assertRaises(except_orm):
+            self.activity_pool.submit(cr, wm_id, placement_id, {'location_id': ward_id})
+
+        # Scenario 3: Try to place a patient without destination location
+        placement_data = {
+            'suggested_location_id': ward_id,
+            'patient_id': self.patients[4]
+        }
+        placement_id = self.placement_pool.create_activity(cr, self.adt_uid, {}, placement_data)
+        with self.assertRaises(except_orm):
+            self.activity_pool.complete(cr, wm_id, placement_id)
+
+        # Scenario 4: Try to place a non admitted patient
+        bed_id = self.locations[ward_id][1]
+        placement_data = {
+            'suggested_location_id': ward_id,
+            'patient_id': self.patients[5]
+        }
+        placement_id = self.placement_pool.create_activity(cr, self.adt_uid, {}, placement_data)
+        self.activity_pool.submit(cr, wm_id, placement_id, {'location_id': bed_id})
+        with self.assertRaises(except_orm):
+            self.activity_pool.complete(cr, wm_id, placement_id)
+
+    def test_05_placement_form_description(self):
+        cr, uid = self.cr, self.uid
+
+        ward_id = self.locations.keys()[2]
+        wm_id = self.users[ward_id]['wm']
+        bed_id = self.locations[ward_id][1]
+
+        # Scenario 1: Get form description for a patient with no placement
+        fd = self.placement_pool.get_form_description(cr, wm_id, self.patients[0])
+        for field in fd:
+            if field['name'] == 'location_id':
+                self.assertFalse(field['selection'], msg="Location selection incorrect")
+
+        # Scenario 2: Get form description for a patient with placement
+        placement_data = {
+            'suggested_location_id': ward_id,
+            'patient_id': self.patients[4]
+        }
+        placement_id = self.placement_pool.create_activity(cr, self.adt_uid, {}, placement_data)
+        fd = self.placement_pool.get_form_description(cr, wm_id, self.patients[4])
+        for field in fd:
+            if field['name'] == 'location_id':
+                self.assertTrue(field['selection'], msg="Location selection incorrect")
+        self.activity_pool.submit(cr, wm_id, placement_id, {'location_id': bed_id})
+        self.activity_pool.complete(cr, wm_id, placement_id)
+
+        ward_id = self.locations.keys()[0]
+        wm_id = self.users[ward_id]['wm']
+        bed_id = self.locations[ward_id][0]
+        placement_data = {
+            'suggested_location_id': ward_id,
+            'patient_id': self.patients[6]
+        }
+        placement_id = self.placement_pool.create_activity(cr, self.adt_uid, {}, placement_data)
+        self.activity_pool.submit(cr, wm_id, placement_id, {'location_id': bed_id})
+        self.activity_pool.complete(cr, wm_id, placement_id)
+
+    def test_06_swap_beds(self):
+        cr, uid = self.cr, self.uid
+
+        # Scenario 1: Swap patients between two beds
+        ward1_id = self.locations.keys()[2]
+        wm_id = self.users[ward1_id]['wm']
+        ward2_id = self.locations.keys()[0]
+        swap_data = {
+            'location1_id': self.locations[ward1_id][0],  # self.patients[3]
+            'location2_id': self.locations[ward1_id][1]  # self.patients[4]
+        }
+        swap_id = self.swap_pool.create_activity(cr, wm_id, {}, swap_data)
+        self.activity_pool.complete(cr, wm_id, swap_id)
+        move_ids = self.activity_pool.search(cr, uid, [
+            ['data_model', '=', 'nh.clinical.patient.move'], ['state', '=', 'completed'],
+            ['patient_id', '=', self.patients[3]], ['creator_id', '=', swap_id]])
+        self.assertTrue(move_ids, msg="Movement Activity not completed after swap")
+        move_ids = self.activity_pool.search(cr, uid, [
+            ['data_model', '=', 'nh.clinical.patient.move'], ['state', '=', 'completed'],
+            ['patient_id', '=', self.patients[4]], ['creator_id', '=', swap_id]])
+        self.assertTrue(move_ids, msg="Movement Activity not completed after swap")
+        spell_id = self.activity_pool.search(cr, uid, [['data_model', '=', 'nh.clinical.spell'],
+                                                       ['state', '=', 'started'],
+                                                       ['patient_id', '=', self.patients[3]]])
+        spell = self.activity_pool.browse(cr, uid, spell_id[0])
+        self.assertEqual(spell.data_ref.location_id.id, self.locations[ward1_id][1],
+                         msg="Swap did not update spell location")
+        patient = self.patient_pool.browse(cr, uid, self.patients[3])
+        self.assertEqual(patient.current_location_id.id, self.locations[ward1_id][1],
+                         msg="Swap did not update current patient location")
+        spell_id = self.activity_pool.search(cr, uid, [['data_model', '=', 'nh.clinical.spell'],
+                                                       ['state', '=', 'started'],
+                                                       ['patient_id', '=', self.patients[4]]])
+        spell = self.activity_pool.browse(cr, uid, spell_id[0])
+        self.assertEqual(spell.data_ref.location_id.id, self.locations[ward1_id][0],
+                         msg="Swap did not update spell location")
+        patient = self.patient_pool.browse(cr, uid, self.patients[4])
+        self.assertEqual(patient.current_location_id.id, self.locations[ward1_id][0],
+                         msg="Swap did not update current patient location")
+
+        # Scenario 2: Try to swap patients using an empty location
+        swap_data = {
+            'location1_id': self.locations[ward1_id][0],  # self.patients[4]
+            'location2_id': self.locations[ward1_id][2]  # no patient
+        }
+        with self.assertRaises(except_orm):
+            self.swap_pool.create_activity(cr, wm_id, {}, swap_data)
+
+        swap_data = {
+            'location1_id': self.locations[ward1_id][2],  # no patient
+            'location2_id': self.locations[ward1_id][1]  # self.patients[3]
+        }
+        with self.assertRaises(except_orm):
+            self.swap_pool.create_activity(cr, wm_id, {}, swap_data)
+
+        # Scenario 3: Try to swap patients from different wards
+        swap_data = {
+            'location1_id': self.locations[ward1_id][0],  # self.patients[4]
+            'location2_id': self.locations[ward2_id][0]  # self.patients[6]
+        }
+        with self.assertRaises(except_orm):
+            self.swap_pool.create_activity(cr, wm_id, {}, swap_data)
+
+    def test_07_discharge_submit_complete(self):
+        cr, uid = self.cr, self.uid
+
         # Scenario 1: Discharge a patient
         discharge_data = {
-            'patient_id': self.patient_id,
+            'patient_id': self.patients[2],
             'discharge_date': '2015-05-14 16:00:00'
         }
-        discharge_id = self.discharge_pool.create_activity(cr, uid, {}, discharge_data)
-        self.activity_pool.complete(cr, uid, discharge_id)
+        discharge_id = self.discharge_pool.create_activity(cr, self.adt_uid, {}, discharge_data)
+        self.activity_pool.complete(cr, self.adt_uid, discharge_id)
         discharge = self.activity_pool.browse(cr, uid, discharge_id)
         self.assertEqual(discharge.parent_id.data_model, 'nh.clinical.spell')
         self.assertEqual(discharge.parent_id.state, 'completed')
         self.assertEqual(discharge.parent_id.date_terminated, '2015-05-14 16:00:00')
-        self.assertEqual(discharge.data_ref.location_id.id, self.wu_id, msg="Discharged from 'location' not updated")
+        self.assertEqual(discharge.data_ref.location_id.id, self.locations.keys()[1],
+                         msg="Discharged from 'location' not updated")
         self.assertNotEqual(discharge.parent_id.location_id.id, discharge.data_ref.location_id.id)
-        
-        # Scenario 2: Discharge a discharged patient
+
+        # Scenario 2: Discharge a patient without discharge date
+        discharge_data = {
+            'patient_id': self.patients[3]
+        }
+        discharge_id = self.discharge_pool.create_activity(cr, self.adt_uid, {}, discharge_data)
+        self.assertTrue(self.activity_pool.complete(cr, self.adt_uid, discharge_id))
+
+        # Scenario 3: Discharge a discharged patient
         with self.assertRaises(except_orm):
-            self.discharge_pool.create_activity(cr, uid, {}, discharge_data)
-    
-    def test_05_get_last_discharge(self):
+            self.discharge_pool.create_activity(cr, self.adt_uid, {}, discharge_data)
+
+        # Scenario 4: Admission without patient data
+        discharge_data = {
+            'discharge_date': '2015-05-14 16:00:00'
+        }
+        with self.assertRaises(except_orm):
+            self.discharge_pool.create_activity(cr, self.adt_uid, {}, discharge_data)
+
+    def test_08_move_submit_complete(self):
         cr, uid = self.cr, self.uid
 
-        discharge_id = self.activity_pool.search(cr, uid, [['patient_id.other_identifier', '=', 'TESTHN01'],
+        ward_id = self.locations.keys()[2]
+        wm_id = self.users[ward_id]['wm']
+        bed_id = self.locations[ward_id][1]
+
+        # Scenario 1: Move a patient
+        move_data = {
+            'location_id': bed_id,
+            'patient_id': self.patients[4]
+        }
+        move_id = self.move_pool.create_activity(cr, wm_id, {}, move_data)
+        self.activity_pool.complete(cr, wm_id, move_id)
+        spell_id = self.activity_pool.search(cr, uid, [['data_model', '=', 'nh.clinical.spell'],
+                                                       ['state', '=', 'started'],
+                                                       ['patient_id', '=', self.patients[4]]])
+        spell = self.activity_pool.browse(cr, uid, spell_id[0])
+        self.assertEqual(spell.data_ref.location_id.id, self.locations[ward_id][1],
+                         msg="Move did not update spell location")
+        patient = self.patient_pool.browse(cr, uid, self.patients[4])
+        self.assertEqual(patient.current_location_id.id, self.locations[ward_id][1],
+                         msg="Move did not update current patient location")
+
+        # Scenario 2: Move a non admitted patient
+        move_data = {
+            'location_id': ward_id,
+            'patient_id': self.patients[5]
+        }
+        move_id = self.move_pool.create_activity(cr, wm_id, {}, move_data)
+        self.assertTrue(self.activity_pool.complete(cr, wm_id, move_id))
+
+        # Scenario 3: Try to move a patient with no location information
+        move_data = {
+            'patient_id': self.patients[5]
+        }
+        move_id = self.move_pool.create_activity(cr, wm_id, {}, move_data)
+        with self.assertRaises(except_orm):
+            self.activity_pool.complete(cr, wm_id, move_id)
+
+        # prepare for cancel discharge scenario
+        discharge_data = {
+            'patient_id': self.patients[4]
+        }
+        discharge_id = self.discharge_pool.create_activity(cr, self.adt_uid, {}, discharge_data)
+        self.assertTrue(self.activity_pool.complete(cr, self.adt_uid, discharge_id))
+
+    def test_09_get_last_discharge(self):
+        cr, uid = self.cr, self.uid
+
+        discharge_id = self.activity_pool.search(cr, uid, [['patient_id', '=', self.patients[2]],
                                                            ['data_model', '=', 'nh.clinical.patient.discharge']])
 
         # Scenario 1: Discharge exists
-        self.assertEqual(self.discharge_pool.get_last(cr, uid, self.patient_id), discharge_id[0])
+        self.assertTrue(discharge_id, msg="No discharge found!")
+        self.assertEqual(self.discharge_pool.get_last(cr, uid, self.patients[2]), discharge_id[0])
 
         # Scenario 2: Discharge does not exist
-        self.assertFalse(self.discharge_pool.get_last(cr, uid, self.patient2_id))
+        self.assertFalse(self.discharge_pool.get_last(cr, uid, self.patients[0]))
 
         # Scenario 3: Exception 'True', Discharge exists
         with self.assertRaises(except_orm):
-            self.discharge_pool.get_last(cr, uid, self.patient_id, exception='True')
-            
+            self.discharge_pool.get_last(cr, uid, self.patients[2], exception='True')
+
         # Scenario 4: Exception 'False', Discharge does not exist
         with self.assertRaises(except_orm):
-            self.discharge_pool.get_last(cr, uid, self.patient2_id, exception='False')
+            self.discharge_pool.get_last(cr, uid, self.patients[0], exception='False')
 
-    def test_06_patient_discharge_cancel(self):
+    def test_10_patient_discharge_cancel(self):
         cr, uid = self.cr, self.uid
 
-        discharge_id = self.activity_pool.search(cr, uid, [['patient_id.other_identifier', '=', 'TESTHN01'],
+        discharge_id = self.activity_pool.search(cr, uid, [['patient_id', '=', self.patients[2]],
                                                            ['data_model', '=', 'nh.clinical.patient.discharge']])
 
-        # Scenario 1: Cancel a discharge
-        self.activity_pool.cancel(cr, uid, discharge_id[0])
+        # Scenario 1: Cancel a discharge with source location Ward
+        self.activity_pool.cancel(cr, self.adt_uid, discharge_id[0])
         discharge = self.activity_pool.browse(cr, uid, discharge_id[0])
         self.assertEqual(discharge.parent_id.state, 'started')
         self.assertFalse(discharge.parent_id.date_terminated)
         self.assertEqual(discharge.parent_id.location_id.id, discharge.data_ref.location_id.id)
 
-    def test_07_patient_transfer_submit_complete(self):
+        # Scenario 2: Cancel a discharge with source location Available Bed
+        discharge_id = self.activity_pool.search(cr, uid, [['patient_id', '=', self.patients[3]],
+                                                           ['data_model', '=', 'nh.clinical.patient.discharge']])
+        self.activity_pool.cancel(cr, self.adt_uid, discharge_id[0])
+        discharge = self.activity_pool.browse(cr, uid, discharge_id[0])
+        self.assertEqual(discharge.parent_id.location_id.id, discharge.data_ref.location_id.id)
+
+        # Scenario 3: Cancel a discharge with source location Unvailable Bed
+        discharge_id = self.activity_pool.search(cr, uid, [['patient_id', '=', self.patients[4]],
+                                                           ['data_model', '=', 'nh.clinical.patient.discharge']])
+        self.activity_pool.cancel(cr, self.adt_uid, discharge_id[0])
+        discharge = self.activity_pool.browse(cr, uid, discharge_id[0])
+        self.assertNotEqual(discharge.parent_id.location_id.id, discharge.data_ref.location_id.id)
+
+        # prepare for cancel transfer
+        ward_id = self.locations.keys()[2]
+        wm_id = self.users[ward_id]['wm']
+        bed_id = self.locations[ward_id][0]
+
+        move_data = {
+            'location_id': bed_id,
+            'patient_id': self.patients[4]
+        }
+        move_id = self.move_pool.create_activity(cr, wm_id, {}, move_data)
+        self.activity_pool.complete(cr, wm_id, move_id)
+
+    def test_11_transfer_submit_complete(self):
         cr, uid = self.cr, self.uid
 
         # Scenario 1: Transfer a patient
         transfer_data = {
-            'patient_id': self.patient_id,
-            'location_id': self.wt_id
+            'patient_id': self.patients[2],
+            'location_id': self.locations.keys()[0]
         }
-        transfer_id = self.transfer_pool.create_activity(cr, uid, {}, transfer_data)
-        self.activity_pool.complete(cr, uid, transfer_id)
+        transfer_id = self.transfer_pool.create_activity(cr, self.adt_uid, {}, transfer_data)
+        self.activity_pool.complete(cr, self.adt_uid, transfer_id)
         transfer = self.activity_pool.browse(cr, uid, transfer_id)
-        self.assertEqual(transfer.data_ref.location_id.id, self.wt_id)
-        self.assertEqual(transfer.data_ref.origin_loc_id.id, self.wu_id)
+        self.assertEqual(transfer.data_ref.location_id.id, self.locations.keys()[0])
+        self.assertEqual(transfer.data_ref.origin_loc_id.id, self.locations.keys()[1])
         self.assertEqual(transfer.parent_id.data_model, 'nh.clinical.spell')
-        self.assertEqual(transfer.parent_id.location_id.id, self.wt_id)
+        self.assertEqual(transfer.parent_id.location_id.id, self.locations.keys()[0])
 
-        # Scenario 2: Trasnfer a patient without spell
+        # Scenario 2: Transfer a patient to the same ward he/she is already in
         transfer_data = {
-            'patient_id': self.patient2_id,
-            'location_id': self.wt_id
+            'patient_id': self.patients[3],
+            'location_id': self.locations.keys()[2]
+        }
+        transfer_id = self.transfer_pool.create_activity(cr, self.adt_uid, {}, transfer_data)
+        self.activity_pool.complete(cr, self.adt_uid, transfer_id)
+        transfer = self.activity_pool.browse(cr, uid, transfer_id)
+        self.assertNotEqual(transfer.parent_id.location_id.id, self.locations.keys()[2])
+
+        # Scenario 3: Transfer a patient without spell
+        transfer_data = {
+            'patient_id': self.patients[5],
+            'location_id': self.locations.keys()[0]
         }
         with self.assertRaises(except_orm):
             self.transfer_pool.create_activity(cr, uid, {}, transfer_data)
 
-    def test_08_get_last_transfer(self):
+        # Scenario 4: Transfer a patient without patient information
+        transfer_data = {
+            'location_id': self.locations.keys()[0]
+        }
+        with self.assertRaises(except_orm):
+            self.transfer_pool.create_activity(cr, uid, {}, transfer_data)
+
+        # prepare for cancel transfer
+        transfer_data = {
+            'patient_id': self.patients[4],
+            'location_id': self.locations.keys()[0]
+        }
+        transfer_id = self.transfer_pool.create_activity(cr, self.adt_uid, {}, transfer_data)
+        self.activity_pool.complete(cr, self.adt_uid, transfer_id)
+
+        transfer_data = {
+            'patient_id': self.patients[0],
+            'location_id': self.locations.keys()[0]
+        }
+        transfer_id = self.transfer_pool.create_activity(cr, self.adt_uid, {}, transfer_data)
+        self.activity_pool.complete(cr, self.adt_uid, transfer_id)
+
+    def test_12_get_last_transfer(self):
         cr, uid = self.cr, self.uid
 
-        transfer_id = self.activity_pool.search(cr, uid, [['patient_id.other_identifier', '=', 'TESTHN01'],
+        transfer_id = self.activity_pool.search(cr, uid, [['patient_id', '=', self.patients[2]],
                                                           ['data_model', '=', 'nh.clinical.patient.transfer']])
 
         # Scenario 1: Transfer exists
-        self.assertEqual(self.transfer_pool.get_last(cr, uid, self.patient_id), transfer_id[0])
+        self.assertEqual(self.transfer_pool.get_last(cr, uid, self.patients[2]), transfer_id[0])
 
         # Scenario 2: Transfer does not exist
-        self.assertFalse(self.transfer_pool.get_last(cr, uid, self.patient2_id))
+        self.assertFalse(self.transfer_pool.get_last(cr, uid, self.patients[1]))
 
         # Scenario 3: Exception 'True', Transfer exists
         with self.assertRaises(except_orm):
-            self.transfer_pool.get_last(cr, uid, self.patient_id, exception='True')
+            self.transfer_pool.get_last(cr, uid, self.patients[2], exception='True')
 
         # Scenario 4: Exception 'False', Transfer does not exist
         with self.assertRaises(except_orm):
-            self.transfer_pool.get_last(cr, uid, self.patient2_id, exception='False')
+            self.transfer_pool.get_last(cr, uid, self.patients[1], exception='False')
 
-    def test_09_patient_transfer_cancel(self):
+    def test_13_transfer_cancel(self):
         cr, uid = self.cr, self.uid
 
-        transfer_id = self.activity_pool.search(cr, uid, [['patient_id.other_identifier', '=', 'TESTHN01'],
+        transfer_id = self.activity_pool.search(cr, uid, [['patient_id', '=', self.patients[2]],
                                                           ['data_model', '=', 'nh.clinical.patient.transfer']])
 
         # Scenario 1: Cancel a transfer
         self.activity_pool.cancel(cr, uid, transfer_id[0])
         transfer = self.activity_pool.browse(cr, uid, transfer_id[0])
-        self.assertEqual(transfer.parent_id.location_id.id, self.wu_id)
+        self.assertEqual(transfer.parent_id.location_id.id, self.locations.keys()[1])
 
-    def test_Placement_SwapBeds_and_Move(self):
-        cr, uid = self.cr, self.uid
-        patient_ids = self.patient_ids
-        patient_id = fake.random_element(patient_ids)
-        patient2_id = fake.random_element(patient_ids)
-        while patient2_id == patient_id:
-            patient2_id = fake.random_element(patient_ids)
-        code = str(fake.random_int(min=1000001, max=9999999))
-        spell_data = {
-            'patient_id': patient_id,
-            'pos_id': self.pos_id,
-            'code': code,
-            'start_date': dt.now().strftime(DTF)}
-        spell2_data = {
-            'patient_id': patient2_id,
-            'pos_id': self.pos_id,
-            'code': str(fake.random_int(min=100001, max=999999)),
-            'start_date': dt.now().strftime(DTF)}
-        spell_activity_id = self.spell_pool.create_activity(cr, uid, {}, spell_data)
-        spell2_activity_id = self.spell_pool.create_activity(cr, uid, {}, spell2_data)
-        self.activity_pool.start(cr, uid, spell_activity_id)
-        self.activity_pool.start(cr, uid, spell2_activity_id)
-        
-        # Patient Placement
-        placement_data = {
-            'suggested_location_id': self.wu_id,
-            'patient_id': patient_id
-        }
-        placement2_data = {
-            'suggested_location_id': self.wu_id,
-            'patient_id': patient2_id
-        }
-        location_id = self.location_pool.browse(cr, uid, self.wu_id).child_ids[0].id
-        location2_id = self.location_pool.browse(cr, uid, self.wu_id).child_ids[1].id
-        placement_activity_id = self.placement_pool.create_activity(cr, uid, {'pos_id': self.pos_id}, placement_data)
-        placement2_activity_id = self.placement_pool.create_activity(cr, uid, {'pos_id': self.pos_id}, placement2_data)
-        self.activity_pool.submit(cr, self.wmu_id, placement_activity_id, {'location_id': location_id})
-        self.activity_pool.submit(cr, self.wmu_id, placement2_activity_id, {'location_id': location2_id})
-        check_placement = self.activity_pool.browse(cr, uid, placement_activity_id)
-        
-        # test placement activity submitted data
-        self.assertTrue(check_placement.data_ref.patient_id.id == patient_id, msg="Patient Placement: Patient id was not submitted correctly")
-        self.assertTrue(check_placement.data_ref.suggested_location_id.id == self.wu_id, msg="Patient Placement: Suggested location was not submitted correctly")
-        self.assertTrue(check_placement.data_ref.location_id.id == location_id, msg="Patient Placement: Location id was not submitted correctly")
-        
-        # Complete Patient Placement
-        self.activity_pool.complete(cr, self.wmu_id, placement_activity_id)
-        self.activity_pool.complete(cr, self.wmu_id, placement2_activity_id)
-        check_placement = self.activity_pool.browse(cr, uid, placement_activity_id)
-        self.assertTrue(check_placement.state == 'completed', msg="Patient Placement not completed successfully")
-        self.assertTrue(check_placement.date_terminated, msg="Patient Placement Completed: Date terminated not registered")
-        # test spell data
-        check_spell = self.activity_pool.browse(cr, uid, spell_activity_id)
-        self.assertTrue(check_spell.data_ref.location_id.id == location_id, msg= "Patient Placement Completed: Spell location not registered correctly")
-        # test patient data
-        check_patient = self.patient_pool.browse(cr, uid, patient_id)
-        self.assertTrue(check_patient.current_location_id.id == location_id, msg= "Patient Placement Completed: Patient current location not registered correctly")
+        transfer_id = self.activity_pool.search(cr, uid, [['patient_id', '=', self.patients[3]],
+                                                          ['data_model', '=', 'nh.clinical.patient.transfer']])
 
-        # Swap Beds
-        beds_data = {
-            'location1_id': location_id,
-            'location2_id': location2_id
-        }
-        swap_activity_id = self.swap_pool.create_activity(cr, uid, {}, beds_data)
-        self.activity_pool.submit(cr, uid, swap_activity_id, {})
-        check_swap = self.activity_pool.browse(cr, uid, swap_activity_id)
+        # Scenario 2: Cancel a transfer from the same ward the patient is already in
+        self.activity_pool.cancel(cr, uid, transfer_id[0])
+        transfer = self.activity_pool.browse(cr, uid, transfer_id[0])
+        self.assertNotEqual(transfer.parent_id.location_id.id, self.locations.keys()[2])
 
-        # test swap activity submitted data
-        self.assertTrue(check_swap.data_ref.location1_id.id == location_id, msg="Swap Beds: Location id was not submitted correctly")
-        self.assertTrue(check_swap.data_ref.location2_id.id == location2_id, msg="Swap Beds: 2nd Location id was not submitted correctly")
+        # Scenario 3: Cancel a transfer for a patient which  original location is now unavailable
+        ward_id = self.locations.keys()[2]
+        wm_id = self.users[ward_id]['wm']
+        bed_id = self.locations[ward_id][0]
 
-        # Complete Swap Beds
-        self.activity_pool.complete(cr, uid, swap_activity_id)
-        check_swap = self.activity_pool.browse(cr, uid, swap_activity_id)
-        self.assertTrue(check_swap.state == 'completed', msg="Swap Beds not completed successfully")
-        self.assertTrue(check_swap.date_terminated, msg="Swap Beds Completed: Date terminated not registered")
-        # test spell data
-        check_spell = self.activity_pool.browse(cr, uid, spell_activity_id)
-        self.assertTrue(check_spell.data_ref.location_id.id == location2_id, msg= "Swap Beds Completed: Spell location not updated correctly")
-        check_spell = self.activity_pool.browse(cr, uid, spell2_activity_id)
-        self.assertTrue(check_spell.data_ref.location_id.id == location_id, msg= "Swap Beds Completed: 2nd Spell location not updated correctly")
-        # test patient data
-        check_patient = self.patient_pool.browse(cr, uid, patient_id)
-        self.assertTrue(check_patient.current_location_id.id == location2_id, msg= "Swap Beds Completed: Patient current location not updated correctly")
-        check_patient = self.patient_pool.browse(cr, uid, patient2_id)
-        self.assertTrue(check_patient.current_location_id.id == location_id, msg= "Swap Beds Completed: 2nd Patient current location not updated correctly")
-
-        # Patient Move
-        location_id = self.location_pool.browse(cr, uid, self.wt_id).child_ids[0].id
         move_data = {
-            'location_id': location_id,
-            'patient_id': patient_id
+            'location_id': bed_id,
+            'patient_id': self.patients[3]
         }
-        move_activity_id = self.move_pool.create_activity(cr, uid, {'parent_id': spell_activity_id}, move_data)
-        self.activity_pool.submit(cr, uid, move_activity_id, {})
-        check_move = self.activity_pool.browse(cr, uid, move_activity_id)
-        
-        # test move activity submitted data
-        self.assertTrue(check_move.data_ref.patient_id.id == patient_id, msg="Patient Move: Patient id was not submitted correctly")
-        self.assertTrue(check_move.data_ref.location_id.id == location_id, msg="Patient Move: Location id was not submitted correctly")
-        
-        # Complete Patient Move
-        self.activity_pool.complete(cr, uid, move_activity_id)
-        check_move = self.activity_pool.browse(cr, uid, move_activity_id)
-        self.assertTrue(check_move.state == 'completed', msg="Patient Move not completed successfully")
-        self.assertTrue(check_move.date_terminated, msg="Patient Move Completed: Date terminated not registered")
-        # test spell data
-        check_spell = self.activity_pool.browse(cr, uid, spell_activity_id)
-        self.assertTrue(check_spell.data_ref.location_id.id == location_id, msg= "Patient Move Completed: Spell location unexpectedly updated")
-        # test patient data
-        check_patient = self.patient_pool.browse(cr, uid, patient_id)
-        self.assertTrue(check_patient.current_location_id.id == location_id, msg= "Patient Move Completed: Patient current location not registered correctly")
+        move_id = self.move_pool.create_activity(cr, wm_id, {}, move_data)
+        self.activity_pool.complete(cr, wm_id, move_id)
 
-    def test_patient_following(self):
+        transfer_id = self.activity_pool.search(cr, uid, [['patient_id', '=', self.patients[4]],
+                                                          ['data_model', '=', 'nh.clinical.patient.transfer']])
+        self.activity_pool.cancel(cr, uid, transfer_id[0])
+        transfer = self.activity_pool.browse(cr, uid, transfer_id[0])
+        self.assertEqual(transfer.parent_id.location_id.id, ward_id)
+
+        # Scenario 4: Cancel transfer for non admitted / discharged patient
+        discharge_data = {
+            'patient_id': self.patients[0]
+        }
+        discharge_id = self.discharge_pool.create_activity(cr, self.adt_uid, {}, discharge_data)
+        self.assertTrue(self.activity_pool.complete(cr, self.adt_uid, discharge_id))
+        transfer_id = self.activity_pool.search(cr, uid, [['patient_id', '=', self.patients[0]],
+                                                          ['data_model', '=', 'nh.clinical.patient.transfer']])
+        with self.assertRaises(except_orm):
+            self.activity_pool.cancel(cr, uid, transfer_id[0])
+
+    def test_14_patient_following(self):
         cr, uid = self.cr, self.uid
-        patient_ids = self.patient_ids
-        patient_id = fake.random_element(patient_ids)
-        patient2_id = fake.random_element(patient_ids)
-        while patient2_id == patient_id:
-            patient2_id = fake.random_element(patient_ids)
-
-        # Creating 3 Patient Follow Activities:
+        
+        ward_id = self.locations.keys()[0]
+        wm_id = self.users[ward_id]['wm']
+        nurse_id = self.users[ward_id]['n']
+        
+        # Creating 4 Patient Follow Activities:
         # 1st one to test Patient Follow
         # 2nd one to test open follow activities are cancelled when 'unfollowing' a patient
         # 3rd one to test 2nd case only happens if you created those follow activities
-        follow_activity_id = self.follow_pool.create_activity(cr, uid, {'user_id': self.nt_id}, {'patient_ids': [[4, patient_id]]})
-        follow_activity_id2 = self.follow_pool.create_activity(cr, uid, {'user_id': self.nt_id}, {'patient_ids': [[6, False, [patient_id, patient2_id]]]})
-        follow_activity_id3 = self.follow_pool.create_activity(cr, self.wmu_id, {'user_id': self.nt_id}, {'patient_ids': [[6, False, [patient_id, patient2_id]]]})
-        self.assertTrue(follow_activity_id, msg="Patient Follow: Create activity failed")
-        self.assertTrue(follow_activity_id2, msg="Patient Follow: Create second activity failed")
-        self.assertTrue(follow_activity_id3, msg="Patient Follow: Create second activity failed")
-
-        # Checking System state is OK PRE-COMPLETE the first Follow Activity
-        check_follow = self.activity_pool.browse(cr, uid, follow_activity_id)
-        self.assertTrue(patient_id in [patient.id for patient in check_follow.data_ref.patient_ids], msg="Patient Follow: Incorrect patient")
-        self.assertEqual(check_follow.user_id.id, self.nt_id, msg="Patient Follow: Incorrect user following")
-        check_user = self.users_pool.browse(cr, uid, self.nt_id)
-        self.assertTrue(patient_id not in [patient.id for patient in check_user.following_ids], msg="Patient Follow: The user is already following that patient")
+        follow_id = self.follow_pool.create_activity(cr, uid, {'user_id': nurse_id},
+                                                              {'patient_ids': [[4, self.patients[3]]]})
+        follow_id2 = self.follow_pool.create_activity(cr, uid, {'user_id': nurse_id}, 
+                                                               {'patient_ids': [[6, False, [self.patients[3], 
+                                                                                            self.patients[4]]]]})
+        follow_id3 = self.follow_pool.create_activity(cr, wm_id, {'user_id': nurse_id}, 
+                                                                 {'patient_ids': [[6, False, [self.patients[3],
+                                                                                              self.patients[4]]]]})
+        self.assertTrue(follow_id, msg="Patient Follow: Create activity failed")
+        self.assertTrue(follow_id2, msg="Patient Follow: Create activity failed")
+        self.assertTrue(follow_id3, msg="Patient Follow: Create activity failed")
 
         # Complete Follow Activity and check System state POST-COMPLETE
-        self.activity_pool.complete(cr, uid, follow_activity_id)
-        check_user = self.users_pool.browse(cr, uid, self.nt_id)
-        self.assertTrue(patient_id in [patient.id for patient in check_user.following_ids], msg="Patient Follow: The user is not following that patient")
-        self.assertFalse(patient2_id in [patient.id for patient in check_user.following_ids], msg="Patient Follow: The user should not be following that patient")
-        check_patient = self.patient_pool.browse(cr, uid, patient_id)
-        check_patient2 = self.patient_pool.browse(cr, uid, patient2_id)
-        self.assertTrue(self.nt_id in [user.id for user in check_patient.follower_ids], msg="Patient Follow: The user is not in the patient followers list")
-        self.assertFalse(self.nt_id in [user.id for user in check_patient2.follower_ids], msg="Patient Follow: The user should not be in the patient followers list")
+        self.activity_pool.complete(cr, uid, follow_id)
+        user = self.users_pool.browse(cr, uid, nurse_id)
+        self.assertTrue(self.patients[3] in [patient.id for patient in user.following_ids], 
+                        msg="Patient Follow: The user is not following that patient")
+        self.assertFalse(self.patients[4] in [patient.id for patient in user.following_ids], 
+                         msg="Patient Follow: The user should not be following that patient")
+        patient = self.patient_pool.browse(cr, uid, self.patients[3])
+        patient2 = self.patient_pool.browse(cr, uid, self.patients[4])
+        self.assertTrue(nurse_id in [user.id for user in patient.follower_ids], 
+                        msg="Patient Follow: The user is not in the patient followers list")
+        self.assertFalse(nurse_id in [user.id for user in patient2.follower_ids], 
+                         msg="Patient Follow: The user should not be in the patient followers list")
 
         # Create an Unfollow Activity
-        unfollow_activity_id = self.unfollow_pool.create_activity(cr, uid, {}, {'patient_ids': [[4, patient_id]]})
-        self.assertTrue(follow_activity_id, msg="Patient Unfollow: Create activity failed")
-
-        # Checking System state is OK PRE-COMPLETE the Unfollow Activity
-        check_unfollow = self.activity_pool.browse(cr, uid, unfollow_activity_id)
-        self.assertTrue(patient_id in [patient.id for patient in check_unfollow.data_ref.patient_ids], msg="Patient Unfollow: Incorrect patient")
-        check_user = self.users_pool.browse(cr, uid, self.nt_id)
-        self.assertTrue(patient_id in [patient.id for patient in check_user.following_ids], msg="Patient Unfollow: The user is not following that patient")
+        unfollow_id = self.unfollow_pool.create_activity(cr, uid, {}, {'patient_ids': [[4, self.patients[3]]]})
+        self.assertTrue(unfollow_id, msg="Patient Unfollow: Create activity failed")
 
         # Complete Unfollow Activity and check System state POST-COMPLETE
-        self.activity_pool.complete(cr, uid, unfollow_activity_id)
-        check_user = self.users_pool.browse(cr, uid, self.nt_id)
-        self.assertTrue(patient_id not in [patient.id for patient in check_user.following_ids], msg="Patient Unfollow: The user is still following that patient")
-        check_patient = self.patient_pool.browse(cr, uid, patient_id)
-        self.assertTrue(self.nt_id not in [user.id for user in check_patient.follower_ids], msg="Patient Unfollow: The user still is in the patient followers list")
-        check_follow2 = self.activity_pool.browse(cr, uid, follow_activity_id2)
-        self.assertEqual(check_follow2.state, 'cancelled', msg="Patient Unfollow: A follow activity containing the unfollowed patient was not cancelled")
-        check_follow3 = self.activity_pool.browse(cr, uid, follow_activity_id3)
-        self.assertNotEqual(check_follow3.state, 'cancelled', msg="Patient Unfollow: A follow activity created by a different user was cancelled")
+        self.activity_pool.complete(cr, uid, unfollow_id)
+        user = self.users_pool.browse(cr, uid, nurse_id)
+        self.assertTrue(self.patients[3] not in [patient.id for patient in user.following_ids],
+                        msg="Patient Unfollow: The user is still following that patient")
+        patient = self.patient_pool.browse(cr, uid, self.patients[3])
+        self.assertTrue(nurse_id not in [user.id for user in patient.follower_ids],
+                        msg="Patient Unfollow: The user still is in the patient followers list")
+
+        follow = self.activity_pool.browse(cr, uid, follow_id2)
+        self.assertEqual(follow.state, 'cancelled',
+                         msg="Patient Unfollow: A follow activity containing the unfollowed patient was not cancelled")
+        follow = self.activity_pool.browse(cr, uid, follow_id3)
+        self.assertNotEqual(follow.state, 'cancelled',
+                            msg="Patient Unfollow: A follow activity created by a different user was cancelled")
+
+        # Try to complete follow activity without user assigned to it
+        follow_id = self.follow_pool.create_activity(cr, uid, {}, {'patient_ids': [[4, self.patients[3]]]})
+        with self.assertRaises(except_orm):
+            self.activity_pool.complete(cr, uid, follow_id)

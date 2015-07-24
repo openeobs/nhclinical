@@ -25,12 +25,6 @@ class nh_clinical_patient_move(orm.Model):
 
     _order = 'id desc'
 
-    def name_get(self, cr, uid, ids, context=None):
-        res = []
-        for move in self.browse(cr, uid, ids, context):
-            res.append( [move.id, "%s to %s" % ("patient", "location")] )
-        return res
-
     def submit(self, cr, uid, activity_id, vals, context=None):
         data = vals.copy()
         if 'patient_id' in vals and 'parent_id' not in vals:
@@ -56,7 +50,6 @@ class nh_clinical_patient_move(orm.Model):
         last_movement_id = last_movement_id[0] if last_movement_id else False
         last_movement = activity_pool.browse(cr, uid, last_movement_id, context=context) if last_movement_id else False
         self.write(cr, uid, activity.data_ref.id, {'from_location_id': last_movement.data_ref.location_id.id if last_movement else False})
-        # FIXME having both current_location_id in PATIENT and location_id in SPELL seems redundant.
         patient_pool.write(cr, uid, activity.data_ref.patient_id.id, {
             'current_location_id': activity.data_ref.location_id.id}, context=context)
         if activity.parent_id:
@@ -108,9 +101,11 @@ class nh_clinical_patient_swap_beds(orm.Model):
         spell1 = spell_pool.browse(cr, uid, spell1_id, context=context)
         spell2 = spell_pool.browse(cr, uid, spell2_id, context=context)
 
-        move1_id = move_pool.create_activity(cr, uid, {'parent_id': spell1.activity_id.id}, {
+        move1_id = move_pool.create_activity(cr, uid, {
+            'parent_id': spell1.activity_id.id, 'creator_id': activity_id}, {
             'location_id': location2.id, 'patient_id': patient1.id}, context=context)
-        move2_id = move_pool.create_activity(cr, uid, {'parent_id': spell2.activity_id.id}, {
+        move2_id = move_pool.create_activity(cr, uid, {
+            'parent_id': spell2.activity_id.id, 'creator_id': activity_id}, {
             'location_id': location1.id, 'patient_id': patient2.id}, context=context)
         activity_pool.complete(cr, uid, move1_id, context=context)
         activity_pool.complete(cr, uid, move2_id, context=context)
@@ -153,7 +148,7 @@ class nh_clinical_patient_placement(orm.Model):
             ('patient_id', '=', patient_id),
             ('state', 'not in', ['completed', 'cancelled']),
             ('data_model', '=', 'nh.clinical.patient.placement')
-        ])
+        ], order='id desc', context=context)
         location_selection = []
         if placement_ids:
             placement = activity_pool.browse(cr, uid, placement_ids[0], context=context)
@@ -226,6 +221,8 @@ class nh_clinical_patient_discharge(orm.Model):
             spell = spell_pool.browse(cr, uid, spell_id, context=context)
             data.update({'location_id': spell.location_id.id})
             activity_pool.write(cr, uid, activity_id, {'parent_id': spell.activity_id.id}, context=context)
+        else:
+            raise osv.except_osv('Discharge Error!', 'Patient required for discharge!')
         return super(nh_clinical_patient_discharge, self).submit(cr, uid, activity_id, data, context=context)
 
     def complete(self, cr, uid, activity_id, context=None):
@@ -326,6 +323,8 @@ class nh_clinical_patient_admission(orm.Model):
         if 'patient_id' in vals:
             spell_pool = self.pool['nh.clinical.spell']
             spell_pool.get_by_patient_id(cr, uid, vals['patient_id'], exception='True', context=context)
+        else:
+            raise osv.except_osv('Admission Error!', 'Patient required for admission!')
         return super(nh_clinical_patient_admission, self).submit(cr, uid, activity_id, vals, context=context)
 
     def complete(self, cr, uid, activity_id, context=None):
@@ -415,6 +414,8 @@ class nh_clinical_patient_transfer(orm.Model):
             spell = spell_pool.browse(cr, uid, spell_id, context=context)
             data.update({'origin_loc_id': spell.location_id.id})
             activity_pool.write(cr, uid, activity_id, {'parent_id': spell.activity_id.id}, context=context)
+        else:
+            raise osv.except_osv('Transfer Error!', 'Patient required for transfer!')
         return super(nh_clinical_patient_transfer, self).submit(cr, uid, activity_id, data, context=context)
     
     def complete(self, cr, uid, activity_id, context=None):
