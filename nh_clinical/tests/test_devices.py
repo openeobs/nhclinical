@@ -1,7 +1,7 @@
 from datetime import datetime as dt
 import logging
 
-from openerp.tests import common
+from openerp.tests.common import TransactionCase, SingleTransactionCase
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
 
 _logger = logging.getLogger(__name__)
@@ -17,7 +17,8 @@ def next_seed():
     return seed
 
 
-class TestDevices(common.SingleTransactionCase):
+class TestDevices(SingleTransactionCase):
+
     @classmethod
     def setUpClass(cls):
         super(TestDevices, cls).setUpClass()
@@ -175,3 +176,30 @@ class TestDevices(common.SingleTransactionCase):
         self.assertTrue(check_disconnect.date_terminated, msg="Device disconnect Completed: Date terminated not registered")
         check_session = self.session_pool.browse(cr, uid, device_session2_id)
         self.assertTrue(check_session.activity_id.state == 'completed', msg="Device disconnect Completed: Device session not completed")
+
+
+class TestClinicalDevice(SingleTransactionCase):
+
+    @classmethod
+    def setUpClass(cls):
+        super(TestClinicalDevice, cls).setUpClass()
+        cr, uid = cls.cr, cls.uid
+
+        cls.type_pool = cls.registry('nh.clinical.device.type')
+        cls.device_pool = cls.registry('nh.clinical.device')
+
+        cls.type_id = cls.type_pool.create(
+            cr, uid, {'name': 'DeviceType'}
+        )
+        cls.device_id = cls.device_pool.create(
+            cr, uid, {'type_id': cls.type_id, 'serial_number': 'SN1'}
+        )
+
+    def test_01_name_get_returns_device_name(self):
+        cr, uid = self.cr, self.uid
+
+        result = self.device_pool.name_get(cr, uid, [self.device_id], context=None)
+        self.assertEquals(result, [(self.device_id, 'DeviceType/SN1')])
+
+
+

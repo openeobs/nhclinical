@@ -46,7 +46,7 @@ class nh_clinical_device(orm.Model):
         'is_available': True
     }
 
-    def name_get(self, cr, uid, ids, context):
+    def name_get(self, cr, uid, ids, context=None):
         res = []
         for device in self.browse(cr, uid, ids, context):
             res.append((device.id, "%s/%s" % (device.type_id.name, device.serial_number)))
