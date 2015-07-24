@@ -8,7 +8,7 @@
                    <field name="patient_id" />
                    <field name="location_id" />
                    <field name="reason" />
-                    <button name="submit_ui" type="object" string="Submit"/>
+                   <button name="submit_ui" type="object" string="Submit"/>
                 </form>
             </field>
         </record>
