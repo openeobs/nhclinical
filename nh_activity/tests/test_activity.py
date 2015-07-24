@@ -453,3 +453,27 @@ class TestActivity(common.SingleTransactionCase):
             activity_id = self.test_model_pool.create_activity(cr, uid, 'test', {})
         with self.assertRaises(except_orm):
             activity_id = self.test_model_pool.create_activity(cr, uid, {}, 'test')
+
+    def test_submit_ui(self):
+        cr, uid = self.cr, self.uid
+
+        # Scenario 1: Submit data through submit_ui
+        activity_id = self.test_model_pool.create_activity(cr, uid, {}, {'field1': 'test'})
+        activity = self.activity_pool.browse(cr, uid, activity_id)
+        self.test_model_pool.submit_ui(cr, uid, [activity.data_ref.id], context={'active_id': activity_id})
+
+        # Scenario 2: Try to submit data using submit_ui without context
+        self.test_model_pool.submit_ui(cr, uid, [activity.data_ref.id])
+
+    def test_complete_ui(self):
+        cr, uid = self.cr, self.uid
+
+        # Scenario 1: Complete activity through complete_ui
+        activity_id = self.test_model_pool.create_activity(cr, uid, {}, {'field1': 'test'})
+        activity = self.activity_pool.browse(cr, uid, activity_id)
+        self.test_model_pool.complete_ui(cr, uid, [activity.data_ref.id], context={'active_id': activity_id})
+        activity = self.activity_pool.browse(cr, uid, activity_id)
+        self.assertEqual(activity.state, 'completed')
+
+        # Scenario 2: Try to complete activity using complete_ui without context
+        self.test_model_pool.complete_ui(cr, uid, [activity.data_ref.id])
