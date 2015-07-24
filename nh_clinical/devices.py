@@ -104,7 +104,8 @@ class nh_clinical_device_session(orm.Model):
         if len(session_id) > 1:
             _logger.warn("For device_type_id=%s found more than 1 started device session activity_ids"
                          % device_type_id)
-        return self.browse(cr, uid, session_id[0], context=context).activity_id.id
+        device_session = self.browse(cr, uid, session_id[0], context=context)
+        return device_session.activity_id.id
         
     
 class nh_clinical_device_connect(orm.Model):
