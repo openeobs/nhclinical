@@ -1,6 +1,7 @@
 from openerp.osv import osv, fields
 from lxml import etree
 
+
 class allocating_user(osv.TransientModel):
     _name = 'nh.clinical.allocating.user'
     _rec_name = 'user_id'
@@ -29,9 +30,6 @@ class allocating_user(osv.TransientModel):
         'location_ids': fields.many2many('nh.clinical.location', 'allocating_user_rel', 'user_allocating_id',
                                          'location_id', string='Locations')
     }
-
-    def get_domain_location_ids(self, cr, uid, ids, ward_ids, context=None):
-        return {'domain': {'location_ids': [('usage', '=', 'bed'), ('parent_id', 'in', ward_ids)]}}
 
     def fields_view_get(self, cr, uid, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
         res = super(allocating_user, self).fields_view_get(cr, uid, view_id, view_type, context, toolbar, submenu)

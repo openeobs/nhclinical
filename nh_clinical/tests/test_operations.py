@@ -1,27 +1,11 @@
-from datetime import datetime as dt
-import logging
-
 from openerp.tests import common
 from openerp.osv.orm import except_orm
-from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
-
-_logger = logging.getLogger(__name__)
-
-from faker import Faker
-fake = Faker()
-seed = fake.random_int(min=0, max=9999999)
 
 
-def next_seed():
-    global seed
-    seed += 1
-    return seed
-
-
-class test_operations(common.SingleTransactionCase):
+class TestOperations(common.SingleTransactionCase):
     @classmethod
     def setUpClass(cls):
-        super(test_operations, cls).setUpClass()
+        super(TestOperations, cls).setUpClass()
         cr, uid = cls.cr, cls.uid
 
         cls.users_pool = cls.registry('res.users')
@@ -44,8 +28,6 @@ class test_operations(common.SingleTransactionCase):
 
         cls.wm_group_id = cls.groups_pool.search(cr, uid, [['name', '=', 'NH Clinical Ward Manager Group']])
         cls.nurse_group_id = cls.groups_pool.search(cr, uid, [['name', '=', 'NH Clinical Nurse Group']])
-        # cls.hca_group_id = cls.groups_pool.search(cr, uid, [['name', '=', 'NH Clinical HCA Group']])
-        # cls.doctor_group_id = cls.groups_pool.search(cr, uid, [['name', '=', 'NH Clinical Doctor Group']])
         cls.admin_group_id = cls.groups_pool.search(cr, uid, [['name', '=', 'NH Clinical Admin Group']])
 
         cls.hospital_id = cls.location_pool.create(cr, uid, {'name': 'Test Hospital', 'code': 'TESTHOSP',
@@ -81,26 +63,6 @@ class test_operations(common.SingleTransactionCase):
 
         cls.patients = [cls.patient_pool.create(cr, uid, {
             'other_identifier': 'TESTP000'+str(i), 'patient_identifier': 'TESTNHS0'+str(i)}) for i in range(7)]
-
-
-
-        # cls.apidemo = cls.registry('nh.clinical.api.demo')
-        #
-        # cls.patient_ids = cls.apidemo.build_unit_test_env1(cr, uid, bed_count=4, patient_count=4)
-        #
-        # cls.patient_id = cls.patient_pool.create(cr, uid, {'other_identifier': 'TESTHN01'})
-        # cls.patient2_id = cls.patient_pool.create(cr, uid, {'other_identifier': 'TESTHN02'})
-        #
-        # cls.wu_id = cls.location_pool.search(cr, uid, [('code', '=', 'U')])[0]
-        # cls.wt_id = cls.location_pool.search(cr, uid, [('code', '=', 'T')])[0]
-        # cls.pos_id = cls.location_pool.read(cr, uid, cls.wu_id, ['pos_id'])['pos_id'][0]
-        # cls.pos_location_id = cls.pos_pool.read(cr, uid, cls.pos_id, ['location_id'])['location_id'][0]
-        #
-        # cls.wmu_id = cls.users_pool.search(cr, uid, [('login', '=', 'WMU')])[0]
-        # cls.wmt_id = cls.users_pool.search(cr, uid, [('login', '=', 'WMT')])[0]
-        # cls.nu_id = cls.users_pool.search(cr, uid, [('login', '=', 'NU')])[0]
-        # cls.nt_id = cls.users_pool.search(cr, uid, [('login', '=', 'NT')])[0]
-        # cls.adt_id = cls.users_pool.search(cr, uid, [('groups_id.name', 'in', ['NH Clinical ADT Group']), ('pos_id', '=', cls.pos_id)])[0]
 
     def test_01_admission_submit_complete(self):
         cr, uid = self.cr, self.uid
