@@ -83,7 +83,7 @@ class TestUserboard(common.SingleTransactionCase):
         user_data = {
             'name': 'HCA1', 'login': 'hca1', 'hca': True
         }
-        hca_uid = self.userboard_pool.create(cr, self.wm_uid, user_data, context={})
+        hca_uid = self.userboard_pool.create(cr, self.wm_uid, user_data, context={'tz': 'Europe/London'})
         self.assertTrue(hca_uid, msg="HCA user not created")
         user = self.user_pool.browse(cr, uid, hca_uid)
         self.assertEqual(user.name, 'HCA1')
@@ -159,7 +159,7 @@ class TestUserboard(common.SingleTransactionCase):
         user_data = {
             'name': 'KIOSK0', 'login': 'kiosk0', 'kiosk': True
         }
-        kiosk_uid = self.adminboard_pool.create(cr, self.adt_uid, user_data, context={})
+        kiosk_uid = self.adminboard_pool.create(cr, self.adt_uid, user_data, context={'tz': 'Europe/London'})
         self.assertTrue(kiosk_uid, msg="Kiosk user not created")
         user = self.user_pool.browse(cr, uid, kiosk_uid)
         self.assertEqual(user.name, 'KIOSK0')
@@ -217,3 +217,34 @@ class TestUserboard(common.SingleTransactionCase):
         }
         with self.assertRaises(except_orm):
             self.adminboard_pool.write(cr, self.adt_uid, [self.wm_uid], user_data)
+
+    def test_07_userboard_admin_responsibility_allocation(self):
+        cr, uid = self.cr, self.uid
+
+        # Scenario 1: Open responsibility allocation wizard
+        res = self.adminboard_pool.responsibility_allocation(cr, self.adt_uid, [self.wm_uid], context={})
+        self.assertDictEqual(res, {
+            'type': 'ir.actions.act_window', 'res_model': 'nh.clinical.responsibility.allocation',
+            'name': 'Location Responsibility Allocation', 'view_mode': 'form', 'view_type': 'tree,form',
+            'target': 'new', 'context': {'default_user_id': self.wm_uid}
+        })
+
+    def test_08_userboard_admin_deactivate(self):
+        cr, uid = self.cr, self.uid
+
+        # Scenario 1: Deactivate a user
+        self.assertTrue(self.adminboard_pool.deactivate(cr, self.adt_uid, [self.hca_uid]))
+        user = self.user_pool.browse(cr, uid, self.hca_uid)
+        self.assertFalse(user.active, msg="User not deactivated")
+
+        # Scenario 2: Attempt to deactivate yourself
+        with self.assertRaises(except_orm):
+            self.adminboard_pool.deactivate(cr, self.adt_uid, [self.adt_uid])
+
+    def test_09_userboard_admin_activate(self):
+        cr, uid = self.cr, self.uid
+
+        # Scenario 1: Activate a user
+        self.assertTrue(self.adminboard_pool.activate(cr, self.adt_uid, [self.hca_uid]))
+        user = self.user_pool.browse(cr, uid, self.hca_uid)
+        self.assertTrue(user.active, msg="User not activated")
