@@ -42,14 +42,26 @@ class TestUserboard(common.SingleTransactionCase):
         cls.bed_id = cls.location_pool.create(cr, uid, {
             'name': 'Bed0', 'code': 'B0', 'usage': 'bed', 'parent_id': cls.ward_id, 'type': 'poc'
         })
-        cls.hca_uid = False
-        cls.nurse_uid = False
+        cls.hca_uid = cls.user_pool.create(cr, uid, {
+            'name': 'HCA0', 'login': 'hca0', 'password': 'hca0', 'groups_id': [[4, cls.hca_group_id]],
+            'location_ids': [[5]]
+        })
+        cls.nurse_uid = cls.user_pool.create(cr, uid, {
+            'name': 'NURSE0', 'login': 'n0', 'password': 'n0', 'groups_id': [[4, cls.nurse_group_id]],
+            'location_ids': [[5]]
+        })
         cls.wm_uid = cls.user_pool.create(cr, uid, {
             'name': 'WM0', 'login': 'wm0', 'password': 'wm0', 'groups_id': [[4, cls.wm_group_id]],
             'location_ids': [[5]]
         })
-        cls.sm_uid = False
-        cls.dr_uid = False
+        cls.sm_uid = cls.user_pool.create(cr, uid, {
+            'name': 'SM0', 'login': 'sm0', 'password': 'sm0', 'groups_id': [[4, cls.sm_group_id]],
+            'location_ids': [[5]]
+        })
+        cls.dr_uid = cls.user_pool.create(cr, uid, {
+            'name': 'DR0', 'login': 'dr0', 'password': 'dr0', 'groups_id': [[4, cls.dr_group_id]],
+            'location_ids': [[5]]
+        })
 
     def test_01_change_password_get_default_user_ids(self):
         cr, uid = self.cr, self.uid
@@ -69,24 +81,24 @@ class TestUserboard(common.SingleTransactionCase):
 
         # Scenario 1: Create new HCA user using userboard
         user_data = {
-            'name': 'HCA0', 'login': 'hca0', 'hca': True
+            'name': 'HCA1', 'login': 'hca1', 'hca': True
         }
-        self.hca_uid = self.userboard_pool.create(cr, self.wm_uid, user_data, context={})
-        self.assertTrue(self.hca_uid, msg="HCA user not created")
-        user = self.user_pool.browse(cr, uid, self.hca_uid)
-        self.assertEqual(user.name, 'HCA0')
-        self.assertEqual(user.login, 'hca0')
+        hca_uid = self.userboard_pool.create(cr, self.wm_uid, user_data, context={})
+        self.assertTrue(hca_uid, msg="HCA user not created")
+        user = self.user_pool.browse(cr, uid, hca_uid)
+        self.assertEqual(user.name, 'HCA1')
+        self.assertEqual(user.login, 'hca1')
         groups = [g.name for g in user.groups_id]
         self.assertTrue('NH Clinical HCA Group' in groups, msg="User created without HCA group")
         self.assertTrue('Employee' in groups, msg="User created without Employee group")
 
         # Scenario 2: Create new Senior Manager user using userboard
         user_data = {
-            'name': 'SM0', 'login': 'sm0', 'senior_manager': True
+            'name': 'SM1', 'login': 'sm1', 'senior_manager': True
         }
-        self.sm_uid = self.userboard_pool.create(cr, self.wm_uid, user_data, context=None)
-        self.assertTrue(self.sm_uid, msg="Senior Manager user not created")
-        user = self.user_pool.browse(cr, uid, self.sm_uid)
+        sm_uid = self.userboard_pool.create(cr, self.wm_uid, user_data, context=None)
+        self.assertTrue(sm_uid, msg="Senior Manager user not created")
+        user = self.user_pool.browse(cr, uid, sm_uid)
         groups = [g.name for g in user.groups_id]
         self.assertTrue('NH Clinical Senior Manager Group' in groups, msg="User created without Senior Manager group")
         self.assertTrue('Employee' in groups, msg="User created without Employee group")
@@ -98,3 +110,33 @@ class TestUserboard(common.SingleTransactionCase):
         }
         with self.assertRaises(except_orm):
             self.userboard_pool.create(cr, self.wm_uid, user_data)
+
+    def test_03_userboard_write(self):
+        cr, uid = self.cr, self.uid
+
+        # Scenario 1: Add Nurse group to the hca user
+        user_data = {
+            'hca': True, 'nurse': True
+        }
+        self.assertTrue(self.userboard_pool.write(cr, self.wm_uid, [self.hca_uid], user_data))
+        user = self.user_pool.browse(cr, uid, self.hca_uid)
+        groups = [g.name for g in user.groups_id]
+        self.assertTrue('NH Clinical HCA Group' in groups, msg="HCA group missing")
+        self.assertTrue('Employee' in groups, msg="Employee group missing")
+        self.assertTrue('NH Clinical Nurse Group' in groups, msg="Nurse group missing")
+
+        # Scenario 2: Change name and Login from Senior Manager user
+        user_data = {
+            'name': 'SENMAN0', 'login': 'senman0'
+        }
+        self.assertTrue(self.userboard_pool.write(cr, self.wm_uid, [self.sm_uid], user_data))
+        user = self.user_pool.browse(cr, uid, self.sm_uid)
+        self.assertEqual(user.name, 'SENMAN0')
+        self.assertEqual(user.login, 'senman0')
+
+        # Scenario 3: Attempt to remove all roles from a user
+        user_data = {
+            'hca': False, 'nurse': False
+        }
+        with self.assertRaises(except_orm):
+            self.userboard_pool.write(cr, self.wm_uid, [self.hca_uid], user_data)
