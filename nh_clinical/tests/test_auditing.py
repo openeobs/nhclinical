@@ -198,3 +198,22 @@ class TestAuditing(common.SingleTransactionCase):
         self.activity_pool.complete(cr, uid, activity_id)
         user = self.users_pool.browse(cr, uid, self.wmu_id)
         self.assertEqual(self.wu_id, user.location_ids.id, msg="Scenario 4 Failed: User locations don't match")
+
+        # Scenario 5: Assign a bed to a ward manager
+        activity_id = self.allocation_pool.create_activity(cr, uid, {}, {
+            'responsible_user_id': self.wmu_id,
+            'location_ids': [[6, False, [bed_ids[0]]]]})
+        self.activity_pool.complete(cr, uid, activity_id)
+        user = self.users_pool.browse(cr, uid, self.wmu_id)
+        self.assertEqual(bed_ids[0], user.location_ids.id, msg="Scenario 5 Failed: User locations don't match")
+
+        # Scenario 6: Complete the activity without data
+        activity_id = self.allocation_pool.create_activity(cr, uid, {}, {})
+        with self.assertRaises(except_orm):
+            self.activity_pool.complete(cr, uid, activity_id)
+
+        # Scenario 7: Complete the activity without user
+        activity_id = self.allocation_pool.create_activity(cr, uid, {}, {
+            'location_ids': [[6, False, [bed_ids[0]]]]})
+        with self.assertRaises(except_orm):
+            self.activity_pool.complete(cr, uid, activity_id)
