@@ -1,20 +1,11 @@
 from datetime import datetime as dt
 import logging
 
-from openerp.tests.common import TransactionCase, SingleTransactionCase
+from openerp.tests.common import SingleTransactionCase
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
+from openerp.osv.orm import except_orm
 
 _logger = logging.getLogger(__name__)
-
-from faker import Faker
-fake = Faker()
-seed = fake.random_int(min=0, max=9999999)
-
-
-def next_seed():
-    global seed
-    seed += 1
-    return seed
 
 
 class TestDevices(SingleTransactionCase):
@@ -24,7 +15,7 @@ class TestDevices(SingleTransactionCase):
         super(TestDevices, cls).setUpClass()
         cr, uid = cls.cr, cls.uid
 
-        cls.users_pool = cls.registry('res.users')
+        cls.user_pool = cls.registry('res.users')
         cls.groups_pool = cls.registry('res.groups')
         cls.partner_pool = cls.registry('res.partner')
         cls.activity_pool = cls.registry('nh.activity')
@@ -40,166 +31,208 @@ class TestDevices(SingleTransactionCase):
         cls.connect_pool = cls.registry('nh.clinical.device.connect')
         cls.disconnect_pool = cls.registry('nh.clinical.device.disconnect')
 
-        cls.apidemo = cls.registry('nh.clinical.api.demo')
+        cls.wm_group_id = cls.groups_pool.search(cr, uid, [['name', '=', 'NH Clinical Ward Manager Group']])[0]
+        cls.admin_group_id = cls.groups_pool.search(cr, uid, [['name', '=', 'NH Clinical Admin Group']])
 
-        cls.patient_ids = cls.apidemo.build_unit_test_env1(cr, uid, bed_count=4, patient_count=4)
+        cls.hospital_id = cls.location_pool.create(cr, uid, {'name': 'Test Hospital', 'code': 'TESTHOSP',
+                                                             'usage': 'hospital'})
+        cls.pos_id = cls.pos_pool.create(cr, uid, {'name': 'Test POS', 'location_id': cls.hospital_id})
 
-        cls.wu_id = cls.location_pool.search(cr, uid, [('code', '=', 'U')])[0]
-        cls.wt_id = cls.location_pool.search(cr, uid, [('code', '=', 'T')])[0]
-        cls.pos_id = cls.location_pool.read(cr, uid, cls.wu_id, ['pos_id'])['pos_id'][0]
-        cls.pos_location_id = cls.pos_pool.read(cr, uid, cls.pos_id, ['location_id'])['location_id'][0]
+        cls.adt_uid = cls.user_pool.create(cr, uid, {'name': 'Admin 0', 'login': 'user_000',
+                                                        'password': 'user_000',
+                                                        'groups_id': [[4, cls.admin_group_id[0]]],
+                                                        'pos_id': cls.pos_id})
 
-        cls.wmu_id = cls.users_pool.search(cr, uid, [('login', '=', 'WMU')])[0]
-        cls.wmt_id = cls.users_pool.search(cr, uid, [('login', '=', 'WMT')])[0]
-        cls.nu_id = cls.users_pool.search(cr, uid, [('login', '=', 'NU')])[0]
-        cls.nt_id = cls.users_pool.search(cr, uid, [('login', '=', 'NT')])[0]
-        cls.adt_id = cls.users_pool.search(cr, uid, [('groups_id.name', 'in', ['NH Clinical ADT Group']), ('pos_id', '=', cls.pos_id)])[0]
+        cls.ward_id = cls.location_pool.create(cr, uid, {
+            'name': 'Ward0', 'code': 'W0', 'usage': 'ward', 'parent_id': cls.hospital_id, 'type': 'poc'
+        })
+        cls.bed_id = cls.location_pool.create(cr, uid, {
+            'name': 'Bed0', 'code': 'B0', 'usage': 'bed', 'parent_id': cls.ward_id, 'type': 'poc'
+        })
+        cls.wm_uid = cls.user_pool.create(cr, uid, {
+            'name': 'WM0', 'login': 'wm0', 'password': 'wm0', 'groups_id': [[4, cls.wm_group_id]],
+            'location_ids': [[5]]
+        })
 
-    def test_device_Connect_Session_and_Disconnect(self):
+        cls.patients = [cls.patient_pool.create(cr, uid, {
+            'other_identifier': 'TESTP000'+str(i), 'patient_identifier': 'TESTNHS0'+str(i)}) for i in range(2)]
+
+        cls.activity_pool.start(cr, uid, cls.spell_pool.create_activity(
+            cr, uid, {}, {'patient_id': cls.patients[0], 'pos_id': cls.pos_id, 'code': 'AD00'}))
+        cls.type_ids = cls.type_pool.search(cr, uid, [])
+        cls.device_id = cls.device_pool.create(cr, uid, {'type_id': cls.type_ids[0], 'serial_number': '000001'})
+
+        # cls.apidemo = cls.registry('nh.clinical.api.demo')
+        #
+        # cls.patient_ids = cls.apidemo.build_unit_test_env1(cr, uid, bed_count=4, patient_count=4)
+        #
+        # cls.wu_id = cls.location_pool.search(cr, uid, [('code', '=', 'U')])[0]
+        # cls.wt_id = cls.location_pool.search(cr, uid, [('code', '=', 'T')])[0]
+        # cls.pos_id = cls.location_pool.read(cr, uid, cls.wu_id, ['pos_id'])['pos_id'][0]
+        # cls.pos_location_id = cls.pos_pool.read(cr, uid, cls.pos_id, ['location_id'])['location_id'][0]
+        #
+        # cls.wmu_id = cls.users_pool.search(cr, uid, [('login', '=', 'WMU')])[0]
+        # cls.wmt_id = cls.users_pool.search(cr, uid, [('login', '=', 'WMT')])[0]
+        # cls.nu_id = cls.users_pool.search(cr, uid, [('login', '=', 'NU')])[0]
+        # cls.nt_id = cls.users_pool.search(cr, uid, [('login', '=', 'NT')])[0]
+        # cls.adt_id = cls.users_pool.search(cr, uid, [('groups_id.name', 'in', ['NH Clinical ADT Group']), ('pos_id', '=', cls.pos_id)])[0]
+
+    def test_01_device_session(self):
         cr, uid = self.cr, self.uid
 
-        patient_id = fake.random_element(self.patient_ids)
-        code = str(fake.random_int(min=1000001, max=9999999))
-        spell_data = {
-            'patient_id': patient_id,
-            'pos_id': self.pos_id,
-            'code': code,
-            'start_date': dt.now().strftime(DTF)}
-        spell_activity_id = self.spell_pool.create_activity(cr, uid, {}, spell_data)
-        self.activity_pool.start(cr, uid, spell_activity_id)
-        
-        device_type_ids = self.type_pool.search(cr, uid, [])
-        type_id = fake.random_element(device_type_ids)
-        type2_id = fake.random_element(device_type_ids)
-        while type_id == type2_id:
-            type2_id = fake.random_element(device_type_ids)
-        device_data = {
-            'type_id': type_id,
-            'serial_number': str(fake.random_int(min=1000001, max=9999999))
+        # Scenario 1: Get session activity id when the patient has no session
+        self.assertFalse(self.session_pool.get_activity_id(cr, uid, self.patients[0], self.type_ids[0]))
+
+        # Scenario 2: Start a device session without providing specific device
+        session_data = {
+            'device_type_id': self.type_ids[0],
+            'location': 'arm',
+            'patient_id': self.patients[0]
         }
-        device_id = self.device_pool.create(cr, uid, device_data)
-        
-        # Device Connect 1
-        connect_data = {
-            'patient_id': patient_id,
-            'device_id': device_id
+        session_id = self.session_pool.create_activity(cr, self.wm_uid, {}, session_data)
+        self.activity_pool.start(cr, self.wm_uid, session_id)
+        device = self.device_pool.browse(cr, uid, self.device_id)
+        self.assertTrue(device.is_available, msg="Device is not available")
+
+        # Scenario 3: Get session activity id when the patient has one session
+        self.assertEqual(self.session_pool.get_activity_id(cr, uid, self.patients[0], self.type_ids[0]), session_id)
+
+        # Scenario 4: Start a device session providing specific device
+        session_data = {
+            'device_type_id': self.type_ids[0],
+            'device_id': self.device_id,
+            'location': 'arm',
+            'patient_id': self.patients[0]
         }
-        connect_activity_id = self.connect_pool.create_activity(cr, uid, {}, {})
-        self.activity_pool.submit(cr, self.wmu_id, connect_activity_id, connect_data)
-        check_connect = self.activity_pool.browse(cr, uid, connect_activity_id)
-        
-        # test device connect activity submitted data
-        self.assertTrue(check_connect.data_ref.patient_id.id == patient_id, msg="Device Connect: Patient id was not submitted correctly")
-        self.assertTrue(check_connect.data_ref.device_id.id == device_id, msg="Device Connect: Device id was not submitted correctly")
-        self.assertTrue(check_connect.data_ref.device_type_id.id == type_id, msg="Device Connect: Type id was not registered correctly")
-        
-        # Complete Device Connect
-        self.activity_pool.complete(cr, self.wmu_id, connect_activity_id)
-        check_connect = self.activity_pool.browse(cr, uid, connect_activity_id)
-        self.assertTrue(check_connect.state == 'completed', msg="Device Connect not completed successfully")
-        self.assertTrue(check_connect.date_terminated, msg="Device Connect Completed: Date terminated not registered")
-        session_ids = self.session_pool.search(cr, uid, [['patient_id', '=', patient_id], ['device_id', '=', device_id]])
-        self.assertTrue(session_ids, msg="Device Connect Completed: Device session not created")
-        device_session_id = session_ids[0]
-        check_session = self.session_pool.browse(cr, uid, device_session_id)
-        self.assertTrue(check_session.activity_id.state == 'started', msg="Device Connect Completed: Device session not started")
-        check_device = self.device_pool.browse(cr, uid, device_id)
-        self.assertFalse(check_device.is_available, msg="Device Connect Completed: Device availability not updated")
+        session2_id = self.session_pool.create_activity(cr, self.wm_uid, {}, session_data)
+        self.activity_pool.start(cr, self.wm_uid, session2_id)
+        device = self.device_pool.browse(cr, uid, self.device_id)
+        self.assertFalse(device.is_available, msg="Device is still available")
 
-        # Device Connect 2
-        connect_data = {
-            'patient_id': patient_id,
-            'device_type_id': type2_id
-        }
-        connect_activity_id = self.connect_pool.create_activity(cr, uid, {}, {})
-        self.activity_pool.submit(cr, self.wmu_id, connect_activity_id, connect_data)
-        check_connect = self.activity_pool.browse(cr, uid, connect_activity_id)
+        # Scenario 5: Get session activity id when the patient has more than one session started
+        self.assertIn(self.session_pool.get_activity_id(cr, uid, self.patients[0], self.type_ids[0]),
+                      [session_id, session2_id])
 
-        # test device connect activity submitted data
-        self.assertTrue(check_connect.data_ref.patient_id.id == patient_id, msg="Device Connect: Patient id was not submitted correctly")
-        self.assertFalse(check_connect.data_ref.device_id, msg="Device Connect: Device id was not submitted correctly")
-        self.assertTrue(check_connect.data_ref.device_type_id.id == type2_id, msg="Device Connect: Type id was not submitted correctly")
+        # Scenario 6: Complete a device session without providing specific device
+        self.activity_pool.complete(cr, self.wm_uid, session_id)
+        device = self.device_pool.browse(cr, uid, self.device_id)
+        self.assertFalse(device.is_available, msg="Device was made available")
 
-        # Complete Device Connect
-        self.activity_pool.complete(cr, self.wmu_id, connect_activity_id)
-        check_connect = self.activity_pool.browse(cr, uid, connect_activity_id)
-        self.assertTrue(check_connect.state == 'completed', msg="Device Connect not completed successfully")
-        self.assertTrue(check_connect.date_terminated, msg="Device Connect Completed: Date terminated not registered")
-        session_ids = self.session_pool.search(cr, uid, [['patient_id', '=', patient_id], ['device_type_id', '=', type2_id]])
-        self.assertTrue(session_ids, msg="Device Connect Completed: Device session not created")
-        device_session2_id = session_ids[0]
-        check_session = self.session_pool.browse(cr, uid, device_session2_id)
-        self.assertTrue(check_session.activity_id.state == 'started', msg="Device Connect Completed: Device session not started")
-        
-        # Device Disconnect 1
-        disconnect_data = {
-            'patient_id': patient_id,
-            'device_id': device_id
-        }
-        disconnect_activity_id = self.disconnect_pool.create_activity(cr, uid, {}, {})
-        self.activity_pool.submit(cr, self.wmu_id, disconnect_activity_id, disconnect_data)
-        check_disconnect = self.activity_pool.browse(cr, uid, disconnect_activity_id)
-        
-        # test device disconnect activity submitted data
-        self.assertTrue(check_disconnect.data_ref.patient_id.id == patient_id, msg="Device disconnect: Patient id was not submitted correctly")
-        self.assertTrue(check_disconnect.data_ref.device_id.id == device_id, msg="Device disconnect: Device id was not submitted correctly")
-        self.assertTrue(check_disconnect.data_ref.device_type_id.id == type_id, msg="Device disconnect: Type id was not registered correctly")
-        
-        # Complete Device Disconnect
-        self.activity_pool.complete(cr, self.wmu_id, disconnect_activity_id)
-        check_disconnect = self.activity_pool.browse(cr, uid, disconnect_activity_id)
-        self.assertTrue(check_disconnect.state == 'completed', msg="Device disconnect not completed successfully")
-        self.assertTrue(check_disconnect.date_terminated, msg="Device disconnect Completed: Date terminated not registered")
-        check_session = self.session_pool.browse(cr, uid, device_session_id)
-        self.assertTrue(check_session.activity_id.state == 'completed', msg="Device disconnect Completed: Device session not completed")
-        check_device = self.device_pool.browse(cr, uid, device_id)
-        self.assertTrue(check_device.is_available, msg="Device disconnect Completed: Device availability not updated")
-        
-        # Device Disconnect 2
-        disconnect_data = {
-            'patient_id': patient_id,
-            'device_type_id': type2_id
-        }
-        disconnect_activity_id = self.disconnect_pool.create_activity(cr, uid, {}, {})
-        self.activity_pool.submit(cr, self.wmu_id, disconnect_activity_id, disconnect_data)
-        check_disconnect = self.activity_pool.browse(cr, uid, disconnect_activity_id)
+        # Scenario 7: Complete a device session providing specific device
+        self.activity_pool.complete(cr, self.wm_uid, session2_id)
+        device = self.device_pool.browse(cr, uid, self.device_id)
+        self.assertTrue(device.is_available, msg="Device is not available")
 
-        # test device disconnect activity submitted data
-        self.assertTrue(check_disconnect.data_ref.patient_id.id == patient_id, msg="Device disconnect: Patient id was not submitted correctly")
-        self.assertFalse(check_disconnect.data_ref.device_id, msg="Device disconnect: Device id was not submitted correctly")
-        self.assertTrue(check_disconnect.data_ref.device_type_id.id == type2_id, msg="Device disconnect: Type id was not submitted correctly")
-
-        # Complete Device Disconnect
-        self.activity_pool.complete(cr, self.wmu_id, disconnect_activity_id)
-        check_disconnect = self.activity_pool.browse(cr, uid, disconnect_activity_id)
-        self.assertTrue(check_disconnect.state == 'completed', msg="Device disconnect not completed successfully")
-        self.assertTrue(check_disconnect.date_terminated, msg="Device disconnect Completed: Date terminated not registered")
-        check_session = self.session_pool.browse(cr, uid, device_session2_id)
-        self.assertTrue(check_session.activity_id.state == 'completed', msg="Device disconnect Completed: Device session not completed")
-
-
-class TestClinicalDevice(SingleTransactionCase):
-
-    @classmethod
-    def setUpClass(cls):
-        super(TestClinicalDevice, cls).setUpClass()
-        cr, uid = cls.cr, cls.uid
-
-        cls.type_pool = cls.registry('nh.clinical.device.type')
-        cls.device_pool = cls.registry('nh.clinical.device')
-
-        cls.type_id = cls.type_pool.create(
-            cr, uid, {'name': 'DeviceType'}
-        )
-        cls.device_id = cls.device_pool.create(
-            cr, uid, {'type_id': cls.type_id, 'serial_number': 'SN1'}
-        )
-
-    def test_01_name_get_returns_device_name(self):
+    def test_02_device_connect(self):
         cr, uid = self.cr, self.uid
 
-        result = self.device_pool.name_get(cr, uid, [self.device_id], context=None)
-        self.assertEquals(result, [(self.device_id, 'DeviceType/SN1')])
+        # Scenario 1: Create device connect without providing specific device
+        connect_data = {
+            'device_type_id': self.type_ids[0],
+            'patient_id': self.patients[0]
+        }
+        connect_id = self.connect_pool.create_activity(cr, self.wm_uid, {}, connect_data)
+        self.assertTrue(connect_id, msg="Connect Activity not generated")
+        self.activity_pool.complete(cr, self.wm_uid, connect_id)
 
+        # Scenario 2: Create device connect providing specific device
+        connect_data = {
+            'device_id': self.device_id,
+            'patient_id': self.patients[0]
+        }
+        connect2_id = self.connect_pool.create_activity(cr, self.wm_uid, {}, connect_data)
+        self.assertTrue(connect2_id, msg="Connect Activity not generated")
+        connect = self.activity_pool.browse(cr, uid, connect2_id)
+        self.assertEqual(connect.data_ref.device_type_id.id, self.type_ids[0], msg="Device type does not match")
+        self.activity_pool.complete(cr, self.wm_uid, connect2_id)
 
+        # Scenario 3: Create device connect without patient
+        connect_data = {
+            'device_id': self.device_id
+        }
+        with self.assertRaises(except_orm):
+            self.connect_pool.create_activity(cr, self.wm_uid, {}, connect_data)
 
+        # Scenario 4: Create device connect without device information
+        connect_data = {
+            'patient_id': self.patients[0]
+        }
+        with self.assertRaises(except_orm):
+            self.connect_pool.create_activity(cr, self.wm_uid, {}, connect_data)
+
+        # Scenario 5: Attempt to connect a device to a not admitted patient
+        connect_data = {
+            'device_type_id': self.type_ids[0],
+            'patient_id': self.patients[1]
+        }
+        with self.assertRaises(except_orm):
+            self.connect_pool.create_activity(cr, self.wm_uid, {}, connect_data)
+
+        # Scenario 6: Attempt to connect an already used device to a patient
+        connect_data = {
+            'device_id': self.device_id,
+            'patient_id': self.patients[0]
+        }
+        with self.assertRaises(except_orm):
+            self.connect_pool.create_activity(cr, self.wm_uid, {}, connect_data)
+
+    def test_03_device_disconnect(self):
+        cr, uid = self.cr, self.uid
+
+        # Scenario 1: Create device disconnect providing specific device
+        disconnect_data = {
+            'device_id': self.device_id,
+            'patient_id': self.patients[0]
+        }
+        disconnect_id = self.disconnect_pool.create_activity(cr, self.wm_uid, {}, disconnect_data)
+        self.assertTrue(disconnect_id, msg="Disconnect Activity not generated")
+        disconnect = self.activity_pool.browse(cr, uid, disconnect_id)
+        self.assertEqual(disconnect.data_ref.device_type_id.id, self.type_ids[0], msg="Device type does not match")
+        self.activity_pool.complete(cr, self.wm_uid, disconnect_id)
+
+        # Scenario 2: Create device disconnect without providing specific device
+        disconnect_data = {
+            'device_type_id': self.type_ids[0],
+            'patient_id': self.patients[0]
+        }
+        disconnect_id = self.disconnect_pool.create_activity(cr, self.wm_uid, {}, disconnect_data)
+        self.assertTrue(disconnect_id, msg="Disconnect Activity not generated")
+        self.activity_pool.complete(cr, self.wm_uid, disconnect_id)
+
+        # Scenario 3: Create device disconnect without patient
+        disconnect_data = {
+            'device_id': self.device_id
+        }
+        with self.assertRaises(except_orm):
+            self.disconnect_pool.create_activity(cr, self.wm_uid, {}, disconnect_data)
+
+        # Scenario 4: Create device disconnect without device information
+        disconnect_data = {
+            'patient_id': self.patients[0]
+        }
+        with self.assertRaises(except_orm):
+            self.disconnect_pool.create_activity(cr, self.wm_uid, {}, disconnect_data)
+
+        # Scenario 5: Attempt to disconnect a device not connected to the patient
+        disconnect_data = {
+            'device_id': self.device_id,
+            'patient_id': self.patients[0]
+        }
+        with self.assertRaises(except_orm):
+            self.disconnect_pool.create_activity(cr, self.wm_uid, {}, disconnect_data)
+
+        # Scenario 6: Attempt to disconnect a device not connected to the patient (type)
+        disconnect_data = {
+            'device_type_id': self.type_ids[0],
+            'patient_id': self.patients[0]
+        }
+        with self.assertRaises(except_orm):
+            self.disconnect_pool.create_activity(cr, self.wm_uid, {}, disconnect_data)
+
+    def test_04_device_name_get(self):
+        cr, uid = self.cr, self.uid
+
+        type = self.type_pool.browse(cr, uid, self.type_ids[0])
+        res = self.device_pool.name_get(cr, uid, [self.device_id])
+        self.assertEqual(len(res), 1)
+        self.assertEqual(res[0][1], type.name+'/000001')

@@ -70,20 +70,14 @@ class nh_clinical_device_session(orm.Model):
         'removal_reason': fields.char('Removal reason', size=100),
         'planned': fields.selection((('planned', 'Planned'), ('unplanned', 'Unplanned')), 'Planned?')
     }
-    
-    def name_get(self, cr, uid, ids, context):
-        res = []
-        for session in self.browse(cr, uid, ids, context):
-            res.append((session.id, "%s/%s" % (session.patient_id.full_name, session.device_type_id.name)))
-        return res
-    
+
     def start(self, cr, uid, activity_id, context=None):
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context)
         if activity.data_ref.device_id:
             device_pool = self.pool['nh.clinical.device']
             device_pool.write(cr, uid, activity.data_ref.device_id.id, {'is_available': False})
-        super(nh_clinical_device_session, self).start(cr, uid, activity_id, context)
+        return super(nh_clinical_device_session, self).start(cr, uid, activity_id, context)
         
     def complete(self, cr, uid, activity_id, context=None):
         activity_pool = self.pool['nh.activity']
@@ -91,7 +85,7 @@ class nh_clinical_device_session(orm.Model):
         if activity.data_ref.device_id:
             device_pool = self.pool['nh.clinical.device']
             device_pool.write(cr, uid, activity.data_ref.device_id.id, {'is_available': True})
-        super(nh_clinical_device_session, self).complete(cr, uid, activity_id, context)
+        return super(nh_clinical_device_session, self).complete(cr, uid, activity_id, context)
 
     def get_activity_id(self, cr, uid, patient_id, device_type_id, context=None):
         domain = [
@@ -123,6 +117,7 @@ class nh_clinical_device_connect(orm.Model):
 
     def submit(self, cr, uid, activity_id, vals, context=None):
         device_pool = self.pool['nh.clinical.device']
+        activity_pool = self.pool['nh.activity']
         if not vals.get('patient_id'):
             raise osv.except_osv('Device Connect Error!', "Patient missing in submitted values!")
         if not (vals.get('device_id') or vals.get('device_type_id')):
@@ -130,7 +125,16 @@ class nh_clinical_device_connect(orm.Model):
         vals_copy = vals.copy()
         if vals.get('device_id'):
             device = device_pool.browse(cr, uid, vals['device_id'], context=context)
+            if not device.is_available:
+                raise osv.except_osv('Device Connect Error!', "This device is already being used!")
             vals_copy.update({'device_type_id': device.type_id.id})
+        spell_pool = self.pool['nh.clinical.spell']
+        spell_id = spell_pool.get_by_patient_id(cr, uid, vals.get('patient_id'), context=context)
+        if not spell_id:
+            raise osv.except_osv('Device Connect Error!',
+                                 'No started spell found for patient_id=%s' % vals.get('patient_id'))
+        spell_activity_id = spell_pool.browse(cr, uid, spell_id, context=context).activity_id.id
+        activity_pool.write(cr, uid, activity_id, {'parent_id': spell_activity_id}, context=context)
         return super(nh_clinical_device_connect, self).submit(cr, uid, activity_id, vals_copy, context=context)
 
     def complete(self, cr, uid, activity_id, context=None):
@@ -139,14 +143,13 @@ class nh_clinical_device_connect(orm.Model):
         device_session_pool = self.pool['nh.clinical.device.session']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
         spell_id = spell_pool.get_by_patient_id(cr, uid, activity.data_ref.patient_id.id, context=context)
-        if not spell_id:
-            raise osv.except_osv('No started spell found for patient_id=%s' % activity.data_ref.patient_id.id)
         spell_activity_id = spell_pool.browse(cr, uid, spell_id, context=context).activity_id.id
-        session_activity_id = device_session_pool.create_activity(cr, uid, 
-                                            {'creator_id': activity_id, 'parent_id': spell_activity_id},
-                                            {'patient_id': activity.data_ref.patient_id.id,
-                                             'device_type_id': activity.data_ref.device_type_id.id,
-                                             'device_id': activity.data_ref.device_id.id if activity.data_ref.device_id else False})
+        session_activity_id = device_session_pool.create_activity(cr, uid, {
+            'creator_id': activity_id, 'parent_id': spell_activity_id
+        }, {
+            'patient_id': activity.data_ref.patient_id.id, 'device_type_id': activity.data_ref.device_type_id.id,
+            'device_id': activity.data_ref.device_id.id if activity.data_ref.device_id else False
+        }, context=context)
         activity_pool.start(cr, uid, session_activity_id, context=context)
         return super(nh_clinical_device_connect, self).complete(cr, SUPERUSER_ID, activity_id, context=context)
 
@@ -162,10 +165,13 @@ class nh_clinical_device_disconnect(orm.Model):
         'device_type_id': fields.many2one('nh.clinical.device.type', 'Device Type', required=True),
         'device_id': fields.many2one('nh.clinical.device', 'Device'),
         'patient_id': fields.many2one('nh.clinical.patient', 'Patient', required=True),
+        'session_activity_id': fields.many2one('nh.activity', 'Disconnected Device Session')
     }
 
     def submit(self, cr, uid, activity_id, vals, context=None):
         device_pool = self.pool['nh.clinical.device']
+        activity_pool = self.pool['nh.activity']
+        session_pool = self.pool['nh.clinical.device.session']
         if not vals.get('patient_id'):
             osv.except_osv('Device Disconnect Error!', "Patient missing in submitted values!")
         if not (vals.get('device_id') or vals.get('device_type_id')):
@@ -174,21 +180,29 @@ class nh_clinical_device_disconnect(orm.Model):
         if vals.get('device_id'):
             device = device_pool.browse(cr, uid, vals['device_id'], context=context)
             vals_copy.update({'device_type_id': device.type_id.id})
+            session_id = session_pool.search(cr, uid, [
+                ['activity_id.state', '=', 'started'], ['device_id', '=', vals.get('device_id')],
+                ['patient_id', '=', vals.get('patient_id')]], context=context)
+            if not session_id:
+                raise osv.except_osv('Device Disconnect Error!',
+                                     'No started session found for device_id=%s' % vals_copy.get('device_id'))
+            session_activity_id = session_pool.browse(cr, uid, session_id[0], context=context).activity_id.id
+        else:
+            session_activity_id = session_pool.get_activity_id(cr, uid, vals.get('patient_id'),
+                                                               vals_copy.get('device_type_id'), context=context)
+            if not session_activity_id:
+                raise osv.except_osv('Device Disconnect Error!',
+                                     'No started session found for device_type_id=%s' % vals_copy.get('device_type_id'))
+        vals_copy.update({'session_activity_id': session_activity_id})
+        session_activity = activity_pool.browse(cr, uid, session_activity_id, context=context)
+        spell_activity_id = session_activity.parent_id.id if session_activity.parent_id else False
+        activity_pool.write(cr, uid, activity_id, {'parent_id': spell_activity_id}, context=context)
         return super(nh_clinical_device_disconnect, self).submit(cr, uid, activity_id, vals_copy, context=context)
 
     def complete(self, cr, uid, activity_id, context=None):
         activity_pool = self.pool['nh.activity']
-        session_pool = self.pool['nh.clinical.device.session']
-        spell_pool = self.pool['nh.clinical.spell']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
-        spell_id = spell_pool.get_by_patient_id(cr, uid, activity.data_ref.patient_id.id, context=context)
-        if not spell_id:
-            raise osv.except_osv('No started spell found for patient_id=%s' % activity.data_ref.patient_id.id)
-        session_activity_id = session_pool.get_activity_id(cr, uid, activity.data_ref.patient_id.id,
-                                                           activity.data_ref.device_type_id.id, context=context)
-        if not session_activity_id:
-            raise osv.except_osv('No started session found for device_type_id=%s' % activity.data_ref.device_type_id.id)
-        activity_pool.complete(cr, uid, session_activity_id)
+        activity_pool.complete(cr, uid, activity.data_ref.session_activity_id.id, context=context)
         return super(nh_clinical_device_disconnect, self).complete(cr, SUPERUSER_ID, activity_id, context)
 
     
