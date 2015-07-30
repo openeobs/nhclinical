@@ -48,6 +48,13 @@ class TestActivity(common.SingleTransactionCase):
         self.assertEqual(activity.data_model, 'test.activity.data.model2', msg="Activity created with the wrong data model")
         self.assertEqual(activity.summary, 'Undefined Activity', msg="Activity default summary not added")
 
+        # Scenario 5: Create an activity with a data model and description
+        activity_id = self.activity_pool.create(cr, uid, {'data_model': 'test.activity.data.model2', 'summary': 'Test Activity Data Model'})
+        self.assertTrue(activity_id, msg="Activity create failed")
+        activity = self.activity_pool.browse(cr, uid, activity_id)
+        self.assertEqual(activity.data_model, 'test.activity.data.model2', msg="Activity created with the wrong data model")
+        self.assertEqual(activity.summary, 'Test Activity Data Model', msg="Activity set summary incorrect")
+
     def test_write(self):
         cr, uid = self.cr, self.uid
 
