@@ -109,6 +109,7 @@ class res_users(orm.Model):
         return res
 
     def name_get(self, cr, uid, ids, context=None):
+        partner_pool = self.pool['res.partner']
         if context is None:
             context = {}
         if isinstance(ids, (int, long)):
@@ -124,9 +125,9 @@ class res_users(orm.Model):
             if record.parent_id and not record.is_company:
                 name = "%s, %s" % (record.parent_name, name)
             if context.get('show_address_only'):
-                name = self._display_address(cr, uid, record, without_company=True, context=context)
+                name = partner_pool._display_address(cr, uid, record, without_company=True, context=context)
             if context.get('show_address'):
-                name = name + "\n" + self._display_address(cr, uid, record, without_company=True, context=context)
+                name = name + "\n" + partner_pool._display_address(cr, uid, record, without_company=True, context=context)
             name = name.replace('\n\n','\n')
             name = name.replace('\n\n','\n')
             if context.get('show_email') and record.email:

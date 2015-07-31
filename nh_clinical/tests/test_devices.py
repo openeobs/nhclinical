@@ -1,8 +1,6 @@
-from datetime import datetime as dt
 import logging
 
 from openerp.tests.common import SingleTransactionCase
-from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
 from openerp.osv.orm import except_orm
 
 _logger = logging.getLogger(__name__)
@@ -61,21 +59,6 @@ class TestDevices(SingleTransactionCase):
             cr, uid, {}, {'patient_id': cls.patients[0], 'pos_id': cls.pos_id, 'code': 'AD00'}))
         cls.type_ids = cls.type_pool.search(cr, uid, [])
         cls.device_id = cls.device_pool.create(cr, uid, {'type_id': cls.type_ids[0], 'serial_number': '000001'})
-
-        # cls.apidemo = cls.registry('nh.clinical.api.demo')
-        #
-        # cls.patient_ids = cls.apidemo.build_unit_test_env1(cr, uid, bed_count=4, patient_count=4)
-        #
-        # cls.wu_id = cls.location_pool.search(cr, uid, [('code', '=', 'U')])[0]
-        # cls.wt_id = cls.location_pool.search(cr, uid, [('code', '=', 'T')])[0]
-        # cls.pos_id = cls.location_pool.read(cr, uid, cls.wu_id, ['pos_id'])['pos_id'][0]
-        # cls.pos_location_id = cls.pos_pool.read(cr, uid, cls.pos_id, ['location_id'])['location_id'][0]
-        #
-        # cls.wmu_id = cls.users_pool.search(cr, uid, [('login', '=', 'WMU')])[0]
-        # cls.wmt_id = cls.users_pool.search(cr, uid, [('login', '=', 'WMT')])[0]
-        # cls.nu_id = cls.users_pool.search(cr, uid, [('login', '=', 'NU')])[0]
-        # cls.nt_id = cls.users_pool.search(cr, uid, [('login', '=', 'NT')])[0]
-        # cls.adt_id = cls.users_pool.search(cr, uid, [('groups_id.name', 'in', ['NH Clinical ADT Group']), ('pos_id', '=', cls.pos_id)])[0]
 
     def test_01_device_session(self):
         cr, uid = self.cr, self.uid
