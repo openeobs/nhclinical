@@ -814,4 +814,5 @@ class nh_clinical_doctor(orm.Model):
                 con_doctor_ids and data.update({'con_doctor_ids': [[6, False, con_doctor_ids]]})
             except:
                 _logger.warn("Can't evaluate 'doctors': %s" % (data['doctors']))
+                return False
         return True
