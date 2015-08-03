@@ -26,9 +26,23 @@ class TestLocation(common.SingleTransactionCase):
         cls.hospital_id = cls.location_pool.create(cr, uid, {'name': 'Test Hospital', 'code': 'TESTHOSP'})
         cls.pos_id = cls.pos_pool.create(cr, uid, {'name': 'Test POS', 'location_id': cls.hospital_id})
         group_ids = cls.group_pool.search(cr, uid, [['name', '=', 'NH Clinical Admin Group']])
+        cls.hca_group_id = cls.group_pool.search(cr, uid, [['name', '=', 'NH Clinical HCA Group']])[0]
+        cls.nurse_group_id = cls.group_pool.search(cr, uid, [['name', '=', 'NH Clinical Nurse Group']])[0]
         cls.userpos_id = cls.user_pool.create(cr, uid, {'name': 'Test User', 'login': 'user_001',
                                                         'password': 'user_001', 'groups_id': [[4, group_ids[0]]],
                                                         'pos_id': cls.pos_id})
+        cls.hca_uid = cls.user_pool.create(cr, uid, {'name': 'HCA01', 'login': 'hca01', 'password': 'hca01',
+                                                     'groups_id': [[4, cls.hca_group_id]]})
+        cls.nurse_uid = cls.user_pool.create(cr, uid, {'name': 'Nurse01', 'login': 'nurse01', 'password': 'nurse01',
+                                                       'groups_id': [[4, cls.nurse_group_id]]})
+        cls.ward_id = cls.location_pool.create(cr, uid, {
+            'name': 'Ward0', 'code': 'W0', 'usage': 'ward', 'parent_id': cls.hospital_id, 'type': 'poc'
+        })
+        cls.bed_id = cls.location_pool.create(cr, uid, {
+            'name': 'Bed0', 'code': 'B0', 'usage': 'bed', 'parent_id': cls.ward_id, 'type': 'poc'
+        })
+
+        cls.patients = [cls.patient_pool.create(cr, uid, {'other_identifier': 'TESTHN00'+str(i)}) for i in range(4)]
 
     def test_01_create(self):
         cr, uid = self.cr, self.uid
@@ -74,9 +88,8 @@ class TestLocation(common.SingleTransactionCase):
         self.assertTrue(location_id in result, msg="Location not found in Available Locations")
 
         # Scenario 2: Make the location unavailable
-        patient_id = self.patient_pool.create(cr, uid, {'other_identifier': 'TESTHN002',
-                                                        'current_location_id': location_id})
-        activity_id = self.spell_pool.create_activity(cr, uid, {}, {'patient_id': patient_id,
+        self.patient_pool.write(cr, uid, self.patients[0], {'current_location_id': location_id})
+        activity_id = self.spell_pool.create_activity(cr, uid, {}, {'patient_id': self.patients[0],
                                                                     'location_id': location_id,
                                                                     'pos_id': pos_id})
         self.activity_pool.start(cr, uid, activity_id)
@@ -96,14 +109,13 @@ class TestLocation(common.SingleTransactionCase):
         self.assertTrue(result[location_id], msg="Availability not set correctly")
 
         # Scenario 2: Assign a patient to the location
-        patient_id = self.patient_pool.create(cr, uid, {'other_identifier': 'TESTHN001',
-                                                        'current_location_id': location_id})
+        self.patient_pool.write(cr, uid, self.patients[1], {'current_location_id': location_id})
         result = self.location_pool._is_available(cr, uid, location_id, field='is_available', args={})
         self.assertTrue(result[location_id], msg="Availability updated incorrectly when patient is linked to it")
 
         # Scenario 3: Assign a spell to the location
-        self.patient_pool.write(cr, uid, patient_id, {'current_location_id': False})
-        activity_id = self.spell_pool.create_activity(cr, uid, {}, {'patient_id': patient_id,
+        self.patient_pool.write(cr, uid, self.patients[1], {'current_location_id': False})
+        activity_id = self.spell_pool.create_activity(cr, uid, {}, {'patient_id': self.patients[1],
                                                                     'location_id': location_id,
                                                                     'pos_id': pos_id})
         result = self.location_pool._is_available(cr, uid, location_id, field='is_available', args={})
@@ -134,9 +146,8 @@ class TestLocation(common.SingleTransactionCase):
         self.assertTrue(result[location_id], msg="Availability not set correctly")
 
         # Scenario 8: Assign the location to an started Spell
-        patient_id = self.patient_pool.create(cr, uid, {'other_identifier': 'TESTHN003',
-                                                        'current_location_id': location_id})
-        activity_id = self.spell_pool.create_activity(cr, uid, {}, {'patient_id': patient_id,
+        self.patient_pool.write(cr, uid, self.patients[2], {'current_location_id': location_id})
+        activity_id = self.spell_pool.create_activity(cr, uid, {}, {'patient_id': self.patients[2],
                                                                     'location_id': location_id,
                                                                     'pos_id': pos_id})
         self.activity_pool.start(cr, uid, activity_id)
@@ -156,10 +167,9 @@ class TestLocation(common.SingleTransactionCase):
         self.assertFalse(result[location_id], msg="Patients returned for a location without patients")
 
         # Scenario 2: Create a new Patient and assign it to the location
-        patient_id = self.patient_pool.create(cr, uid, {'other_identifier': 'TESTHN004',
-                                                        'current_location_id': location_id})
+        self.patient_pool.write(cr, uid, self.patients[0], {'current_location_id': location_id})
         result = self.location_pool._get_patient_ids(cr, uid, location_id, field='patient_ids', args={})
-        self.assertTrue(patient_id in result[location_id], msg="Patient not found in result")
+        self.assertTrue(self.patients[0] in result[location_id], msg="Patient not found in result")
 
         # Scenario 3: Create a new Patient and assign it to a child location
         location2_id = self.location_pool.create(cr, uid, {'name': 'Test Loc',
@@ -167,20 +177,17 @@ class TestLocation(common.SingleTransactionCase):
                                                            'type': 'poc',
                                                            'usage': 'bed',
                                                            'parent_id': location_id})
-        patient2_id = self.patient_pool.create(cr, uid, {'other_identifier': 'TESTHN005',
-                                                         'current_location_id': location2_id})
+        self.patient_pool.write(cr, uid, self.patients[1], {'current_location_id': location2_id})
         result = self.location_pool._get_patient_ids(cr, uid, location_id, field='patient_ids', args={})
-        self.assertTrue(patient_id in result[location_id], msg="Patient not found in result")
-        self.assertTrue(patient2_id in result[location_id], msg="Patient not found in result")
+        self.assertTrue(self.patients[0] in result[location_id], msg="Patient not found in result")
+        self.assertTrue(self.patients[1] in result[location_id], msg="Patient not found in result")
 
         # Scenario 4: Create a new Patient, create his spell and assign the spell to the location
-        patient3_id = self.patient_pool.create(cr, uid, {'other_identifier': 'TESTHN006'})
-        activity_id = self.spell_pool.create_activity(cr, uid, {}, {'patient_id': patient_id,
-                                                                    'location_id': location_id,
-                                                                    'pos_id': pos_id})
-        self.activity_pool.start(cr, uid, activity_id)
+        self.patient_pool.write(cr, uid, self.patients[2], {'current_location_id': False})
+        spell_id = self.spell_pool.get_by_patient_id(cr, uid, self.patients[2])
+        self.spell_pool.write(cr, uid, spell_id, {'location_id': location_id, 'pos_id': pos_id})
         result = self.location_pool._get_patient_ids(cr, uid, location_id, field='patient_ids', args={})
-        self.assertFalse(patient3_id in result[location_id], msg="Unexpected patient found in result")
+        self.assertFalse(self.patients[2] in result[location_id], msg="Unexpected patient found in result")
 
         # Scenario 5: Test _get_child_patients
         result = self.location_pool._get_child_patients(cr, uid, location_id, field='child_patients', args={})
@@ -340,13 +347,10 @@ class TestLocation(common.SingleTransactionCase):
         bed_id = self.location_pool.create(cr, uid, {'name': 'Test Bed', 'code': 'TESTLOC14',
                                                      'type': 'poc', 'usage': 'bed', 'parent_id': location_id})
 
-        patient_id = self.patient_pool.create(cr, uid, {'other_identifier': 'TESTHN007'})
-        activity_id = self.spell_pool.create_activity(cr, uid, {}, {'patient_id': patient_id,
-                                                                    'location_id': location_id,
-                                                                    'pos_id': pos_id})
-        self.activity_pool.start(cr, uid, activity_id)
+        spell_id = self.spell_pool.get_by_patient_id(cr, uid, self.patients[2])
+        self.spell_pool.write(cr, uid, spell_id, {'location_id': location_id, 'pos_id': pos_id})
         placement_id = self.placement_pool.create_activity(cr, uid, {}, {'suggested_location_id': location_id,
-                                                                         'patient_id': patient_id})
+                                                                         'patient_id': self.patients[2]})
 
         # Scenario 1: Get related patients
         result = self.location_pool._get_waiting_patients(cr, uid, location_id, field='waiting_patients', args={})
@@ -470,8 +474,7 @@ class TestLocation(common.SingleTransactionCase):
         location_id = self.location_pool.create(cr, uid, {'name': 'Test Loc', 'code': 'TESTLOC23',
                                                           'type': 'poc', 'usage': 'bed'})
         pos_id = self.pos_pool.create(cr, uid, {'name': 'Test POS', 'location_id': location_id})
-        patient_id = self.patient_pool.create(cr, uid, {'other_identifier': 'TESTHN008'})
-        activity_id = self.spell_pool.create_activity(cr, uid, {}, {'patient_id': patient_id,
+        activity_id = self.spell_pool.create_activity(cr, uid, {}, {'patient_id': self.patients[3],
                                                                     'location_id': location_id,
                                                                     'pos_id': pos_id})
         self.activity_pool.start(cr, uid, activity_id)
@@ -505,3 +508,29 @@ class TestLocation(common.SingleTransactionCase):
         self.assertTrue(self.location_pool.switch_active_status(cr, uid, location_id), msg="Switch active status failed")
         location = self.location_pool.browse(cr, uid, location_id)
         self.assertTrue(location.active, msg="Active value not updated")
+
+    def test_14_get_nurse_follower_ids(self):
+        cr, uid = self.cr, self.uid
+
+        # Scenario 1: Check followers without nurses following patients in that location
+        res = self.location_pool._get_nurse_follower_ids(cr, uid, [self.bed_id], 'nurse_follower_ids', None)
+        self.assertFalse(res[self.bed_id])
+
+        # Scenario 2: Check followers when a nurse is following a patient in that location
+        self.patient_pool.write(cr, uid, self.patients[3], {'current_location_id': self.bed_id})
+        self.user_pool.write(cr, uid, self.nurse_uid, {'following_ids': [[4, self.patients[3]]]})
+        res = self.location_pool._get_nurse_follower_ids(cr, uid, [self.bed_id], 'nurse_follower_ids', None)
+        self.assertListEqual(res[self.bed_id], [self.nurse_uid])
+
+    def test_15_get_hca_follower_ids(self):
+        cr, uid = self.cr, self.uid
+
+        # Scenario 1: Check followers without HCAs following patients in that location
+        res = self.location_pool._get_hca_follower_ids(cr, uid, [self.bed_id], 'hca_follower_ids', None)
+        self.assertFalse(res[self.bed_id])
+
+        # Scenario 2: Check followers when a HCA is following a patient in that location
+        self.user_pool.write(cr, uid, self.hca_uid, {'following_ids': [[4, self.patients[3]]]})
+        res = self.location_pool._get_hca_follower_ids(cr, uid, [self.bed_id], 'hca_follower_ids', None)
+        self.assertListEqual(res[self.bed_id], [self.hca_uid])
+
