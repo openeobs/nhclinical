@@ -23,6 +23,8 @@ class TestUsers(SingleTransactionCase):
         cls.pos_pool = cls.registry('nh.clinical.pos')
         cls.spell_pool = cls.registry('nh.clinical.spell')
         cls.doctor_pool = cls.registry('nh.clinical.doctor')
+        cls.mail_pool = cls.registry('mail.message')
+        cls.config_pool = cls.registry('ir.config_parameter')
 
         cls.admin_group_id = cls.groups_pool.search(cr, uid, [['name', '=', 'NH Clinical Admin Group']])
         cls.dr_group_id = cls.groups_pool.search(cr, uid, [['name', '=', 'NH Clinical Doctor Group']])[0]
@@ -98,3 +100,22 @@ class TestUsers(SingleTransactionCase):
         # Scenario 6: Get name and email
         name = self.user_pool.name_get(cr, uid, self.admin_uid, {'show_email': 1})
         self.assertEqual(name[0][1], "Company1, Admin 1 <a@b.org>")
+
+    def test_04_mail_message_get_default_from(self):
+        cr, uid = self.cr, self.uid
+
+        user_uid = self.user_pool.create(cr, uid, {'name': 'Admin 2', 'login': 'user_002',
+                                                   'password': 'user_002',
+                                                   'groups_id': [[4, self.admin_group_id[0]]]})
+
+        # Scenario 1: No mail
+        self.assertEqual(self.mail_pool._get_default_from(cr, user_uid), 'Admin 2 <No email>')
+
+        # Scenario 2: Email
+        self.user_pool.write(cr, uid, user_uid, {'email': 'a@b.org'})
+        self.assertEqual(self.mail_pool._get_default_from(cr, user_uid), 'Admin 2 <a@b.org>')
+
+        # Scenario 3: Alias name and domain
+        self.user_pool.write(cr, uid, user_uid, {'alias_name': 'c'})
+        self.config_pool.set_param(cr, uid, 'mail.catchall.domain', 'd.com')
+        self.assertEqual(self.mail_pool._get_default_from(cr, user_uid), 'Admin 2 <c@d.com>')

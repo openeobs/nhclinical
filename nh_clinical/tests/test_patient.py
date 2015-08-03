@@ -137,7 +137,14 @@ class TestClinicalPatient(common.SingleTransactionCase):
         patient = self.patient_pool.browse(cr, uid, [patient_id])
         self.assertEquals('Smith, John', patient.name)
 
-    def test_06_unlink(self):
+    def test_06_write(self):
+        cr, uid = self.cr, self.uid
+
+        patient_id = self.patient_pool.search(cr, uid, [['other_identifier', '=', 'TESTHN004']])
+        self.assertTrue(self.patient_pool.write(cr, uid, patient_id, {'title': 'test'}))
+        self.assertTrue(self.patient_pool.write(cr, uid, patient_id, {'family_name': 'testfamily'}))
+
+    def test_07_unlink(self):
         cr, uid = self.cr, self.uid
 
         patient_id = self.patient_pool.create(cr, uid, {'other_identifier': 'TEST_UNLINK'})
@@ -145,7 +152,7 @@ class TestClinicalPatient(common.SingleTransactionCase):
         # unlink sets the field 'active' to False, making it invisible to users
         self.assertFalse(self.patient_pool.browse(cr, uid, [patient_id]).active)
 
-    def test_07_check_data(self):
+    def test_08_check_data(self):
         cr, uid = self.cr, self.uid
 
         data = {
