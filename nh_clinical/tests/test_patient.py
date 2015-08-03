@@ -186,11 +186,13 @@ class TestClinicalPatient(common.SingleTransactionCase):
         data.update({'other_identifier': 'TESTHN008'})
         with self.assertRaises(except_orm):
             self.patient_pool.check_data(cr, uid, data, create=False)
+        self.assertFalse(self.patient_pool.check_data(cr, uid, data, create=False, exception=False))
 
         # Scenario 7: Update data, no existing patient with NHS Number
         data.update({'patient_identifier': 'TESTNHS08'})
         with self.assertRaises(except_orm):
             self.patient_pool.check_data(cr, uid, data, create=False)
+        self.assertFalse(self.patient_pool.check_data(cr, uid, data, create=False, exception=False))
 
         # Scenario 8: Update data, 2 identifiers for 2 different patients
         data.update({'other_identifier': 'TESTHN001', 'patient_identifier': 'TESTPI001'})
