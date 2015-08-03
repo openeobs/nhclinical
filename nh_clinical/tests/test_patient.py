@@ -198,6 +198,7 @@ class TestClinicalPatient(common.SingleTransactionCase):
         data.update({'other_identifier': 'TESTHN001', 'patient_identifier': 'TESTPI001'})
         with self.assertRaises(except_orm):
             self.patient_pool.check_data(cr, uid, data, create=False)
+        self.assertFalse(self.patient_pool.check_data(cr, uid, data, create=False, exception=False))
 
         # Scenario 9: Correct update data
         data.update({'other_identifier': 'TESTHN009'})
