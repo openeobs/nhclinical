@@ -478,9 +478,11 @@ class nh_clinical_location(orm.Model):
     def check_context_ids(self, cr, uid, context_ids, context=None):
         if isinstance(context_ids[0], list):
             if context_ids[0][0] == 4:
-                context_ids = [c[1] for c in context_ids[0]]
+                context_ids = [c[1] for c in context_ids]
             elif context_ids[0][0] == 6:
                 context_ids = context_ids[0][2]
+            else:
+                return True
         self.pool['nh.clinical.context'].check_model(cr, uid, context_ids, self._name, context=context)
         return True
 

@@ -1,4 +1,5 @@
 from openerp.tests import common
+from openerp.osv.orm import except_orm
 
 import logging
 
@@ -22,7 +23,11 @@ class TestLocation(common.SingleTransactionCase):
         cls.placement_pool = cls.registry('nh.clinical.patient.placement')
         cls.user_pool = cls.registry('res.users')
         cls.group_pool = cls.registry('res.groups')
+        cls.context_pool = cls.registry('nh.clinical.context')
 
+        cls.contexts = []
+        cls.contexts.append(cls.context_pool.create(cr, uid, {'name': 'c0', 'models': '[]'}))
+        cls.contexts.append(cls.context_pool.create(cr, uid, {'name': 'c1', 'models': "['nh.clinical.location']"}))
         cls.hospital_id = cls.location_pool.create(cr, uid, {'name': 'Test Hospital', 'code': 'TESTHOSP'})
         cls.pos_id = cls.pos_pool.create(cr, uid, {'name': 'Test POS', 'location_id': cls.hospital_id})
         group_ids = cls.group_pool.search(cr, uid, [['name', '=', 'NH Clinical Admin Group']])
@@ -36,7 +41,8 @@ class TestLocation(common.SingleTransactionCase):
         cls.nurse_uid = cls.user_pool.create(cr, uid, {'name': 'Nurse01', 'login': 'nurse01', 'password': 'nurse01',
                                                        'groups_id': [[4, cls.nurse_group_id]]})
         cls.ward_id = cls.location_pool.create(cr, uid, {
-            'name': 'Ward0', 'code': 'W0', 'usage': 'ward', 'parent_id': cls.hospital_id, 'type': 'poc'
+            'name': 'Ward0', 'code': 'W0', 'usage': 'ward', 'parent_id': cls.hospital_id, 'type': 'poc',
+            'context_ids': [[6, 0, [cls.contexts[1]]]]
         })
         cls.bed_id = cls.location_pool.create(cr, uid, {
             'name': 'Bed0', 'code': 'B0', 'usage': 'bed', 'parent_id': cls.ward_id, 'type': 'poc'
@@ -534,3 +540,27 @@ class TestLocation(common.SingleTransactionCase):
         res = self.location_pool._get_hca_follower_ids(cr, uid, [self.bed_id], 'hca_follower_ids', None)
         self.assertListEqual(res[self.bed_id], [self.hca_uid])
 
+    def test_16_context_check_model(self):
+        cr, uid = self.cr, self.uid
+
+        # Scenario 1: model is applicable on the specified context
+        self.assertTrue(self.context_pool.check_model(cr, uid, self.contexts[1], 'nh.clinical.location'))
+
+        # Scenario 2: model is not applicable on the specified context
+        with self.assertRaises(except_orm):
+            self.context_pool.check_model(cr, uid, self.contexts[0], 'nh.clinical.location')
+
+    def test_17_check_context_ids(self):
+        cr, uid = self.cr, self.uid
+
+        # Scenario 1: Use Add code
+        self.assertTrue(self.location_pool.check_context_ids(cr, uid, [[4, self.contexts[1]]]))
+
+        # Scenario 2: Use Replace code
+        self.assertTrue(self.location_pool.check_context_ids(cr, uid, [[6, 0, [self.contexts[1]]]]))
+
+        # Scenario 3: Use Remove code
+        self.assertTrue(self.location_pool.check_context_ids(cr, uid, [[5, self.contexts[1]]]))
+
+        # Scenario 4: Use List
+        self.assertTrue(self.location_pool.check_context_ids(cr, uid, [self.contexts[1]]))
