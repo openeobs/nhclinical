@@ -119,3 +119,13 @@ class TestUsers(SingleTransactionCase):
         self.user_pool.write(cr, uid, user_uid, {'alias_name': 'c'})
         self.config_pool.set_param(cr, uid, 'mail.catchall.domain', 'd.com')
         self.assertEqual(self.mail_pool._get_default_from(cr, user_uid), 'Admin 2 <c@d.com>')
+
+    def test_05_update_doctor_status(self):
+        cr, uid = self.cr, self.uid
+
+        dr_uid = self.user_pool.create(cr, uid, {'name': 'Dr 3', 'login': 'user_003', 'password': 'user_003',
+                                                 'groups_id': [[4, self.dr_group_id]]})
+        user_uid = self.user_pool.create(cr, uid, {'name': 'U04', 'login': 'user_004', 'password': 'user_004',
+                                                   'doctor': True})
+
+        self.assertTrue(self.user_pool.update_doctor_status(cr, uid, [dr_uid, user_uid]))
