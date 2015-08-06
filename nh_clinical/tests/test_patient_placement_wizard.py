@@ -104,7 +104,7 @@ class TestPatientPlacementWizard(TransactionCase):
             'nh.clinical.patient.placement.wizard'
         )
         del self.wizard_pool.write, self.wizard_pool._get_place_patients, \
-            self.wizard_pool._get_placement_ids,\
+            self.wizard_pool._get_placement_ids, \
             self.wizard_pool._get_recent_placement_ids
 
     def test_08_test_get_place_patients(self):
@@ -117,7 +117,6 @@ class TestPatientPlacementWizard(TransactionCase):
         self.wizard_pool._place_patients = MagicMock()
 
         self.wizard_pool._get_place_patients(cr, uid, [1, 2])
-        self.assertTrue(self.wizard_pool._place_patients.called)
         self.assertEquals(2, self.wizard_pool._place_patients.call_count)
         self.assertTrue(self.wizard_pool._get_placements.called)
         del placement_mock, self.wizard_pool._get_placements, \
