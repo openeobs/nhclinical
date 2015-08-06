@@ -1,5 +1,5 @@
 __author__ = 'Will'
-from mock import MagicMock
+from mock import MagicMock, patch
 
 from openerp.tests.common import TransactionCase
 
@@ -107,4 +107,18 @@ class TestPatientPlacementWizard(TransactionCase):
             self.wizard_pool._get_placement_ids,\
             self.wizard_pool._get_recent_placement_ids
 
+    def test_08_test_get_place_patients(self):
+        cr, uid = self.cr, self.uid
+        placement_mock = MagicMock(spec=self.placement_pool.__class__.__name__)
+        return_value = [
+            placement_mock._get_child_mock(), placement_mock._get_child_mock()
+        ]
+        self.wizard_pool._get_placements = MagicMock(return_value=return_value)
+        self.wizard_pool._place_patients = MagicMock()
 
+        self.wizard_pool._get_place_patients(cr, uid, [1, 2])
+        self.assertTrue(self.wizard_pool._place_patients.called)
+        self.assertEquals(2, self.wizard_pool._place_patients.call_count)
+        self.assertTrue(self.wizard_pool._get_placements.called)
+        del placement_mock, self.wizard_pool._get_placements, \
+            self.wizard_pool._place_patients
