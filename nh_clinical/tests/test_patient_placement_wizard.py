@@ -111,13 +111,13 @@ class TestPatientPlacementWizard(TransactionCase):
         cr, uid = self.cr, self.uid
         placement_mock = MagicMock(spec=self.placement_pool.__class__.__name__)
         return_value = [
-            placement_mock._get_child_mock(), placement_mock._get_child_mock()
+            placement_mock._get_child_mock(), placement_mock._get_child_mock(location_id=None)
         ]
         self.wizard_pool._get_placements = MagicMock(return_value=return_value)
         self.wizard_pool._place_patients = MagicMock()
 
         self.wizard_pool._get_place_patients(cr, uid, [1, 2])
-        self.assertEquals(2, self.wizard_pool._place_patients.call_count)
+        self.assertEquals(1, self.wizard_pool._place_patients.call_count)
         self.assertTrue(self.wizard_pool._get_placements.called)
         del placement_mock, self.wizard_pool._get_placements, \
             self.wizard_pool._place_patients
