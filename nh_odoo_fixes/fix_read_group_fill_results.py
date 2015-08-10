@@ -1,5 +1,6 @@
 import openerp
 
+
 def _read_group_fill_results(self, cr, uid, domain, groupby, remaining_groupbys,
                              aggregated_fields, count_field,
                              read_group_result, read_group_order=None, context=None):
@@ -79,4 +80,77 @@ def _read_group_fill_results(self, cr, uid, domain, groupby, remaining_groupbys,
             r['__fold'] = folded.get(r[groupby] and r[groupby][0], False)
     return result
 
+
+def _append_all(self, cr, uid, read_group_result, all_groups, all_group_tuples, groupby, result_template, domain, count_field):
+
+    result = []
+    known_values = {}
+
+    while read_group_result or all_groups:
+        left_side = read_group_result[0] if read_group_result else None
+        right_side = all_groups[0] if all_groups else None
+        ##### NHC BEGIN #####
+        if left_side and not isinstance(left_side[groupby], (tuple, list)):
+            left_side[groupby] = all_group_tuples[left_side[groupby]]
+        ##### NHC END #####
+        assert left_side is None or left_side[groupby] is False \
+             or isinstance(left_side[groupby], (tuple, list)), \
+            'M2O-like pair expected, got %r' % left_side[groupby]
+        assert right_side is None or isinstance(right_side, (tuple, list)), \
+            'M2O-like pair expected, got %r' % right_side
+        if left_side is None:
+            result, known_values = self._append_right(
+                all_groups.pop(0), groupby, known_values, result, result_template, domain
+            )
+        elif right_side is None:
+            result, known_values = self._append_left(
+                read_group_result.pop(0), groupby, known_values, result, count_field
+            )
+        elif left_side[groupby] == right_side:
+            result, known_values = _append_left(
+                read_group_result.pop(0), groupby, known_values, result, count_field
+            )
+            # discard right_side
+            all_groups.pop(0)
+        elif not left_side[groupby] or not left_side[groupby][0]:
+            # left side == "Undefined" entry, not present on right_side
+            result, known_values = _append_left(
+                read_group_result.pop(0), groupby, known_values, result, count_field
+            )
+        else:
+            result, known_values = _append_right(
+                all_groups.pop(0), groupby, known_values, result, result_template, domain
+            )
+
+    return result
+
+@staticmethod
+def _append_left(left_side, groupby, known_values, result, count_field):
+
+    grouped_value = left_side[groupby] and left_side[groupby][0]
+    if grouped_value not in known_values:
+        result.append(left_side)
+        known_values[grouped_value] = left_side
+    else:
+        known_values[grouped_value].update({count_field: left_side[count_field]})
+
+    return result, known_values
+
+
+@staticmethod
+def _append_right(right_side, groupby, known_values, result, result_template, domain):
+
+    grouped_value = right_side[0]
+    if grouped_value not in known_values:
+        line = dict(result_template)
+        line[groupby] = right_side
+        line['__domain'] = [(groupby, '=', grouped_value)] + domain
+        result.append(line)
+        known_values[grouped_value] = line
+
+    return result, known_values
+
+openerp.models.BaseModel._append_all = _append_all
+openerp.models.BaseModel._append_right = _append_right
+openerp.models.BaseModel._append_left = _append_left
 openerp.models.BaseModel._read_group_fill_results = _read_group_fill_results
