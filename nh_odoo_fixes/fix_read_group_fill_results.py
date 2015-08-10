@@ -107,7 +107,7 @@ def _append_all(self, cr, uid, read_group_result, all_groups, all_group_tuples, 
                 read_group_result.pop(0), groupby, known_values, result, count_field
             )
         elif left_side[groupby] == right_side:
-            result, known_values = _append_left(
+            result, known_values = self._append_left(
                 read_group_result.pop(0), groupby, known_values, result, count_field
             )
             # discard right_side
