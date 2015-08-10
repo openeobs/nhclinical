@@ -122,7 +122,25 @@ class TestReadGroupFillResults(TransactionCase):
         self.assertEquals(result, [])
         del self.base_model._append_left
 
-
+    def test_09_append_all_when_left_and_right_calls_append_right_then_left(self):
+        cr, uid = self.cr, self.uid
+        read_group_result = [{'name': ['value']}]
+        all_groups = [['name']]
+        all_group_tuples = {'value', ('name', 'value')}
+        groupby = 'name'
+        result_template = None
+        domain = None
+        count_field = 'count_key'
+        self.base_model._append_right = MagicMock(return_value=([], {}))
+        result = self.base_model._append_all(
+            cr, uid, read_group_result, all_groups, all_group_tuples, groupby,
+            result_template, domain, count_field
+        )
+        self.base_model._append_right.assert_called_with(
+            ['name'], 'name', {}, [], None, None
+        )
+        self.assertEquals(result, [{'name': ['value']}])
+        del self.base_model._append_right
 
 
 

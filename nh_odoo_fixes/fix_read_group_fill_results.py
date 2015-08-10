@@ -94,10 +94,11 @@ def _append_all(self, cr, uid, read_group_result, all_groups, all_group_tuples, 
             left_side[groupby] = all_group_tuples[left_side[groupby]]
         ##### NHC END #####
         assert left_side is None or left_side[groupby] is False \
-             or isinstance(left_side[groupby], (tuple, list)), \
-            'M2O-like pair expected, got %r' % left_side[groupby]
+            or isinstance(left_side[groupby], (tuple, list)), \
+           'M2O-like pair expected, got %r' % left_side[groupby]
         assert right_side is None or isinstance(right_side, (tuple, list)), \
             'M2O-like pair expected, got %r' % right_side
+
         if left_side is None:
             result, known_values = self._append_right(
                 all_groups.pop(0), groupby, known_values, result, result_template, domain
@@ -114,11 +115,11 @@ def _append_all(self, cr, uid, read_group_result, all_groups, all_group_tuples, 
             all_groups.pop(0)
         elif not left_side[groupby] or not left_side[groupby][0]:
             # left side == "Undefined" entry, not present on right_side
-            result, known_values = _append_left(
+            result, known_values = self._append_left(
                 read_group_result.pop(0), groupby, known_values, result, count_field
             )
         else:
-            result, known_values = _append_right(
+            result, known_values = self._append_right(
                 all_groups.pop(0), groupby, known_values, result, result_template, domain
             )
 
