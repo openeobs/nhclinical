@@ -78,6 +78,7 @@ class nh_activity(orm.Model):
         'data_ref': fields.reference('Data Reference', _get_data_type_selection, size=256, readonly=True),
         # order
         'sequence': fields.integer("State Switch Sequence"),
+        'assign_locked': fields.boolean("Assign Locked")
     }
 
     # Fixing the '_sql_constraints' attribute below doesn't automatically change the database structure.
@@ -92,6 +93,7 @@ class nh_activity(orm.Model):
 
     _defaults = {
         'state': 'new',
+        'assign_locked': False
     }
 
     def create(self, cr, uid, vals, context=None):
@@ -253,16 +255,38 @@ class nh_activity_data(orm.AbstractModel):
         return True
 
     def assign(self, cr, uid, activity_id, user_id, context=None):
+        """
+        Assigns activity to a user. Raises an exception if the activity
+        is already assigned to another user. If the activity is already
+        assigned to the same user, then the activity is locked.
+        :param activity_id:
+        :param user_id:
+        :return: True
+        """
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
         self.check_action(activity.state, 'assign')
-        if activity.user_id:
+        if activity.user_id and activity.user_id.id != user_id:
             raise osv.except_osv('Error!', "activity is already assigned to '%s'" % activity.user_id.name)
-        activity_pool.write(cr, uid, activity_id, {'user_id': user_id}, context=context)
-        _logger.debug("activity '%s', activity.id=%s assigned to user.id=%s" % (activity.data_model, activity.id, user_id))
+        if not activity.assign_locked:
+            if not activity.user_id:
+                activity_pool.write(cr, uid, activity_id, {'user_id': user_id}, context=context)
+                _logger.debug("activity '%s', activity.id=%s assigned to user.id=%s" % (activity.data_model,
+                                                                                        activity.id, user_id))
+            else:
+                activity_pool.write(cr, uid, activity_id, {'assign_locked': True}, context=context)
+                _logger.debug("activity '%s', activity.id=%s locked to user.id=%s!" % (activity.data_model,
+                                                                                       activity.id, user_id))
         return True
 
     def unassign(self, cr, uid, activity_id, context=None):
+        """
+        Unassigns an activity. Raises an exception if activity is not
+        assigned. Raised an exception if another user tries to unassign
+        an activity not assigned to them.
+        :param activity_id:
+        :return: True
+        """
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
         self.check_action(activity.state, 'unassign')
@@ -270,8 +294,12 @@ class nh_activity_data(orm.AbstractModel):
             raise osv.except_osv('Error!', "activity is not assigned yet!")
         if uid != activity.user_id.id:
             raise osv.except_osv('Error!', "only the activity owner is allowed to unassign it!")
-        activity_pool.write(cr, uid, activity_id, {'user_id': False}, context=context)
-        _logger.debug("activity '%s', activity.id=%s unassigned" % (activity.data_model, activity.id))
+        if not activity.assign_locked:
+            activity_pool.write(cr, uid, activity_id, {'user_id': False}, context=context)
+            _logger.debug("activity '%s', activity.id=%s unassigned" % (activity.data_model, activity.id))
+        else:
+            _logger.debug("activity '%s', activity.id=%s cannot be unassigned (locked)" % (activity.data_model,
+                                                                                           activity.id))
         return True
 
     def cancel(self, cr, uid, activity_id, context=None):

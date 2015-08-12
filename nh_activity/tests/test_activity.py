@@ -1,3 +1,5 @@
+from mock import MagicMock
+
 from openerp.tests import common
 from openerp.osv.orm import except_orm
 from datetime import datetime as dt
@@ -239,6 +241,13 @@ class TestActivity(common.SingleTransactionCase):
         with self.assertRaises(except_orm):
             self.activity_pool.assign(cr, uid, activity_id, uid)
 
+        # Scenario 5: Assign an activity already assigned
+        activity_id = self.activity_pool.create(cr, uid, {'data_model': 'test.activity.data.model'})
+        self.assertTrue(self.activity_pool.assign(cr, uid, activity_id, uid), msg="Assign Activity Failed")
+        self.activity_pool.assign(cr, uid, activity_id, uid)
+        activity = self.activity_pool.browse(cr, uid, activity_id)
+        self.assertEquals(activity.assign_locked, True)
+
     def test_unassign(self):
         cr, uid = self.cr, self.uid
 
@@ -266,6 +275,17 @@ class TestActivity(common.SingleTransactionCase):
         self.activity_pool.write(cr, uid, activity_id, {'state': 'cancelled'})
         with self.assertRaises(except_orm):
             self.activity_pool.unassign(cr, uid, activity_id)
+
+        # Scenario 5: Unassign an activity which is locked
+        self.activity_pool.write = MagicMock()
+        activity_id = self.activity_pool.create(
+            cr, uid, {'user_id': uid, 'data_model': 'test.activity.data.model', 'assign_locked': True}
+        )
+        self.activity_pool.unassign(cr, uid, activity_id)
+        activity = self.activity_pool.browse(cr, uid, activity_id)
+        self.assertTrue(activity.assign_locked)
+        self.assertFalse(self.activity_pool.write.called)
+        del self.activity_pool.write
 
     def test_start(self):
         cr, uid = self.cr, self.uid
