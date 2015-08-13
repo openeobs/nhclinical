@@ -132,6 +132,7 @@ class TestReadGroupFillResults(TransactionCase):
         domain = None
         count_field = 'count_key'
         self.base_model._append_right = MagicMock(return_value=([], {}))
+
         result = self.base_model._append_all(
             cr, uid, read_group_result, all_groups, all_group_tuples, groupby,
             result_template, domain, count_field
@@ -141,6 +142,55 @@ class TestReadGroupFillResults(TransactionCase):
         )
         self.assertEquals(result, [{'name': ['value']}])
         del self.base_model._append_right
+
+    def test_10_append_all_when_groupby_is_not_in_right_side_then_append_right(self):
+        cr, uid = self.cr, self.uid
+        read_group_result = [{'name': 'value'}]
+        all_groups = [['name']]
+        all_group_tuples = {'value': ('name', 'value')}
+        groupby = 'name'
+        result_template = {}
+        domain = None
+        count_field = 'count_key'
+        self.base_model._append_right = MagicMock(return_value=([], {}))
+
+        result = self.base_model._append_all(
+            cr, uid, read_group_result, all_groups, all_group_tuples, groupby,
+            result_template, domain, count_field
+        )
+        self.assertEquals(result, [{'name': ('name', 'value')}])
+        self.base_model._append_right.assert_called_with(
+            ['name'], 'name', {}, [], {}, None
+        )
+        del self.base_model._append_right
+
+    def test_11_append_all_when_groupby_is_not_left_side_then_append_left(self):
+        cr, uid = self.cr, self.uid
+        read_group_result = [{'name': False}]
+        all_groups = [['other']]
+        all_group_tuples = {'other': ('other_1', 'other_2')}
+        groupby = 'name'
+        result_template = {}
+        domain = None
+        count_field = 'count_name'
+        self.base_model._append_left = MagicMock(return_value=([], {}))
+        self.base_model._append_right = MagicMock(return_value=([], {}))
+
+        result = self.base_model._append_all(
+            cr, uid, read_group_result, all_groups, all_group_tuples, groupby,
+            result_template, domain, count_field
+        )
+        self.base_model._append_left.assert_called_with(
+            {'name': False}, 'name', {}, [], 'count_name'
+        )
+        self.base_model._append_right.assert_called_with(
+            ['other'], 'name', {}, [], {}, None
+        )
+        self.assertEquals(result, [])
+        del self.base_model._append_left, self.base_model._append_right
+
+
+
 
 
 
