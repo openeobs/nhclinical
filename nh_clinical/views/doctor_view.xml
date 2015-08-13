@@ -1,0 +1,70 @@
+<openerp>
+    <data>
+        <record model="ir.ui.view" id="view_doctor_search">
+            <field name="name">Doctor Search View</field>
+            <field name="model">nh.clinical.doctor</field>
+            <field name="arch" type="xml">
+                <search string="Doctor Search View">
+                    <field name="name"/>
+                    <field name="code"/>
+                    <field name="gmc"/>
+                    <field name="user_id"/>
+                    <group expand="1" string="Group By...">
+                        <filter name="specialty" string="Specialty" domain="[]" context="{'group_by':'specialty_id'}" help="Specialty"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="view_doctor_tree">
+            <field name="name">Doctor Tree View</field>
+            <field name="model">nh.clinical.doctor</field>
+            <field name="arch" type="xml">
+                <tree string="Doctor Tree View" version="7.0">
+                    <field name="name"/>
+                    <field name="gender"/>
+                    <field name="code"/>
+                    <field name="specialty_id"/>
+                    <field name="gmc"/>
+                    <field name="user_id"/>
+                </tree>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="view_doctor_form">
+            <field name="name">Doctor Form View</field>
+            <field name="model">nh.clinical.doctor</field>
+            <field name="arch" type="xml">
+                <form string="Doctor Form View">
+                    <sheet>
+                        <group>
+                            <field name="name" required="1"/>
+                            <field name="gender"/>
+                            <field name="code" required="1"/>
+                            <field name="specialty_id"/>
+                            <field name="gmc"/>
+                            <field name="user_id"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="action_show_doctors" >
+            <field name="name">Doctors</field>
+            <field name="res_model">nh.clinical.doctor</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_doctor_search"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="act_view_doctor_tree">
+            <field eval="0" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_doctor_tree"/>
+            <field name="act_window_id" ref="action_show_doctors"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="act_view_doctor_form">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_doctor_form"/>
+            <field name="act_window_id" ref="action_show_doctors"/>
+        </record>
+    </data>
+</openerp>

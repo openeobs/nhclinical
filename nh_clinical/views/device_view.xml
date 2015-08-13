@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <!--Device-->
+        <record model="ir.ui.view" id="view_device_search">
+            <field name="name">Device Search View</field>
+            <field name="model">nh.clinical.device</field>
+            <field name="arch" type="xml">
+                <search string="Patient activity Trigger Search View">
+                    <field name="serial_number"/>
+                    <group expand="1" string="Filters">
+                      <filter name="is_available" string="Available" domain="[['is_available','=',True]]" context="{}" help="Available devices"/>
+                    </group>
+                    <group expand="1" string="Group By...">
+                      <filter name="type_id" string="Type" domain="[]" context="{'group_by':'type_id'}" help="Group by type"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="view_device_tree">
+            <field name="name">Device Tree View</field>
+            <field name="model">nh.clinical.device</field>
+            <field name="arch" type="xml">
+                <tree string="Device">
+                    <field name="serial_number"/>
+                    <field name="type_id"/>
+                    <field name="category_id"/>
+                    <field name="is_available"/>
+                </tree>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="view_device_form">
+            <field name="name">Device Form View</field>
+            <field name="model">nh.clinical.device</field>
+            <field name="arch" type="xml">
+                <form string="Device">
+                    <sheet>
+                        <group>
+                            <field name="serial_number"/>
+                            <field name="type_id"/>
+                            <field name="category_id" readonly="1"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="action_device" >
+            <field name="name">nh.clinical.device</field>
+            <field name="res_model">nh.clinical.device</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_device_search"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="act_view_device_tree">
+            <field eval="0" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_device_tree"/>
+            <field name="act_window_id" ref="action_device"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="act_view_device_form">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_device_form"/>
+            <field name="act_window_id" ref="action_device"/>
+        </record>
+        
+        <!--Device Type-->
+        <record model="ir.ui.view" id="view_device_type_search">
+            <field name="name">Device Type Search View</field>
+            <field name="model">nh.clinical.device.type</field>
+            <field name="arch" type="xml">
+                <search string="Device Type Search View">
+                    <field name="name"/>
+                    <group expand="1" string="Group By...">
+                      <filter name="category_id" string="Category" domain="[]" context="{'group_by':'category_id'}" help="Group by category"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="view_device_type_tree">
+            <field name="name">Device Type Tree View</field>
+            <field name="model">nh.clinical.device.type</field>
+            <field name="arch" type="xml">
+                <tree string="Device Type Tree View">
+                    <field name="name"/>
+                    <field name="category_id"/>
+                </tree>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="view_device_type_form">
+            <field name="name">Device Type Form View</field>
+            <field name="model">nh.clinical.device.type</field>
+            <field name="arch" type="xml">
+                <form string="Device Type Form View">
+                    <sheet>
+                        <group>
+                            <field name="name"/>
+                            <field name="category_id"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="action_device_type" >
+            <field name="name">nh.clinical.device_type</field>
+            <field name="res_model">nh.clinical.device.type</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_device_type_search"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="act_view_device_type_tree">
+            <field eval="0" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_device_type_tree"/>
+            <field name="act_window_id" ref="action_device_type"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="act_view_device_type_form">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_device_type_form"/>
+            <field name="act_window_id" ref="action_device_type"/>
+        </record>
+        
+        <!--Device Category-->
+        <record model="ir.ui.view" id="view_device_category_search">
+            <field name="name">Device Category Search View</field>
+            <field name="model">nh.clinical.device.category</field>
+            <field name="arch" type="xml">
+                <search string="Device Category Search View">
+                    <field name="name"/>
+                    <group expand="1" string="Group By...">
+                      <filter name="flow_direction" string="Flow Direction" domain="[]" context="{'group_by':'flow_direction'}" help="Group by flow"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="view_device_category_tree">
+            <field name="name">Device Category Tree View</field>
+            <field name="model">nh.clinical.device.category</field>
+            <field name="arch" type="xml">
+                <tree string="Device Category Tree View">
+                    <field name="name"/>
+                    <field name="flow_direction"/>
+                </tree>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="view_device_category_form">
+            <field name="name">Device Category Form View</field>
+            <field name="model">nh.clinical.device.category</field>
+            <field name="arch" type="xml">
+                <form string="Device Category Form View">
+                    <sheet>
+                        <group>
+                            <field name="name"/>
+                            <field name="flow_direction"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="action_device_category" >
+            <field name="name">nh.clinical.device_category</field>
+            <field name="res_model">nh.clinical.device.category</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_device_category_search"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="act_view_device_category_tree">
+            <field eval="0" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_device_category_tree"/>
+            <field name="act_window_id" ref="action_device_category"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="act_view_device_category_form">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_device_category_form"/>
+            <field name="act_window_id" ref="action_device_category"/>
+        </record>
+    </data>
+</openerp>
