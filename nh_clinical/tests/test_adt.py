@@ -669,8 +669,8 @@ class testADT(common.SingleTransactionCase):
             'code': 'TESTADMISSION0Z',
             'location': 'T'
         }
-        activity_id = self.spell_update_pool.create_activity(cr, self.adt_id, {}, update_data)
-
+        with self.assertRaises(except_orm):
+            self.spell_update_pool.create_activity(cr, self.adt_id, {}, update_data)
 
     def test_10_adt_patient_merge(self):
         cr, uid = self.cr, self.uid

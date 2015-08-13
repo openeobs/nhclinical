@@ -539,17 +539,7 @@ class nh_clinical_adt_spell_update(orm.Model):
         activity_pool = self.pool['nh.activity']
         spell_id = spell_pool.get_by_patient_id(cr, uid, patient_id, context=context)
         if not spell_id:
-            _logger.warn("Patient admitted from an update call!")
-            admission_pool = self.pool['nh.clinical.patient.admission']
-            admission_data = {
-                'pos_id': user.pos_id.id,
-                'patient_id': patient_id,
-                'location_id': location_id,
-            }
-            admission_id = admission_pool.create_activity(cr, uid, {'creator_id': activity_id}, admission_data,
-                                                          context=context)
-            activity_pool.complete(cr, uid, admission_id, context=context)
-            spell_id = spell_pool.get_by_patient_id(cr, uid, patient_id, exception='False', context=context)
+            raise osv.except_osv('Update Error!', 'The patient does not have an open spell!')
         spell = spell_pool.browse(cr, uid, spell_id, context=context)
         activity_pool.write(cr, uid, activity_id, {'parent_id': spell.activity_id.id}, context=context)
         data = vals.copy()
