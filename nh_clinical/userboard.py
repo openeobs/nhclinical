@@ -19,6 +19,72 @@ class nh_change_password_wizard(osv.TransientModel):
         'user_ids': _default_user_ids,
     }
 
+
+class nh_clinical_user_management(orm.Model):
+    """
+    SQL View that shows the Clinical users and allows to assign roles and responsibilities to them.
+    """
+    _name = "nh.clinical.user.management"
+    _inherits = {'res.users': 'user_id'}
+    _auto = False
+    _table = "nh_clinical_user_management"
+
+    _columns = {
+        'user_id': fields.many2one('res.users', 'User', required=1, ondelete='restrict')
+    }
+
+    def fields_view_get(self, cr, user, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
+        ctx = context.copy()
+        ctx['partner_category_display'] = 'short'
+        res = super(nh_clinical_user_management, self).fields_view_get(cr, user, view_id, view_type, ctx, toolbar, submenu)
+        if view_type == 'form' and res['fields'].get('category_id'):
+            user_pool = self.pool['res.users']
+            category_pool = self.pool['res.partner.category']
+            u = user_pool.browse(cr, user, user, context=ctx)
+            category_ids = [c.id for c in u.category_id]
+            child_ids = []
+            for c in category_ids:
+                child_ids += category_pool.get_child_of_ids(cr, user, c, context=ctx)
+            res['fields']['category_id']['domain'] = [['id', 'in', child_ids]]
+        return res
+
+    def allocate_responsibility(self, cr, uid, ids, context=None):
+        user = self.browse(cr, uid, ids[0], context=context)
+        context.update({'default_user_id': user.id})
+        view = {
+            'type': 'ir.actions.act_window',
+            'res_model': 'nh.clinical.responsibility.allocation',
+            'name': 'Location Responsibility Allocation',
+            'view_mode': 'form',
+            'view_type': 'tree,form',
+            'target': 'new',
+            'context': context,
+        }
+        return view
+
+    def init(self, cr):
+        cr.execute("""
+            drop view if exists %s;
+            create or replace view %s as (
+                select
+                    users.id as id,
+                    users.id as user_id
+                from res_users users
+                inner join res_partner partner on partner.id = users.partner_id
+            )
+        """ % (self._table, self._table))
+        # Might need this to get user roles
+        # with user_roles as (
+        #             select
+        #                 user.id as id,
+        #                 array_agg(category.name) as roles
+        #             from res_users user
+        #             inner join res_partner partner on partner.id = user.partner_id
+        #             inner join res_partner_res_partner_category_rel crel on crel.partner_id = partner.id
+        #             inner join res_partner_category category on category.id = crel.category_id
+        #             group by user.id
+        #         )
+
 class nh_clinical_userboard(orm.Model):
     """
     SQL View that shows the NH Clinical users and allows to assign roles and responsibilities to them.

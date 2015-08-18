@@ -28,6 +28,29 @@ class res_partner(orm.Model):
                                                context=dict(context or {}, mail_create_nosubscribe=True))
 
 
+class res_partner_category_extension(orm.Model):
+    _inherit = 'res.partner.category'
+    _columns = {
+        'group_ids': fields.many2many('res.groups', 'category_group_rel', 'category_id', 'group_id',
+                                      'Related Groups'),
+    }
+
+    def name_get(self, cr, user, ids, context=None):
+        ctx = context.copy()
+        ctx['partner_category_display'] = 'short'
+        return super(res_partner_category_extension, self).name_get(cr, user, ids, context=ctx)
+
+    def get_child_of_ids(self, cr, uid, id, context=None):
+        res = [id]
+        child_ids = self.read(cr, uid, id, ['child_ids'], context=context)['child_ids']
+        if not child_ids:
+            return res
+        else:
+            for c in child_ids:
+                res += self.get_child_of_ids(cr, uid, c, context=context)
+            return res
+
+
 class res_partner_title_extension(orm.Model):
     _inherit = 'res.partner.title'
 
@@ -91,7 +114,73 @@ class res_users(orm.Model):
             else:
                 return result
 
+    def update_group_vals(self, cr, uid, user_id, vals, context=None):
+        category_pool = self.pool['res.partner.category']
+        if not vals.get('category_id'):
+            return True
+        elif not isinstance(vals.get('category_id'), list):
+            raise osv.except_osv('Value Error!', 'category_id field expecting list value, %s received' %
+                                 type(vals.get('category_id')))
+        elif not isinstance(vals.get('category_id')[0], list):
+            raise osv.except_osv('Value Error!', 'many2many update expecting list value, %s received' %
+                                 type(vals.get('category_id')[0]))
+        elif vals.get('category_id')[0][0] == 4: #  Adding categories / roles
+            for cat_val in vals.get('category_id'):
+                if not vals.get('groups_id'):
+                    vals['groups_id'] = []
+                group_ids = category_pool.read(cr, uid, cat_val[1], ['group_ids'], context=context)['group_ids']
+                for gid in group_ids:
+                    vals['groups_id'].append([4, gid])
+            return True
+        elif vals.get('category_id')[0][0] == 5: #  Removing categories / roles
+            remove_group_ids = []
+            if len(vals.get('category_id')[0]) > 1:
+                category_ids = [cv[1] for cv in vals.get('category_id')]
+                for cid in category_ids:
+                    remove_group_ids += category_pool.read(cr, uid, cid, ['group_ids'], context=context)['group_ids']
+                remaining_group_ids = []
+                if user_id:
+                    old_ids = set(self.read(cr, uid, user_id, ['category_id'], context=context)['category_id'])
+                    remaining_cat_ids = [cid for cid in old_ids if cid not in category_ids]
+                    for cid in remaining_cat_ids:
+                        remaining_group_ids += category_pool.read(cr, uid, cid, ['group_ids'], context=context)['group_ids']
+                    remaining_group_ids = set(remaining_group_ids)
+                remove_group_ids = [gid for gid in remove_group_ids if gid not in remaining_group_ids]
+            else: #  Removing all categories / roles
+                parent_id = category_pool.search(cr, uid, [['name', '=', 'NHC Administrator']])
+                category_ids = category_pool.get_child_of_ids(cr, uid, parent_id[0], context=context)
+                for cid in category_ids:
+                    remove_group_ids += category_pool.read(cr, uid, cid, ['group_ids'], context=context)['group_ids']
+            if not vals.get('groups_id'):
+                vals['groups_id'] = []
+            for gid in remove_group_ids:
+                vals['groups_id'].append([5, gid])
+            return True
+        elif vals.get('category_id')[0][0] == 6: #  Replacing categories / roles
+            category_ids = vals.get('category_id')[0][2]
+            new_group_ids = []
+            for cid in category_ids:
+                new_group_ids += category_pool.read(cr, uid, cid, ['group_ids'], context=context)['group_ids']
+            old_group_ids = self.read(cr, uid, user_id, ['groups_id'], context=context)['groups_id'] if user_id else []
+            for ogid in old_group_ids:
+                is_nhc_related = category_pool.search(cr, uid, [['group_ids', 'in', [ogid]]], context=context)
+                if not is_nhc_related:
+                    old_group_ids.remove(ogid)
+            if not vals.get('groups_id'):
+                vals['groups_id'] = []
+            group_ids = list(set(old_group_ids + new_group_ids))
+            for gid in group_ids:
+                if gid in old_group_ids and gid not in new_group_ids:
+                    vals['groups_id'].append([5, gid])
+                elif gid not in old_group_ids and gid in new_group_ids:
+                    vals['groups_id'].append([4, gid])
+            return True
+        else:
+            raise osv.except_osv('Value Error!', 'Unexpected value for category_id field received: %s' %
+                                 vals.get('category_id'))
+
     def create(self, cr, user, vals, context=None):
+        self.update_group_vals(cr, user, False, vals, context=context)
         res = super(res_users, self).create(cr, user, vals, context=dict(context or {}, mail_create_nosubscribe=True))
         if 'doctor_id' in vals:
             self.pool['nh.clinical.doctor'].write(cr, user, vals['doctor_id'], {'user_id': res}, context=context)
@@ -100,6 +189,8 @@ class res_users(orm.Model):
         return res
 
     def write(self, cr, uid, ids, values, context=None):
+        if (isinstance(ids, list) and len(ids) == 1) or isinstance(ids, int):
+            self.update_group_vals(cr, uid, ids[0], values, context=context)
         res = super(res_users, self).write(cr, uid, ids, values, context)
         if values.get('location_ids') or values.get('groups_id'):
             activity_pool = self.pool['nh.activity']
