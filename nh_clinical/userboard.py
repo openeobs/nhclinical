@@ -33,6 +33,26 @@ class nh_clinical_user_management(orm.Model):
         'user_id': fields.many2one('res.users', 'User', required=1, ondelete='restrict')
     }
 
+    def create(self, cr, uid, vals, context=None):
+        user_pool = self.pool['res.users']
+        return user_pool.create(cr, uid, vals, context=context)
+
+    def write(self, cr, uid, ids, vals, context=None):
+        user_pool = self.pool['res.users']
+        category_pool = self.pool['res.partner.category']
+        u = user_pool.browse(cr, uid, uid, context=context)
+        category_ids = [c.id for c in u.category_id]
+        child_ids = []
+        for c in category_ids:
+            child_ids += category_pool.get_child_of_ids(cr, uid, c, context=context)
+        res = [True]
+        for user in self.browse(cr, uid, ids, context=context):
+            ucids = [c.id for c in user.category_id]
+            if any([i for i in ucids if i not in child_ids]):
+                raise osv.except_osv('Permission Error!', 'You are not allowed to edit this user!')
+            res.append(user_pool.write(cr, uid, user.id, vals, context=context))
+        return all(res)
+
     def fields_view_get(self, cr, user, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
         ctx = context.copy()
         ctx['partner_category_display'] = 'short'
@@ -62,6 +82,16 @@ class nh_clinical_user_management(orm.Model):
         }
         return view
 
+    def deactivate(self, cr, uid, ids, context=None):
+        user_pool = self.pool['res.users']
+        if uid in ids:
+            raise osv.except_osv('Error!', 'You cannot deactivate yourself!')
+        return user_pool.write(cr, uid, ids, {'active': False}, context=context)
+
+    def activate(self, cr, uid, ids, context=None):
+        user_pool = self.pool['res.users']
+        return user_pool.write(cr, uid, ids, {'active': True}, context=context)
+
     def init(self, cr):
         cr.execute("""
             drop view if exists %s;
@@ -73,17 +103,7 @@ class nh_clinical_user_management(orm.Model):
                 inner join res_partner partner on partner.id = users.partner_id
             )
         """ % (self._table, self._table))
-        # Might need this to get user roles
-        # with user_roles as (
-        #             select
-        #                 user.id as id,
-        #                 array_agg(category.name) as roles
-        #             from res_users user
-        #             inner join res_partner partner on partner.id = user.partner_id
-        #             inner join res_partner_res_partner_category_rel crel on crel.partner_id = partner.id
-        #             inner join res_partner_category category on category.id = crel.category_id
-        #             group by user.id
-        #         )
+
 
 class nh_clinical_userboard(orm.Model):
     """

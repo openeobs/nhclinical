@@ -36,7 +36,10 @@ class res_partner_category_extension(orm.Model):
     }
 
     def name_get(self, cr, user, ids, context=None):
-        ctx = context.copy()
+        if context:
+            ctx = context.copy()
+        else:
+            ctx = {}
         ctx['partner_category_display'] = 'short'
         return super(res_partner_category_extension, self).name_get(cr, user, ids, context=ctx)
 
@@ -121,63 +124,77 @@ class res_users(orm.Model):
         elif not isinstance(vals.get('category_id'), list):
             raise osv.except_osv('Value Error!', 'category_id field expecting list value, %s received' %
                                  type(vals.get('category_id')))
-        elif not isinstance(vals.get('category_id')[0], list):
-            raise osv.except_osv('Value Error!', 'many2many update expecting list value, %s received' %
+        elif not isinstance(vals.get('category_id')[0], (list, tuple)):
+            raise osv.except_osv('Value Error!', 'many2many update expecting list or tuple value, %s received' %
                                  type(vals.get('category_id')[0]))
-        elif vals.get('category_id')[0][0] == 4: #  Adding categories / roles
-            for cat_val in vals.get('category_id'):
-                if not vals.get('groups_id'):
-                    vals['groups_id'] = []
+        add_groups_id = []
+        if not vals.get('groups_id'):
+            vals['groups_id'] = []
+        for cat_val in vals.get('category_id'):
+            if not isinstance(cat_val, (list, tuple)):
+                raise osv.except_osv('Value Error!', 'many2many update expecting list or tuple value, %s received' %
+                                 type(vals.get('category_id')[0]))
+            if cat_val[0] == 3:  # Removing categories / roles
                 group_ids = category_pool.read(cr, uid, cat_val[1], ['group_ids'], context=context)['group_ids']
                 for gid in group_ids:
-                    vals['groups_id'].append([4, gid])
-            return True
-        elif vals.get('category_id')[0][0] == 5: #  Removing categories / roles
-            remove_group_ids = []
-            if len(vals.get('category_id')[0]) > 1:
-                category_ids = [cv[1] for cv in vals.get('category_id')]
-                for cid in category_ids:
-                    remove_group_ids += category_pool.read(cr, uid, cid, ['group_ids'], context=context)['group_ids']
-                remaining_group_ids = []
-                if user_id:
-                    old_ids = set(self.read(cr, uid, user_id, ['category_id'], context=context)['category_id'])
-                    remaining_cat_ids = [cid for cid in old_ids if cid not in category_ids]
-                    for cid in remaining_cat_ids:
-                        remaining_group_ids += category_pool.read(cr, uid, cid, ['group_ids'], context=context)['group_ids']
-                    remaining_group_ids = set(remaining_group_ids)
-                remove_group_ids = [gid for gid in remove_group_ids if gid not in remaining_group_ids]
-            else: #  Removing all categories / roles
+                    add_groups_id.append((3, gid))
+            elif cat_val[0] == 4:  # Adding categories / roles
+                group_ids = category_pool.read(cr, uid, cat_val[1], ['group_ids'], context=context)['group_ids']
+                for gid in group_ids:
+                    add_groups_id.append((4, gid))
+            elif cat_val[0] == 5:  # Removing all categories / roles
+                add_groups_id = []
+                group_ids = []
                 parent_id = category_pool.search(cr, uid, [['name', '=', 'NHC Administrator']])
                 category_ids = category_pool.get_child_of_ids(cr, uid, parent_id[0], context=context)
                 for cid in category_ids:
-                    remove_group_ids += category_pool.read(cr, uid, cid, ['group_ids'], context=context)['group_ids']
-            if not vals.get('groups_id'):
-                vals['groups_id'] = []
-            for gid in remove_group_ids:
-                vals['groups_id'].append([5, gid])
-            return True
-        elif vals.get('category_id')[0][0] == 6: #  Replacing categories / roles
-            category_ids = vals.get('category_id')[0][2]
-            new_group_ids = []
-            for cid in category_ids:
-                new_group_ids += category_pool.read(cr, uid, cid, ['group_ids'], context=context)['group_ids']
-            old_group_ids = self.read(cr, uid, user_id, ['groups_id'], context=context)['groups_id'] if user_id else []
-            for ogid in old_group_ids:
-                is_nhc_related = category_pool.search(cr, uid, [['group_ids', 'in', [ogid]]], context=context)
-                if not is_nhc_related:
-                    old_group_ids.remove(ogid)
-            if not vals.get('groups_id'):
-                vals['groups_id'] = []
-            group_ids = list(set(old_group_ids + new_group_ids))
-            for gid in group_ids:
-                if gid in old_group_ids and gid not in new_group_ids:
-                    vals['groups_id'].append([5, gid])
-                elif gid not in old_group_ids and gid in new_group_ids:
-                    vals['groups_id'].append([4, gid])
-            return True
-        else:
-            raise osv.except_osv('Value Error!', 'Unexpected value for category_id field received: %s' %
-                                 vals.get('category_id'))
+                    group_ids += category_pool.read(cr, uid, cid, ['group_ids'], context=context)['group_ids']
+                for gid in group_ids:
+                    add_groups_id.append((3, gid))
+                vals['groups_id'] += add_groups_id
+                return True
+            elif cat_val[0] == 6:  # Replacing categories / roles
+                add_groups_id = []
+                category_ids = cat_val[2]
+                new_group_ids = []
+                for cid in category_ids:
+                    new_group_ids += category_pool.read(cr, uid, cid, ['group_ids'], context=context)['group_ids']
+                old_group_ids = self.read(cr, uid, user_id, ['groups_id'], context=context)['groups_id'] if user_id \
+                    else []
+                for ogid in old_group_ids:
+                    is_nhc_related = category_pool.search(cr, uid, [['group_ids', 'in', [ogid]]], context=context)
+                    if not is_nhc_related:
+                        old_group_ids.remove(ogid)
+                group_ids = list(set(old_group_ids + new_group_ids))
+                for gid in group_ids:
+                    if gid in old_group_ids and gid not in new_group_ids:
+                        add_groups_id.append((3, gid))
+                    elif gid not in old_group_ids and gid in new_group_ids:
+                        add_groups_id.append((4, gid))
+                vals['groups_id'] += add_groups_id
+                return True
+            else:
+                raise osv.except_osv('Value Error!', 'Unexpected value for category_id field received: %s' %
+                                     cat_val)
+        add_groups_id = list(set(add_groups_id))
+        if user_id:  # Make sure we don't remove any group from a category the user is still linked to
+            old_cat_ids = set(self.read(cr, uid, user_id, ['category_id'], context=context)['category_id'])
+            del_cat_ids = [ctuple[1] for ctuple in vals.get('category_id') if ctuple[0] == 3]
+            new_cat_ids = [cid for cid in old_cat_ids if cid not in del_cat_ids]
+            remaining_group_ids = []
+            for cid in new_cat_ids:
+                remaining_group_ids += category_pool.read(cr, uid, cid, ['group_ids'], context=context)['group_ids']
+            remaining_group_ids = set(remaining_group_ids)
+            for gid_tuple in add_groups_id:
+                if gid_tuple[0] == 3:
+                    if gid_tuple[1] in remaining_group_ids:
+                        add_groups_id.remove(gid_tuple)
+        for gid_tuple in add_groups_id:  # Make sure we don't remove any group that is being added
+            if gid_tuple[0] == 3:
+                if (4, gid_tuple[1]) in add_groups_id:
+                    add_groups_id.remove(gid_tuple)
+        vals['groups_id'] += add_groups_id
+        return True
 
     def create(self, cr, user, vals, context=None):
         self.update_group_vals(cr, user, False, vals, context=context)
@@ -189,8 +206,10 @@ class res_users(orm.Model):
         return res
 
     def write(self, cr, uid, ids, values, context=None):
-        if (isinstance(ids, list) and len(ids) == 1) or isinstance(ids, int):
+        if isinstance(ids, list) and len(ids) == 1:
             self.update_group_vals(cr, uid, ids[0], values, context=context)
+        elif isinstance(ids, int):
+            self.update_group_vals(cr, uid, ids, values, context=context)
         res = super(res_users, self).write(cr, uid, ids, values, context)
         if values.get('location_ids') or values.get('groups_id'):
             activity_pool = self.pool['nh.activity']

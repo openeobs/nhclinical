@@ -33,6 +33,7 @@ class TestUsers(SingleTransactionCase):
         cls.nurse_group_id = cls.groups_pool.search(cr, uid, [['name', '=', 'NH Clinical Nurse Group']])[0]
         cls.hca_group_id = cls.groups_pool.search(cr, uid, [['name', '=', 'NH Clinical HCA Group']])[0]
         cls.employee_group_id = cls.groups_pool.search(cr, uid, [['name', '=', 'Employee']])[0]
+        cls.cc_group_id = cls.groups_pool.search(cr, uid, [['name', '=', 'Contact Creation']])[0]
 
         cls.admin_role_id = cls.category_pool.search(cr, uid, [['name', '=', 'NHC Administrator']])[0]
         cls.wm_role_id = cls.category_pool.search(cr, uid, [['name', '=', 'Ward Manager']])[0]
@@ -44,9 +45,10 @@ class TestUsers(SingleTransactionCase):
         cls.pos_id = cls.pos_pool.create(cr, uid, {'name': 'Test POS', 'location_id': cls.hospital_id})
 
         cls.adt_uid = cls.user_pool.create(cr, uid, {'name': 'Admin 0', 'login': 'user_000',
-                                                        'password': 'user_000',
-                                                        'groups_id': [[4, cls.admin_group_id[0]]],
-                                                        'pos_id': cls.pos_id})
+                                                     'password': 'user_000',
+                                                     'groups_id': [[4, cls.admin_group_id[0]]],
+                                                     'category_id': [[4, cls.admin_role_id]],
+                                                     'pos_id': cls.pos_id})
 
         cls.admin_uid = cls.user_pool.create(cr, uid, {'name': 'Admin 1', 'login': 'user_001',
                                                         'password': 'user_001',
@@ -75,7 +77,6 @@ class TestUsers(SingleTransactionCase):
         vals = {
             'groups_id': [[4, self.admin_group_id[0]]]
         }
-        vals2 = {}
         check_vals = vals.copy()
 
         # Scenario 1: Update values without updating category_id field
@@ -95,59 +96,79 @@ class TestUsers(SingleTransactionCase):
 
         # Scenario 3.1: Add a category with groups_id having values
         vals = {
-            'groups_id': [[4, self.admin_group_id[0]]],
-            'category_id': [[4, self.wm_role_id]]
+            'groups_id': [(4, self.admin_group_id[0])],
+            'category_id': [(4, self.wm_role_id)]
         }
         self.assertTrue(self.user_pool.update_group_vals(cr, uid, False, vals))
-        self.assertIn([4, self.wm_group_id], vals['groups_id'])
+        self.assertIn((4, self.wm_group_id), vals['groups_id'])
+        self.assertIn((4, self.cc_group_id), vals['groups_id'])
+        self.assertIn((4, self.admin_group_id[0]), vals['groups_id'])
 
         # Scenario 3.2: Add a category with groups_id not having values
-        vals2 = {'category_id': [[4, self.wm_role_id]]}
-        self.assertTrue(self.user_pool.update_group_vals(cr, uid, False, vals2))
-        self.assertIn([4, self.wm_group_id], vals2.get('groups_id'))
+        vals = {'category_id': [(4, self.wm_role_id)]}
+        self.assertTrue(self.user_pool.update_group_vals(cr, uid, False, vals))
+        self.assertIn((4, self.wm_group_id), vals.get('groups_id'))
+        self.assertIn((4, self.cc_group_id), vals['groups_id'])
+        self.assertNotIn((4, self.admin_group_id[0]), vals['groups_id'])
 
-        # Scenario 4.1: Remove a category with groups_id having values / no user_id provided
+        # Scenario 4.1: Remove a category with no user_id provided
         vals = {
-            'groups_id': [[4, self.admin_group_id[0]]],
-            'category_id': [[5, self.wm_role_id]]
+            'category_id': [(3, self.wm_role_id)]
         }
         self.assertTrue(self.user_pool.update_group_vals(cr, uid, False, vals))
-        self.assertIn([5, self.wm_group_id], vals['groups_id'])
-        self.assertNotIn([5, self.employee_group_id], vals['groups_id'])
+        self.assertIn((3, self.wm_group_id), vals['groups_id'])
+        self.assertIn((3, self.cc_group_id), vals['groups_id'])
+        self.assertNotIn((3, self.employee_group_id), vals['groups_id'])
 
-        # Scenario 4.2: Remove all categories with groups_id not having values / no user_id provided
-        vals2 = {'category_id': [[5]]}
-        self.assertTrue(self.user_pool.update_group_vals(cr, uid, False, vals2))
-        self.assertIn([5, self.wm_group_id], vals2['groups_id'])
-        self.assertIn([5, self.hca_group_id], vals2['groups_id'])
-        self.assertIn([5, self.nurse_group_id], vals2['groups_id'])
-        self.assertIn([5, self.dr_group_id], vals2['groups_id'])
-        self.assertNotIn([5, self.employee_group_id], vals['groups_id'])
+        # Scenario 4.2: Remove all categories no user_id provided
+        vals = {'category_id': [[5]]}
+        self.assertTrue(self.user_pool.update_group_vals(cr, uid, False, vals))
+        self.assertIn((3, self.wm_group_id), vals['groups_id'])
+        self.assertIn((3, self.hca_group_id), vals['groups_id'])
+        self.assertIn((3, self.nurse_group_id), vals['groups_id'])
+        self.assertIn((3, self.dr_group_id), vals['groups_id'])
+        self.assertIn((3, self.cc_group_id), vals['groups_id'])
+        self.assertNotIn((3, self.employee_group_id), vals['groups_id'])
 
         # Scenario 4.3: Remove a category with user_id provided
         vals = {
-            'groups_id': [[4, self.admin_group_id[0]]],
-            'category_id': [[5, self.admin_role_id]]
+            'category_id': [(3, self.wm_role_id)]
         }
         self.assertTrue(self.user_pool.update_group_vals(cr, uid, self.adt_uid, vals))
-        self.assertIn([5, self.admin_group_id[0]], vals['groups_id'])
-        self.assertNotIn([5, self.employee_group_id], vals['groups_id'])
+        self.assertIn((3, self.wm_group_id), vals['groups_id'])
+        self.assertNotIn((3, self.cc_group_id), vals['groups_id'])
+        self.assertNotIn((3, self.employee_group_id), vals['groups_id'])
 
-        # Scenario 5.1: Replace categories with groups_id having values
+        # Scenario 4.4: Add and remove a category
         vals = {
-            'groups_id': [[4, self.admin_group_id[0]]],
+            'category_id': [(3, self.wm_role_id), (4, self.admin_role_id)]
+        }
+        self.assertTrue(self.user_pool.update_group_vals(cr, uid, False, vals))
+        self.assertIn((3, self.wm_group_id), vals['groups_id'])
+        self.assertIn((4, self.admin_group_id[0]), vals['groups_id'])
+        self.assertIn((4, self.cc_group_id), vals['groups_id'])
+        self.assertNotIn((3, self.cc_group_id), vals['groups_id'])
+        self.assertNotIn((3, self.employee_group_id), vals['groups_id'])
+
+        # Scenario 5.1: Replace categories with user_id provided
+        vals = {
             'category_id': [[6, 0, [self.wm_role_id]]]
         }
         self.assertTrue(self.user_pool.update_group_vals(cr, uid, self.adt_uid, vals))
-        self.assertIn([5, self.admin_group_id[0]], vals['groups_id'])
-        self.assertIn([4, self.wm_group_id], vals['groups_id'])
-        self.assertNotIn([5, self.employee_group_id], vals['groups_id'])
+        self.assertIn((3, self.admin_group_id[0]), vals['groups_id'])
+        self.assertIn((4, self.wm_group_id), vals['groups_id'])
+        self.assertNotIn((4, self.cc_group_id), vals['groups_id'])
+        self.assertNotIn((3, self.cc_group_id), vals['groups_id'])
+        self.assertNotIn((3, self.employee_group_id), vals['groups_id'])
 
-        # Scenario 5.2: Replace categories with groups_id not having values and no user_id provided
-        vals2 = {'category_id': [[6, 0, [self.wm_role_id]]]}
-        self.assertTrue(self.user_pool.update_group_vals(cr, uid, False, vals2))
-        self.assertIn([4, self.wm_group_id], vals2['groups_id'])
-        self.assertNotIn([5, self.employee_group_id], vals2['groups_id'])
+        # Scenario 5.2: Replace categories with no user_id provided
+        vals = {'category_id': [[6, 0, [self.wm_role_id]]]}
+        self.assertTrue(self.user_pool.update_group_vals(cr, uid, False, vals))
+        self.assertNotIn((3, self.admin_group_id[0]), vals['groups_id'])
+        self.assertIn((4, self.wm_group_id), vals['groups_id'])
+        self.assertIn((4, self.cc_group_id), vals['groups_id'])
+        self.assertNotIn((3, self.cc_group_id), vals['groups_id'])
+        self.assertNotIn((3, self.employee_group_id), vals['groups_id'])
 
     def test_03_create(self):
         cr, uid = self.cr, self.uid
