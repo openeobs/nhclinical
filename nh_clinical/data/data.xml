@@ -76,7 +76,7 @@
         <record id="group_nhc_senior_doctor" model="res.groups">
             <field name="name">NH Clinical Senior Doctor Group</field>
             <field name="category_id" ref="module_category_nhc"/>
-            <field name="implied_ids" eval="[(6, False, [ref('group_nhc_registrar'),ref('group_nhc_consultant')])]"/>
+            <field name="implied_ids" eval="[(6, False, [ref('group_nhc_base')])]"/>
         </record>
         <record id="group_nhc_junior_doctor" model="res.groups">
             <field name="name">NH Clinical Junior Doctor Group</field>
@@ -86,7 +86,7 @@
         <record id="group_nhc_doctor" model="res.groups">
             <field name="name">NH Clinical Doctor Group</field>
             <field name="category_id" ref="module_category_nhc"/>
-            <field name="implied_ids" eval="[(6, False, [ref('group_nhc_senior_doctor'),ref('group_nhc_junior_doctor')])]"/>
+            <field name="implied_ids" eval="[(6, False, [ref('group_nhc_base')])]"/>
         </record>
         <!-- Roles -->
         <record id="role_nhc_admin" model="res.partner.category">
