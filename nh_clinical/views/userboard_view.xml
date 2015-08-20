@@ -93,7 +93,8 @@
             <field name="res_model">nh.clinical.user.management</field>
             <field name="view_mode">tree,form</field>
             <field name="domain">[['category_id.name','in',
-                ['HCA','Nurse','Ward Manager','Doctor','Senior Manager','Kiosk','NHC Administrator']]]</field>
+                ['HCA','Nurse','Ward Manager','Doctor','Senior Manager','Kiosk','NHC Administrator','Senior Doctor',
+                'Junior Doctor','Registrar','Consultant','Receptionist']]]</field>
             <field name="search_view_id" ref="view_nhc_user_management_search"/>
             <field name="context">{'partner_category_display': 'short'}</field>
         </record>
