@@ -68,7 +68,7 @@
                                    string="Roles" required="1"/>
 	                    </group>
                         <div colspan="4">
-                            <button name="responsibility_allocation" string="Responsibility Allocation" type="object"/>
+                            <button name="allocate_responsibility" string="Responsibility Allocation" type="object"/>
                         </div>
                         <notebook>
                             <page string="Location responsibility">
