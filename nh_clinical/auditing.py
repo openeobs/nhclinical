@@ -1,9 +1,6 @@
-from datetime import datetime as dt
 import logging
 
 from openerp.osv import orm, fields, osv
-from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as dtf
-from openerp import SUPERUSER_ID
 
 _logger = logging.getLogger(__name__)
 
@@ -95,7 +92,8 @@ class nh_clinical_user_responsibility_allocation(orm.Model):
         res = super(nh_clinical_user_responsibility_allocation, self).complete(cr, uid, activity_id, context=context)
 
         locations = []
-        if any([g.name == 'NH Clinical Ward Manager Group' for g in activity.data_ref.responsible_user_id.groups_id]):
+        if any([g.name in ['NH Clinical Ward Manager Group', 'NH Clinical Senior Manager Group']
+                for g in activity.data_ref.responsible_user_id.groups_id]):
             for loc in activity.data_ref.location_ids:
                 if loc.usage == 'ward':
                     locations.append(loc.id)
