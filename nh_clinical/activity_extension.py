@@ -69,7 +69,7 @@ class nh_activity(orm.Model):
         open_activity_ids = self.search(cr, uid, domain, context=context)
         return all([self.cancel(cr, uid, a, context=context) for a in open_activity_ids])
 
-    def update_users(self, cr, uid, user_ids=[]):
+    def update_users(self, cr, uid, user_ids, context=None):
         """
         Deletes all passed user_ids from all activities and
         Updates activities with user_ids who are responsible for activity location
