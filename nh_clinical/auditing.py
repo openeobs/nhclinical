@@ -92,8 +92,8 @@ class nh_clinical_user_responsibility_allocation(orm.Model):
         res = super(nh_clinical_user_responsibility_allocation, self).complete(cr, uid, activity_id, context=context)
 
         locations = []
-        if any([g.name in ['NH Clinical Ward Manager Group', 'NH Clinical Senior Manager Group']
-                for g in activity.data_ref.responsible_user_id.groups_id]):
+        if not any([g.name in ['NH Clinical HCA Group', 'NH Clinical Nurse Group']
+                    for g in activity.data_ref.responsible_user_id.groups_id]):
             for loc in activity.data_ref.location_ids:
                 if loc.usage == 'ward':
                     locations.append(loc.id)
