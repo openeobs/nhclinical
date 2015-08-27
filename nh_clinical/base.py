@@ -145,7 +145,7 @@ class res_users(orm.Model):
             elif cat_val[0] == 5:  # Removing all categories / roles
                 add_groups_id = []
                 group_ids = []
-                parent_id = category_pool.search(cr, uid, [['name', '=', 'NHC Administrator']])
+                parent_id = category_pool.search(cr, uid, [['name', '=', 'System Administrator']])
                 category_ids = category_pool.get_child_of_ids(cr, uid, parent_id[0], context=context)
                 for cid in category_ids:
                     group_ids += category_pool.read(cr, uid, cid, ['group_ids'], context=context)['group_ids']

@@ -30,7 +30,7 @@ class TestUserboard(common.SingleTransactionCase):
         cls.sm_group_id = cls.group_pool.search(cr, uid, [['name', '=', 'NH Clinical Senior Manager Group']])[0]
         cls.dr_group_id = cls.group_pool.search(cr, uid, [['name', '=', 'NH Clinical Doctor Group']])[0]
 
-        cls.admin_role_id = cls.category_pool.search(cr, uid, [['name', '=', 'NHC Administrator']])[0]
+        cls.admin_role_id = cls.category_pool.search(cr, uid, [['name', '=', 'System Administrator']])[0]
         cls.wm_role_id = cls.category_pool.search(cr, uid, [['name', '=', 'Ward Manager']])[0]
         cls.nurse_role_id = cls.category_pool.search(cr, uid, [['name', '=', 'Nurse']])[0]
         cls.hca_role_id = cls.category_pool.search(cr, uid, [['name', '=', 'HCA']])[0]

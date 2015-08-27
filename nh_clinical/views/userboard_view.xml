@@ -20,7 +20,7 @@
                                 groups="nh_clinical.group_nhc_admin,nh_clinical.group_nhc_dev"/>
                         <filter name="filter_kiosk" string="Kiosk" domain="[['category_id.name','in',['Kiosk']]]"
                                 groups="nh_clinical.group_nhc_admin,nh_clinical.group_nhc_dev"/>
-                        <filter name="filter_admin" string="Admins" domain="[['category_id.name','in',['NHC Administrator']]]"
+                        <filter name="filter_admin" string="Admins" domain="[['category_id.name','in',['System Administrator']]]"
                                 groups="nh_clinical.group_nhc_admin,nh_clinical.group_nhc_dev"/>
                     </group>
                 </search>
@@ -93,7 +93,7 @@
             <field name="res_model">nh.clinical.user.management</field>
             <field name="view_mode">tree,form</field>
             <field name="domain">[['category_id.name','in',
-                ['HCA','Nurse','Ward Manager','Doctor','Senior Manager','Kiosk','NHC Administrator','Senior Doctor',
+                ['HCA','Nurse','Ward Manager','Doctor','Senior Manager','Kiosk','System Administrator','Senior Doctor',
                 'Junior Doctor','Registrar','Consultant','Receptionist']]]</field>
             <field name="search_view_id" ref="view_nhc_user_management_search"/>
             <field name="context">{'partner_category_display': 'short'}</field>

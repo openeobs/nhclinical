@@ -90,7 +90,7 @@
         </record>
         <!-- Roles -->
         <record id="role_nhc_admin" model="res.partner.category">
-            <field name="name">NHC Administrator</field>
+            <field name="name">System Administrator</field>
             <field name="group_ids" eval="[(6, False, [ref('group_nhc_admin'),ref('group_nhc_base'),ref('base.group_partner_manager')])]"/>
         </record>
         <record id="role_nhc_kiosk" model="res.partner.category">

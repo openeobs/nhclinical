@@ -35,7 +35,7 @@ class TestUsers(SingleTransactionCase):
         cls.employee_group_id = cls.groups_pool.search(cr, uid, [['name', '=', 'Employee']])[0]
         cls.cc_group_id = cls.groups_pool.search(cr, uid, [['name', '=', 'Contact Creation']])[0]
 
-        cls.admin_role_id = cls.category_pool.search(cr, uid, [['name', '=', 'NHC Administrator']])[0]
+        cls.admin_role_id = cls.category_pool.search(cr, uid, [['name', '=', 'System Administrator']])[0]
         cls.wm_role_id = cls.category_pool.search(cr, uid, [['name', '=', 'Ward Manager']])[0]
         cls.nurse_role_id = cls.category_pool.search(cr, uid, [['name', '=', 'Nurse']])[0]
         cls.hca_role_id = cls.category_pool.search(cr, uid, [['name', '=', 'HCA']])[0]
