@@ -25,7 +25,7 @@
              'security/ir.model.access.csv',
              'security/adt/ir.model.access.csv',
              'security/operations/ir.model.access.csv'],
-    'demo': [],
+    'demo': ['data/demo.xml'],
     'css': [],
     'js': [],
     'qweb': [],
