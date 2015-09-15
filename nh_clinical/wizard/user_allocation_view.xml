@@ -60,7 +60,7 @@
         </record>
 
         <record id="action_nhc_user_allocation" model="ir.actions.act_window">
-            <field name="name">User Allocation</field>
+            <field name="name">Shift Management</field>
             <field name="res_model">nh.clinical.user.allocation</field>
             <field name="view_mode">form</field>
             <field name="target">new</field>
