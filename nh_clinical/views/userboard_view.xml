@@ -68,7 +68,7 @@
                                    string="Roles" required="1"/>
 	                    </group>
                         <div colspan="4">
-                            <button name="allocate_responsibility" string="Responsibility Allocation" type="object"/>
+                            <button name="allocate_responsibility" groups="nh_clinical.group_nhc_admin,nh_clinical.group_nhc_dev" string="Responsibility Allocation" type="object"/>
                         </div>
                         <notebook>
                             <page string="Location responsibility">
@@ -81,7 +81,7 @@
         </record>
 
         <record id="action_nhc_user_management_wm" model="ir.actions.act_window">
-            <field name="name">Staff Management</field>
+            <field name="name">Account Administration</field>
             <field name="res_model">nh.clinical.user.management</field>
             <field name="view_mode">tree,form</field>
             <field name="domain">[['category_id.name','in',['HCA','Nurse','Ward Manager']]]</field>
@@ -89,7 +89,7 @@
             <field name="context">{'partner_category_display': 'short'}</field>
         </record>
         <record id="action_nhc_user_management_admin" model="ir.actions.act_window">
-            <field name="name">Staff Management</field>
+            <field name="name">Account Administration</field>
             <field name="res_model">nh.clinical.user.management</field>
             <field name="view_mode">tree,form</field>
             <field name="domain">[['category_id.name','in',
@@ -172,7 +172,7 @@
             </field>
         </record>
         <record id="action_nhc_userboard" model="ir.actions.act_window">
-            <field name="name">Staff Management</field>
+            <field name="name">Account Administration</field>
             <field name="res_model">nh.clinical.userboard</field>
             <field name="view_mode">tree,form</field>
             <field name="domain">['|',['hca','=',True],'|',['nurse','=',True],['ward_manager','=',True]]</field>
