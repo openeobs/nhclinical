@@ -116,8 +116,8 @@ class staff_allocation_wizard(osv.TransientModel):
         for allocating in allocating_pool.browse(cr, uid, [a.id for a in wizard.allocating_ids], context=context):
             if allocating.nurse_id:
                 allocation[allocating.nurse_id.id].append(allocating.location_id.id)
-            if allocating.hca_id:
-                allocation[allocating.hca_id.id].append(allocating.location_id.id)
+            for hca in allocating.hca_ids:
+                allocation[hca.id].append(allocating.location_id.id)
         for key in allocation.keys():
             activity_id = respallocation_pool.create_activity(cr, uid, {}, {
                 'responsible_user_id': key, 'location_ids': [[6, 0, allocation[key]]]}, context=context)
@@ -171,15 +171,16 @@ class staff_reallocation_wizard(osv.TransientModel):
             if l.usage != 'bed':
                 continue
             nurse_id = False
-            hca_id = False
+            hca_ids = []
             for u in l.user_ids:
                 groups = [g.name for g in u.groups_id]
                 nurse_id = u.id if 'NH Clinical Nurse Group' in groups else nurse_id
-                hca_id = u.id if 'NH Clinical HCA Group' in groups else hca_id
+                if 'NH Clinical HCA Group' in groups:
+                    hca_ids.append(u.id)
             allocating_ids.append(allocating_pool.create(cr, uid, {
                 'location_id': l.id,
                 'nurse_id': nurse_id,
-                'hca_id': hca_id
+                'hca_ids': [[6, 0, hca_ids]]
             }, context=context))
         return allocating_ids
 
@@ -257,8 +258,8 @@ class staff_reallocation_wizard(osv.TransientModel):
         for allocating in allocating_pool.browse(cr, uid, [a.id for a in wizard.allocating_ids], context=context):
             if allocating.nurse_id:
                 allocation[allocating.nurse_id.id].append(allocating.location_id.id)
-            if allocating.hca_id:
-                allocation[allocating.hca_id.id].append(allocating.location_id.id)
+            for hca in allocating.hca_ids:
+                allocation[hca.id].append(allocating.location_id.id)
         for key in allocation.keys():
             activity_id = respallocation_pool.create_activity(cr, uid, {}, {
                 'responsible_user_id': key, 'location_ids': [[6, 0, allocation[key]]]}, context=context)
@@ -360,10 +361,10 @@ class allocating_user(osv.TransientModel):
                                       string='Patient'),
         'nurse_id': fields.many2one('res.users', 'Responsible Nurse',
                                     domain=[['groups_id.name', 'in', ['NH Clinical Nurse Group']]]),
-        'hca_id': fields.many2one('res.users', 'Responsible HCA',
-                                  domain=[['groups_id.name', 'in', ['NH Clinical HCA Group']]]),
-        'nurse_name': fields.related('nurse_id', 'name', type='char', size=100, string='Responsible Nurse'),
-        'hca_name': fields.related('hca_id', 'name', type='char', size=100, string='Responsible HCA')
+        'hca_ids': fields.many2many('res.users', 'allocating_hca_rel', 'allocating_id', 'hca_id',
+                                    string='Responsible HCAs',
+                                    domain=[['groups_id.name', 'in', ['NH Clinical HCA Group']]]),
+        'nurse_name': fields.related('nurse_id', 'name', type='char', size=100, string='Responsible Nurse')
     }
 
     def fields_view_get(self, cr, uid, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
@@ -384,12 +385,12 @@ class allocating_user(osv.TransientModel):
                 allocation = allocation_pool.browse(cr, uid, al_id[0], context=context)
                 user_ids = [u.id for u in allocation.user_ids]
                 res['fields']['nurse_id']['domain'] = [['id', 'in', user_ids], ['groups_id.name', 'in', ['NH Clinical Nurse Group']]]
-                res['fields']['hca_id']['domain'] = [['id', 'in', user_ids], ['groups_id.name', 'in', ['NH Clinical HCA Group']]]
+                res['fields']['hca_ids']['domain'] = [['id', 'in', user_ids], ['groups_id.name', 'in', ['NH Clinical HCA Group']]]
             else:
                 reallocation = reallocation_pool.browse(cr, uid, real_id[0], context=context)
                 user_ids = [u.id for u in reallocation.user_ids]
                 res['fields']['nurse_id']['domain'] = [['id', 'in', user_ids], ['groups_id.name', 'in', ['NH Clinical Nurse Group']]]
-                res['fields']['hca_id']['domain'] = [['id', 'in', user_ids], ['groups_id.name', 'in', ['NH Clinical HCA Group']]]
+                res['fields']['hca_ids']['domain'] = [['id', 'in', user_ids], ['groups_id.name', 'in', ['NH Clinical HCA Group']]]
         return res
 
 

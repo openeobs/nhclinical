@@ -65,7 +65,7 @@
                     <group>
                         <field name="patient_ids" widget="many2many_tags" readonly="1"/>
                         <field name="nurse_id" widget="nh_many2one"/>
-                        <field name="hca_id" widget="nh_many2one"/>
+                        <field name="hca_ids" widget="many2many_tags" options="{'no_create': True}"/>
                     </group>
                 </form>
             </field>
@@ -119,7 +119,7 @@
                                     <field name="location_id" readonly="1"/>
                                     <field name="patient_ids" readonly="1"/>
                                     <field name="nurse_name" widget="nh_many2one"/>
-                                    <field name="hca_name" widget="nh_many2one"/>
+                                    <field name="hca_ids" widget="many2many_tags"/>
                                     <button string="Allocate" type="action" name="%(action_allocate)d" nh_icon="allocate_btn" class="oe_highlight"/>
                                 </tree>
                             </field>
@@ -160,7 +160,7 @@
                                     <field name="location_id" readonly="1"/>
                                     <field name="patient_ids" readonly="1"/>
                                     <field name="nurse_name" widget="nh_many2one"/>
-                                    <field name="hca_name" widget="nh_many2one"/>
+                                    <field name="hca_ids" widget="many2many_tags"/>
                                     <button string="Allocate" type="action" name="%(action_allocate)d" nh_icon="allocate_btn" class="oe_highlight"/>
                                 </tree>
                             </field>
