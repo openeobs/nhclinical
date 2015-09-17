@@ -332,19 +332,12 @@ class nh_clinical_location(orm.Model):
         return res
 
     def _is_available(self, cr, uid, ids, field, args, context=None):
-        # res = {}
         usages = [usage[0] for usage in self._usages]
         available_location_ids = self.get_available_location_ids(
             cr, uid, usages=usages, context=context)
         location_ids = self.search(
             cr, uid, [['id', 'in', ids]], context=context)
         res = {i: True for i in location_ids if i in available_location_ids}
-
-        # for location in self.browse(cr, uid, ids, context):
-        #     available_location_ids = self.get_available_location_ids(cr, uid, usages=[location.usage], context=context)
-        #     res[location.id] = location.id in available_location_ids
-        #
-        # available_location_ids = self.get_available_location_ids(cr, uid, usages=['ward', 'bay', 'bed'], context=context)
         return res
 
     def _get_patient_ids(self, cr, uid, ids, field, args, context=None):
