@@ -111,12 +111,12 @@ class TestLocation(common.SingleTransactionCase):
                                                           'type': 'poc',
                                                           'usage': 'bed'})
         pos_id = self.pos_pool.create(cr, uid, {'name': 'Test POS', 'location_id': location_id})
-        result = self.location_pool._is_available(cr, uid, location_id, field='is_available', args={})
+        result = self.location_pool._is_available(cr, uid, [location_id], field='is_available', args={})
         self.assertTrue(result[location_id], msg="Availability not set correctly")
 
         # Scenario 2: Assign a patient to the location
         self.patient_pool.write(cr, uid, self.patients[1], {'current_location_id': location_id})
-        result = self.location_pool._is_available(cr, uid, location_id, field='is_available', args={})
+        result = self.location_pool._is_available(cr, uid, [location_id], field='is_available', args={})
         self.assertTrue(result[location_id], msg="Availability updated incorrectly when patient is linked to it")
 
         # Scenario 3: Assign a spell to the location
@@ -124,22 +124,22 @@ class TestLocation(common.SingleTransactionCase):
         activity_id = self.spell_pool.create_activity(cr, uid, {}, {'patient_id': self.patients[1],
                                                                     'location_id': location_id,
                                                                     'pos_id': pos_id})
-        result = self.location_pool._is_available(cr, uid, location_id, field='is_available', args={})
+        result = self.location_pool._is_available(cr, uid, [location_id], field='is_available', args={})
         self.assertTrue(result[location_id], msg="Availability updated incorrectly when spell is linked to it")
 
         # Scenario 4: Start the spell
         self.activity_pool.start(cr, uid, activity_id)
-        result = self.location_pool._is_available(cr, uid, location_id, field='is_available', args={})
+        result = self.location_pool._is_available(cr, uid, [location_id], field='is_available', args={})
         self.assertFalse(result[location_id], msg="Availability not updated correctly when spell is started")
 
         # Scenario 5: Complete the spell
         self.activity_pool.complete(cr, uid, activity_id)
-        result = self.location_pool._is_available(cr, uid, location_id, field='is_available', args={})
+        result = self.location_pool._is_available(cr, uid, [location_id], field='is_available', args={})
         self.assertTrue(result[location_id], msg="Availability not updated correctly when spell is completed")
 
         # Scenario 6: Cancel the spell
         self.activity_pool.cancel(cr, uid, activity_id)
-        result = self.location_pool._is_available(cr, uid, location_id, field='is_available', args={})
+        result = self.location_pool._is_available(cr, uid, [location_id], field='is_available', args={})
         self.assertTrue(result[location_id], msg="Availability not updated correctly when spell is cancelled")
 
         # Scenario 7: Create a new Ward Location and check its availability
@@ -148,7 +148,7 @@ class TestLocation(common.SingleTransactionCase):
                                                           'type': 'poc',
                                                           'usage': 'ward'})
         pos_id = self.pos_pool.create(cr, uid, {'name': 'Test POS', 'location_id': location_id})
-        result = self.location_pool._is_available(cr, uid, location_id, field='is_available', args={})
+        result = self.location_pool._is_available(cr, uid, [location_id], field='is_available', args={})
         self.assertTrue(result[location_id], msg="Availability not set correctly")
 
         # Scenario 8: Assign the location to an started Spell
@@ -157,7 +157,7 @@ class TestLocation(common.SingleTransactionCase):
                                                                     'location_id': location_id,
                                                                     'pos_id': pos_id})
         self.activity_pool.start(cr, uid, activity_id)
-        result = self.location_pool._is_available(cr, uid, location_id, field='is_available', args={})
+        result = self.location_pool._is_available(cr, uid, [location_id], field='is_available', args={})
         self.assertTrue(result[location_id], msg="Availability updated incorrectly when spell is started")
 
     def test_05_get_patient_ids(self):
