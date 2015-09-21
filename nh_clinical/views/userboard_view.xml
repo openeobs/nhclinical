@@ -66,10 +66,9 @@
                             <field name="active" invisible="1"/>
                             <field name="category_id" widget="many2many_tags" options="{'no_create': True}"
                                    string="Roles" required="1"/>
+                            <field name="ward_ids" widget="many2many_tags" options="{'no_create': True}"
+                                    readonly="0" groups="nh_clinical.group_nhc_admin,nh_clinical.group_nhc_dev"/>
 	                    </group>
-                        <div colspan="4">
-                            <button name="allocate_responsibility" groups="nh_clinical.group_nhc_admin,nh_clinical.group_nhc_dev" string="Responsibility Allocation" type="object"/>
-                        </div>
                         <notebook>
                             <page string="Location responsibility">
                                 <field name="location_ids" readonly="1"/>
