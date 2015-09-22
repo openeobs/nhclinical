@@ -335,9 +335,9 @@ class nh_clinical_location(orm.Model):
         usages = [usage[0] for usage in self._usages]
         available_location_ids = self.get_available_location_ids(
             cr, uid, usages=usages, context=context)
-        location_ids = self.search(
-            cr, uid, [['id', 'in', ids]], context=context)
-        res = {i: True for i in location_ids if i in available_location_ids}
+        res = {}
+        for i in ids:
+            res[i] = i in available_location_ids
         return res
 
     def _get_patient_ids(self, cr, uid, ids, field, args, context=None):
