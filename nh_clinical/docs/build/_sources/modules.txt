@@ -1,29 +1,12 @@
-Modules
-=======
+Module Reference
+================
 
-.. toctree::
-   :maxdepth: 2
+``nh_clinical.api``
+-------------------
 
-.. automodule:: adt
-   :members:
+.. autoclass:: api.nh_clinical_api
+    :members:
+    :special-members:
+    :exclude-members:
+    :member-order: bysource
 
-.. automodule:: api
-   :members:
-
-.. automodule:: auditing
-   :members:
-
-.. automodule:: base
-   :members:
-
-.. automodule:: devices
-   :members:
-
-.. automodule:: operations
-   :members:
-
-.. automodule:: spell
-   :members:
-
-.. automodule:: userboard
-   :members:

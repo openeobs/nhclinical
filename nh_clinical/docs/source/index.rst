@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 Welcome to NH Clinical!
-============================================
+=======================
 
 User's Guide
 ------------
@@ -13,7 +13,7 @@ User's Guide
    :maxdepth: 2
 
 Module Reference
--------------
+----------------
 
 .. toctree::
    :maxdepth: 2
