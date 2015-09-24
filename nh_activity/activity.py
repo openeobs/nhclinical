@@ -9,13 +9,19 @@ _logger = logging.getLogger(__name__)
 
 
 def data_model_event(callback=None):
+    """
+    Decorator for activity methods. This will automatically call a method with the same name on the data_model related
+    to the activity instance after calling the activity method. The result returned is the one from the data_model
+    method.
+    """
     def decorator(f):
         def wrapper(*args, **kwargs):
             self, cr, uid, activity_id = args[:4]
             if isinstance(activity_id, list) and len(activity_id) == 1:
                 activity_id = activity_id[0]
             if not isinstance(activity_id, (int, long)):
-                raise osv.except_osv('Type Error!', "activity_id must be int or long, found to be %s" % type(activity_id))
+                raise osv.except_osv('Type Error!', "activity_id must be int or long, found to be %s" %
+                                     type(activity_id))
             elif activity_id < 1:
                 raise osv.except_osv('ID Error!', "activity_id must be > 0, found to be %s" % activity_id)
             activity = self.browse(cr, uid, activity_id)
@@ -28,7 +34,12 @@ def data_model_event(callback=None):
 
 
 class nh_activity(orm.Model):
-    """ activity
+    """
+    Class representing any event that needs to be recorded by the system.
+
+    Any event that can be done by a user and has a starting and ending point could be represented as an instance of
+    this class. Most of them will need extra information recorded and that is why this class is closely related to the
+    activity data class, which could be also named activity type.
     """
     _name = 'nh.activity'
     _rec_name = 'summary'
@@ -117,6 +128,10 @@ class nh_activity(orm.Model):
         return super(nh_activity, self).write(cr, uid, ids, vals, context)
 
     def get_recursive_created_ids(self, cr, uid, activity_id, context=None):
+        """
+        Recursively gets every single activity triggered by this instance or any of the ones triggered by it.
+        :return: list of activity ids
+        """
         activity = self.browse(cr, uid, activity_id, context=context)
         if not activity.created_ids:
             return [activity_id]
@@ -130,10 +145,20 @@ class nh_activity(orm.Model):
 
     @data_model_event(callback="update_activity")
     def update_activity(self, cr, uid, activity_id, context=None):
+        """
+        This method is meant to refresh any real time data that needs to be refreshed on the activity. Does nothing as
+        default. Included for potential utility on some activity types.
+        :return: True if successful
+        """
         return True
 
     @data_model_event(callback="submit")
     def submit(self, cr, uid, activity_id, vals, context=None):
+        """
+        Updates data included in the vals parameter.
+        :param vals: dictionary containing {field_name_to_update: new_value}
+        :return: True if successful
+        """
         if not isinstance(vals, dict):
             raise osv.except_osv('Type Error!', "vals must be a dict, found to be %s" % type(vals))
         return True
@@ -141,6 +166,10 @@ class nh_activity(orm.Model):
     # MGMT API
     @data_model_event(callback="schedule")
     def schedule(self, cr, uid, activity_id, date_scheduled=None, context=None):
+        """
+        Sets 'date_scheduled' to the specified date and changes the activity state to 'scheduled'.
+        :return: True if successful
+        """
         if date_scheduled:
             if isinstance(date_scheduled, datetime):
                 return True
@@ -162,24 +191,47 @@ class nh_activity(orm.Model):
 
     @data_model_event(callback="assign")
     def assign(self, cr, uid, activity_id, user_id, context=None):
+        """
+        Sets 'user_id' to the specified user if allowed by access rights.
+        :param user_id: res.users id
+        :return: True if successful
+        """
         if not isinstance(user_id, (int, long)):
             raise osv.except_osv('Type Error!', "user_id must be int or long, found to be %s" % type(user_id))
         return True
 
     @data_model_event(callback="unassign")
     def unassign(self, cr, uid, activity_id, context=None):
+        """
+        Sets 'user_id' to False. Only the current owner of the activity is allowed to do this action.
+        :return: True if successful
+        """
         return True
 
     @data_model_event(callback="start")
     def start(self, cr, uid, activity_id, context=None):
+        """
+        Sets activity state to 'started'.
+        :return: True if successful
+        """
         return True
 
     @data_model_event(callback="complete")
     def complete(self, cr, uid, activity_id, context=None):
+        """
+        Sets activity state to 'completed' and records the date and user on 'date_terminated' and 'terminate_uid'
+        respectively.
+        :return: True if successful
+        """
         return True
 
     @data_model_event(callback="cancel")
     def cancel(self, cr, uid, activity_id, context=None):
+        """
+        Sets activity state to 'cancelled' and records the date and user on 'date_terminated' and 'terminate_uid'
+        respectively.
+        :return: True if successful
+        """
         return True
 
 
@@ -225,6 +277,10 @@ class nh_activity_data(orm.AbstractModel):
         return super(nh_activity_data, self).create(cr, uid, vals, context)
 
     def create_activity(self, cr, uid, vals_activity={}, vals_data={}, context=None):
+        """
+        Creates a new activity of the current data type.
+        :return: created activity id.
+        """
         if not isinstance(vals_activity, dict):
             raise osv.except_osv('Type Error!', 'vals_activity must be a dict, found {}'.format(type(vals_activity)))
         if not isinstance(vals_data, dict):
@@ -261,7 +317,7 @@ class nh_activity_data(orm.AbstractModel):
         assigned to the same user, then the activity is locked.
         :param activity_id:
         :param user_id:
-        :return: True
+        :return: True if successful
         """
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
@@ -285,7 +341,7 @@ class nh_activity_data(orm.AbstractModel):
         assigned. Raised an exception if another user tries to unassign
         an activity not assigned to them.
         :param activity_id:
-        :return: True
+        :return: True if successful
         """
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
