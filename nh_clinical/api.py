@@ -37,13 +37,13 @@ class nh_clinical_api(orm.AbstractModel):
         Registers a new patient into the system
         :param hospital_number: Hospital Number of the patient
         :param data: dictionary parameter that may contain the following keys:
-            patient_identifier: NHS number
-            family_name: Surname
-            given_name: Name
-            middle_names: Middle names
-            dob: Date of birth
-            gender: Gender (M/F)
-            sex: Sex (M/F)
+        patient_identifier: NHS number
+        family_name: Surname
+        given_name: Name
+        middle_names: Middle names
+        dob: Date of birth
+        gender: Gender (M/F)
+        sex: Sex (M/F)
         """
         activity_pool = self.pool['nh.activity']
         register_pool = self.pool['nh.clinical.adt.patient.register']
@@ -60,17 +60,13 @@ class nh_clinical_api(orm.AbstractModel):
         Admits a patient into the specified location.
         :param hospital_number: Hospital number of the patient
         :param data: dictionary parameter that may contain the following keys:
-            location: location code where the patient will be admitted. REQUIRED
-            start_date: admission start date.
-            doctors: consulting and referring doctors list of dictionaries. expected format:
-               [...
-               {
-               'type': 'c' or 'r',
-               'code': code string,
-               'title':, 'given_name':, 'family_name':, }
-               ...]
-                if doctor doesn't exist, we create partner, but don't create user for that doctor.
+        location: location code where the patient will be admitted. REQUIRED
+        start_date: admission start date.
+        doctors: consulting and referring doctors list of dictionaries. expected format:
+        [...{'type': 'c' or 'r', 'code': code string, 'title':, 'given_name':, 'family_name':, }...]
+        if doctor doesn't exist, we create partner, but don't create user for that doctor.
         """
+
         activity_pool = self.pool['nh.activity']
         patient_pool = self.pool['nh.clinical.patient']
         admit_pool = self.pool['nh.clinical.adt.patient.admit']
@@ -133,7 +129,7 @@ class nh_clinical_api(orm.AbstractModel):
         Discharges the patient.
         :param hospital_number: Hospital number of the patient
         :param data: dictionary parameter that may contain the following keys:
-            discharge_date: patient discharge date.
+        discharge_date: patient discharge date.
         """
         activity_pool = self.pool['nh.activity']
         discharge_pool = self.pool['nh.clinical.adt.patient.discharge']
@@ -173,7 +169,7 @@ class nh_clinical_api(orm.AbstractModel):
         Merges a specified patient into the patient.
         :param hospital_number: Hospital number of the patient we want to merge INTO
         :param data: dictionary parameter that may contain the following keys:
-            from_identifier: Hospital number of the patient we want to merge FROM
+        from_identifier: Hospital number of the patient we want to merge FROM
         """
         patient_pool = self.pool['nh.clinical.patient']
         patient_pool.check_hospital_number(cr, uid, hospital_number, exception='False', context=context)
@@ -191,7 +187,7 @@ class nh_clinical_api(orm.AbstractModel):
         Transfers the patient to the specified location.
         :param hospital_number: Hospital number of the patient
         :param data: dictionary parameter that may contain the following keys:
-            location: location code where the patient will be transferred. REQUIRED
+        location: location code where the patient will be transferred. REQUIRED
         """
         activity_pool = self.pool['nh.activity']
         patient_pool = self.pool['nh.clinical.patient']

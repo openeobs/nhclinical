@@ -50,7 +50,7 @@
 <span class="n">_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="nh_clinical_adt_patient_register"><a class="viewcode-back" href="../code.html#adt.nh_clinical_adt_patient_register">[docs]</a><span class="k">class</span> <span class="nc">nh_clinical_adt_patient_register</span><span class="p">(</span><span class="n">orm</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<div class="viewcode-block" id="nh_clinical_adt_patient_register"><a class="viewcode-back" href="../modules.html#adt.nh_clinical_adt_patient_register">[docs]</a><span class="k">class</span> <span class="nc">nh_clinical_adt_patient_register</span><span class="p">(</span><span class="n">orm</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Registers a new patient into the system.</span>
 <span class="sd">     patient_identifier: String - NHS Number</span>
@@ -121,7 +121,7 @@
         <span class="k">return</span> <span class="n">patient_id</span>
 
 </div>
-<span class="k">class</span> <span class="nc">nh_clinical_adt_patient_update</span><span class="p">(</span><span class="n">orm</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<div class="viewcode-block" id="nh_clinical_adt_patient_update"><a class="viewcode-back" href="../modules.html#adt.nh_clinical_adt_patient_update">[docs]</a><span class="k">class</span> <span class="nc">nh_clinical_adt_patient_update</span><span class="p">(</span><span class="n">orm</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Update patient information. It will overwrite every single field in the target patient.</span>
 <span class="sd">    Same fields as patient register.</span>
@@ -181,8 +181,8 @@
         <span class="nb">super</span><span class="p">(</span><span class="n">nh_clinical_adt_patient_update</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">complete</span><span class="p">(</span><span class="n">cr</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">activity_id</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">res</span>
 
-
-<span class="k">class</span> <span class="nc">nh_clinical_adt_patient_admit</span><span class="p">(</span><span class="n">orm</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+</div>
+<div class="viewcode-block" id="nh_clinical_adt_patient_admit"><a class="viewcode-back" href="../modules.html#adt.nh_clinical_adt_patient_admit">[docs]</a><span class="k">class</span> <span class="nc">nh_clinical_adt_patient_admit</span><span class="p">(</span><span class="n">orm</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generates a patient Admission to the provided Location.</span>
 <span class="sd">        It will generate a new ward location if it does not exist.</span>
@@ -266,8 +266,8 @@
         <span class="n">activity_pool</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">cr</span><span class="p">,</span> <span class="n">SUPERUSER_ID</span><span class="p">,</span> <span class="n">activity_id</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;parent_id&#39;</span><span class="p">:</span> <span class="n">spell_id</span><span class="p">})</span>
         <span class="k">return</span> <span class="n">res</span>  
 
-    
-<span class="k">class</span> <span class="nc">nh_clinical_adt_patient_cancel_admit</span><span class="p">(</span><span class="n">orm</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    </div>
+<div class="viewcode-block" id="nh_clinical_adt_patient_cancel_admit"><a class="viewcode-back" href="../modules.html#adt.nh_clinical_adt_patient_cancel_admit">[docs]</a><span class="k">class</span> <span class="nc">nh_clinical_adt_patient_cancel_admit</span><span class="p">(</span><span class="n">orm</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Cancels the last admission of the patient which cancels the current patient spell.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -305,8 +305,8 @@
         <span class="n">activity_pool</span><span class="o">.</span><span class="n">cancel</span><span class="p">(</span><span class="n">cr</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">activity</span><span class="o">.</span><span class="n">data_ref</span><span class="o">.</span><span class="n">admission_id</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">res</span>
 
-
-<span class="k">class</span> <span class="nc">nh_clinical_adt_patient_discharge</span><span class="p">(</span><span class="n">orm</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+</div>
+<div class="viewcode-block" id="nh_clinical_adt_patient_discharge"><a class="viewcode-back" href="../modules.html#adt.nh_clinical_adt_patient_discharge">[docs]</a><span class="k">class</span> <span class="nc">nh_clinical_adt_patient_discharge</span><span class="p">(</span><span class="n">orm</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Discharge a patient from the hospital. Completes the patient spell.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -384,8 +384,8 @@
         <span class="n">activity_pool</span><span class="o">.</span><span class="n">complete</span><span class="p">(</span><span class="n">cr</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">discharge_id</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">res</span>
 
-
-<span class="k">class</span> <span class="nc">nh_clinical_adt_patient_cancel_discharge</span><span class="p">(</span><span class="n">orm</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+</div>
+<div class="viewcode-block" id="nh_clinical_adt_patient_cancel_discharge"><a class="viewcode-back" href="../modules.html#adt.nh_clinical_adt_patient_cancel_discharge">[docs]</a><span class="k">class</span> <span class="nc">nh_clinical_adt_patient_cancel_discharge</span><span class="p">(</span><span class="n">orm</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Cancels the last patient discharge. The spell will be reopened. This will fail if the patient has already been</span>
 <span class="sd">    admitted again.</span>
@@ -421,8 +421,8 @@
                             <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">res</span>
 
-
-<span class="k">class</span> <span class="nc">nh_clinical_adt_patient_transfer</span><span class="p">(</span><span class="n">orm</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+</div>
+<div class="viewcode-block" id="nh_clinical_adt_patient_transfer"><a class="viewcode-back" href="../modules.html#adt.nh_clinical_adt_patient_transfer">[docs]</a><span class="k">class</span> <span class="nc">nh_clinical_adt_patient_transfer</span><span class="p">(</span><span class="n">orm</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transfers a patient from a location to another location.</span>
 <span class="sd">    It will trigger admission policy in the destination location.</span>
@@ -497,8 +497,8 @@
         <span class="n">activity_pool</span><span class="o">.</span><span class="n">complete</span><span class="p">(</span><span class="n">cr</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">transfer_id</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">res</span>
 
-
-<span class="k">class</span> <span class="nc">nh_clinical_adt_patient_cancel_transfer</span><span class="p">(</span><span class="n">orm</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+</div>
+<div class="viewcode-block" id="nh_clinical_adt_patient_cancel_transfer"><a class="viewcode-back" href="../modules.html#adt.nh_clinical_adt_patient_cancel_transfer">[docs]</a><span class="k">class</span> <span class="nc">nh_clinical_adt_patient_cancel_transfer</span><span class="p">(</span><span class="n">orm</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Cancels the last patient transfer. Effectively moving the patient back to the origin location.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -535,8 +535,8 @@
                             <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">res</span>
 
-
-<span class="k">class</span> <span class="nc">nh_clinical_adt_spell_update</span><span class="p">(</span><span class="n">orm</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+</div>
+<div class="viewcode-block" id="nh_clinical_adt_spell_update"><a class="viewcode-back" href="../modules.html#adt.nh_clinical_adt_spell_update">[docs]</a><span class="k">class</span> <span class="nc">nh_clinical_adt_spell_update</span><span class="p">(</span><span class="n">orm</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Update patient spell information.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -623,8 +623,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">trigger_policy</span><span class="p">(</span><span class="n">cr</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">activity_id</span><span class="p">,</span> <span class="n">location_id</span><span class="o">=</span><span class="n">update</span><span class="o">.</span><span class="n">location_id</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">res</span>
         
-
-<span class="k">class</span> <span class="nc">nh_clinical_adt_patient_merge</span><span class="p">(</span><span class="n">orm</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+</div>
+<div class="viewcode-block" id="nh_clinical_adt_patient_merge"><a class="viewcode-back" href="../modules.html#adt.nh_clinical_adt_patient_merge">[docs]</a><span class="k">class</span> <span class="nc">nh_clinical_adt_patient_merge</span><span class="p">(</span><span class="n">orm</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Merges a patient into another patient making the resulting patient own all activities.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -690,7 +690,7 @@
         <span class="n">res</span><span class="p">[</span><span class="s">&#39;merge_into_update&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">patient_pool</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">cr</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">into_id</span><span class="p">,</span> <span class="n">vals_into</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
         <span class="n">res</span><span class="p">[</span><span class="s">&#39;merge_from_deactivate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">patient_pool</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">cr</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">from_id</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;active&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">},</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
         <span class="n">activity_pool</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">cr</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">activity_id</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;patient_id&#39;</span><span class="p">:</span> <span class="n">into_id</span><span class="p">},</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">res</span>
+        <span class="k">return</span> <span class="n">res</span></div>
 </pre></div>
 
           </div>
