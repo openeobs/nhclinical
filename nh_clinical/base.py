@@ -332,10 +332,12 @@ class nh_clinical_location(orm.Model):
         return res
 
     def _is_available(self, cr, uid, ids, field, args, context=None):
+        usages = [usage[0] for usage in self._usages]
+        available_location_ids = self.get_available_location_ids(
+            cr, uid, usages=usages, context=context)
         res = {}
-        for location in self.browse(cr, uid, ids, context):
-            available_location_ids = self.get_available_location_ids(cr, uid, usages=[location.usage], context=context)
-            res[location.id] = location.id in available_location_ids
+        for i in ids:
+            res[i] = i in available_location_ids
         return res
 
     def _get_patient_ids(self, cr, uid, ids, field, args, context=None):
