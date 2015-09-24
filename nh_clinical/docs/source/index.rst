@@ -3,15 +3,28 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to NH Clinical documentation!
+Welcome to NH Clinical!
 ============================================
 
-Contents:
+User's Guide
+------------
+
+.. toctree::
+   :maxdepth: 2
+
+Module Reference
+-------------
 
 .. toctree::
    :maxdepth: 2
 
    modules
+
+Additional Notes
+----------------
+
+.. toctree::
+   :maxdepth: 2
 
 
 Indices and tables
