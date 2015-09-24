@@ -1,12 +1,16 @@
-Module Reference
-================
+Module Documentation
+====================
 
-``nh_clinical.api``
--------------------
+``api``
+-------
 
-.. autoclass:: api.nh_clinical_api
+.. automodule:: api
     :members:
-    :special-members:
-    :exclude-members:
     :member-order: bysource
 
+``adt``
+-------
+
+.. automodule:: adt
+    :members:
+    :member-order: bysource
