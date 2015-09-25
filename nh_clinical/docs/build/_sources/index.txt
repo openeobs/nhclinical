@@ -16,7 +16,7 @@ Module Reference
 ----------------
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    modules
 
@@ -28,7 +28,7 @@ Additional Notes
 
 
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
 * :ref:`modindex`

@@ -13,15 +13,6 @@ _logger = logging.getLogger(__name__)
 class nh_clinical_adt_patient_register(orm.Model):
     """
     Registers a new patient into the system.
-     patient_identifier: String - NHS Number
-     other_identifier: String - Hospital Number
-     given_name: String - First name
-     family_name: String - Last name
-     middle_names: String - Middle names
-     dob: String - Date of Birth, have to be in format '%Y-%m-%d %H:%M:%S'
-     gender: String - 'BOTH','F','I','M','NSP','U'
-     sex: String - Same values as gender.
-     ethnicity: String - Look at patient class for the list of allowed values.
     """
     _name = 'nh.clinical.adt.patient.register'
     _inherit = ['nh.activity.data']   
@@ -83,9 +74,12 @@ class nh_clinical_adt_patient_register(orm.Model):
 
 class nh_clinical_adt_patient_update(orm.Model):
     """
-    Update patient information. It will overwrite every single field in the target patient.
+    Updates patient information.
+
+    It will overwrite every single field in the target patient.
     Same fields as patient register.
     """
+
     _name = 'nh.clinical.adt.patient.update'
     _inherit = ['nh.activity.data']
     _description = 'ADT Patient Update'
@@ -144,10 +138,10 @@ class nh_clinical_adt_patient_update(orm.Model):
 
 class nh_clinical_adt_patient_admit(orm.Model):
     """
-        Generates a patient Admission to the provided Location.
-        It will generate a new ward location if it does not exist.
+    Generates a patient admission to the provided Location.
+    A new ward location is generated, if it does not exist.
             
-       consulting and referring doctors are expected in the submitted values on key='doctors' in format:
+    Consulting and referring doctors are expected in the submitted values on key='doctors' in format:
        [...
        {
        'type': 'c' or 'r',

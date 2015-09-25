@@ -1,20 +1,15 @@
 Module Documentation
 ====================
 
-``api``
+
+Modules
 -------
 
-.. automodule:: api
-    :members:
-    :member-order: bysource
+.. toctree::
+    :maxdepth: 3
 
-.. autoclass:: nh_clinical_api
-    :members:
+    api
+    adt
 
 
-``adt``
--------
 
-.. automodule:: adt
-    :members:
-    :member-order: bysource

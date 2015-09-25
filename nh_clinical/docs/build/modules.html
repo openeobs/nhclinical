@@ -24,6 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="nh_clinical_docs 0.0.1 documentation" href="index.html" />
+    <link rel="next" title="nh_clinical.api" href="api.html" />
     <link rel="prev" title="Welcome to NH Clinical!" href="index.html" />
    
   
@@ -39,185 +40,14 @@
             
   <div class="section" id="module-documentation">
 <h1>Module Documentation<a class="headerlink" href="#module-documentation" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-api">
-<span id="api"></span><h2><code class="docutils literal"><span class="pre">api</span></code><a class="headerlink" href="#module-api" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="api.nh_clinical_api">
-<em class="property">class </em><code class="descclassname">api.</code><code class="descname">nh_clinical_api</code><span class="sig-paren">(</span><em>pool</em>, <em>cr</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api.html#nh_clinical_api"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.nh_clinical_api" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
-<dt id="api.nh_clinical_api.admit">
-<code class="descname">admit</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api.html#nh_clinical_api.admit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.nh_clinical_api.admit" title="Permalink to this definition">¶</a></dt>
-<dd><p>Admits a patient into the specified location.
-:param hospital_number: Hospital number of the patient
-:param data: dictionary parameter that may contain the following keys:
-location: location code where the patient will be admitted. REQUIRED
-start_date: admission start date.
-doctors: consulting and referring doctors list of dictionaries. expected format:
-[...{&#8216;type&#8217;: &#8216;c&#8217; or &#8216;r&#8217;, &#8216;code&#8217;: code string, &#8216;title&#8217;:, &#8216;given_name&#8217;:, &#8216;family_name&#8217;:, }...]
-if doctor doesn&#8217;t exist, we create partner, but don&#8217;t create user for that doctor.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="api.nh_clinical_api.admit_update">
-<code class="descname">admit_update</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api.html#nh_clinical_api.admit_update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.nh_clinical_api.admit_update" title="Permalink to this definition">¶</a></dt>
-<dd><p>Updates the spell information of the patient. Accepts the same parameters as admit.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="api.nh_clinical_api.cancel_admit">
-<code class="descname">cancel_admit</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api.html#nh_clinical_api.cancel_admit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.nh_clinical_api.cancel_admit" title="Permalink to this definition">¶</a></dt>
-<dd><p>Cancels the open admission of the patient.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="api.nh_clinical_api.cancel_discharge">
-<code class="descname">cancel_discharge</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api.html#nh_clinical_api.cancel_discharge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.nh_clinical_api.cancel_discharge" title="Permalink to this definition">¶</a></dt>
-<dd><p>Cancels the last discharge of the patient.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="api.nh_clinical_api.cancel_transfer">
-<code class="descname">cancel_transfer</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api.html#nh_clinical_api.cancel_transfer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.nh_clinical_api.cancel_transfer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Cancels the last transfer of the patient.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="api.nh_clinical_api.discharge">
-<code class="descname">discharge</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api.html#nh_clinical_api.discharge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.nh_clinical_api.discharge" title="Permalink to this definition">¶</a></dt>
-<dd><p>Discharges the patient.
-:param hospital_number: Hospital number of the patient
-:param data: dictionary parameter that may contain the following keys:
-discharge_date: patient discharge date.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="api.nh_clinical_api.merge">
-<code class="descname">merge</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api.html#nh_clinical_api.merge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.nh_clinical_api.merge" title="Permalink to this definition">¶</a></dt>
-<dd><p>Merges a specified patient into the patient.
-:param hospital_number: Hospital number of the patient we want to merge INTO
-:param data: dictionary parameter that may contain the following keys:
-from_identifier: Hospital number of the patient we want to merge FROM</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="api.nh_clinical_api.register">
-<code class="descname">register</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api.html#nh_clinical_api.register"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.nh_clinical_api.register" title="Permalink to this definition">¶</a></dt>
-<dd><p>Registers a new patient into the system
-:param hospital_number: Hospital Number of the patient
-:param data: dictionary parameter that may contain the following keys:
-patient_identifier: NHS number
-family_name: Surname
-given_name: Name
-middle_names: Middle names
-dob: Date of birth
-gender: Gender (M/F)
-sex: Sex (M/F)</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="api.nh_clinical_api.transfer">
-<code class="descname">transfer</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api.html#nh_clinical_api.transfer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.nh_clinical_api.transfer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Transfers the patient to the specified location.
-:param hospital_number: Hospital number of the patient
-:param data: dictionary parameter that may contain the following keys:
-location: location code where the patient will be transferred. REQUIRED</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="api.nh_clinical_api.update">
-<code class="descname">update</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/api.html#nh_clinical_api.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.nh_clinical_api.update" title="Permalink to this definition">¶</a></dt>
-<dd><p>Update patient information</p>
-</dd></dl>
-
-</dd></dl>
-
+<div class="section" id="modules">
+<h2>Modules<a class="headerlink" href="#modules" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html"><code class="docutils literal"><span class="pre">nh_clinical.api</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="adt.html"><code class="docutils literal"><span class="pre">nh_clinical.adt</span></code></a></li>
+</ul>
 </div>
-<div class="section" id="module-adt">
-<span id="adt"></span><h2><code class="docutils literal"><span class="pre">adt</span></code><a class="headerlink" href="#module-adt" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="adt.nh_clinical_adt_patient_register">
-<em class="property">class </em><code class="descclassname">adt.</code><code class="descname">nh_clinical_adt_patient_register</code><span class="sig-paren">(</span><em>pool</em>, <em>cr</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/adt.html#nh_clinical_adt_patient_register"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#adt.nh_clinical_adt_patient_register" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="docutils">
-<dt>Registers a new patient into the system.</dt>
-<dd>patient_identifier: String - NHS Number
-other_identifier: String - Hospital Number
-given_name: String - First name
-family_name: String - Last name
-middle_names: String - Middle names
-dob: String - Date of Birth, have to be in format &#8216;%Y-%m-%d %H:%M:%S&#8217;
-gender: String - &#8216;BOTH&#8217;,&#8217;F&#8217;,&#8217;I&#8217;,&#8217;M&#8217;,&#8217;NSP&#8217;,&#8217;U&#8217;
-sex: String - Same values as gender.
-ethnicity: String - Look at patient class for the list of allowed values.</dd>
-</dl>
-</dd></dl>
-
-<dl class="class">
-<dt id="adt.nh_clinical_adt_patient_update">
-<em class="property">class </em><code class="descclassname">adt.</code><code class="descname">nh_clinical_adt_patient_update</code><span class="sig-paren">(</span><em>pool</em>, <em>cr</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/adt.html#nh_clinical_adt_patient_update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#adt.nh_clinical_adt_patient_update" title="Permalink to this definition">¶</a></dt>
-<dd><p>Update patient information. It will overwrite every single field in the target patient.
-Same fields as patient register.</p>
-</dd></dl>
-
-<dl class="class">
-<dt id="adt.nh_clinical_adt_patient_admit">
-<em class="property">class </em><code class="descclassname">adt.</code><code class="descname">nh_clinical_adt_patient_admit</code><span class="sig-paren">(</span><em>pool</em>, <em>cr</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/adt.html#nh_clinical_adt_patient_admit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#adt.nh_clinical_adt_patient_admit" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div>Generates a patient Admission to the provided Location.
-It will generate a new ward location if it does not exist.</div></blockquote>
-<p>consulting and referring doctors are expected in the submitted values on key=&#8217;doctors&#8217; in format:
-[...
-{
-&#8216;type&#8217;: &#8216;c&#8217; or &#8216;r&#8217;,
-&#8216;code&#8217;: code string,
-&#8216;title&#8217;:, &#8216;given_name&#8217;:, &#8216;family_name&#8217;:, }
-...]</p>
-<p>if doctor doesn&#8217;t exist, we create partner, but don&#8217;t create user</p>
-</dd></dl>
-
-<dl class="class">
-<dt id="adt.nh_clinical_adt_patient_cancel_admit">
-<em class="property">class </em><code class="descclassname">adt.</code><code class="descname">nh_clinical_adt_patient_cancel_admit</code><span class="sig-paren">(</span><em>pool</em>, <em>cr</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/adt.html#nh_clinical_adt_patient_cancel_admit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#adt.nh_clinical_adt_patient_cancel_admit" title="Permalink to this definition">¶</a></dt>
-<dd><p>Cancels the last admission of the patient which cancels the current patient spell.</p>
-</dd></dl>
-
-<dl class="class">
-<dt id="adt.nh_clinical_adt_patient_discharge">
-<em class="property">class </em><code class="descclassname">adt.</code><code class="descname">nh_clinical_adt_patient_discharge</code><span class="sig-paren">(</span><em>pool</em>, <em>cr</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/adt.html#nh_clinical_adt_patient_discharge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#adt.nh_clinical_adt_patient_discharge" title="Permalink to this definition">¶</a></dt>
-<dd><p>Discharge a patient from the hospital. Completes the patient spell.</p>
-</dd></dl>
-
-<dl class="class">
-<dt id="adt.nh_clinical_adt_patient_cancel_discharge">
-<em class="property">class </em><code class="descclassname">adt.</code><code class="descname">nh_clinical_adt_patient_cancel_discharge</code><span class="sig-paren">(</span><em>pool</em>, <em>cr</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/adt.html#nh_clinical_adt_patient_cancel_discharge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#adt.nh_clinical_adt_patient_cancel_discharge" title="Permalink to this definition">¶</a></dt>
-<dd><p>Cancels the last patient discharge. The spell will be reopened. This will fail if the patient has already been
-admitted again.</p>
-</dd></dl>
-
-<dl class="class">
-<dt id="adt.nh_clinical_adt_patient_transfer">
-<em class="property">class </em><code class="descclassname">adt.</code><code class="descname">nh_clinical_adt_patient_transfer</code><span class="sig-paren">(</span><em>pool</em>, <em>cr</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/adt.html#nh_clinical_adt_patient_transfer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#adt.nh_clinical_adt_patient_transfer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Transfers a patient from a location to another location.
-It will trigger admission policy in the destination location.</p>
-</dd></dl>
-
-<dl class="class">
-<dt id="adt.nh_clinical_adt_patient_cancel_transfer">
-<em class="property">class </em><code class="descclassname">adt.</code><code class="descname">nh_clinical_adt_patient_cancel_transfer</code><span class="sig-paren">(</span><em>pool</em>, <em>cr</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/adt.html#nh_clinical_adt_patient_cancel_transfer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#adt.nh_clinical_adt_patient_cancel_transfer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Cancels the last patient transfer. Effectively moving the patient back to the origin location.</p>
-</dd></dl>
-
-<dl class="class">
-<dt id="adt.nh_clinical_adt_spell_update">
-<em class="property">class </em><code class="descclassname">adt.</code><code class="descname">nh_clinical_adt_spell_update</code><span class="sig-paren">(</span><em>pool</em>, <em>cr</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/adt.html#nh_clinical_adt_spell_update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#adt.nh_clinical_adt_spell_update" title="Permalink to this definition">¶</a></dt>
-<dd><p>Update patient spell information.</p>
-</dd></dl>
-
-<dl class="class">
-<dt id="adt.nh_clinical_adt_patient_merge">
-<em class="property">class </em><code class="descclassname">adt.</code><code class="descname">nh_clinical_adt_patient_merge</code><span class="sig-paren">(</span><em>pool</em>, <em>cr</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/adt.html#nh_clinical_adt_patient_merge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#adt.nh_clinical_adt_patient_merge" title="Permalink to this definition">¶</a></dt>
-<dd><p>Merges a patient into another patient making the resulting patient own all activities.</p>
-</dd></dl>
-
 </div>
 </div>
 
@@ -230,8 +60,7 @@ It will trigger admission policy in the destination location.</p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Module Documentation</a><ul>
-<li><a class="reference internal" href="#module-api"><code class="docutils literal"><span class="pre">api</span></code></a></li>
-<li><a class="reference internal" href="#module-adt"><code class="docutils literal"><span class="pre">adt</span></code></a></li>
+<li><a class="reference internal" href="#modules">Modules</a></li>
 </ul>
 </li>
 </ul>
@@ -240,6 +69,7 @@ It will trigger admission policy in the destination location.</p>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="index.html" title="previous chapter">Welcome to NH Clinical!</a></li>
+      <li>Next: <a href="api.html" title="next chapter"><code class="docutils literal"><span class="pre">nh_clinical.api</span></code></a></li>
   </ul></li>
 </ul>
 </div>

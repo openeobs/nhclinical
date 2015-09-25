@@ -14,11 +14,8 @@
 
 import sys
 import os
-import mock
 import shlex
 
-MOCK_MODULES = ['openerp', 'openerp.osv', 'openerp.tools']
-sys.modules.update((mod_name, mock.MagicMock()) for mod_name in MOCK_MODULES)
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -297,6 +294,3 @@ texinfo_documents = [
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'https://docs.python.org/': None}
 
-# Odoo addons
-sphinxodoo_addons = ['nh_clinical']
-sphinxodoo_root_path = '/opt/nh/odoo/'

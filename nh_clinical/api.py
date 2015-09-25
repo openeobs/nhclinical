@@ -10,8 +10,16 @@ class nh_clinical_api(orm.AbstractModel):
 
     def update(self, cr, uid, hospital_number, data, context=None):
         """
-        Update patient information
+        Update patient information.
+
+        :param hospital_number: hospital number of the patient
+        :type hospital_number: str
+        :param data: may contain the following keys:
+            ``patient_identifier`` and ``other_identifier`` among
+            others
+        :type data: dict
         """
+
         activity_pool = self.pool['nh.activity']
         patient_pool = self.pool['nh.clinical.patient']
         update_pool = self.pool['nh.clinical.adt.patient.update']
@@ -34,17 +42,15 @@ class nh_clinical_api(orm.AbstractModel):
 
     def register(self, cr, uid, hospital_number, data, context=None):
         """
-        Registers a new patient into the system
-        :param hospital_number: Hospital Number of the patient
-        :param data: dictionary parameter that may contain the following keys:
-        patient_identifier: NHS number
-        family_name: Surname
-        given_name: Name
-        middle_names: Middle names
-        dob: Date of birth
-        gender: Gender (M/F)
-        sex: Sex (M/F)
+        Registers a new patient in the system.
+
+        :param hospital_number: hospital number of the patient
+        :type hospital_number: str
+        :param data: may contain the following keys:
+            ``patient_identifier``, ``family_name``, ``given_name``,
+            ``middle_names``, ``dob``, ``gender`` and ``sex``
         """
+
         activity_pool = self.pool['nh.activity']
         register_pool = self.pool['nh.clinical.adt.patient.register']
         register_activity = register_pool.create_activity(cr, uid, {}, {}, context=context)
@@ -57,14 +63,15 @@ class nh_clinical_api(orm.AbstractModel):
 
     def admit(self, cr, uid, hospital_number, data, context=None):
         """
-        Admits a patient into the specified location.
+        Admits a patient into a specified location.
+
         :param hospital_number: Hospital number of the patient
-        :param data: dictionary parameter that may contain the following keys:
-        location: location code where the patient will be admitted. REQUIRED
-        start_date: admission start date.
-        doctors: consulting and referring doctors list of dictionaries. expected format:
-        [...{'type': 'c' or 'r', 'code': code string, 'title':, 'given_name':, 'family_name':, }...]
-        if doctor doesn't exist, we create partner, but don't create user for that doctor.
+        :type hospital_number: str
+        :param data: contains ``location_code``, ``start_date`` and a
+            list of dictionaries of consulting and referring doctors,
+            containing the following keys: ``type``, ``code``,
+            ``title``, ``given_name`` and ``family_name``
+        :type data: dict
         """
 
         activity_pool = self.pool['nh.activity']
@@ -88,8 +95,15 @@ class nh_clinical_api(orm.AbstractModel):
 
     def admit_update(self, cr, uid, hospital_number, data, context=None):
         """
-        Updates the spell information of the patient. Accepts the same parameters as admit.
+        Updates the spell information of a patient.
+
+        :param hospital_number: hospital number of the patient
+        :type hospital_number: str
+        :param data: may contain ``other_identifier`` and
+            ``patient_identifier`` among others
+        :type data: dict
         """
+
         activity_pool = self.pool['nh.activity']
         update_pool = self.pool['nh.clinical.adt.spell.update']
         patient_pool = self.pool['nh.clinical.patient']
@@ -112,7 +126,11 @@ class nh_clinical_api(orm.AbstractModel):
     def cancel_admit(self, cr, uid, hospital_number, context=None):
         """
         Cancels the open admission of the patient.
+
+        :param hospital_number: hospital number of the patient
+        :type hospital_number: str
         """
+
         activity_pool = self.pool['nh.activity']
         cancel_pool = self.pool['nh.clinical.adt.patient.cancel_admit']
         patient_pool = self.pool['nh.clinical.patient']
@@ -126,11 +144,14 @@ class nh_clinical_api(orm.AbstractModel):
 
     def discharge(self, cr, uid, hospital_number, data, context=None):
         """
-        Discharges the patient.
-        :param hospital_number: Hospital number of the patient
-        :param data: dictionary parameter that may contain the following keys:
-        discharge_date: patient discharge date.
+        Discharges a patient.
+
+        :param hospital_number: hospital number of the patient
+        :type hospital_number: str
+        :param data: may contain the key ``discharge_date``
+        :type data: dict
         """
+
         activity_pool = self.pool['nh.activity']
         discharge_pool = self.pool['nh.clinical.adt.patient.discharge']
         patient_pool = self.pool['nh.clinical.patient']
@@ -152,8 +173,12 @@ class nh_clinical_api(orm.AbstractModel):
 
     def cancel_discharge(self, cr, uid, hospital_number, context=None):
         """
-        Cancels the last discharge of the patient.
+        Cancels the last discharge of a patient.
+
+        :param hospital_number: hospital number of the patient
+        :type hospital_number: str
         """
+
         patient_pool = self.pool['nh.clinical.patient']
         patient_pool.check_hospital_number(cr, uid, hospital_number, exception='False', context=context)
         activity_pool = self.pool['nh.activity']
@@ -166,11 +191,15 @@ class nh_clinical_api(orm.AbstractModel):
 
     def merge(self, cr, uid, hospital_number, data, context=None):
         """
-        Merges a specified patient into the patient.
-        :param hospital_number: Hospital number of the patient we want to merge INTO
-        :param data: dictionary parameter that may contain the following keys:
-        from_identifier: Hospital number of the patient we want to merge FROM
+        Merges a specified patient into a patient.
+
+        :param hospital_number: hospital number of the patient merged INTO
+        :type hospital_number: str
+        :param data: may contain the key ``from_identifier``,
+            the hospital number of the patient merged FROM
+        :type data: dict
         """
+
         patient_pool = self.pool['nh.clinical.patient']
         patient_pool.check_hospital_number(cr, uid, hospital_number, exception='False', context=context)
         activity_pool = self.pool['nh.activity']
@@ -184,11 +213,15 @@ class nh_clinical_api(orm.AbstractModel):
 
     def transfer(self, cr, uid, hospital_number, data, context=None):
         """
-        Transfers the patient to the specified location.
-        :param hospital_number: Hospital number of the patient
-        :param data: dictionary parameter that may contain the following keys:
-        location: location code where the patient will be transferred. REQUIRED
+        Transfers the patient to a specified location.
+
+        :param hospital_number: hospital number of the patient
+        :type hospital_number: str
+        :param data: required is ``location_code`` of the patient's transfer
+            destination
+        :type data: dict
         """
+
         activity_pool = self.pool['nh.activity']
         patient_pool = self.pool['nh.clinical.patient']
         transfer_pool = self.pool['nh.clinical.adt.patient.transfer']
@@ -210,8 +243,12 @@ class nh_clinical_api(orm.AbstractModel):
 
     def cancel_transfer(self, cr, uid, hospital_number, context=None):
         """
-        Cancels the last transfer of the patient.
+        Cancels the last transfer of a patient.
+
+        :param hospital_number: hospital number of the patient
+        :type hospital_number: str
         """
+
         patient_pool = self.pool['nh.clinical.patient']
         patient_pool.check_hospital_number(cr, uid, hospital_number, exception='False', context=context)
         activity_pool = self.pool['nh.activity']
