@@ -33,7 +33,8 @@ class nh_cancel_reason(orm.Model):
 
     
 class nh_activity(orm.Model):
-    """ activity
+    """
+    nh_activity Extension to add clinical related information.
     """
     _name = 'nh.activity'
     _inherit = 'nh.activity'
@@ -42,7 +43,6 @@ class nh_activity(orm.Model):
         # identification
         'user_ids': fields.many2many('res.users', 'activity_user_rel', 'activity_id', 'user_id', 'Users', readonly=True),
         'patient_id': fields.many2one('nh.clinical.patient', 'Patient', readonly=True),
-        # 'device_id': fields.many2one('nh.clinical.device', 'Device', readonly=True),
         'location_id': fields.many2one('nh.clinical.location', 'Location', readonly=True),
         'location_name': fields.related('location_id', 'full_name', type='char', size=150, string='Location Name'),
         'pos_id': fields.many2one('nh.clinical.pos', 'POS', readonly=True),
@@ -52,6 +52,10 @@ class nh_activity(orm.Model):
     }
 
     def write(self, cr, uid, ids, vals, context=None):
+        """
+        write extension to automatically trigger an update on the user_ids field when the location_id of the activity
+        is changed.
+        """
         if not vals:
             vals = {}
         res = super(nh_activity, self).write(cr, uid, ids, vals, context=context)
@@ -63,6 +67,13 @@ class nh_activity(orm.Model):
         return res
 
     def cancel_open_activities(self, cr, uid, parent_id, model, context=None):
+        """
+        Cancels all open activities (not on state 'completed' or 'cancelled') that share the provided parent_id and the
+        specified data type.
+        :param parent_id: activity id, usually of spell data type.
+        :param model: string specifying the activity data type.
+        :return: True if successful
+        """
         domain = [('parent_id', '=', parent_id),
                   ('data_model', '=', model),
                   ('state', 'not in', ['completed', 'cancelled'])]

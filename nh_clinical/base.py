@@ -29,6 +29,10 @@ class res_partner(orm.Model):
 
 
 class res_partner_category_extension(orm.Model):
+    """
+    Extension of res_partner_category to expand its functionality as Roles.
+    The addition of group_ids to the roles lets us relate every role to the corresponding groups.
+    """
     _inherit = 'res.partner.category'
     _columns = {
         'group_ids': fields.many2many('res.groups', 'category_group_rel', 'category_id', 'group_id',
@@ -307,7 +311,12 @@ class nh_clinical_context(orm.Model):
 
 
 class nh_clinical_location(orm.Model):
-    """ Clinical LOCATION """
+    """
+    Clinical Location represents a place where a patient in the system may be located or an activity may take place.
+     There are different types of locations.
+     The most common usage is to have a Hospital as parent of a group of Wards which include several beds each where
+     patients can be placed.
+    """
 
     _name = 'nh.clinical.location'
     _types = [('poc', 'Point of Care'), ('structural', 'Structural'), ('virtual', 'Virtual'), ('pos', 'POS')]
@@ -847,6 +856,9 @@ class mail_message(osv.Model):
 
 
 class nh_clinical_specialty(orm.Model):
+    """
+    Specialty represent a doctor clinical specialty
+    """
 
     _name = 'nh.clinical.specialty'
     _description = 'A Clinical Specialty'
