@@ -10,6 +10,8 @@ fake = Faker()
 
 
 class nh_clinical_api_demo(orm.AbstractModel):
+    """PLACEHOLDER docstring"""
+
     _name = 'nh.clinical.api.demo'
     
     def __init__(self, pool, cr):

@@ -1,0 +1,5 @@
+``spell``
+=========
+
+.. automodule:: spell
+    :members:

@@ -1,0 +1,5 @@
+``auditing``
+============
+
+.. automodule:: auditing
+    :members:

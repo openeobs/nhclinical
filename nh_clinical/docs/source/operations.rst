@@ -1,0 +1,5 @@
+``operations``
+==============
+
+.. automodule:: operations
+    :members:

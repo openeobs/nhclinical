@@ -18,7 +18,16 @@ Module Reference
 .. toctree::
    :maxdepth: 3
 
-   modules
+   activity_extension
+   api
+   api_demo
+   adt
+   auditing
+   base
+   devices
+   operations
+   spell
+   userboard
 
 Additional Notes
 ----------------

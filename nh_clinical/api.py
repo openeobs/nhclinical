@@ -6,6 +6,8 @@ _logger = logging.getLogger(__name__)
 
 
 class nh_clinical_api(orm.AbstractModel):
+    """PLACEHOLDER Docstring"""
+
     _name = 'nh.clinical.api'
 
     def update(self, cr, uid, hospital_number, data, context=None):
