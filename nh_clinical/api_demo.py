@@ -10,7 +10,7 @@ fake = Faker()
 
 
 class nh_clinical_api_demo(orm.AbstractModel):
-    """PLACEHOLDER docstring"""
+    """Generates demo data for nh_clinical."""
 
     _name = 'nh.clinical.api.demo'
     

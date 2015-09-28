@@ -6,17 +6,22 @@
 Welcome to NH Clinical!
 =======================
 
+Welcome to NH Clinical - don't get cynical, get (NH) clinical.
+
 User's Guide
 ------------
 
 .. toctree::
    :maxdepth: 2
 
+   intro
+   getting-started
+
 Module Reference
 ----------------
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
 
    activity_extension
    api
@@ -35,11 +40,7 @@ Additional Notes
 .. toctree::
    :maxdepth: 2
 
+   contribute
+   changelog
 
-Indices and tables
-------------------
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
 

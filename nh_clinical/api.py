@@ -6,7 +6,7 @@ _logger = logging.getLogger(__name__)
 
 
 class nh_clinical_api(orm.AbstractModel):
-    """PLACEHOLDER Docstring"""
+    """Base API for nh_clinical"""
 
     _name = 'nh.clinical.api'
 

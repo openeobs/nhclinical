@@ -2,7 +2,13 @@
 =======
 
 .. automodule:: api
-   :members: nh_clinical_api
+
+
+``nh_clinical_api``
+-------------------
+
+.. autoclass:: nh_clinical_api
+    :members:
 
 
 
