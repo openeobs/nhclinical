@@ -1,19 +1,19 @@
 Introduction
 ============
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis
-nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+Cat slap dog in face meowing non stop for food lick butt. Chew on cable hunt
+anything that moves, so hide at bottom of staircase to trip human. Make muffins
+vommit food and eat it again.
 
 Why use NH Clinical?
 --------------------
-Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore
-eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident,
-sunt in culpa qui officia deserunt mollit anim id est laborum
+Leave dead animals as gifts damn that dog eat prawns daintily with a claw then
+lick paws clean wash down prawns with a lap of carnation milk then retire to
+the warmest spot on the couch to claw at the fabric before taking a catnap but
+peer out window, chatter at birds, lure them to mouth.
 
 Why not use NH Clinical?
 ------------------------
-Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium
-doloremque laudantiui totam rem aperiam, eaque ipsa quae ab illo inventore
-veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim
-ipsam voluptatem quia voluptas sit aspernatur aut odit au
+Put toy mouse in food bowl run out of litter box at full speed stare at
+ceiling, yet i am the best or the dog smells bad. Kitty loves pigs sleep on
+dog bed, force dog to sleep on floor hiss at vacuum cleaner.
