@@ -19,7 +19,6 @@ import shlex
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#sys.path.insert(0, os.path.abspath('/'))
 sys.path.insert(0, os.path.abspath('../../'))
 
 # -- General configuration ------------------------------------------------
@@ -44,7 +43,7 @@ templates_path = ['_templates']
 # mock Odoo modules
 autodoc_mock_imports = [
     'openerp.osv.orm', 'openerp.osv.osv', 'openerp.osv.fields',
-    'openerp.tools', 'openerp.SUPERUSER_ID', 'faker.Faker'
+    'openerp.tools', 'openerp.SUPERUSER_ID'
 ]
 
 # The suffix(es) of source filenames.
@@ -140,12 +139,13 @@ html_theme = 'alabaster'
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-#html_logo = None
+# html_logo = '_static/img/company_logo.png'
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
-#html_favicon = None
+# html_favicon = None
+
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -166,8 +166,14 @@ html_static_path = ['_static']
 #html_use_smartypants = True
 
 # Custom sidebar templates, maps document names to template names.
-#html_sidebars = {}
-
+html_sidebars = {
+    '**': [
+        'sidebarlogo.html',
+        'navigation.html',
+        'relations.html',
+        'searchbox.html',
+    ]
+}
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
 #html_additional_pages = {}
@@ -182,7 +188,7 @@ html_static_path = ['_static']
 #html_split_index = False
 
 # If true, links to the reST sources are added to the pages.
-#html_show_sourcelink = True
+html_show_sourcelink = False
 
 # If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
 #html_show_sphinx = True

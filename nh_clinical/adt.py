@@ -138,20 +138,22 @@ class nh_clinical_adt_patient_update(orm.Model):
 
 class nh_clinical_adt_patient_admit(orm.Model):
     """
-    Generates a patient admission to the provided Location.
+    Generates a patient admission to the provided location.
     A new ward location is generated, if it does not exist.
             
     Consulting and referring doctors are expected in the submitted
-    values on key='doctors' in format:
-       ``[...
-       {
-       'type': 'c' or 'r',
-       'code': code string,
-       'title':, 'given_name':, 'family_name':, }
-       ...]``
+    values in the following format::
+
+        [...
+            {
+                'type': 'c' or 'r', 'code': 'code_string,
+                'title': 'Mr', 'given_name': 'John',
+                'family_name': 'Smith'
+            }...
+        ]
        
-       If the doctor doesn't exist, then a partner is created
-       (but no user is created).
+    If doctor doesn't exist, then a partner is created (but no user is
+    created).
     """
     
     _name = 'nh.clinical.adt.patient.admit'

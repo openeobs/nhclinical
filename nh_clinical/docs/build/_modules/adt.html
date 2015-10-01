@@ -178,20 +178,22 @@
 </div>
 <div class="viewcode-block" id="nh_clinical_adt_patient_admit"><a class="viewcode-back" href="../adt.html#adt.nh_clinical_adt_patient_admit">[docs]</a><span class="k">class</span> <span class="nc">nh_clinical_adt_patient_admit</span><span class="p">(</span><span class="n">orm</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Generates a patient admission to the provided Location.</span>
+<span class="sd">    Generates a patient admission to the provided location.</span>
 <span class="sd">    A new ward location is generated, if it does not exist.</span>
 <span class="sd">            </span>
 <span class="sd">    Consulting and referring doctors are expected in the submitted</span>
-<span class="sd">    values on key=&#39;doctors&#39; in format:</span>
-<span class="sd">       ``[...</span>
-<span class="sd">       {</span>
-<span class="sd">       &#39;type&#39;: &#39;c&#39; or &#39;r&#39;,</span>
-<span class="sd">       &#39;code&#39;: code string,</span>
-<span class="sd">       &#39;title&#39;:, &#39;given_name&#39;:, &#39;family_name&#39;:, }</span>
-<span class="sd">       ...]``</span>
+<span class="sd">    values in the following format::</span>
+
+<span class="sd">        [...</span>
+<span class="sd">            {</span>
+<span class="sd">                &#39;type&#39;: &#39;c&#39; or &#39;r&#39;, &#39;code&#39;: &#39;code_string,</span>
+<span class="sd">                &#39;title&#39;: &#39;Mr&#39;, &#39;given_name&#39;: &#39;John&#39;,</span>
+<span class="sd">                &#39;family_name&#39;: &#39;Smith&#39;</span>
+<span class="sd">            }...</span>
+<span class="sd">        ]</span>
 <span class="sd">       </span>
-<span class="sd">       If the doctor doesn&#39;t exist, then a partner is created</span>
-<span class="sd">       (but no user is created).</span>
+<span class="sd">    If doctor doesn&#39;t exist, then a partner is created (but no user is</span>
+<span class="sd">    created).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="n">_name</span> <span class="o">=</span> <span class="s">&#39;nh.clinical.adt.patient.admit&#39;</span>
@@ -418,7 +420,7 @@
         <span class="k">return</span> <span class="n">res</span>
 
 </div>
-<div class="viewcode-block" id="nh_clinical_adt_patient_transfer"><a class="viewcode-back" href="../adt.html#adt.nh_clinical_adt_patient_transfer">[docs]</a><span class="k">class</span> <span class="nc">nh_clinical_adt_patient_transfer</span><span class="p">(</span><span class="n">orm</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">nh_clinical_adt_patient_transfer</span><span class="p">(</span><span class="n">orm</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transfers a patient from a location to another location.</span>
 <span class="sd">    It will trigger admission policy in the destination location.</span>
@@ -493,7 +495,7 @@
         <span class="n">activity_pool</span><span class="o">.</span><span class="n">complete</span><span class="p">(</span><span class="n">cr</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">transfer_id</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">res</span>
 
-</div>
+
 <div class="viewcode-block" id="nh_clinical_adt_patient_cancel_transfer"><a class="viewcode-back" href="../adt.html#adt.nh_clinical_adt_patient_cancel_transfer">[docs]</a><span class="k">class</span> <span class="nc">nh_clinical_adt_patient_cancel_transfer</span><span class="p">(</span><span class="n">orm</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Cancels the last patient transfer. Effectively moving the patient back to the origin location.</span>
@@ -693,7 +695,31 @@
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper"><div class="relations">
+        <div class="sphinxsidebarwrapper"><p class="logo"><a href="../index.html">
+<img class="logo" src="../_static/img/company_logo.png" alt="Logo"/>
+</a></p><h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting Started</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../activity_extension.html"><code class="docutils literal"><span class="pre">activity_extension</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html"><code class="docutils literal"><span class="pre">api</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_demo.html"><code class="docutils literal"><span class="pre">api_demo</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../adt.html"><code class="docutils literal"><span class="pre">adt</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../auditing.html"><code class="docutils literal"><span class="pre">auditing</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../base.html"><code class="docutils literal"><span class="pre">base</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../devices.html"><code class="docutils literal"><span class="pre">devices</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../operations.html"><code class="docutils literal"><span class="pre">operations</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spell.html"><code class="docutils literal"><span class="pre">spell</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../userboard.html"><code class="docutils literal"><span class="pre">userboard</span></code></a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contribute.html">Contribution Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+<div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>

@@ -3,10 +3,13 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to NH Clinical!
-=======================
+NH Clinical
+===========
 
-Welcome to NH Clinical - don't get cynical, get (NH) clinical.
+If it fits, i sits stretch, or spot something, big eyes, big eyes, crouch,
+shake butt, prepare to pounce leave fur on owners clothes refuse to drink water
+except out of someone's glass meow all night having their mate disturbing
+sleeping humans so refuse to drink water except out of someone's glass.
 
 User's Guide
 ------------

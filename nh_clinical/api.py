@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+"""
+``api.py`` defines the core methods to interface with the
+:mod:`adt` module.
+"""
+
 import logging
 
 from openerp.osv import orm, osv
@@ -6,7 +11,7 @@ _logger = logging.getLogger(__name__)
 
 
 class nh_clinical_api(orm.AbstractModel):
-    """Base API for nh_clinical"""
+    """Core API for nh_clinical"""
 
     _name = 'nh.clinical.api'
 
@@ -20,6 +25,8 @@ class nh_clinical_api(orm.AbstractModel):
             ``patient_identifier`` and ``other_identifier`` among
             others
         :type data: dict
+        :returns: ``True``
+        :rtype: bool
         """
 
         activity_pool = self.pool['nh.activity']
@@ -51,6 +58,8 @@ class nh_clinical_api(orm.AbstractModel):
         :param data: may contain the following keys:
             ``patient_identifier``, ``family_name``, ``given_name``,
             ``middle_names``, ``dob``, ``gender`` and ``sex``
+        :returns: ``True``
+        :rtype: bool
         """
 
         activity_pool = self.pool['nh.activity']
@@ -74,6 +83,8 @@ class nh_clinical_api(orm.AbstractModel):
             containing the following keys: ``type``, ``code``,
             ``title``, ``given_name`` and ``family_name``
         :type data: dict
+        :returns: ``True``
+        :rtype: bool
         """
 
         activity_pool = self.pool['nh.activity']
@@ -104,6 +115,8 @@ class nh_clinical_api(orm.AbstractModel):
         :param data: may contain ``other_identifier`` and
             ``patient_identifier`` among others
         :type data: dict
+        :returns: ``True``
+        :rtype: bool
         """
 
         activity_pool = self.pool['nh.activity']
@@ -131,6 +144,8 @@ class nh_clinical_api(orm.AbstractModel):
 
         :param hospital_number: hospital number of the patient
         :type hospital_number: str
+        :returns: ``True``
+        :rtype: bool
         """
 
         activity_pool = self.pool['nh.activity']
@@ -152,6 +167,8 @@ class nh_clinical_api(orm.AbstractModel):
         :type hospital_number: str
         :param data: may contain the key ``discharge_date``
         :type data: dict
+        :returns: ``True``
+        :rtype: bool
         """
 
         activity_pool = self.pool['nh.activity']
@@ -179,6 +196,8 @@ class nh_clinical_api(orm.AbstractModel):
 
         :param hospital_number: hospital number of the patient
         :type hospital_number: str
+        :returns: ``True``
+        :rtype: bool
         """
 
         patient_pool = self.pool['nh.clinical.patient']
@@ -200,6 +219,8 @@ class nh_clinical_api(orm.AbstractModel):
         :param data: may contain the key ``from_identifier``,
             the hospital number of the patient merged FROM
         :type data: dict
+        :returns: ``True``
+        :rtype: bool
         """
 
         patient_pool = self.pool['nh.clinical.patient']
@@ -222,6 +243,8 @@ class nh_clinical_api(orm.AbstractModel):
         :param data: required is ``location_code`` of the patient's transfer
             destination
         :type data: dict
+        :returns: ``True``
+        :rtype: bool
         """
 
         activity_pool = self.pool['nh.activity']
@@ -249,6 +272,8 @@ class nh_clinical_api(orm.AbstractModel):
 
         :param hospital_number: hospital number of the patient
         :type hospital_number: str
+        :returns: ``True``
+        :rtype: bool
         """
 
         patient_pool = self.pool['nh.clinical.patient']

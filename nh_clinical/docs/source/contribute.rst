@@ -1,5 +1,5 @@
-Contribution Guidlines
-======================
+Contribution Guidelines
+=======================
 
 Philosophy of Neova Health and NH Clinical
 ------------------------------------------

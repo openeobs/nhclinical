@@ -17,8 +17,7 @@
 .. autoclass:: nh_activity_data
     :members:
 
-``nh_clinical_activity_access``
--------------------------------
+``activity_access``
+-------------------
 .. autoclass:: nh_clinical_activity_access
     :members:
-
