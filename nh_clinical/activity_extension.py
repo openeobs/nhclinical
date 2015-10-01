@@ -24,7 +24,7 @@ def list2sqlstr(lst):
 
 class nh_cancel_reason(orm.Model):
     """
-    The reason for a cancellation of an activity.
+    Cancellation reason for an activity.
     """
 
     _name = 'nh.cancel.reason'
@@ -56,6 +56,20 @@ class nh_activity(orm.Model):
     }
 
     def write(self, cr, uid, ids, vals, context=None):
+        """
+        See Odoo ``write()``. In addition, writes the ``user_ids`` for
+        users responsible for the location of the activity. See
+        :mod:`base.nh_clinical_location`.
+
+        :param ids: nh_activity record ids
+        :type ids: list
+        :param vals: values to update records (may include
+            ``location_id``)
+        :type vals: dict
+        :returns: ``True``
+        :rtype: bool
+        """
+
         if not vals:
             vals = {}
         res = super(nh_activity, self).write(cr, uid, ids, vals, context=context)
@@ -67,6 +81,18 @@ class nh_activity(orm.Model):
         return res
 
     def cancel_open_activities(self, cr, uid, parent_id, model, context=None):
+        """
+        Cancels all open activities of parent activity.
+
+        :param parent_id: id of the parent activity
+        :type parent_id: int
+        :param model: model (type) of activity
+        :type model: str
+        :returns: `True` if all open activities are cancelled or if
+            there are no open activities. Otherwise, `False`
+        :rtype: bool
+        """
+
         domain = [('parent_id', '=', parent_id),
                   ('data_model', '=', model),
                   ('state', 'not in', ['completed', 'cancelled'])]
@@ -75,7 +101,7 @@ class nh_activity(orm.Model):
 
     def update_users(self, cr, uid, user_ids, context=None):
         """
-        Deletes all passed user_ids from all activities and
+        Removes users from responsible activities before
         Updates activities with user_ids who are responsible for activity location
         """
         if not user_ids:
