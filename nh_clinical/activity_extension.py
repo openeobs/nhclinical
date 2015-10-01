@@ -24,7 +24,7 @@ def list2sqlstr(lst):
 
 class nh_cancel_reason(orm.Model):
     """
-    The reason for a cancellation of an activity.
+    Cancellation reason for an activity.
     """
 
     _name = 'nh.cancel.reason'
@@ -46,6 +46,7 @@ class nh_activity(orm.Model):
         # identification
         'user_ids': fields.many2many('res.users', 'activity_user_rel', 'activity_id', 'user_id', 'Users', readonly=True),
         'patient_id': fields.many2one('nh.clinical.patient', 'Patient', readonly=True),
+        # 'device_id': fields.many2one('nh.clinical.device', 'Device', readonly=True),
         'location_id': fields.many2one('nh.clinical.location', 'Location', readonly=True),
         'location_name': fields.related('location_id', 'full_name', type='char', size=150, string='Location Name'),
         'pos_id': fields.many2one('nh.clinical.pos', 'POS', readonly=True),
@@ -56,9 +57,19 @@ class nh_activity(orm.Model):
 
     def write(self, cr, uid, ids, vals, context=None):
         """
-        write extension to automatically trigger an update on the user_ids field when the location_id of the activity
-        is changed.
+        See Odoo ``write()``. In addition, writes the ``user_ids`` for
+        users responsible for the location of the activity. See
+        :mod:`base.nh_clinical_location`.
+
+        :param ids: nh_activity record ids
+        :type ids: list
+        :param vals: values to update records (may include
+            ``location_id``)
+        :type vals: dict
+        :returns: ``True``
+        :rtype: bool
         """
+
         if not vals:
             vals = {}
         res = super(nh_activity, self).write(cr, uid, ids, vals, context=context)
@@ -71,12 +82,17 @@ class nh_activity(orm.Model):
 
     def cancel_open_activities(self, cr, uid, parent_id, model, context=None):
         """
-        Cancels all open activities (not on state 'completed' or 'cancelled') that share the provided parent_id and the
-        specified data type.
-        :param parent_id: activity id, usually of spell data type.
-        :param model: string specifying the activity data type.
-        :return: True if successful
+        Cancels all open activities of parent activity.
+
+        :param parent_id: id of the parent activity
+        :type parent_id: int
+        :param model: model (type) of activity
+        :type model: str
+        :returns: `True` if all open activities are cancelled or if
+            there are no open activities. Otherwise, `False`
+        :rtype: bool
         """
+
         domain = [('parent_id', '=', parent_id),
                   ('data_model', '=', model),
                   ('state', 'not in', ['completed', 'cancelled'])]
@@ -85,7 +101,7 @@ class nh_activity(orm.Model):
 
     def update_users(self, cr, uid, user_ids, context=None):
         """
-        Deletes all passed user_ids from all activities and
+        Removes users from responsible activities before
         Updates activities with user_ids who are responsible for activity location
         """
         if not user_ids:
