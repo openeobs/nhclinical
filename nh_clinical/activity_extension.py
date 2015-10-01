@@ -23,8 +23,10 @@ def list2sqlstr(lst):
 
 
 class nh_cancel_reason(orm.Model):
-    """cancellation reason
     """
+    The reason for a cancellation of an activity.
+    """
+
     _name = 'nh.cancel.reason'
     _columns = {
         'name': fields.char('Name', size=300),
@@ -33,8 +35,10 @@ class nh_cancel_reason(orm.Model):
 
     
 class nh_activity(orm.Model):
-    """ activity
     """
+    Extension of nh_activity.
+    """
+
     _name = 'nh.activity'
     _inherit = 'nh.activity'
     
@@ -148,6 +152,10 @@ class nh_activity(orm.Model):
  
     
 class nh_activity_data(orm.AbstractModel):
+    """
+    Extension of nh.activity.data.
+    """
+
     _inherit = 'nh.activity.data'
     _transitions = {
         'new': ['schedule', 'start', 'complete', 'cancel', 'submit', 'assign', 'unassign'],
@@ -387,7 +395,11 @@ class nh_activity_data(orm.AbstractModel):
         return True
 
 
-class nh_clinical_activity_access(orm.Model):    
+class nh_clinical_activity_access(orm.Model):
+    """
+    Extension of nh.clinical.activity.access.
+    """
+
     _name = 'nh.clinical.activity.access'
     _auto = False
     _columns = {
