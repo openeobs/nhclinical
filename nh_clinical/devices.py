@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""
+``devices.py`` defines a set of objects and activity types to deal with
+clinical devices management within the Hospital.
+"""
 
 import logging
 
