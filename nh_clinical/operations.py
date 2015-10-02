@@ -35,7 +35,7 @@ class nh_clinical_patient_move(orm.Model):
     def submit(self, cr, uid, activity_id, vals, context=None):
         """
         Checks the submitted data and then calls
-        :meth:`submit<activity.nh_activity_data.submit>`.
+        :meth:`submit<activity.nh_activity.submit>`.
 
         :returns: ``True``
         :rtype: bool
@@ -104,7 +104,7 @@ class nh_clinical_patient_swap_beds(orm.Model):
     def submit(self, cr, uid, activity_id, vals, context=None):
         """
         Checks the submitted data is correct and then calls
-        :meth:`submit<activity.nh_activity_data.submit>`.
+        :meth:`submit<activity.nh_activity.submit>`.
 
         :returns: ``True``
         :rtype: bool
@@ -277,7 +277,7 @@ class nh_clinical_patient_placement(orm.Model):
     def submit(self, cr, uid, activity_id, vals, context=None):
         """
         Checks the submitted data is correct and then calls
-        :meth:`submit<activity.nh_activity_data.submit>`.
+        :meth:`submit<activity.nh_activity.submit>`.
 
         :returns: ``True``
         :rtype: bool
@@ -307,7 +307,7 @@ class nh_clinical_patient_discharge(orm.Model):
     def submit(self, cr, uid, activity_id, vals, context=None):
         """
         Checks the submitted data is correct and then calls
-        :meth:`submit<activity.nh_activity_data.submit>`.
+        :meth:`submit<activity.nh_activity.submit>`.
 
         :returns: ``True``
         :rtype: bool
@@ -362,7 +362,7 @@ class nh_clinical_patient_discharge(orm.Model):
 
     def cancel(self, cr, uid, activity_id, context=None):
         """
-        Calls :meth:`cancel<activity.nh_activity_data.cancel>` and then
+        Calls :meth:`cancel<activity.nh_activity.cancel>` and then
         opens (changes state to `started`) the last completed patient
         :mod:`spell<spell.nh_clinical_spell>`.
 
@@ -458,7 +458,7 @@ class nh_clinical_patient_admission(orm.Model):
     def submit(self, cr, uid, activity_id, vals, context=None):
         """
         Checks the submitted data is correct and then calls
-        :meth:`submit<activity.nh_activity_data.submit>`.
+        :meth:`submit<activity.nh_activity.submit>`.
 
         :returns: ``True``
         :rtype: bool
@@ -523,7 +523,7 @@ class nh_clinical_patient_admission(orm.Model):
 
     def cancel(self, cr, uid, activity_id, context=None):
         """
-        Calls :meth:`cancel<activity.nh_activity_data.cancel>` and then
+        Calls :meth:`cancel<activity.nh_activity.cancel>` and then
         cancels every :class:`activity<activity.nh_activity>` related to
         the admission, including the current patient
         :mod:`spell<spell.nh_clinical_spell>`.
@@ -583,7 +583,7 @@ class nh_clinical_patient_transfer(orm.Model):
     def submit(self, cr, uid, activity_id, vals, context=None):
         """
         Checks the submitted data is correct and then calls
-        :meth:`submit<activity.nh_activity_data.submit>`.
+        :meth:`submit<activity.nh_activity.submit>`.
 
         :returns: ``True``
         :rtype: bool
@@ -637,7 +637,7 @@ class nh_clinical_patient_transfer(orm.Model):
 
     def cancel(self, cr, uid, activity_id, context=None):
         """
-        Calls :meth:`cancel<activity.nh_activity_data.cancel>` and then
+        Calls :meth:`cancel<activity.nh_activity.cancel>` and then
         if the origin `ward` usage location is different from where the
         current patient location is located, a new
         :mod:`movement<operations.nh_clinical_patient_move>` is created
