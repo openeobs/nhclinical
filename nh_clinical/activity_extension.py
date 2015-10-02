@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+"""
+Extends module :mod:`nh_activity<activity>`, introducing patients,
+spells, users and locations. See also :mod:`base` module for more
+information on their representative classes.
+"""
 from datetime import datetime as dt, timedelta as td
 import logging
 
@@ -36,7 +41,7 @@ class nh_cancel_reason(orm.Model):
     
 class nh_activity(orm.Model):
     """
-    Extension of nh_activity. See :mod:`activity`
+    Extends class :class:`nh_activity<activity.nh_activity>`.
     """
 
     _name = 'nh.activity'
@@ -57,11 +62,13 @@ class nh_activity(orm.Model):
 
     def write(self, cr, uid, ids, vals, context=None):
         """
-        See Odoo ``write()``. In addition, writes the ``user_ids`` for
-        users responsible for the location of the activity. See
-        :mod:`base.nh_clinical_location`.
+        Extends Odoo's :meth:`write()<openerp.models.Model.write>` method.
+        Also writes ``user_ids`` for responsible users of the
+        activities' location. See class
+        :mod:`nh_clinical_location<base.nh_clinical_location>`.
 
-        :param ids: :mod:`nh_activity` record ids
+        :param ids: :class:`nh_activity<activity.nh_activity>`
+            record ids
         :type ids: list
         :param vals: values to update records (may include
             ``location_id``)
@@ -88,8 +95,8 @@ class nh_activity(orm.Model):
         :type parent_id: int
         :param model: model (type) of activity
         :type model: str
-        :returns: `True` if all open activities are cancelled or if
-            there are no open activities. Otherwise, `False`
+        :returns: ``True`` if all open activities are cancelled or if
+            there are no open activities. Otherwise, ``False``
         :rtype: bool
         """
 
@@ -101,9 +108,16 @@ class nh_activity(orm.Model):
 
     def update_users(self, cr, uid, user_ids, context=None):
         """
-        Removes users from responsible activities before
-        Updates activities with user_ids who are responsible for activity location
+        Updates activities with the user_ids of users responsible for
+        the activities' locations.
+
+        :param user_ids: user ids. See class
+            :class:`res_users<base.res_users>`
+        :type user_ids: list
+        :returns: ``True``
+        :rtype: bool
         """
+
         if not user_ids:
             return True
 
@@ -132,7 +146,14 @@ class nh_activity(orm.Model):
 
     def update_spell_users(self, cr, uid, user_ids=[]):
         """
-        Updates spell activities with user_ids who are responsible for parent locations of spell location
+        Updates spell activities with the user_ids of users
+        responsible for parent locations of spell location.
+
+        :param user_ids: user ids. See class
+            :class:`res_users<base.res_users>`
+        :type user_ids: list
+        :returns: ``True``
+        :rtype: bool
         """
 
         if not user_ids:
@@ -179,7 +200,7 @@ class nh_activity(orm.Model):
     
 class nh_activity_data(orm.AbstractModel):
     """
-    Extension of nh.activity.data.
+    Extends class :class:`nh_activity_data<activity.nh_activity_data>`.
     """
 
     _inherit = 'nh.activity.data'
@@ -194,12 +215,18 @@ class nh_activity_data(orm.AbstractModel):
 
     def _audit_ward_manager(self, cr, uid, activity_id, context=None):
         """
-        Looks for the Activity Location and the Ward Manager responsible for the Ward where the Location is.
-        If there is a Ward Manager then it is stored in the 'ward_manager_id' field. If there is no location or
-        the location is not within a ward or there is not a ward manager assigned to the ward, then nothing will be
-        audited.
-        :return: True if the ward_manager_id is stored. False in any other case.
+        Writes ward_manager_id for ward manager responsible for the
+        activity's location. If location doesn't exist or it's not
+        within the ward or there's no ward assigned, then no audit
+        happens.
+
+        :param activity_id: activity id
+        :type activity_id: int
+        :return: ``True`` if the ward_manager_id is stored. Otherwise
+            ``False``
+        :rtype: bool
         """
+
         if isinstance(activity_id, list) and len(activity_id) == 1:
             activity_id = activity_id[0]
         activity_pool = self.pool['nh.activity']
@@ -219,23 +246,48 @@ class nh_activity_data(orm.AbstractModel):
 
     def complete(self, cr, uid, activity_id, context=None):
         """
-        Extension of the complete method to Audit the Ward Manager responsible for the ward where the activity was
-        completed.
+        Extends :meth:`complete()<activity.nh_activity_data.complete>`
+        method to audit the ward manager responsible for activity
+        location.
+
+        :param activity_id: activity id
+        :type activity_id: int
+        :return: ``True``
+        :rtype: bool
         """
+
         res = super(nh_activity_data, self).complete(cr, uid, activity_id, context=context)
         self._audit_ward_manager(cr, uid, activity_id, context=context)
         return res
 
     def cancel(self, cr, uid, activity_id, context=None):
         """
-        Extension of the cancel method to Audit the Ward Manager responsible for the ward where the activity was
-        cancelled.
+        Extends :meth:`cancel()<activity.nh_activity_data.complete>`
+        method to audit the ward manager responsible for activity
+        location.
+
+        :param activity_id: activity id
+        :type activity_id: int
+        :returns: ``True``
+        :rtype: bool
         """
+
         res = super(nh_activity_data, self).cancel(cr, uid, activity_id, context=context)
         self._audit_ward_manager(cr, uid, activity_id, context=context)
         return res
 
     def update_activity(self, cr, uid, activity_id, context=None):
+        """
+        Extends
+        :meth:`update_activity()<activity.nh_activity_data.update_activity>`
+        method.
+
+        :param activity_id: activity id of updated activity
+        :type activity_id: int
+        :returns: ``True``
+        :rtype: bool
+        """
+
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
         activity_vals = {}
@@ -263,8 +315,14 @@ class nh_activity_data(orm.AbstractModel):
 
     def get_activity_pos_id(self, cr, uid, activity_id, context=None):
         """
-        Returns pos_id for activity calculated based on activity data
+        Gets activity point of service (POST) id.
+
+        :param activity_id: activity id of updated activity
+        :type activity_id: int
+        :returns: POS id
+        :rtype: int
         """
+
         pos_id = False
         patient_pool = self.pool['nh.clinical.patient']
 
@@ -294,10 +352,13 @@ class nh_activity_data(orm.AbstractModel):
 
     def get_activity_location_id(self, cr, uid, activity_id, context=None):
         """
-        Returns pos_id for activity calculated based on activity data
-        Logic:
-        1. If activity_data has 'location_id' field and it is not False, returns value of the field
-        2. 
+        Gets the activity's location id.
+
+        :param activity_id: activity id
+        :type activity_id: int
+        :returns: location_id. See class
+            :mod:`nh_clinical_location<base.nh_clinical_location>`
+        :rtype: int
         """
         location_id = False
         data_ids = self.search(cr, uid, [('activity_id', '=', activity_id)])
@@ -314,6 +375,15 @@ class nh_activity_data(orm.AbstractModel):
         return location_id
 
     def get_activity_patient_id(self, cr, uid, activity_id, context=None):
+        """
+        Gets the activity's patient id.
+
+        :param activity_id: activity id
+        :type activity_id: int
+        :returns: patient_id. See class
+            :mod:`nh_clinical_patient<base.nh_clinical_patient>`
+        :rtype: int
+        """
         patient_id = False
         data_ids = self.search(cr, uid, [('activity_id', '=', activity_id)])
         data = self.browse(cr, uid, data_ids, context)[0]
@@ -323,6 +393,14 @@ class nh_activity_data(orm.AbstractModel):
         return patient_id
     
     def get_activity_user_ids(self, cr, uid, activity_id, context=None):
+        """
+        Gets the activity's user ids.
+
+        :param activity_id: activity id
+        :type activity_id: int
+        :returns: patient_id. See class :mod:`res_users<base.res_users>`
+        :rtype: list
+        """
         activity_pool = self.pool['nh.activity']
         cr.execute("select location_id from nh_activity where id = %s" % activity_id)
         if not cr.fetchone()[0]:
@@ -354,17 +432,19 @@ class nh_activity_data(orm.AbstractModel):
 
     def trigger_policy(self, cr, uid, activity_id, location_id=None, case=False, context=None):
         """
-        triggers the list of activities in the _POLICY['activities'] list.
-        location_id [optional]. Required for context checking.
-        - Every element in the list is a dictionary that contain the following keys:
-            model: name of the data_model of the activity that is going to be triggered
-            context: name of the context if the activity is only triggered in a specific context
-            type: start, schedule, complete or recurring. Will do different actions with the created activity.
-            data: data to submit.
-            create_data: data to add on creation. Dictionary that contains the following structure:
-                key: value
-                being key the name of the attribute where we want to store the value and value the place to browse it from
-                the current activity. i.e. 'location_id': 'data_ref.location_id.id' will add vals {'location_id': activity.data_ref.location_id.id}
+        Triggers the list of activities in the ``_POLICY['activities']``
+        list.
+
+        :param activity_id: id of activity triggering policy
+        :type activity_id: int
+        :param location_id: location id [optional].
+            Required for checking context
+        :type location_id: int
+        :param case: default ``False``. Otherwise integer related to
+            risk of patient
+        :type case: bool or int
+        :returns: ``True``
+        :rtype: bool
         """
         activity_pool = self.pool['nh.activity']
         spell_pool = self.pool['nh.clinical.spell']
@@ -423,7 +503,9 @@ class nh_activity_data(orm.AbstractModel):
 
 class nh_clinical_activity_access(orm.Model):
     """
-    Extension of nh.clinical.activity.access.
+    Adds an additional permission type called ``perm_responsibility``
+    to an activity. This defines if a particular user group can or
+    cannot perform an activity.
     """
 
     _name = 'nh.clinical.activity.access'
@@ -434,7 +516,7 @@ class nh_clinical_activity_access(orm.Model):
         'parent_location_ids_text': fields.text('Parent Location IDS Text'),
         'location_activity_ids_text': fields.text('Activity IDS Text'),
         'parent_location_activity_ids_text': fields.text('Parent Location Activity IDS Text'),      
-                }
+    }
 
     def init(self, cr):
          
