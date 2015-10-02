@@ -50,7 +50,8 @@ class nh_clinical_adt_patient_register(orm.Model):
 
     def submit(self, cr, uid, activity_id, vals, context=None):
         """
-        Checks the patient data is correct and then calls ``submit``
+        Checks the patient data is correct and then calls
+        :meth:`submit<activity.nh_activity.submit>`.
 
         :returns: ``True``
         :rtype: bool
@@ -62,10 +63,11 @@ class nh_clinical_adt_patient_register(orm.Model):
     
     def complete(self, cr, uid, activity_id, context=None):
         """
-        Creates a new instance of :mod:`base.nh_clinical_patient` and
-        then calls ``complete``
+        Creates a new instance of
+        :mod:`patient<base.nh_clinical_patient>` and
+        then calls :meth:`complete<activity.nh_activity.complete>`.
 
-        :returns: :mod:`base.nh_clinical_patient` id
+        :returns: :mod:`patient<base.nh_clinical_patient>` id
         :rtype: int
         """
         activity_pool = self.pool['nh.activity']
@@ -127,7 +129,8 @@ class nh_clinical_adt_patient_update(orm.Model):
 
     def submit(self, cr, uid, activity_id, vals, context=None):
         """
-        Checks the patient data is correct and then calls ``submit``
+        Checks the patient data is correct and then calls
+        :meth:`submit<activity.nh_activity.submit>`.
 
         :returns: ``True``
         :rtype: bool
@@ -139,8 +142,9 @@ class nh_clinical_adt_patient_update(orm.Model):
 
     def complete(self, cr, uid, activity_id, context=None):
         """
-        Overwrites the target :mod:`base.nh_clinical_patient` instance
-        information and then calls ``complete``
+        Overwrites the target :mod:`patient<base.nh_clinical_patient>`
+        instance information and then calls
+        :meth:`complete<activity.nh_activity.complete>`.
 
         :returns: ``True``
         :rtype: bool
@@ -202,15 +206,17 @@ class nh_clinical_adt_patient_admit(orm.Model):
 
     def submit(self, cr, uid, activity_id, vals, context=None):
         """
-        Checks the submitted data and then calls ``submit``
+        Checks the submitted data and then calls
+        :meth:`submit<activity.nh_activity.submit>`.
 
-        If a :mod:`base.nh_clinical_location` of ``ward`` usage with the
-        provided code does not exist, it will create a new one.
+        If a :mod:`location<base.nh_clinical_location>` of `ward` usage
+        with the provided code does not exist, it will create a new one.
 
         Due to this behaviour the user submitting the data must be
-        related to a :mod:`base.nh_clinical_pos` linked to a valid
-        :mod:`base.nh_clinical_location` instance of ``pos`` type, as
-        new Wards will need to be assigned to a Point of Service.
+        related to a :mod:`point of service<base.nh_clinical_pos>`
+        linked to a valid :mod:`location<base.nh_clinical_location>`
+        instance of `pos` type, as new Wards will need to be assigned to
+        a point of service.
 
         :returns: ``True``
         :rtype: bool
@@ -244,9 +250,10 @@ class nh_clinical_adt_patient_admit(orm.Model):
 
     def complete(self, cr, uid, activity_id, context=None):
         """
-        Calls ``complete`` and then creates and completes a new
-        :mod:`operations.nh_clinical_patient_admission` to the provided
-        location.
+        Calls :meth:`complete<activity.nh_activity.complete>` and then
+        creates and completes a new
+        :mod:`admission<operations.nh_clinical_patient_admission>` to
+        the provided location.
 
         :returns: ``True``
         :rtype: bool
@@ -293,8 +300,9 @@ class nh_clinical_adt_patient_cancel_admit(orm.Model):
     def submit(self, cr, uid, activity_id, vals, context=None):
         """
         Checks the submitted data is correct, finding the last completed
-        instance of :mod:`operations.nh_clinical_patient_admission`
-        and then calls ``submit``
+        instance of
+        :mod:`admission<operations.nh_clinical_patient_admission>`
+        and then calls :meth:`submit<activity.nh_activity.submit>`.
 
         :returns: ``True``
         :rtype: bool
@@ -318,9 +326,10 @@ class nh_clinical_adt_patient_cancel_admit(orm.Model):
 
     def complete(self, cr, uid, activity_id, context=None):
         """
-        Calls ``complete`` and then cancels the last completed
-        :mod:`operations.nh_clinical_patient_admission` for the provided
-        patient.
+        Calls :meth:`complete<activity.nh_activity.complete>` and then
+        cancels the last `completed`
+        :mod:`admission<operations.nh_clinical_patient_admission>` for
+        the provided patient.
 
         :returns: ``True``
         :rtype: bool
@@ -351,13 +360,14 @@ class nh_clinical_adt_patient_discharge(orm.Model):
 
     def submit(self, cr, uid, activity_id, vals, context=None):
         """
-        Checks the submitted data and then calls ``submit``
+        Checks the submitted data and then calls
+        :meth:`submit<activity.nh_activity.submit>`.
 
-        Creates a new :mod:`spell.nh_clinical_spell` for the provided
-        patient if there is not an open instance related to it.
-        Requires the user to be linked to a :mod:`base.nh_clinical_pos`
-        due to similar behaviour as the admission in this particular
-        scenario.
+        Creates a new :mod:`spell<spell.nh_clinical_spell>` for the
+        provided patient if there is not an open instance related to it.
+        Requires the user to be linked to a
+        :mod:`point of service<base.nh_clinical_pos>` due to similar
+        behaviour as the admission in this particular scenario.
 
         :returns: ``True``
         :rtype: bool
@@ -411,9 +421,10 @@ class nh_clinical_adt_patient_discharge(orm.Model):
 
     def complete(self, cr, uid, activity_id, context=None):
         """
-        Calls ``complete`` and then creates and completes a new
-        :mod:`operations.nh_clinical_patient_discharge` for the provided
-        patient.
+        Calls :meth:`complete<activity.nh_activity.complete>` and then
+        creates and completes a new
+        :mod:`discharge<operations.nh_clinical_patient_discharge>` for
+        the provided patient.
 
         :returns: ``True``
         :rtype: bool
@@ -448,9 +459,10 @@ class nh_clinical_adt_patient_cancel_discharge(orm.Model):
 
     def submit(self, cr, uid, activity_id, vals, context=None):
         """
-        Checks the submitted data is correct, finding the last completed
-        instance of :mod:`operations.nh_clinical_patient_discharge`
-        and then calls ``submit``
+        Checks the submitted data is correct, finding the last
+        `completed` instance of
+        :mod:`discharge<operations.nh_clinical_patient_discharge>`
+        and then calls :meth:`submit<activity.nh_activity.submit>`.
 
         :returns: ``True``
         :rtype: bool
@@ -469,9 +481,10 @@ class nh_clinical_adt_patient_cancel_discharge(orm.Model):
 
     def complete(self, cr, uid, activity_id, context=None):
         """
-        Calls ``complete`` and then cancels the last completed
-        :mod:`operations.nh_clinical_patient_discharge` for the provided
-        patient.
+        Calls :meth:`complete<activity.nh_activity.complete>` and then
+        cancels the last `completed`
+        :mod:`discharge<operations.nh_clinical_patient_discharge>` for
+        the provided patient.
 
         :returns: ``True``
         :rtype: bool
@@ -505,14 +518,15 @@ class nh_clinical_adt_patient_transfer(orm.Model):
     
     def submit(self, cr, uid, activity_id, vals, context=None):
         """
-        Checks the submitted data and then calls ``submit``
+        Checks the submitted data and then calls
+        :meth:`submit<activity.nh_activity.submit>`.
 
-        Creates a new :mod:`spell.nh_clinical_spell` for the provided
-        patient if there is not an open instance related to it and
-        an origin location for the transfer was provided.
-        Requires the user to be linked to a :mod:`base.nh_clinical_pos`
-        due to similar behaviour as the admission in this particular
-        scenario.
+        Creates a new :mod:`spell<spell.nh_clinical_spell>` for the
+        provided patient if there is not an open instance related to it
+        and an origin location for the transfer was provided.
+        Requires the user to be linked to a
+        :mod:`point of service<base.nh_clinical_pos>` due to similar
+        behaviour as the admission in this particular scenario.
 
         :returns: ``True``
         :rtype: bool
@@ -560,9 +574,10 @@ class nh_clinical_adt_patient_transfer(orm.Model):
 
     def complete(self, cr, uid, activity_id, context=None):
         """
-        Calls ``complete`` and then creates and completes a new
-        :mod:`operations.nh_clinical_patient_transfer` for the provided
-        patient.
+        Calls :meth:`complete<activity.nh_activity.complete>` and then
+        creates and completes a new
+        :mod:`transfer<operations.nh_clinical_patient_transfer>` for the
+        provided patient.
 
         :returns: ``True``
         :rtype: bool
@@ -599,9 +614,10 @@ class nh_clinical_adt_patient_cancel_transfer(orm.Model):
 
     def submit(self, cr, uid, activity_id, vals, context=None):
         """
-        Checks the submitted data is correct, finding the last completed
-        instance of :mod:`operations.nh_clinical_patient_transfer`
-        and then calls ``submit``
+        Checks the submitted data is correct, finding the last
+        `completed` instance of
+        :mod:`transfer<operations.nh_clinical_patient_transfer>`
+        and then calls :meth:`submit<activity.nh_activity.submit>`.
 
         :returns: ``True``
         :rtype: bool
@@ -620,9 +636,10 @@ class nh_clinical_adt_patient_cancel_transfer(orm.Model):
 
     def complete(self, cr, uid, activity_id, context=None):
         """
-        Calls ``complete`` and then cancels the last completed
-        :mod:`operations.nh_clinical_patient_transfer` for the provided
-        patient.
+        Calls :meth:`complete<activity.nh_activity.complete>` and then
+        cancels the last `completed`
+        :mod:`transfer<operations.nh_clinical_patient_transfer>` for the
+        provided patient.
 
         :returns: ``True``
         :rtype: bool
@@ -659,15 +676,17 @@ class nh_clinical_adt_spell_update(orm.Model):
 
     def submit(self, cr, uid, activity_id, vals, context=None):
         """
-        Checks the submitted data and then calls ``submit``
+        Checks the submitted data and then calls
+        :meth:`submit<activity.nh_activity.submit>`.
 
-        If a :mod:`base.nh_clinical_location` of ``ward`` usage with the
-        provided code does not exist, it will create a new one.
+        If a :mod:`location<base.nh_clinical_location>` of `ward` usage
+        with the provided code does not exist, it will create a new one.
 
         Due to this behaviour the user submitting the data must be
-        related to a :mod:`base.nh_clinical_pos` linked to a valid
-        :mod:`base.nh_clinical_location` instance of ``pos`` type, as
-        new Wards will need to be assigned to a Point of Service.
+        related to a :mod:`point of service<base.nh_clinical_pos>`
+        linked to a valid :mod:`location<base.nh_clinical_location>`
+        instance of `pos` type, as new Wards will need to be assigned
+        to a point of service.
 
         :returns: ``True``
         :rtype: bool
@@ -708,16 +727,18 @@ class nh_clinical_adt_spell_update(orm.Model):
 
     def complete(self, cr, uid, activity_id, context=None):
         """
-        Overwrites the target :mod:`spell.nh_clinical_spell` instance
-        information and then calls ``complete``
+        Overwrites the target :mod:`spell<spell.nh_clinical_spell>`
+        information and then calls
+        :meth:`complete<activity.nh_activity.complete>`.
 
         If location information needs to be updated a new instance of
-        :mod:`operations.nh_clinical_patient_movement` is created and
-        completed.
+        :mod:`movement<operations.nh_clinical_patient_move>` is created
+        and completed.
 
         If the new location is located in a different Ward than the
-        current spell location, a policy trigger will be kicked off. As
-        that is technically a transfer movement.
+        current spell location, a
+        :meth:`policy trigger<activity.nh_activity_data.trigger_policy>`
+        will be kicked off. As that is technically a transfer movement.
 
         :returns: ``True``
         :rtype: bool
@@ -773,7 +794,8 @@ class nh_clinical_adt_patient_merge(orm.Model):
     
     def submit(self, cr, uid, activity_id, vals, context=None):
         """
-        Checks the submitted data and then calls ``submit``
+        Checks the submitted data and then calls
+        :meth:`submit<activity.nh_activity.submit>`.
 
         :returns: ``True``
         :rtype: bool
@@ -792,12 +814,13 @@ class nh_clinical_adt_patient_merge(orm.Model):
         
     def complete(self, cr, uid, activity_id, context=None):
         """
-        Calls ``complete`` and then adds every piece of information that
-        the source patient has and the destination patient lacks into
-        the destination patient.
+        Calls :meth:`complete<activity.nh_activity.complete>` and then
+        adds every piece of information that the source patient has and
+        the destination patient lacks into the destination patient.
 
         The destination patient ends up being linked to all the
-        activities both patients were linked to.
+        :class:`activities<activity.nh_activity>` both patients were
+        linked to.
 
         :returns: ``True``
         :rtype: bool
