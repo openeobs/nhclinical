@@ -9,8 +9,9 @@ _logger = logging.getLogger(__name__)
 
 class nh_clinical_device_category(orm.Model):
     """
-    Represents a device category which groups several
-    :mod:`devices.nh_clinical_device_type` into it.
+    Represents a group of
+    :mod:`device types<devices.nh_clinical_device_type>` that share the
+    same category / specialty (i.e. surgical).
     """
     _name = 'nh.clinical.device.category'
 
@@ -22,7 +23,8 @@ class nh_clinical_device_category(orm.Model):
 
 class nh_clinical_device_type(orm.Model):
     """
-    Represents the specific device type of a :mod:`devices.nh_clinical_device`
+    Represents a specific device type of a
+    :mod:`device<devices.nh_clinical_device>`
     """
     _name = 'nh.clinical.device.type'
     _columns = {
@@ -58,10 +60,10 @@ class nh_clinical_device(orm.Model):
 class nh_clinical_device_session(orm.Model):
     """
     Represents a period of time where an instance of
-    :mod:`devices.nh_clinical_device` or
-    :mod:`devices.nh_clinical_device_type` (the specific physical
-    instance of the device is not required) is being used during a
-    :mod:`spell.nh_clinical_spell`
+    :mod:`device<devices.nh_clinical_device>` or
+    :mod:`device type<devices.nh_clinical_device_type>` (the specific
+    physical instance of the device is not required) is being used
+    during a :mod:`spell<spell.nh_clinical_spell>`
     """
     _name = 'nh.clinical.device.session'
     _description = 'Device Session'
@@ -79,8 +81,9 @@ class nh_clinical_device_session(orm.Model):
 
     def start(self, cr, uid, activity_id, context=None):
         """
-        Sets the specified :mod:`devices.nh_clinical_device` as not
-        available and calls ``start``.
+        Sets the specified :mod:`device<devices.nh_clinical_device>` as
+        not available and calls
+        :meth:`start<activity.nh_activity.start>`.
 
         :returns: ``True``
         :rtype: bool
@@ -94,8 +97,9 @@ class nh_clinical_device_session(orm.Model):
         
     def complete(self, cr, uid, activity_id, context=None):
         """
-        Sets the specified :mod:`devices.nh_clinical_device` as
-        available and calls ``complete``.
+        Sets the specified :mod:`device<devices.nh_clinical_device>` as
+        available and calls
+        :meth:`complete<activity.nh_activity.complete>`.
 
         :returns: ``True``
         :rtype: bool
@@ -114,11 +118,11 @@ class nh_clinical_device_session(orm.Model):
          It will throw a warning if finds more than one, as the method
          will only return the last started one.
 
-         :param patient_id: :mod:`base.nh_clinical_patient` id
+         :param patient_id: :mod:`patient<base.nh_clinical_patient>` id
          :type patient_id: int
-         :param device_type_id: :mod:`devices.nh_clinical_device_type` id
+         :param device_type_id: :mod:`device type<devices.nh_clinical_device_type>` id
          :type device_type_id: int
-         :returns: :mod:`devices.nh_clinical_device_session` id
+         :returns: :mod:`device session<devices.nh_clinical_device_session>` id
          :rtype: int
         """
         domain = [
@@ -150,7 +154,8 @@ class nh_clinical_device_connect(orm.Model):
 
     def submit(self, cr, uid, activity_id, vals, context=None):
         """
-        Checks the submitted data and calls ``submit``.
+        Checks the submitted data and calls
+        :meth:`submit<activity.nh_activity.submit>`.
 
         :returns: ``True``
         :rtype: bool
@@ -179,8 +184,8 @@ class nh_clinical_device_connect(orm.Model):
     def complete(self, cr, uid, activity_id, context=None):
         """
         Creates and starts a new
-        :mod:`devices.nh_clinical_device_session` and then calls
-        ``complete``.
+        :mod:`device session<devices.nh_clinical_device_session>` and
+        then calls :meth:`complete<activity.nh_activity.complete>`.
 
         :returns: ``True``
         :rtype: bool
@@ -217,10 +222,11 @@ class nh_clinical_device_disconnect(orm.Model):
 
     def submit(self, cr, uid, activity_id, vals, context=None):
         """
-        Checks the submitted data is correct, finding the last started
-        :mod:`devices.nh_clinical_device_session` for the provided
-        device or device type (if the specific device is not provided)
-        and calls ``submit``.
+        Checks the submitted data is correct, finding the last `started`
+        :mod:`device session<devices.nh_clinical_device_session>` for
+        the provided device or device type (if the specific device is
+        not provided) and calls
+        :meth:`submit<activity.nh_activity.submit>`.
 
         :returns: ``True``
         :rtype: bool
@@ -257,8 +263,9 @@ class nh_clinical_device_disconnect(orm.Model):
 
     def complete(self, cr, uid, activity_id, context=None):
         """
-        Completes the related :mod:`devices.nh_clinical_device_session`
-        and then calls ``complete``.
+        Completes the related
+        :mod:`device session<devices.nh_clinical_device_session>`
+        and then calls :meth:`complete<activity.nh_activity.complete>`.
 
         :returns: ``True``
         :rtype: bool
