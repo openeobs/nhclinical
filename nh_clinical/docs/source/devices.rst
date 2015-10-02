@@ -9,30 +9,25 @@
 
 ``device_type``
 ---------------
-.. autoclass: nh_clinical_device_type
+.. autoclass:: nh_clinical_device_type
     :members:
 
 ``device``
 ----------
-.. autoclass: nh_clinical_device
+.. autoclass:: nh_clinical_device
     :members:
 
 ``device_session``
 ------------------
-.. autoclass: nh_clinical_device_session
+.. autoclass:: nh_clinical_device_session
     :members:
 
 ``device_connect``
 ------------------
-.. autoclass: nh_clinical_device_connect
+.. autoclass:: nh_clinical_device_connect
     :members:
 
 ``device_disconnect``
 ---------------------
-.. autoclass: nh_clinical_device_disconnect
-    :members:
-
-``device_observation``
-----------------------
-.. autoclass: nh_clinical_device_observation
+.. autoclass:: nh_clinical_device_disconnect
     :members:
