@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-NH Clinical
+NH Activity
 ===========
 
 If it fits, i sits stretch, or spot something, big eyes, big eyes, crouch,
