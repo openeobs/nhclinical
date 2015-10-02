@@ -36,7 +36,7 @@ class nh_cancel_reason(orm.Model):
     
 class nh_activity(orm.Model):
     """
-    Extension of nh_activity.
+    Extension of nh_activity. See :mod:`activity`
     """
 
     _name = 'nh.activity'
@@ -61,7 +61,7 @@ class nh_activity(orm.Model):
         users responsible for the location of the activity. See
         :mod:`base.nh_clinical_location`.
 
-        :param ids: nh_activity record ids
+        :param ids: :mod:`nh_activity` record ids
         :type ids: list
         :param vals: values to update records (may include
             ``location_id``)
