@@ -1,3 +1,9 @@
+"""
+``operations.py`` defines a set of activity types to deal with
+hospital administrative tasks like patient movements, admissions,
+discharge, etc.
+"""
+
 import logging
 
 from openerp.osv import orm, fields, osv
