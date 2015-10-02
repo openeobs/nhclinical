@@ -7,6 +7,13 @@ _logger = logging.getLogger(__name__)
 
 
 class nh_clinical_patient_move(orm.Model):
+    """
+    Represents any physical patient movement between different instances
+    of :mod:`location<base.nh_clinical_location>`.
+
+    It is meant to work as an audit mechanism to track any patient
+    movements within the Hospital.
+    """
     _name = 'nh.clinical.patient.move'
     _inherit = ['nh.activity.data']
     _description = "Patient Move"
@@ -26,6 +33,13 @@ class nh_clinical_patient_move(orm.Model):
     _order = 'id desc'
 
     def submit(self, cr, uid, activity_id, vals, context=None):
+        """
+        Checks the submitted data and then calls
+        :meth:`submit<activity.nh_activity_data.submit>`.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         data = vals.copy()
         if 'patient_id' in vals and 'parent_id' not in vals:
             spell_pool = self.pool['nh.clinical.spell']
@@ -37,6 +51,14 @@ class nh_clinical_patient_move(orm.Model):
         return super(nh_clinical_patient_move, self).submit(cr, uid, activity_id, data, context=context)
 
     def complete(self, cr, uid, activity_id, context=None):
+        """
+        Updates the patient ``current_location_id`` and the related
+        :mod:`spell<spell.nh_clinical_spell>` ``location_id`` and then
+        calls :meth:`complete<activity.nh_activity.complete>`.
+
+        :returns: ``True``
+        :rtype:  bool
+        """
         activity_pool = self.pool['nh.activity']
         patient_pool = self.pool['nh.clinical.patient']
         activity = activity_pool.browse(cr, uid, activity_id, context)
@@ -59,6 +81,16 @@ class nh_clinical_patient_move(orm.Model):
 
 
 class nh_clinical_patient_swap_beds(orm.Model):
+    """
+    Represents the simultaneous movement of two patients that are
+    located in `bed` usage :mod:`location<base.nh_clinical_location>`
+    instances.
+    The patients will end placed in the location the other patient was
+    in.
+
+    It is meant to be used to move patients specially when there are no
+    available beds to use as a buffer, although it can be used any time.
+    """
     _name = 'nh.clinical.patient.swap_beds'
     _inherit = ['nh.activity.data']
     _description = "Patient Swap"
@@ -70,6 +102,13 @@ class nh_clinical_patient_swap_beds(orm.Model):
     }
 
     def submit(self, cr, uid, activity_id, vals, context=None):
+        """
+        Checks the submitted data is correct and then calls
+        :meth:`submit<activity.nh_activity_data.submit>`.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         res = super(nh_clinical_patient_swap_beds, self).submit(cr, uid, activity_id, vals, context=context)
         activity_pool = self.pool['nh.activity']
         location_pool = self.pool['nh.clinical.location']
@@ -88,6 +127,14 @@ class nh_clinical_patient_swap_beds(orm.Model):
         return res
 
     def complete(self, cr, uid, activity_id, context=None):
+        """
+        Creates and completes a
+        :mod:`movement<operations.nh_clinical_patient_move>` for each
+        patient to swap their locations.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         activity_pool = self.pool['nh.activity']
         move_pool = self.pool['nh.clinical.patient.move']
         spell_pool = self.pool['nh.clinical.spell']
@@ -113,6 +160,10 @@ class nh_clinical_patient_swap_beds(orm.Model):
 
 
 class nh_clinical_patient_placement(orm.Model):
+    """
+    Represents the action of assigning a `bed` usage
+    :mod:`location<base.nh_clinical_location>` to an admitted patient.
+    """
     _name = 'nh.clinical.patient.placement'
     _inherit = ['nh.activity.data']
     _description = "Patient Placement"
@@ -140,6 +191,16 @@ class nh_clinical_patient_placement(orm.Model):
     ]
 
     def get_form_description(self, cr, uid, patient_id, context=None):
+        """
+         Returns a description in dictionary format of the input fields
+         that would be required in the user gui when completing this
+         action.
+
+        :param patient_id: :mod:`patient<base.nh_clinical_patient>` id
+        :type patient_id: int
+        :returns: a list of dictionaries
+        :rtype: list
+        """
         activity_pool = self.pool['nh.activity']
         location_pool = self.pool['nh.clinical.location']
         fd = list(self._form_description)
@@ -164,11 +225,31 @@ class nh_clinical_patient_placement(orm.Model):
         return fd
 
     def get_activity_location_id(self, cr, uid, activity_id, context=None):
+        """
+        Returns the :mod:`location<base.nh_clinical_location>` where the
+        patient is waiting to be placed, usually of `ward` usage.
+
+        :returns: :mod:`location<base.nh_clinical_location>` id
+        :rtype: int
+        """
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context)
         return activity.data_ref.suggested_location_id.id
 
     def complete(self, cr, uid, activity_id, context=None):
+        """
+        Calls :meth:`complete<activity.nh_activity.complete>` and then
+        creates and completes a
+        :mod:`movement<operations.nh_clinical_patient_move>` to the
+        selected `bed` usage location.
+
+        This operation will kick off a policy trigger as Hospitals
+        usually start observations or measurements on patients after
+        this action is taken.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         activity_pool = self.pool['nh.activity']
         spell_pool = self.pool['nh.clinical.spell']
         move_pool = self.pool['nh.clinical.patient.move']
@@ -194,6 +275,13 @@ class nh_clinical_patient_placement(orm.Model):
         return res
 
     def submit(self, cr, uid, activity_id, vals, context=None):
+        """
+        Checks the submitted data is correct and then calls
+        :meth:`submit<activity.nh_activity_data.submit>`.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         if vals.get('location_id'):
             location_pool = self.pool['nh.clinical.location']
             available_bed_location_ids = location_pool.get_available_location_ids(cr, uid, ['bed'], context=context)
@@ -203,6 +291,10 @@ class nh_clinical_patient_placement(orm.Model):
 
 
 class nh_clinical_patient_discharge(orm.Model):
+    """
+    Represents the action of a patient leaving the Hospital after
+    completing his or her visit for any reason.
+    """
     _name = 'nh.clinical.patient.discharge'
     _inherit = ['nh.activity.data']
 
@@ -213,6 +305,13 @@ class nh_clinical_patient_discharge(orm.Model):
     }
 
     def submit(self, cr, uid, activity_id, vals, context=None):
+        """
+        Checks the submitted data is correct and then calls
+        :meth:`submit<activity.nh_activity_data.submit>`.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         data = vals.copy()
         if 'patient_id' in vals:
             spell_pool = self.pool['nh.clinical.spell']
@@ -226,6 +325,19 @@ class nh_clinical_patient_discharge(orm.Model):
         return super(nh_clinical_patient_discharge, self).submit(cr, uid, activity_id, data, context=context)
 
     def complete(self, cr, uid, activity_id, context=None):
+        """
+        Calls :meth:`complete<activity.nh_activity.complete>` and then
+        creates and completes a new
+        :mod:`movement<operations.nh_clinical_patient_move>` to the
+        discharge location, which is a virtual location representing
+        the patient is no longer in the Hospital.
+
+        It will also complete the current
+        :mod:`spell<spell.nh_clinical_spell>`.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         res = super(nh_clinical_patient_discharge, self).complete(cr, uid, activity_id, context=context)
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, SUPERUSER_ID, activity_id, context=context)
@@ -249,6 +361,25 @@ class nh_clinical_patient_discharge(orm.Model):
         return res
 
     def cancel(self, cr, uid, activity_id, context=None):
+        """
+        Calls :meth:`cancel<activity.nh_activity_data.cancel>` and then
+        opens (changes state to `started`) the last completed patient
+        :mod:`spell<spell.nh_clinical_spell>`.
+
+        It will also create and complete a
+        :mod:`movement<operations.nh_clinical_patient_move>` to the
+        `bed` location the patient was previously located if it is still
+        available. If not, the patient will be moved to the
+        corresponding `ward` location parent of that `bed`.
+
+        This operation will kick off a
+        :meth:`policy trigger<activity.nh_activity_data.trigger_policy>`
+        as this is technically equivalent to an admission back to the
+        Hospital.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
         admission_pool = self.pool['nh.clinical.patient.admission']
@@ -282,12 +413,13 @@ class nh_clinical_patient_discharge(orm.Model):
 
     def get_last(self, cr, uid, patient_id, exception=False, context=None):
         """
-        Checks if there is a completed discharge for the provided Patient
-        :param exception: String with value 'True' or 'False'
-        :return: if no exception parameter is provided: activity id of the most recent completed discharge if exists.
-                False if not.
-                if exception 'True': Patien Already Discharged exception is raised if discharge found.
-                if exception 'False': No Discharge Found exception is raised if no discharge found.
+        Checks if there is a `completed` discharge for the provided
+        patient and returns the last one.
+
+        :param exception: 'True' will raise exception when found. 'False' when not.
+        :type exception: str
+        :returns: :mod:`discharge<operations.nh_clinical_patient_discharge>` id
+        :rtype: int
         """
         domain = [['patient_id', '=', patient_id], ['data_model', '=', 'nh.clinical.patient.discharge'],
                   ['state', '=', 'completed'], ['parent_id.state', '=', 'completed']]
@@ -305,6 +437,10 @@ class nh_clinical_patient_discharge(orm.Model):
 
 
 class nh_clinical_patient_admission(orm.Model):
+    """
+    Represents the action of a patient visiting the Hospital and being
+    admitted to one of the Wards.
+    """
     _name = 'nh.clinical.patient.admission'
     _inherit = ['nh.activity.data']
     _columns = {
@@ -320,6 +456,13 @@ class nh_clinical_patient_admission(orm.Model):
     }
 
     def submit(self, cr, uid, activity_id, vals, context=None):
+        """
+        Checks the submitted data is correct and then calls
+        :meth:`submit<activity.nh_activity_data.submit>`.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         if 'patient_id' in vals:
             spell_pool = self.pool['nh.clinical.spell']
             spell_pool.get_by_patient_id(cr, uid, vals['patient_id'], exception='True', context=context)
@@ -328,6 +471,23 @@ class nh_clinical_patient_admission(orm.Model):
         return super(nh_clinical_patient_admission, self).submit(cr, uid, activity_id, vals, context=context)
 
     def complete(self, cr, uid, activity_id, context=None):
+        """
+        Calls :meth:`complete<activity.nh_activity.complete>` and then
+        creates and starts a new :mod:`spell<spell.nh_clinical_spell>`
+        for the selected patient.
+
+        It will also create and complete a
+        :mod:`movement<operations.nh_clinical_move>` to the admitted
+        location.
+
+        This operation kicks off a
+        :meth:`policy trigger<activity.nh_activity_data.trigger_policy>`
+        as actions may need to take place after the patient is admitted
+        into the Hospital.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         res = super(nh_clinical_patient_admission, self).complete(cr, uid, activity_id, context=context)
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, SUPERUSER_ID, activity_id, context=context)
@@ -362,6 +522,15 @@ class nh_clinical_patient_admission(orm.Model):
         return res
 
     def cancel(self, cr, uid, activity_id, context=None):
+        """
+        Calls :meth:`cancel<activity.nh_activity_data.cancel>` and then
+        cancels every :class:`activity<activity.nh_activity>` related to
+        the admission, including the current patient
+        :mod:`spell<spell.nh_clinical_spell>`.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         res = super(nh_clinical_patient_admission, self).cancel(cr, uid, activity_id, context=context)
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
@@ -374,12 +543,13 @@ class nh_clinical_patient_admission(orm.Model):
 
     def get_last(self, cr, uid, patient_id, exception=False, context=None):
         """
-        Checks if there is a completed admission for the provided Patient
-        :param exception: String with value 'True' or 'False'
-        :return: if no exception parameter is provided: activity id of the most recent completed admission if exists.
-                False if not.
-                if exception 'True': Patien Already Admitted exception is raised if admission found.
-                if exception 'False': No Admission Found exception is raised if no admission found.
+        Checks if there is a `completed` admission for the provided
+        patient and returns the last one.
+
+        :param exception: 'True' will raise exception when found. 'False' when not.
+        :type exception: str
+        :returns: :mod:`admission<operations.nh_clinical_patient_admission>` id
+        :rtype: int
         """
         domain = [['patient_id', '=', patient_id], ['data_model', '=', 'nh.clinical.patient.admission'],
                   ['state', '=', 'completed'], ['parent_id.state', '=', 'started']]
@@ -397,6 +567,11 @@ class nh_clinical_patient_admission(orm.Model):
 
 
 class nh_clinical_patient_transfer(orm.Model):
+    """
+    Represents the action of a patient being moved to a `ward`
+    usage :mod:`location<base.nh_clinical_location>` within the
+    Hospital.
+    """
     _name = 'nh.clinical.patient.transfer'
     _inherit = ['nh.activity.data']
     _columns = {
@@ -406,6 +581,13 @@ class nh_clinical_patient_transfer(orm.Model):
     }
     
     def submit(self, cr, uid, activity_id, vals, context=None):
+        """
+        Checks the submitted data is correct and then calls
+        :meth:`submit<activity.nh_activity_data.submit>`.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         data = vals.copy()
         if 'patient_id' in vals:
             spell_pool = self.pool['nh.clinical.spell']
@@ -419,6 +601,21 @@ class nh_clinical_patient_transfer(orm.Model):
         return super(nh_clinical_patient_transfer, self).submit(cr, uid, activity_id, data, context=context)
     
     def complete(self, cr, uid, activity_id, context=None):
+        """
+        Calls :meth:`complete<activity.nh_activity.complete>` and then
+        if the destination `ward` usage location is different from where
+        the current patient location is located, a new
+        :mod:`movement<operations.nh_clinical_patient_move>` is created
+        and completed.
+
+        This operation will kick off a
+        :meth:`policy trigger<activity.nh_activity_data.trigger_policy>`
+        if the movement takes place as this is technically equivalent to
+        an admission into the new Ward.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         res = super(nh_clinical_patient_transfer, self).complete(cr, uid, activity_id, context=context)
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, SUPERUSER_ID, activity_id, context=context)
@@ -439,6 +636,25 @@ class nh_clinical_patient_transfer(orm.Model):
         return res
 
     def cancel(self, cr, uid, activity_id, context=None):
+        """
+        Calls :meth:`cancel<activity.nh_activity_data.cancel>` and then
+        if the origin `ward` usage location is different from where the
+        current patient location is located, a new
+        :mod:`movement<operations.nh_clinical_patient_move>` is created
+        and completed.
+
+        If the origin location was of `bed` usage then the movement
+        will assign that location back to the patient if it is still
+        available.
+
+        This operation will kick off a
+        :meth:`policy trigger<activity.nh_activity_data.trigger_policy>`
+        if the movement takes place as this is technically equivalent to
+        an admission into the new Ward.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         res = super(nh_clinical_patient_transfer, self).cancel(cr, uid, activity_id, context=context)
         activity_pool = self.pool['nh.activity']
         spell_pool = self.pool['nh.clinical.spell']
@@ -472,12 +688,13 @@ class nh_clinical_patient_transfer(orm.Model):
     
     def get_last(self, cr, uid, patient_id, exception=False, context=None):
         """
-        Checks if there is a completed transfer for the provided Patient
-        :param exception: String with value 'True' or 'False'
-        :return: if no exception parameter is provided: activity id of the most recent completed transfer if exists.
-                False if not.
-                if exception 'True': Patien Already Transferred exception is raised if transfer found.
-                if exception 'False': No Transfer Found exception is raised if no transfer found.
+        Checks if there is a completed transfer for the provided
+        patient and returns the last one.
+
+        :param exception: 'True' will raise exception when found. 'False' when not.
+        :type exception: str
+        :returns: :mod:`transfer<operations.nh_clinical_patient_transfer>` id
+        :rtype: int
         """
         domain = [['patient_id', '=', patient_id], ['data_model', '=', 'nh.clinical.patient.transfer'],
                   ['state', '=', 'completed'], ['parent_id.state', '=', 'started']]
@@ -495,6 +712,12 @@ class nh_clinical_patient_transfer(orm.Model):
 
 
 class nh_clinical_patient_follow(orm.Model):
+    """
+    Represents the action to invite another user to follow a group
+    of :mod:`patients<base.nh_clinical_patient>` adding visibility
+    for those patients even when the invited user does not have a
+    responsibility towards them.
+    """
     _name = 'nh.clinical.patient.follow'
     _inherit = ['nh.activity.data']
     _columns = {
@@ -502,6 +725,19 @@ class nh_clinical_patient_follow(orm.Model):
     }
 
     def complete(self, cr, uid, activity_id, context=None):
+        """
+        Calls :meth:`complete<activity.nh_activity.complete>` and then
+        updates the ``following_ids`` list for the assigned
+        :mod:`user<base.res_users>`.
+
+        It will also call
+        :meth:`update activity<activity.nh_activity.update_activity>`
+        for all not ``completed`` or ``cancelled`` activities related to
+        the list of patients.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         super(nh_clinical_patient_follow, self).complete(cr, uid, activity_id, context)
         activity_pool = self.pool['nh.activity']
         user_pool = self.pool['res.users']
@@ -520,6 +756,12 @@ class nh_clinical_patient_follow(orm.Model):
 
 
 class nh_clinical_patient_unfollow(orm.Model):
+    """
+    Represents the action to remove followers from a group of
+    :mod:`patients<base.nh_clinical_patient>` removing visibility
+    for those patients unless the user has a responsibility towards
+    them.
+    """
     _name = 'nh.clinical.patient.unfollow'
     _inherit = ['nh.activity.data']
     _columns = {
@@ -527,6 +769,18 @@ class nh_clinical_patient_unfollow(orm.Model):
     }
 
     def complete(self, cr, uid, activity_id, context=None):
+        """
+        Calls :meth:`complete<activity.nh_activity.complete>` and then
+        removes the ``follower_ids`` list for the selected patients.
+
+        It will also :meth:`cancel<activity.nh_activity.cancel>`
+        any number of open (not ``completed`` or ``cancelled``)
+        :mod:`follow invitations<operations.nh_clinical_patient_follow>`
+        that contain the selected patients.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         super(nh_clinical_patient_unfollow, self).complete(cr, uid, activity_id, context)
         activity_pool = self.pool['nh.activity']
         patient_pool = self.pool['nh.clinical.patient']
