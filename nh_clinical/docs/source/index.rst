@@ -35,7 +35,7 @@ Module Reference
    devices
    operations
    spell
-   userboard
+   user_management
 
 Additional Notes
 ----------------

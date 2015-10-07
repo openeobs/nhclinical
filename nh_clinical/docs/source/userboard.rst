@@ -1,6 +1,6 @@
-``userboard``
-=============
-.. automodule:: userboard
+``user_management``
+===================
+.. automodule:: user_management
 
 ``change_password_wizard``
 --------------------------
@@ -10,14 +10,4 @@
 ``user_management``
 -------------------
 .. autoclass:: nh_clinical_user_management
-    :members:
-
-``userboard``
--------------
-.. autoclass:: nh_clinical_userboard
-    :members:
-
-``admin_userboard``
--------------------
-.. autoclass:: nh_clinical_admin_userboard
     :members:
