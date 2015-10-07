@@ -6,7 +6,7 @@ import spell
 import operations
 import adt
 import devices
-import userboard
+import user_management
 import wizard
 import auditing
 import test_model

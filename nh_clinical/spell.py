@@ -11,9 +11,10 @@ _logger = logging.getLogger(__name__)
 
 class nh_clinical_spell(orm.Model):
     """
-    A spell represents the time between a patient admission in the hospital and the patient discharge. It will be open
-    as long as the patient remains in the hospital and will be connected to every activity related to that patient
-    during this period of time.
+    A spell represents the time between a patient admission to the
+    hospital and the patient discharge. It will be open as long as the
+    patient remains in the hospital and will be connected to every
+    activity related to that patient during this period of time.
     """
     _name = 'nh.clinical.spell'
     _inherit = ['nh.activity.data']
@@ -105,6 +106,13 @@ class nh_clinical_spell(orm.Model):
     }
 
     def create(self, cr, uid, vals, context=None):
+        """
+        Checks the patient does not have already an open spell and then
+        calls :meth:`create<openerp.models.Model.create>`
+
+        :returns: :mod:`spell<spell.nh_clinical_spell>` id
+        :rtype: int
+        """
         current_spell_id = self.search(cr, uid, [['patient_id', '=', vals['patient_id']],
                                                  ['state', '=', 'started']], context=context)
         if current_spell_id:
@@ -115,11 +123,25 @@ class nh_clinical_spell(orm.Model):
         return res
 
     def write(self, cr, uid, ids, vals, context=None):
+        """
+        If ``location_id`` is updated, it will update ``move_date`` too.
+        Then calls :meth:`write<openerp.models.Model.write>`
+
+        :returns: ``True``
+        :rtype: bool
+        """
         if 'location_id' in vals:
             vals['move_date'] = dt.now().strftime(DTF)
         return super(nh_clinical_spell, self).write(cr, uid, ids, vals, context=context)
 
     def get_activity_user_ids(self, cr, uid, activity_id, context=None):
+        """
+        Returns a list of user ids that would have visibility or
+        responsibility over the specified spell activity
+
+        :returns: res.users ids
+        :rtype: list
+        """
         cr.execute("select location_id from nh_activity where id = %s" % activity_id)
         if not cr.fetchone()[0]:
             return []
@@ -161,11 +183,15 @@ class nh_clinical_spell(orm.Model):
 
     def get_by_patient_id(self, cr, uid, patient_id, exception=False, context=None):
         """
-        Checks if there is a started spell for the provided Patient
-        :param exception: string with values 'True' or 'False'.
-        :return: if no exception parameter is provided: spell id if exists. False if not.
-                if exception = 'True': Integrity Error exception is raised if spell exists. False if not.
-                if exception = 'False': spell id if exists. No Started Spell exception is raised if not.
+        Checks if there is a started spell for the provided
+        :mod:`patient<base.nh_clinical_patient>`.
+
+        :param patient_id: :mod:`patient<base.nh_clinical_patient>` id
+        :type patient_id: int
+        :param exception: 'True' will raise an exception if found. 'False' if not.
+        :type exception: str
+        :returns: :mod:`spell<spell.nh_clinical_spell>` id
+        :rtype: int
         """
         domain = [['patient_id', '=', patient_id], ['activity_id.state', '=', 'started']]
         spell_id = self.search(cr, uid, domain, context=context)

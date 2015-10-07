@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""
+``adt.py`` defines a set of activity types to deal with patient
+management systems operations.
+"""
 
 from datetime import datetime as dt
 import logging
@@ -12,16 +16,8 @@ _logger = logging.getLogger(__name__)
 
 class nh_clinical_adt_patient_register(orm.Model):
     """
-    Registers a new patient into the system.
-     patient_identifier: String - NHS Number
-     other_identifier: String - Hospital Number
-     given_name: String - First name
-     family_name: String - Last name
-     middle_names: String - Middle names
-     dob: String - Date of Birth, have to be in format '%Y-%m-%d %H:%M:%S'
-     gender: String - 'BOTH','F','I','M','NSP','U'
-     sex: String - Same values as gender.
-     ethnicity: String - Look at patient class for the list of allowed values.
+    Represents the patient register operation in the patient management
+    system. (A28 Message)
     """
     _name = 'nh.clinical.adt.patient.register'
     _inherit = ['nh.activity.data']   
@@ -53,12 +49,27 @@ class nh_clinical_adt_patient_register(orm.Model):
     }
 
     def submit(self, cr, uid, activity_id, vals, context=None):
+        """
+        Checks the patient data is correct and then calls
+        :meth:`submit<activity.nh_activity.submit>`.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         data = vals.copy()
         patient_pool = self.pool['nh.clinical.patient']
         patient_pool.check_data(cr, uid, data, context=context)
         return super(nh_clinical_adt_patient_register, self).submit(cr, uid, activity_id, data, context)
     
     def complete(self, cr, uid, activity_id, context=None):
+        """
+        Creates a new instance of
+        :mod:`patient<base.nh_clinical_patient>` and
+        then calls :meth:`complete<activity.nh_activity.complete>`.
+
+        :returns: :mod:`patient<base.nh_clinical_patient>` id
+        :rtype: int
+        """
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
         patient_pool = self.pool['nh.clinical.patient']
@@ -83,9 +94,10 @@ class nh_clinical_adt_patient_register(orm.Model):
 
 class nh_clinical_adt_patient_update(orm.Model):
     """
-    Update patient information. It will overwrite every single field in the target patient.
-    Same fields as patient register.
+    Represents the patient update operation in the patient management
+    system. (A31 Message)
     """
+
     _name = 'nh.clinical.adt.patient.update'
     _inherit = ['nh.activity.data']
     _description = 'ADT Patient Update'
@@ -116,12 +128,27 @@ class nh_clinical_adt_patient_update(orm.Model):
     }
 
     def submit(self, cr, uid, activity_id, vals, context=None):
+        """
+        Checks the patient data is correct and then calls
+        :meth:`submit<activity.nh_activity.submit>`.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         data = vals.copy()
         patient_pool = self.pool['nh.clinical.patient']
         patient_pool.check_data(cr, uid, data, create=False, context=context)
         return super(nh_clinical_adt_patient_update, self).submit(cr, uid, activity_id, data, context)
 
     def complete(self, cr, uid, activity_id, context=None):
+        """
+        Overwrites the target :mod:`patient<base.nh_clinical_patient>`
+        instance information and then calls
+        :meth:`complete<activity.nh_activity.complete>`.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
         patient_pool = self.pool['nh.clinical.patient']
@@ -144,18 +171,22 @@ class nh_clinical_adt_patient_update(orm.Model):
 
 class nh_clinical_adt_patient_admit(orm.Model):
     """
-        Generates a patient Admission to the provided Location.
-        It will generate a new ward location if it does not exist.
-            
-       consulting and referring doctors are expected in the submitted values on key='doctors' in format:
-       [...
-       {
-       'type': 'c' or 'r',
-       'code': code string,
-       'title':, 'given_name':, 'family_name':, }
-       ...]
+    Represents the patient admission operation in the patient management
+    system. (A01 Message)
+
+    Consulting and referring doctors are expected in the submitted
+    values in the following format::
+
+        [...
+            {
+                'type': 'c' or 'r', 'code': 'code_string,
+                'title': 'Mr', 'given_name': 'John',
+                'family_name': 'Smith'
+            }...
+        ]
        
-       if doctor doesn't exist, we create partner, but don't create user
+    If doctor doesn't exist, then a partner is created (but no user is
+    created).
     """
     
     _name = 'nh.clinical.adt.patient.admit'
@@ -174,6 +205,22 @@ class nh_clinical_adt_patient_admit(orm.Model):
     }
 
     def submit(self, cr, uid, activity_id, vals, context=None):
+        """
+        Checks the submitted data and then calls
+        :meth:`submit<activity.nh_activity.submit>`.
+
+        If a :mod:`location<base.nh_clinical_location>` of `ward` usage
+        with the provided code does not exist, it will create a new one.
+
+        Due to this behaviour the user submitting the data must be
+        related to a :mod:`point of service<base.nh_clinical_pos>`
+        linked to a valid :mod:`location<base.nh_clinical_location>`
+        instance of `pos` type, as new Wards will need to be assigned to
+        a point of service.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         user = self.pool['res.users'].browse(cr, uid, uid, context=context)
         if not user.pos_id or not user.pos_id.location_id:
             raise osv.except_osv('POS Missing Error!', "POS location is not set for user.login = %s!" % user.login)
@@ -202,6 +249,15 @@ class nh_clinical_adt_patient_admit(orm.Model):
         return super(nh_clinical_adt_patient_admit, self).submit(cr, uid, activity_id, data, context=context)
 
     def complete(self, cr, uid, activity_id, context=None):
+        """
+        Calls :meth:`complete<activity.nh_activity.complete>` and then
+        creates and completes a new
+        :mod:`admission<operations.nh_clinical_patient_admission>` to
+        the provided location.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         res = super(nh_clinical_adt_patient_admit, self).complete(cr, uid, activity_id, context=context)
         activity_pool = self.pool['nh.activity']
         admission_pool = self.pool['nh.clinical.patient.admission']
@@ -229,7 +285,8 @@ class nh_clinical_adt_patient_admit(orm.Model):
     
 class nh_clinical_adt_patient_cancel_admit(orm.Model):
     """
-    Cancels the last admission of the patient which cancels the current patient spell.
+    Represents the cancel admission operation in the patient management
+    system. (A11 Message)
     """
     _name = 'nh.clinical.adt.patient.cancel_admit'
     _inherit = ['nh.activity.data']  
@@ -241,6 +298,15 @@ class nh_clinical_adt_patient_cancel_admit(orm.Model):
     }
 
     def submit(self, cr, uid, activity_id, vals, context=None):
+        """
+        Checks the submitted data is correct, finding the last completed
+        instance of
+        :mod:`admission<operations.nh_clinical_patient_admission>`
+        and then calls :meth:`submit<activity.nh_activity.submit>`.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         if not vals.get('other_identifier'):
             raise osv.except_osv('Cancel Admit Error!', 'Patient must be set!')
         patient_pool = self.pool['nh.clinical.patient']
@@ -259,6 +325,15 @@ class nh_clinical_adt_patient_cancel_admit(orm.Model):
         return super(nh_clinical_adt_patient_cancel_admit, self).submit(cr, uid, activity_id, data, context=context)
 
     def complete(self, cr, uid, activity_id, context=None):
+        """
+        Calls :meth:`complete<activity.nh_activity.complete>` and then
+        cancels the last `completed`
+        :mod:`admission<operations.nh_clinical_patient_admission>` for
+        the provided patient.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         res = super(nh_clinical_adt_patient_cancel_admit, self).complete(cr, uid, activity_id, context=context)
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
@@ -268,7 +343,8 @@ class nh_clinical_adt_patient_cancel_admit(orm.Model):
 
 class nh_clinical_adt_patient_discharge(orm.Model):
     """
-    Discharge a patient from the hospital. Completes the patient spell.
+    Represents the patient discharge operation in the patient management
+    system. (A03 Message)
     """
     _name = 'nh.clinical.adt.patient.discharge'
     _inherit = ['nh.activity.data']  
@@ -283,6 +359,19 @@ class nh_clinical_adt_patient_discharge(orm.Model):
     }
 
     def submit(self, cr, uid, activity_id, vals, context=None):
+        """
+        Checks the submitted data and then calls
+        :meth:`submit<activity.nh_activity.submit>`.
+
+        Creates a new :mod:`spell<spell.nh_clinical_spell>` for the
+        provided patient if there is not an open instance related to it.
+        Requires the user to be linked to a
+        :mod:`point of service<base.nh_clinical_pos>` due to similar
+        behaviour as the admission in this particular scenario.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         user = self.pool['res.users'].browse(cr, uid, uid, context=context)
         if not user.pos_id or not user.pos_id.location_id:
             raise osv.except_osv('POS Missing Error!', "POS location is not set for user.login = %s!" % user.login)
@@ -331,6 +420,15 @@ class nh_clinical_adt_patient_discharge(orm.Model):
         return super(nh_clinical_adt_patient_discharge, self).submit(cr, uid, activity_id, data, context=context)
 
     def complete(self, cr, uid, activity_id, context=None):
+        """
+        Calls :meth:`complete<activity.nh_activity.complete>` and then
+        creates and completes a new
+        :mod:`discharge<operations.nh_clinical_patient_discharge>` for
+        the provided patient.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         res = super(nh_clinical_adt_patient_discharge, self).complete(cr, uid, activity_id, context=context)
         activity_pool = self.pool['nh.activity']
         discharge_pool = self.pool['nh.clinical.patient.discharge']
@@ -347,8 +445,8 @@ class nh_clinical_adt_patient_discharge(orm.Model):
 
 class nh_clinical_adt_patient_cancel_discharge(orm.Model):
     """
-    Cancels the last patient discharge. The spell will be reopened. This will fail if the patient has already been
-    admitted again.
+    Represents the cancel discharge operation in the patient management
+    system. (A13 Message)
     """
     _name = 'nh.clinical.adt.patient.cancel_discharge'
     _inherit = ['nh.activity.data']
@@ -360,6 +458,15 @@ class nh_clinical_adt_patient_cancel_discharge(orm.Model):
     }
 
     def submit(self, cr, uid, activity_id, vals, context=None):
+        """
+        Checks the submitted data is correct, finding the last
+        `completed` instance of
+        :mod:`discharge<operations.nh_clinical_patient_discharge>`
+        and then calls :meth:`submit<activity.nh_activity.submit>`.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         if not vals.get('other_identifier'):
             raise osv.except_osv('Cancel Discharge Error!', 'Patient must be set!')
         patient_pool = self.pool['nh.clinical.patient']
@@ -373,6 +480,15 @@ class nh_clinical_adt_patient_cancel_discharge(orm.Model):
         return super(nh_clinical_adt_patient_cancel_discharge, self).submit(cr, uid, activity_id, data, context=context)
 
     def complete(self, cr, uid, activity_id, context=None):
+        """
+        Calls :meth:`complete<activity.nh_activity.complete>` and then
+        cancels the last `completed`
+        :mod:`discharge<operations.nh_clinical_patient_discharge>` for
+        the provided patient.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         res = super(nh_clinical_adt_patient_cancel_discharge, self).complete(cr, uid, activity_id, context=context)
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
@@ -384,8 +500,8 @@ class nh_clinical_adt_patient_cancel_discharge(orm.Model):
 
 class nh_clinical_adt_patient_transfer(orm.Model):
     """
-    Transfers a patient from a location to another location.
-    It will trigger admission policy in the destination location.
+    Represents the patient transfer operation in the patient management
+    system. (A02 Message)
     """
     _name = 'nh.clinical.adt.patient.transfer'
     _inherit = ['nh.activity.data']
@@ -401,6 +517,20 @@ class nh_clinical_adt_patient_transfer(orm.Model):
     }
     
     def submit(self, cr, uid, activity_id, vals, context=None):
+        """
+        Checks the submitted data and then calls
+        :meth:`submit<activity.nh_activity.submit>`.
+
+        Creates a new :mod:`spell<spell.nh_clinical_spell>` for the
+        provided patient if there is not an open instance related to it
+        and an origin location for the transfer was provided.
+        Requires the user to be linked to a
+        :mod:`point of service<base.nh_clinical_pos>` due to similar
+        behaviour as the admission in this particular scenario.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         user = self.pool['res.users'].browse(cr, uid, uid, context=context)
         if not user.pos_id or not user.pos_id.location_id:
             raise osv.except_osv('POS Missing Error!', "POS location is not set for user.login = %s!" % user.login)
@@ -443,6 +573,15 @@ class nh_clinical_adt_patient_transfer(orm.Model):
         return super(nh_clinical_adt_patient_transfer, self).submit(cr, uid, activity_id, data, context=context)
 
     def complete(self, cr, uid, activity_id, context=None):
+        """
+        Calls :meth:`complete<activity.nh_activity.complete>` and then
+        creates and completes a new
+        :mod:`transfer<operations.nh_clinical_patient_transfer>` for the
+        provided patient.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         res = super(nh_clinical_adt_patient_transfer, self).complete(cr, uid, activity_id, context=context)
         activity_pool = self.pool['nh.activity']
         transfer_pool = self.pool['nh.clinical.patient.transfer']
@@ -460,7 +599,8 @@ class nh_clinical_adt_patient_transfer(orm.Model):
 
 class nh_clinical_adt_patient_cancel_transfer(orm.Model):
     """
-    Cancels the last patient transfer. Effectively moving the patient back to the origin location.
+    Represents the cancel transfer operation in the patient management
+    system. (A12 Message)
     """
     _name = 'nh.clinical.adt.patient.cancel_transfer'
     _inherit = ['nh.activity.data']
@@ -473,6 +613,15 @@ class nh_clinical_adt_patient_cancel_transfer(orm.Model):
     }
 
     def submit(self, cr, uid, activity_id, vals, context=None):
+        """
+        Checks the submitted data is correct, finding the last
+        `completed` instance of
+        :mod:`transfer<operations.nh_clinical_patient_transfer>`
+        and then calls :meth:`submit<activity.nh_activity.submit>`.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         if not vals.get('other_identifier'):
             raise osv.except_osv('Cancel Transfer Error!', 'Patient must be set!')
         patient_pool = self.pool['nh.clinical.patient']
@@ -486,6 +635,15 @@ class nh_clinical_adt_patient_cancel_transfer(orm.Model):
         return super(nh_clinical_adt_patient_cancel_transfer, self).submit(cr, uid, activity_id, data, context=context)
 
     def complete(self, cr, uid, activity_id, context=None):
+        """
+        Calls :meth:`complete<activity.nh_activity.complete>` and then
+        cancels the last `completed`
+        :mod:`transfer<operations.nh_clinical_patient_transfer>` for the
+        provided patient.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         res = super(nh_clinical_adt_patient_cancel_transfer, self).complete(cr, uid, activity_id, context=context)
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
@@ -498,7 +656,8 @@ class nh_clinical_adt_patient_cancel_transfer(orm.Model):
 
 class nh_clinical_adt_spell_update(orm.Model):
     """
-    Update patient spell information.
+    Represents the admission update operation in the patient management
+    system. (A08 Message)
     """
     _name = 'nh.clinical.adt.spell.update'
     _inherit = ['nh.activity.data']
@@ -516,6 +675,22 @@ class nh_clinical_adt_spell_update(orm.Model):
     }
 
     def submit(self, cr, uid, activity_id, vals, context=None):
+        """
+        Checks the submitted data and then calls
+        :meth:`submit<activity.nh_activity.submit>`.
+
+        If a :mod:`location<base.nh_clinical_location>` of `ward` usage
+        with the provided code does not exist, it will create a new one.
+
+        Due to this behaviour the user submitting the data must be
+        related to a :mod:`point of service<base.nh_clinical_pos>`
+        linked to a valid :mod:`location<base.nh_clinical_location>`
+        instance of `pos` type, as new Wards will need to be assigned
+        to a point of service.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         user = self.pool['res.users'].browse(cr, uid, uid, context=context)
         if not user.pos_id or not user.pos_id.location_id:
             raise osv.except_osv('POS Missing Error!', "POS location is not set for user.login = %s!" % user.login)
@@ -551,6 +726,23 @@ class nh_clinical_adt_spell_update(orm.Model):
         return super(nh_clinical_adt_spell_update, self).submit(cr, uid, activity_id, data, context=context)
 
     def complete(self, cr, uid, activity_id, context=None):
+        """
+        Overwrites the target :mod:`spell<spell.nh_clinical_spell>`
+        information and then calls
+        :meth:`complete<activity.nh_activity.complete>`.
+
+        If location information needs to be updated a new instance of
+        :mod:`movement<operations.nh_clinical_patient_move>` is created
+        and completed.
+
+        If the new location is located in a different Ward than the
+        current spell location, a
+        :meth:`policy trigger<activity.nh_activity_data.trigger_policy>`
+        will be kicked off. As that is technically a transfer movement.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         res = super(nh_clinical_adt_spell_update, self).complete(cr, uid, activity_id, context=context)
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
@@ -586,6 +778,8 @@ class nh_clinical_adt_spell_update(orm.Model):
 
 class nh_clinical_adt_patient_merge(orm.Model):
     """
+    Represents the patient merge operation in the patient management
+    system. (A40 Message)
     Merges a patient into another patient making the resulting patient own all activities.
     """
     _name = 'nh.clinical.adt.patient.merge'
@@ -599,6 +793,13 @@ class nh_clinical_adt_patient_merge(orm.Model):
     }
     
     def submit(self, cr, uid, activity_id, vals, context=None):
+        """
+        Checks the submitted data and then calls
+        :meth:`submit<activity.nh_activity.submit>`.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         patient_pool = self.pool['nh.clinical.patient']
         data = vals.copy()
         if data.get('from_identifier'):
@@ -612,6 +813,18 @@ class nh_clinical_adt_patient_merge(orm.Model):
         return super(nh_clinical_adt_patient_merge, self).submit(cr, uid, activity_id, data, context=context)
         
     def complete(self, cr, uid, activity_id, context=None):
+        """
+        Calls :meth:`complete<activity.nh_activity.complete>` and then
+        adds every piece of information that the source patient has and
+        the destination patient lacks into the destination patient.
+
+        The destination patient ends up being linked to all the
+        :class:`activities<activity.nh_activity>` both patients were
+        linked to.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         res = {}
         activity_pool = self.pool['nh.activity']
         merge_activity = activity_pool.browse(cr, SUPERUSER_ID, activity_id, context=context)
