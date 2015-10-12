@@ -16,7 +16,7 @@
              'views/user_view.xml',
              'views/device_view.xml',
              'views/operations_view.xml',
-             'views/userboard_view.xml',
+             'views/user_management_view.xml',
              'views/doctor_view.xml',
              'wizard/placement_wizard_view.xml',
              'wizard/responsibility_allocation_wizard.xml',

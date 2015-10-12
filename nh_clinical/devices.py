@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""
+``devices.py`` defines a set of objects and activity types to deal with
+clinical devices management within the Hospital.
+"""
 
 import logging
 
@@ -9,7 +13,9 @@ _logger = logging.getLogger(__name__)
 
 class nh_clinical_device_category(orm.Model):
     """
-    Represents a device category which groups several types into it.
+    Represents a group of
+    :mod:`device types<devices.nh_clinical_device_type>` that share the
+    same category / specialty (i.e. surgical).
     """
     _name = 'nh.clinical.device.category'
 
@@ -21,7 +27,8 @@ class nh_clinical_device_category(orm.Model):
 
 class nh_clinical_device_type(orm.Model):
     """
-    Represents the specific device type of a device instance.
+    Represents a specific device type of a
+    :mod:`device<devices.nh_clinical_device>`
     """
     _name = 'nh.clinical.device.type'
     _columns = {
@@ -32,7 +39,8 @@ class nh_clinical_device_type(orm.Model):
 
 class nh_clinical_device(orm.Model):
     """
-    Represents a physical device instance.
+    Represents a physical instance of a device, which will have its own
+    unique serial number.
     """
     _name = 'nh.clinical.device'
     _columns = {
@@ -55,7 +63,11 @@ class nh_clinical_device(orm.Model):
 
 class nh_clinical_device_session(orm.Model):
     """
-    Represents the usage of a device in a patient spell.
+    Represents a period of time where an instance of
+    :mod:`device<devices.nh_clinical_device>` or
+    :mod:`device type<devices.nh_clinical_device_type>` (the specific
+    physical instance of the device is not required) is being used
+    during a :mod:`spell<spell.nh_clinical_spell>`
     """
     _name = 'nh.clinical.device.session'
     _description = 'Device Session'
@@ -72,6 +84,14 @@ class nh_clinical_device_session(orm.Model):
     }
 
     def start(self, cr, uid, activity_id, context=None):
+        """
+        Sets the specified :mod:`device<devices.nh_clinical_device>` as
+        not available and calls
+        :meth:`start<activity.nh_activity.start>`.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context)
         if activity.data_ref.device_id:
@@ -80,6 +100,14 @@ class nh_clinical_device_session(orm.Model):
         return super(nh_clinical_device_session, self).start(cr, uid, activity_id, context)
         
     def complete(self, cr, uid, activity_id, context=None):
+        """
+        Sets the specified :mod:`device<devices.nh_clinical_device>` as
+        available and calls
+        :meth:`complete<activity.nh_activity.complete>`.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context)
         if activity.data_ref.device_id:
@@ -88,6 +116,19 @@ class nh_clinical_device_session(orm.Model):
         return super(nh_clinical_device_session, self).complete(cr, uid, activity_id, context)
 
     def get_activity_id(self, cr, uid, patient_id, device_type_id, context=None):
+        """
+         Looks for a `started` device session for the provided
+         patient and device type.
+         It will throw a warning if finds more than one, as the method
+         will only return the last started one.
+
+         :param patient_id: :mod:`patient<base.nh_clinical_patient>` id
+         :type patient_id: int
+         :param device_type_id: :mod:`device type<devices.nh_clinical_device_type>` id
+         :type device_type_id: int
+         :returns: :mod:`device session<devices.nh_clinical_device_session>` id
+         :rtype: int
+        """
         domain = [
             ['patient_id', '=', patient_id],
             ['device_type_id', '=', device_type_id],
@@ -116,6 +157,13 @@ class nh_clinical_device_connect(orm.Model):
     }
 
     def submit(self, cr, uid, activity_id, vals, context=None):
+        """
+        Checks the submitted data and calls
+        :meth:`submit<activity.nh_activity.submit>`.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         device_pool = self.pool['nh.clinical.device']
         activity_pool = self.pool['nh.activity']
         if not vals.get('patient_id'):
@@ -138,6 +186,14 @@ class nh_clinical_device_connect(orm.Model):
         return super(nh_clinical_device_connect, self).submit(cr, uid, activity_id, vals_copy, context=context)
 
     def complete(self, cr, uid, activity_id, context=None):
+        """
+        Creates and starts a new
+        :mod:`device session<devices.nh_clinical_device_session>` and
+        then calls :meth:`complete<activity.nh_activity.complete>`.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         activity_pool = self.pool['nh.activity']
         spell_pool = self.pool['nh.clinical.spell']
         device_session_pool = self.pool['nh.clinical.device.session']
@@ -169,6 +225,16 @@ class nh_clinical_device_disconnect(orm.Model):
     }
 
     def submit(self, cr, uid, activity_id, vals, context=None):
+        """
+        Checks the submitted data is correct, finding the last `started`
+        :mod:`device session<devices.nh_clinical_device_session>` for
+        the provided device or device type (if the specific device is
+        not provided) and calls
+        :meth:`submit<activity.nh_activity.submit>`.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         device_pool = self.pool['nh.clinical.device']
         activity_pool = self.pool['nh.activity']
         session_pool = self.pool['nh.clinical.device.session']
@@ -200,17 +266,15 @@ class nh_clinical_device_disconnect(orm.Model):
         return super(nh_clinical_device_disconnect, self).submit(cr, uid, activity_id, vals_copy, context=context)
 
     def complete(self, cr, uid, activity_id, context=None):
+        """
+        Completes the related
+        :mod:`device session<devices.nh_clinical_device_session>`
+        and then calls :meth:`complete<activity.nh_activity.complete>`.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
         activity_pool.complete(cr, uid, activity.data_ref.session_activity_id.id, context=context)
         return super(nh_clinical_device_disconnect, self).complete(cr, SUPERUSER_ID, activity_id, context)
-
-    
-class nh_clinical_device_observation(orm.Model):
-    _name = 'nh.clinical.device.observation'
-    _inherit = ['nh.activity.data']
-    _description = 'Device Observation'
-    _columns = {
-        'device_id': fields.many2one('nh.clinical.device', 'Device', required=True),
-        'patient_id': fields.many2one('nh.clinical.patient', 'Patient', required=True),
-    }
