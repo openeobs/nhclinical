@@ -1,13 +1,13 @@
-``user_management``
+``User Management``
 ===================
 .. automodule:: user_management
 
-``change_password_wizard``
+``Change Password Wizard``
 --------------------------
 .. autoclass:: nh_change_password_wizard
     :members:
 
-``user_management``
+``User Management``
 -------------------
 .. autoclass:: nh_clinical_user_management
     :members:

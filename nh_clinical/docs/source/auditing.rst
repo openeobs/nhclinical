@@ -1,18 +1,18 @@
-``auditing``
+``Auditing``
 ============
 .. automodule:: auditing
 
-``location_activate``
----------------------------------
+``Activate Location``
+---------------------
 .. autoclass:: nh_clinical_location_activate
     :members:
 
-``location_deactivate``
+``Deactivate Location``
 -----------------------
 .. autoclass:: nh_clinical_location_deactivate
     :members:
 
-``user_responsibility_allocation``
+``User Responsibility Allocation``
 ----------------------------------
 .. autoclass:: nh_clinical_user_responsibility_allocation
     :members:

@@ -1,48 +1,48 @@
-``adt``
+``ADT``
 =======
 .. automodule:: adt
 
-``register``
+``Register``
 ------------
 .. autoclass:: nh_clinical_adt_patient_register
     :members:
 
-``update``
+``Update``
 ----------
 .. autoclass:: nh_clinical_adt_patient_update
     :members:
 
-``admit``
+``Admit``
 ---------
 .. autoclass:: nh_clinical_adt_patient_admit
     :members:
 
-``cancel_admit``
+``Cancel Admit``
 ----------------
 .. autoclass:: nh_clinical_adt_patient_cancel_admit
     :members:
 
-``discharge``
+``Discharge``
 -------------
 .. autoclass:: nh_clinical_adt_patient_discharge
     :members:
 
-``cancel_discharge``
+``Cancel Discharge``
 --------------------
 .. autoclass:: nh_clinical_adt_patient_cancel_discharge
     :members:
 
-``cancel_transfer``
+``Cancel Transfer``
 -------------------
 .. autoclass:: nh_clinical_adt_patient_cancel_transfer
     :members:
 
-``spell_update``
+``Spell Update``
 ----------------
 .. autoclass:: nh_clinical_adt_spell_update
     :members:
 
-``patient_merge``
+``Patient Merge``
 -----------------
 .. autoclass:: nh_clinical_adt_patient_merge
     :members:
