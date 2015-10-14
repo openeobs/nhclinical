@@ -30,7 +30,7 @@ class TestLocation(common.SingleTransactionCase):
         cls.contexts.append(cls.context_pool.create(cr, uid, {'name': 'c1', 'models': "['nh.clinical.location']"}))
         cls.hospital_id = cls.location_pool.create(cr, uid, {'name': 'Test Hospital', 'code': 'TESTHOSP'})
         cls.pos_id = cls.pos_pool.create(cr, uid, {'name': 'Test POS', 'location_id': cls.hospital_id})
-        group_ids = cls.group_pool.search(cr, uid, [['name', '=', 'NH Clinical Admin Group']])
+        group_ids = cls.group_pool.search(cr, uid, [['name', '=', 'NH Clinical ADT Group']])
         cls.hca_group_id = cls.group_pool.search(cr, uid, [['name', '=', 'NH Clinical HCA Group']])[0]
         cls.nurse_group_id = cls.group_pool.search(cr, uid, [['name', '=', 'NH Clinical Nurse Group']])[0]
         cls.userpos_id = cls.user_pool.create(cr, uid, {'name': 'Test User', 'login': 'user_001',
