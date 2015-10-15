@@ -1,33 +1,33 @@
-``devices``
+``Devices``
 ===========
 .. automodule:: devices
 
-``device_category``
--------------------
+``Category``
+------------
 .. autoclass:: nh_clinical_device_category
     :members:
 
-``device_type``
----------------
+``Type``
+--------
 .. autoclass:: nh_clinical_device_type
     :members:
 
-``device``
+``Device``
 ----------
 .. autoclass:: nh_clinical_device
     :members:
 
-``device_session``
-------------------
+``Session``
+-----------
 .. autoclass:: nh_clinical_device_session
     :members:
 
-``device_connect``
-------------------
+``Connect``
+-----------
 .. autoclass:: nh_clinical_device_connect
     :members:
 
-``device_disconnect``
----------------------
+``Disconnect``
+--------------
 .. autoclass:: nh_clinical_device_disconnect
     :members:

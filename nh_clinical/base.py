@@ -1,19 +1,49 @@
 # -*- coding: utf-8 -*-
+"""
+``base`` extends Odoo addons classes and defines core nh_clinical
+classes :class:`nh_clinical_context`, :class:`nh_clinical_patient`,
+:class:`nh_clinical_location`, :class:`nh_clinical_pos`, etc.
+"""
+
 from openerp.osv import orm, fields, osv
 from openerp import SUPERUSER_ID
-
 import logging
+
+
 _logger = logging.getLogger(__name__)
 
 
 class ir_model_access(orm.Model):
+    """
+    Extends Odoo's class
+    :class:`ir_model_access<openerp.addons.base.ir.ir_model.ir_model_access>`
+    which defines write, read, create and unlink permissions for models
+    by user group.
+
+    Extension adds field ``perm_responsibility``, which gives permanent
+    responsibility to a user group for a model.
+    """
+
     _inherit = 'ir.model.access'
     _columns = {
         'perm_responsibility': fields.boolean('NH Clinical Activity Responsibility'),
         }
 
+
 # Note - This must go before res_company otherwise a new database will not find the new columns
 class res_partner(orm.Model):
+    """
+    Extends Odoo's class
+    :class:`res_partner<openerp.addons.base.res.res_partner.res_partner>`
+    which defines a business entity i.e. customer, supplier, employee.
+
+    Extension adds boolean field ``doctor`` and ``code`` for doctor
+    type.
+
+    Please note: must precede :class:`res_company` (below) to ensure
+    these fields are added to the model in the database.
+    """
+
     _inherit = 'res.partner'
     _columns = {
         'doctor': fields.boolean('Doctor', help="Check this box if this contact is a Doctor"),
@@ -24,15 +54,32 @@ class res_partner(orm.Model):
     }
 
     def create(self, cr, user, vals, context=None):
-        return super(res_partner, self).create(cr, user, vals,
-                                               context=dict(context or {}, mail_create_nosubscribe=True))
+        """
+        Extends Odoo's :meth:`create()<openerp.models.Model.create>`
+        to update fields ``group_ids`` and ``doctor_id``.
+        """
+
+        return super(res_partner, self).create(
+            cr, user, vals,
+            context=dict(context or {}, mail_create_nosubscribe=True)
+        )
 
 
 class res_partner_category_extension(orm.Model):
     """
-    Extension of res_partner_category to expand its functionality as Roles.
-    The addition of group_ids to the roles lets us relate every role to the corresponding groups.
+    Extends Odoo's class
+    :class:`res_partner_category<openerp.addons.base.res.res_partner.res_partner_category>`
+    to add functionality for roles.
+
+
+    Creates many-to-many relationship between categories (roles) and
+    groups, allowing a relation between each role and corresponding
+    group(s).
+
+    An example would be the role 'Registrar' belonging to groups base,
+    doctor, senior doctor and registrar groups.
     """
+
     _inherit = 'res.partner.category'
     _columns = {
         'group_ids': fields.many2many('res.groups', 'category_group_rel', 'category_id', 'group_id',
@@ -40,6 +87,20 @@ class res_partner_category_extension(orm.Model):
     }
 
     def name_get(self, cr, user, ids, context=None):
+        """
+        Extends Odoo's
+        :meth:`name_get()<openerp.addons.base.res.res_partner.res_partner_category.name_get>`
+        method, fetching the short version of category name belonging
+        to ids (without their direct parent).
+
+        :param user: user id
+        :type user: int
+        :param ids: ids of the categories
+        :type ids: list
+        :return: categories' display names
+        :rtype: list
+        """
+
         if context:
             ctx = context.copy()
         else:
@@ -48,6 +109,14 @@ class res_partner_category_extension(orm.Model):
         return super(res_partner_category_extension, self).name_get(cr, user, ids, context=ctx)
 
     def get_child_of_ids(self, cr, uid, id, context=None):
+        """
+        Gets all child category ids of parent, recursively.
+
+        :param id: parent id
+        :type id: int
+        :returns: parent id follow by child ids
+        :rtype: list
+        """
         res = [id]
         child_ids = self.read(cr, uid, id, ['child_ids'], context=context)['child_ids']
         if not child_ids:
@@ -59,14 +128,28 @@ class res_partner_category_extension(orm.Model):
 
 
 class res_partner_title_extension(orm.Model):
+    """
+    Extends Odoo's
+    :class:`res_partner_title<openerp.addons.base.res.res_partner.res_partner_title>`
+    to include method ``get_title_by_name()``.
+    """
+
     _inherit = 'res.partner.title'
 
     def get_title_by_name(self, cr, uid, title, create=True, context=None):
         """
-        Searches for the title with the provided name.
-        :param create: if True, the title will be created if it does not exist.
-        :return: ID of the title. False if it does not exist an create = False
+        Searches for the title by name. If the title does not exist,
+        a new title is created by default.
+
+        :param title: title of partner ('Mr', 'Dr, 'Miss', etc.)
+        :type title: string
+        :param create: when ``True``, the title will be created if the
+            title doesn't exist
+        :type create: ``bool`` [default is ``True``]
+        :returns: id of title
+        :rtype: int
         """
+
         title = title.replace('.', '').replace(' ', '').lower()
         title_id = self.search(cr, uid, [['name', '=', title]], context=context)
         if not create:
@@ -79,6 +162,13 @@ class res_partner_title_extension(orm.Model):
 
 
 class res_company(orm.Model):
+    """
+    Extends Odoo's
+    :class:`res_company<openerp.addons.base.res.res_company.res_company>`
+    to include one-to-many point of service (pos) field. See
+    :class:`nh_clinical_pos`.
+    """
+
     _name = 'res.company'
     _inherit = 'res.company'
     _columns = {
@@ -87,6 +177,13 @@ class res_company(orm.Model):
 
 
 class res_users(orm.Model):
+    """
+    Extends Odoo's
+    :class:`res_users<openerp.addons.base.res.res_users.res_users>`
+    to include point of service, parent locations of responsibility,
+    following patients and the related doctor for the user.
+    """
+
     _name = 'res.users'
     _inherit = 'res.users'
     _columns = {
@@ -106,11 +203,20 @@ class res_users(orm.Model):
 
     def check_pos(self, cr, uid, user_id, exception=False, context=None):
         """
-        Checks if the provided user has an assigned Point of Service
-        :param exception: boolean.
-        :return: if no exception parameter is provided: True if pos is defined. False if not.
-                if exception: True if pos is defined. Point of Service Not Defined exception is raised if not.
+        Checks if user has an assigned point of service (POS).
+
+        :param user_id: id of user to check
+        :type user_id: int
+        :param exception: ``False`` [default]
+        :type exception: bool
+        :returns: if exception parameter is ``False``, then returns
+            ``True`` if POS is defined. Otherwise ``False``. If
+            is ``True``, them returns ``True`` if POS is defined. If POS
+            is undefined, then
+            :class:`osv.except_osv<openerp.osv.osv.except_osv>` is
+            raised
         """
+
         user = self.browse(cr, uid, user_id, context=context)
         result = bool(user.pos_id)
         if not exception:
@@ -122,6 +228,20 @@ class res_users(orm.Model):
                 return result
 
     def update_group_vals(self, cr, uid, user_id, vals, context=None):
+        """
+        Updates a user's groups(see
+        :class:`res_partner_category_extension` and :class:`res_groups`)
+        for the user.
+
+        :param user_id: id of user
+        :type user_id: int
+        :param vals: expecting a dictionary with keys ``group_ids``
+            and/or ``category_id``. Values will be a list of ints
+        :type vals: dict
+        :returns: ``True``
+        :rtype: bool
+        """
+
         category_pool = self.pool['res.partner.category']
         if not vals.get('category_id'):
             return True
@@ -201,6 +321,16 @@ class res_users(orm.Model):
         return True
 
     def create(self, cr, user, vals, context=None):
+        """
+        Extends Odoo's :meth:`create()<openerp.models.Model.create>`
+        to update fields ``group_ids`` and ``doctor_id``.
+
+        :param vals: values to initialise the new record
+        :type vals: dict
+        :returns: id of created record
+        :rtype: int
+        """
+
         self.update_group_vals(cr, user, False, vals, context=context)
         res = super(res_users, self).create(cr, user, vals, context=dict(context or {}, mail_create_nosubscribe=True))
         if 'doctor_id' in vals:
@@ -210,6 +340,18 @@ class res_users(orm.Model):
         return res
 
     def write(self, cr, uid, ids, values, context=None):
+        """
+        Extends Odoo's :meth:`write()<openerp.models.Model.write>`
+        method.
+
+        :param ids: id of records to update
+        :type ids: list or int
+        :param values: values to update the records with
+        :type values: dict
+        :returns: ``True``
+        :rtype: bool
+        """
+
         if isinstance(ids, list) and len(ids) == 1:
             self.update_group_vals(cr, uid, ids[0], values, context=context)
         elif isinstance(ids, int):
@@ -223,6 +365,15 @@ class res_users(orm.Model):
         return res
 
     def name_get(self, cr, uid, ids, context=None):
+        """
+        Gets the names of users.
+
+        :param ids: user ids
+        :type ids: list or int
+        :returns: user names
+        :rtype: list
+        """
+
         partner_pool = self.pool['res.partner']
         if context is None:
             context = {}
@@ -250,6 +401,16 @@ class res_users(orm.Model):
         return res
 
     def update_doctor_status(self, cr, uid, ids, context=None):
+        """
+        Updates ``doctor`` field in :class:`res_partner` if user is a
+        doctor.
+
+        :param ids: user ids
+        :type ids: list
+        :returns: ``True``
+        :rtype: bool
+        """
+
         doctor_groups = ['NH Clinical Doctor Group', 'NH Clinical Registrar Group',
                          'NH Clinical Consultant Group', 'NH Clinical Junior Doctor Group']
         partner_pool = self.pool['res.partner']
@@ -260,23 +421,48 @@ class res_users(orm.Model):
                 partner_pool.write(cr, uid, record.partner_id.id, {'doctor': False}, context=context)
         return True
 
+
 class res_groups(orm.Model):
+    """
+    Extends Odoo's
+    :class:`res_groups<openerp.addons.base.res.res_users.res_groups>`
+    """
+
     _name = 'res.groups'
     _inherit = 'res.groups'
 
     def write(self, cr, uid, ids, values, context=None):
+        """
+        Extends Odoo's
+        :meth:`write()<openerp.addons.base.res.res_users.res_groups.write>`
+        to update nh_activity records with the responsible users.
+
+        :param ids: group ids
+        :type ids: list
+        :param values: may contain user ids of responsible users
+        :type values: dict
+        :returns: ``True``
+        :rtype: bool
+        """
+
         res = super(res_groups, self).write(cr, uid, ids, values, context)
         if values.get('users'):
             activity_pool = self.pool['nh.activity']
             user_ids = []
+            # iterate through groups
             for group in self.browse(cr, uid, isinstance(ids, (list, tuple)) and ids or [ids]):
+                # get all users ids of users who belong to each group
                 user_ids.extend([u.id for u in group.users])
+            # update activities with user ids of responsible users
             activity_pool.update_users(cr, uid, user_ids)
         return res
 
 
 class nh_clinical_pos(orm.Model):
-    """ Clinical point of service """
+    """
+    Represents clinical point of service.
+    """
+
     _name = 'nh.clinical.pos'
 
     _columns = {
@@ -292,10 +478,14 @@ class nh_clinical_pos(orm.Model):
 
 
 class nh_clinical_context(orm.Model):
-    """ Clinical Context, tells us whether a specific policy would be applicable or not to the model.
-        i.e. a Location may be in an 'observation loop' context so patients located in it should trigger policies related
-            to that context but not trigger policies related to a different context.
     """
+    Indicates if a specific policy is applicable to a model.
+
+    A context will trigger actions related to the context. If an action
+    is executed in a particular `context`, then its context-dependent
+    actions will be triggered as a result (if there are any).
+    """
+
     _name = 'nh.clinical.context'
     _columns = {
         'name': fields.char('Name', size=100, required=True, select=True),
@@ -304,6 +494,18 @@ class nh_clinical_context(orm.Model):
     }
 
     def check_model(self, cr, uid, ids, model, context=None):
+        """
+        Checks if model is applicable for the context.
+
+        :param ids: context ids
+        :type ids: list
+        :param model: model to check
+        :returns: ``True`` if model is applicable
+        :rtype: bool
+        :raises: :class:`except_orm<openerp.osv.osv.except_orm>` if not
+            applicable
+        """
+
         for c in self.browse(cr, uid, ids, context=context):
             if model not in eval(c.models):
                 raise osv.except_osv('Error!', model + ' not applicable for context: %s' % c.name)
@@ -312,10 +514,13 @@ class nh_clinical_context(orm.Model):
 
 class nh_clinical_location(orm.Model):
     """
-    Clinical Location represents a place where a patient in the system may be located or an activity may take place.
-     There are different types of locations.
-     The most common usage is to have a Hospital as parent of a group of Wards which include several beds each where
-     patients can be placed.
+    Represents a location where a patient may be located or an activity
+    may take place.
+
+    There are different types of locations. The most common usage is to
+    have a `hospital` as a parent location to a group of `wards` where
+    each ward is a parent to several beds. The bed location is where the
+    patient can be placed.
     """
 
     _name = 'nh.clinical.location'
@@ -440,9 +645,11 @@ class nh_clinical_location(orm.Model):
 
     def _get_waiting_patients(self, cr, uid, ids, field, args, context=None):
         """
-        Returns the number of patients waiting to be allocated into a location within the selected location.
-        Which means patients that have open patient placement activities related to this location.
+        Returns the number of patients waiting to be allocated into a
+        location within the selected location. Which means patients that
+        have open patient placement activities related to this location.
         """
+
         res = {}
         placement_pool = self.pool['nh.clinical.patient.placement']
         for loc in self.browse(cr, uid, ids, context=context):
@@ -452,9 +659,11 @@ class nh_clinical_location(orm.Model):
 
     def _get_child_patients(self, cr, uid, ids, field, args, context=None):
         """
-        Returns the number of patients related to the child locations of this location. Number of patients
-        related to this location are not included.
+        Returns the number of patients related to the child locations of
+        this location. Number of patients related to this location are
+        not included.
         """
+
         res = {}
         for loc in self.browse(cr, uid, ids, context=context):
             sum = 0
@@ -465,9 +674,17 @@ class nh_clinical_location(orm.Model):
 
     def get_closest_parent_id(self, cr, uid, location_id, usage, context=None):
         """
-        Returns the closest parent found in the hierarchy that has the specified usage.
-        Returns False if no parent with that usage is found.
+        Gets a location's closest ancestor (parent) location id of a
+        particular usage. Returns ``False`` if no such location exists.
+
+        :param location_id: location id
+        :type location_id: int
+        :param usage: usage of location.
+            See :class:`nh_clinical_location`
+        :returns: location id of the ancestor. Otherwise ``False``
+        :rtype: int or bool
         """
+
         location = self.read(cr, uid, location_id, ['parent_id'], context=context)
         if not location or not location['parent_id']:
             return False
@@ -480,9 +697,18 @@ class nh_clinical_location(orm.Model):
 
     def is_child_of(self, cr, uid, location_id, code, context=None):
         """
-        Returns True if the location_id provided is a child of the location code provided.
-        False otherwise.
+        Checks if a location is a child of another location.
+
+        :param location_id: location id
+        :type location_id: int
+        :param code: location code
+        :type code: str
+        :returns: the dictionary ``location_id`` (key) and a string
+            containing location name and parent location name (value)
+            Otherwise ``False`` is returned.
+        :rtype: dict or bool
         """
+
         code_location_id = self.search(cr, uid, [['code', '=', code]], context=context)
         child_location_ids = self.search(cr, uid, [['id', 'child_of', code_location_id[0]]], context=context)
         return location_id in child_location_ids
@@ -501,15 +727,13 @@ class nh_clinical_location(orm.Model):
                 result[location.id] = '{0} [{1}]'.format(location.name, parent['name']) if parent else location.name
         return result
 
-
     def _is_available_search(self, cr, uid, obj, name, args, domain=None, context=None):
         """
-        Allows to search through the method _is_available so the field is_available can be searched.
-        It ignores any operand that is not '=' or '!=' because is_available is a boolean and they would not make sense.
-        :param args: list of tuples that define the domain of the search with the format: [is_available, operand, value]
-        :return [('id', 'in', list of location ids)] that will be used by the orm to filter locations. The actual meaning
-                of this is that any location id in the list is to be returned with the specified search domain.
+        Permits searching :meth:`_is_available` method so is_available
+        field is searchable, ignoring any operand not '=' or '!='
+        because is_available is a boolean and thus nonsensical.
         """
+
         location_ids = []
         for cond in args:
             available_value = bool(cond[2])
@@ -522,7 +746,6 @@ class nh_clinical_location(orm.Model):
             else:
                 location_ids += [k for k, v in available_locations_map.items() if v != available_value]
         return [('id', 'in', location_ids)]
-
 
     _columns = {
         'name': fields.char('Location', size=100, required=True, select=True),
@@ -565,9 +788,17 @@ class nh_clinical_location(orm.Model):
 
     def get_available_location_ids(self, cr, uid, usages=None, context=None):
         """
-        Get a list of available locations.
-        Only returns beds unless specified otherwise.
+        Gets a list of available locations, only returning beds unless
+        specified otherwise.
+
+        :param usages: location type (``ward``, ``bed``, etc.) of
+            available locations
+        :type usage: list
+        :returns: location ids of available locations (default usage is
+            ``bed``)
+        :rtype: list
         """
+
         if not usages:
             usages = ['bed']
         activity_pool = self.pool['nh.activity']
@@ -580,10 +811,14 @@ class nh_clinical_location(orm.Model):
 
     def switch_active_status(self, cr, uid, location_id, context=None):
         """
-        Activates the location if it's inactive. Deactivates it if it's active.
-        Added Audit feature by calling Location Activate / Deactivate Activities instead of just writing active field.
-        :return: True if successful
+        Activates the location if inactive and deactivates it if active.
+
+        :param location_id: location id of location to be switched
+        :type location_id: int
+        :returns: ``True``
+        :rtype: bool
         """
+
         if isinstance(location_id, list):
             location_id = location_id[0]
         location = self.browse(cr, uid, location_id, context=context)
@@ -597,6 +832,14 @@ class nh_clinical_location(orm.Model):
         return activity_pool.complete(cr, uid, activity_id, context=context)
 
     def check_context_ids(self, cr, uid, context_ids, context=None):
+        """
+
+        :param cr:
+        :param uid:
+        :param context_ids:
+        :param context:
+        :return:
+        """
         if isinstance(context_ids[0], list):
             if context_ids[0][0] == 4:
                 context_ids = [c[1] for c in context_ids]
@@ -609,10 +852,21 @@ class nh_clinical_location(orm.Model):
 
     def get_by_code(self, cr, uid, code, auto_create=False, context=None):
         """
-        :return: id of the location with the provided code if it exists.
-                 False if auto_create is False and it does not exist.
-                 id of a new ward location with the provided code if auto_create is True.
+        Gets the location's id by the location's code. Creates a
+        location if ``auto_create`` is ``True`` and the location doesn't
+        exist.
+
+        :param code: location's code
+        :type code: str
+        :param auto_create: ``False`` [default].
+        :type auto_create: bool
+        :returns: location id of the location. ``False`` if
+            ``auto_create`` is ``True`` and location doesn't exist, the
+            location id of new ward location created. Otherwise
+            ``False``
+        :rtype: int or bool
         """
+
         location_ids = self.search(cr, uid, [['code', '=', code]], context=context)
         if not location_ids:
             if not auto_create:
@@ -634,11 +888,35 @@ class nh_clinical_location(orm.Model):
         return location_id
 
     def create(self, cr, uid, vals, context=None):
+        """
+        Extends Odoo's :meth:`create()<openerp.models.Model.create>`
+        method. Updates :class:`nh_clinical_location` to write
+        `context_ids` field.
+
+        :param vals: values to update the records with
+        :type vals: dict
+        :returns: ``True``
+        :rtype: bool
+        """
+
         if vals.get('context_ids'):
             self.check_context_ids(cr, uid, vals.get('context_ids'), context=context)
         return super(nh_clinical_location, self).create(cr, uid, vals, context=context)
 
     def write(self, cr, uid, ids, vals, context=None):
+        """
+        Extends Odoo's :meth:`write()<openerp.models.Model.write>`
+        method. Updates :class:`nh_clinical_location` to write
+        `context_ids` field.
+
+        :param ids: ids of the records to update
+        :type ids: list
+        :param vals: values to update the records with
+        :type vals: dict
+        :returns: ``True``
+        :rtype: bool
+        """
+
         if vals.get('context_ids'):
             self.check_context_ids(cr, uid, vals.get('context_ids'), context=context)
         return super(nh_clinical_location, self).write(cr, uid, ids, vals, context=context)
@@ -646,7 +924,7 @@ class nh_clinical_location(orm.Model):
 
 class nh_clinical_patient(osv.Model):
     """
-    NHClinical Patient object, to store all the parameters of the Patient
+    Represents a patient.
     """
     _name = 'nh.clinical.patient'
     _description = "A Patient"
@@ -666,15 +944,18 @@ class nh_clinical_patient(osv.Model):
 
     def _get_fullname(self, vals, fmt='{fn}, {gn} {mn}'):
         """
-        Formats full name from constituent family, given and middle names.
-        :param vals: dictionary containing keys 'family_name', 'given_name'
-                     and 'middle_names'.
-        :param fmt: string with format for full name. Default is
-                    '{fn}, {gn}, {mn}', if no argument is provided. Named
-                    arguments must be 'fn' (family name), 'gn' (given name)
-                    and 'mn' (middle name(s).
-        :return: string containing full name.
+        Formats a fullname string from family, given and middle names.
+
+        :param vals: contains 'family_name', 'given_name' and
+            'middle_names'
+        :type vals: dict
+        :param fmt: format for fullname. Default is
+                    '{fn}, {gn}, {mn}'
+        :type fmt: string
+        :returns: fullname
+        :rtype: string
         """
+
         for k in ['family_name', 'given_name', 'middle_names']:
             if k not in vals or vals[k] in [None, False]:
                 vals.update({k: ''})
@@ -684,6 +965,16 @@ class nh_clinical_patient(osv.Model):
                                    mn=vals.get('middle_names')).split())
 
     def _get_name(self, cr, uid, ids, fn, args, context=None):
+        """
+        Used by function field ``full_name`` to fetch the fullname for
+        each patient given by patient id.
+
+        :param ids: patient ids
+        :type ids: list
+        :returns: fullnames of patients
+        :rtype: dict
+        """
+
         result = dict.fromkeys(ids, False)
         for r in self.read(cr, uid, ids, ['family_name', 'given_name', 'middle_names'], context=context):
             #TODO This needs to be manipulable depending on locale
@@ -692,12 +983,19 @@ class nh_clinical_patient(osv.Model):
 
     def check_hospital_number(self, cr, uid, hospital_number, exception=False, context=None):
         """
-        Checks if there is a patient with the provided Hospital Number
-        :param exception: string with values 'True' or 'False'.
-        :return: if no exception parameter is provided: True if patient exists. False if not.
-                if exception = 'True': Integrity Error exception is raised if patient exists. False if not.
-                if exception = 'False': True if patient exists. Patient Not Found exception is raised if not.
+        Checks for a patient by `hospital number`.
+
+        :param hospital_number: patient's hospital number
+        :type hospital_number: string
+        :param exception: ``True`` or ``False``. Default is ``False``
+        :type exception: bool
+        :returns: ``True`` if patient exists. Otherwise ``False``
+        :rtype: bool
+        :raises: :class:`except_orm<openerp.osv.osv.except_orm>` if
+            ``exception`` is ``True`` and  if the patient exists or if
+            the patient does not
         """
+
         if not hospital_number:
             result = False
         else:
@@ -714,12 +1012,19 @@ class nh_clinical_patient(osv.Model):
 
     def check_nhs_number(self, cr, uid, nhs_number, exception=False, context=None):
         """
-        Checks if there is a patient with the provided NHS Number
-        :param exception: string with values 'True' or 'False'.
-        :return: if no exception parameter is provided: True if patient exists. False if not.
-                if exception = 'True': Integrity Error exception is raised if patient exists. False if not.
-                if exception = 'False': True if patient exists. Patient Not Found exception is raised if not.
+        Checks for patient by provided `NHS Number`.
+
+        :param nhs_number: patient's nhs number
+        :type nhs_number: string
+        :param exception: ``True`` or ``False``. Default is ``False``
+        :type exception: bool
+        :returns: ``True`` if patient exists. Otherwise ``False``
+        :rtype: bool
+        :raises: :class:`except_orm<openerp.osv.osv.except_orm>` if
+            ``exception`` is ``True`` and  if the patient exists or if
+            the patient does not
         """
+
         if not nhs_number:
             result = False
         else:
@@ -736,11 +1041,21 @@ class nh_clinical_patient(osv.Model):
 
     def update(self, cr, uid, identifier, data, selection='other_identifier', context=None):
         """
-        Updates patient data receiving a hospital number/nhs number as identifier instead of the usual patient_id
-        :param selection: 'other_identifier' will look for the patient through the hospital number, 'patient_identifier'
-        will do it through the nhs number.
-        :return: True if successful
+        Updates patient data by provided hospital number or nhs number,
+        instead of patient_id as per usual.
+
+        :param identifier: identifier of patient
+        :type identifier: str
+        :param data: data to write to the patient record
+        :type data: dict
+        :param selection: type of identifier used to lookup patient.
+            Default is ``other_identifier``, which is `hospital number`.
+            ``patient_identifier`` will do it through the nhs number.
+        :type selection: str
+        :returns: ``True``
+        :rtype: bool
         """
+
         patient_id = self.search(cr, uid, [[selection, '=', identifier]], context=context)
         return self.write(cr, uid, patient_id, data, context=context)
 
@@ -771,10 +1086,16 @@ class nh_clinical_patient(osv.Model):
         'ethnicity': 'Z'
     }
 
-    # _sql_constraints = [('hospital_number_uniq', 'unique(other_identifier)', 'The hospital number must be unique!'),
-    #                     ('nhs_number_uniq', 'unique(patient_identifier)', 'The nhs number must be unique!')]
-
     def create(self, cr, uid, vals, context=None):
+        """
+        Extends Odoo's :meth:`create()<openerp.models.Model.create>`
+        to write ``name``, ``other_identifier`` and
+        ``patient_identifier`` upon creation.
+
+        :returns: ``True`` if created
+        :rtype: bool
+        """
+
         if not vals.get('name'):
             vals.update({'name': self._get_fullname(vals)})
         if vals.get('other_identifier'):
@@ -785,6 +1106,13 @@ class nh_clinical_patient(osv.Model):
                                                        context=dict(context or {}, mail_create_nosubscribe=True))
 
     def write(self, cr, uid, ids, vals, context=None):
+        """
+        Extends Odoo's :meth:`write()<openerp.models.Model.write>`.
+
+        :returns: ``True`` if created
+        :rtype: bool
+        """
+
         title_pool = self.pool['res.partner.title']
         if 'title' in vals.keys():
             if not isinstance(vals.get('title'), int):
@@ -792,18 +1120,49 @@ class nh_clinical_patient(osv.Model):
         return super(nh_clinical_patient, self).write(cr, uid, ids, vals, context=context)
 
     def unlink(self, cr, uid, ids, context=None):
+        """
+        "Deletes" a patient from the system without deleting the record
+        from the database. This allows the retrieval of patient data
+        if necessary.
+
+        :param ids: ids of patients to unlink
+        :type ids: list
+        :returns: ``True``
+        :rtype: bool
+        """
+
         return super(nh_clinical_patient, self).write(cr, uid, ids, {'active': False}, context=context)
 
     def check_data(self, cr, uid, data, create=True, exception=True, context=None):
         """
-        Checks create / update data for patients.
-        Either the Hospital Number (other_identifier) or the NHS Number (patient_identifier) is required.
-        On create: Hospital Number must be unique and NHS Number must be unique.
-        On update: A patient must exist with either the Hospital Number or the NHS Number provided.
-        changes title to res.partner.title id. Will create a new one if it does not exist.
-        :param exception: if True, it will raise an exception when the return value is False.
-        :return: True if successful
+        Default will check if patient exists. Either `hospital number`
+        (``other_identifier``) or `NHS number` (``patient_identifier``)
+        is required.
+
+        If ``create`` is ``True``, then both ``other_identifier`` and
+        ``patient_identifier`` must be unique. Otherwise either or both
+        identifiers will be accepted in ``data`` parameter.
+
+        If ``title`` is in ``data`` parameter, then method changes title
+        to res.partner.title id. If ``title`` is not included, a new
+        title will be created.
+
+        :param data: must include either ``patient_identifier`` or
+            ``other_identifier``
+        :type data: dict
+        :param create: ``True`` [default]
+        :type create: bool
+        :param exception: if ``True`` [default], it will raise an
+            exception if no patient exists or more than one patient
+            exists
+        :type create: bool
+        :raises: :class:`except_orm<openerp.osv.osv.except_orm>` if
+            ``exception`` arguments is ``True`` and  if patient doesn't
+            exists or if duplicate patients are found
+        :returns: ``True`` if successful. Otherwise ``False``
+        :rtype: bool
         """
+
         title_pool = self.pool['res.partner.title']
         if 'patient_identifier' not in data.keys() and 'other_identifier' not in data.keys():
             raise osv.except_osv('Patient Data Error!', 'Either the Hospital Number or the NHS Number is required to '
@@ -875,6 +1234,10 @@ class nh_clinical_specialty(orm.Model):
 
 
 class nh_clinical_doctor(orm.Model):
+    """
+    Represents a doctor.
+    """
+
     _name = 'nh.clinical.doctor'
     _inherits = {'res.partner': 'partner_id'}
     _gender = [['BOTH', 'Both'], ['F', 'Female'], ['I', 'Intermediate'],
@@ -892,18 +1255,47 @@ class nh_clinical_doctor(orm.Model):
     }
 
     def create(self, cr, user, vals, context=None):
+        """
+        Extends Odoo's :meth:`create()<openerp.models.Model.create>`
+        to update ``doctor_id`` field in :class:`res_users`.
+
+        :returns: ``True`` if created
+        :rtype: bool
+        """
+
         res = super(nh_clinical_doctor, self).create(cr, user, vals, context=dict(context or {}, mail_create_nosubscribe=True))
         if 'user_id' in vals:
             self.pool['res.users'].write(cr, user, vals['user_id'], {'doctor_id': res}, context=context)
         return res
 
     def write(self, cr, uid, ids, vals, context=None):
+        """
+        Extends Odoo's :meth:`write()<openerp.models.Model.write>` to
+        update ``doctor_id`` field in :class:`res_users`.
+
+        :returns: ``True`` if created
+        :rtype: bool
+        """
+
         res = super(nh_clinical_doctor, self).write(cr, uid, ids, vals, context=context)
         if 'user_id' in vals:
             self.pool['res.users'].write(cr, uid, vals['user_id'], {'doctor_id': ids[0] if isinstance(ids, list) else ids}, context=context)
         return res
 
     def evaluate_doctors_dict(self, cr, uid, data, context=None):
+        """
+        Evaluates doctors, checking for a doctor before creating a new
+        doctor if it doesn't exist.
+
+        :param data: must contain ``doctors`` key. Its value will be a
+            list of dictionaries which must contain the keys ``code``,
+            ``gender``, ``gmc`` and ``type``. It many contain ``title``.
+        :type data: dict
+        :returns: ``True`` if either it finds a doctor or creates a new
+            doctor. Otherwise ``False``
+        :rtype: bool
+        """
+
         if not data.get('doctors'):
             _logger.warn("Trying to evaluate doctors dictionary without doctors data!")
             return False

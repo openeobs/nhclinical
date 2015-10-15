@@ -214,7 +214,8 @@ class nh_clinical_api(orm.AbstractModel):
         """
         Merges a specified patient into a patient.
 
-        :param hospital_number: hospital number of the patient merged INTO
+        :param hospital_number: hospital number of the patient merged
+            INTO
         :type hospital_number: str
         :param data: may contain the key ``from_identifier``,
             the hospital number of the patient merged FROM
@@ -240,8 +241,8 @@ class nh_clinical_api(orm.AbstractModel):
 
         :param hospital_number: hospital number of the patient
         :type hospital_number: str
-        :param data: required is ``location_code`` of the patient's transfer
-            destination
+        :param data: required is ``location_code`` of the patient's
+            transfer destination
         :type data: dict
         :returns: ``True``
         :rtype: bool

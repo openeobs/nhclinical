@@ -209,7 +209,7 @@ class nh_clinical_adt_patient_admit(orm.Model):
         Checks the submitted data and then calls
         :meth:`submit<activity.nh_activity.submit>`.
 
-        If a :mod:`location<base.nh_clinical_location>` of `ward` usage
+        If a `ward` :mod:`location<base.nh_clinical_location>`
         with the provided code does not exist, it will create a new one.
 
         Due to this behaviour the user submitting the data must be

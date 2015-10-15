@@ -1,43 +1,43 @@
-``operations``
+``Operations``
 ==============
 .. automodule:: operations
 
-``patient_move``
-----------------
+``Move``
+--------
 .. autoclass:: nh_clinical_patient_move
     :members:
 
-``patient_swap_beds``
----------------------
+``Swap Beds``
+-------------
 .. autoclass:: nh_clinical_patient_swap_beds
     :members:
 
-``patient_placement``
----------------------
+``Placement``
+-------------
 .. autoclass:: nh_clinical_patient_placement
     :members:
 
-``patient_discharge``
----------------------
+``Discharge``
+-------------
 .. autoclass:: nh_clinical_patient_discharge
     :members:
 
-``patient_admission``
----------------------
+``Admission``
+-------------
 .. autoclass:: nh_clinical_patient_admission
     :members:
 
-``patient_transfer``
---------------------
+``Transfer``
+------------
 .. autoclass:: nh_clinical_patient_transfer
     :members:
 
-``patient_follow``
-------------------
+``Follow``
+----------
 .. autoclass:: nh_clinical_patient_follow
     :members:
 
-``patient_unfollow``
---------------------
+``Unfollow``
+------------
 .. autoclass:: nh_clinical_patient_unfollow
     :members:

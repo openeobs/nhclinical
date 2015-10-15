@@ -1,7 +1,6 @@
-``base``
+``Base``
 ========
 .. automodule:: base
-    :members:
 
 ``ir_model_access``
 -------------------
@@ -38,37 +37,37 @@
 .. autoclass:: res_groups
     :members:
 
-``pos``
+``POS``
 -------
 .. autoclass:: nh_clinical_pos
     :members:
 
-``context``
+``Context``
 -----------
 .. autoclass:: nh_clinical_context
     :members:
 
-``location``
+``Location``
 ------------
 .. autoclass:: nh_clinical_location
     :members:
 
-``patient``
+``Patient``
 -----------
 .. autoclass:: nh_clinical_patient
     :members:
 
-``mail_message``
+``Mail Message``
 ----------------
 .. autoclass:: mail_message
     :members:
 
-``specialty``
+``Specialty``
 -------------
 .. autoclass:: nh_clinical_specialty
     :members:
 
-``doctor``
+``Doctor``
 ----------
 .. autoclass:: nh_clinical_doctor
     :members:

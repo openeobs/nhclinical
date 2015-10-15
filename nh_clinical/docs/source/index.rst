@@ -28,7 +28,6 @@ Module Reference
 
    activity_extension
    api
-   api_demo
    adt
    auditing
    base
