@@ -32,7 +32,7 @@
             <field name="model">nh.clinical.user.management</field>
             <field name="arch" type="xml">
                 <tree string="User List" version="7.0">
-                    <field name="name"/>
+                    <field name="user_id" string="Name"/>
                     <field name="login"/>
                     <field name="category_id" widget="many2many_tags" string="Roles"/>
                     <field name="location_ids" string="Responsible for locations..."/>
@@ -66,10 +66,9 @@
                             <field name="active" invisible="1"/>
                             <field name="category_id" widget="many2many_tags" options="{'no_create': True}"
                                    string="Roles" required="1"/>
+                            <field name="ward_ids" widget="many2many_tags" options="{'no_create': True}"
+                                   readonly="0" groups="nh_clinical.group_nhc_admin,nh_clinical.group_nhc_dev"/>
 	                    </group>
-                        <div colspan="4">
-                            <button name="allocate_responsibility" groups="nh_clinical.group_nhc_admin,nh_clinical.group_nhc_dev" string="Responsibility Allocation" type="object"/>
-                        </div>
                         <notebook>
                             <page string="Location responsibility">
                                 <field name="location_ids" readonly="1"/>

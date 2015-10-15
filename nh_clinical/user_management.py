@@ -36,9 +36,19 @@ class nh_clinical_user_management(orm.Model):
     _inherits = {'res.users': 'user_id'}
     _auto = False
     _table = "nh_clinical_user_management"
+    _ward_ids_not_editable = ['Nurse', 'HCA']
+
+    def _get_ward_ids(self, cr, uid, ids, field, args, context=None):
+        res = {}
+
+        for user in self.browse(cr, uid, ids, context=context):
+            res[user.id] = [loc.id for loc in user.location_ids if loc.usage == 'ward']
+        return res
 
     _columns = {
-        'user_id': fields.many2one('res.users', 'User', required=1, ondelete='restrict')
+        'user_id': fields.many2one('res.users', 'User', required=1, ondelete='restrict'),
+        'ward_ids': fields.function(_get_ward_ids, type='many2many', relation='nh.clinical.location',
+                                    string='Ward Responsibility', domain=[['usage', '=', 'ward']])
     }
 
     def create(self, cr, uid, vals, context=None):
@@ -46,11 +56,32 @@ class nh_clinical_user_management(orm.Model):
         Redirects to the res.users :meth:`create<openerp.models.Model.create>`
         method.
 
+        If ``ward_ids`` is provided, a
+        :mod:`responsibility allocation<auditing.nh_clinical_user_responsibility_allocation>`
+        is created and completed to assign the user to those wards.
+
         :returns: res.users id
         :rtype: int
         """
         user_pool = self.pool['res.users']
-        return user_pool.create(cr, uid, vals, context=context)
+        allocation_pool = self.pool['nh.clinical.user.responsibility.allocation']
+        activity_pool = self.pool['nh.activity']
+        user_data = vals.copy()
+        if vals.get('ward_ids'):
+            user_data.pop('ward_ids', None)
+        user_id = user_pool.create(cr, uid, user_data, context=context)
+
+        if vals.get('ward_ids')[0][2]:
+            locations = vals.get('ward_ids')
+            user = self.browse(cr, uid, user_id, context=context)
+            editable = any([c.name not in self._ward_ids_not_editable for c in user.category_id])
+            if not editable:
+                raise osv.except_osv('Role Error!', 'This user cannot be assigned with ward responsibility!')
+            activity_id = allocation_pool.create_activity(cr, uid, {}, {
+                'responsible_user_id': user_id,
+                'location_ids': locations}, context=context)
+            activity_pool.complete(cr, uid, activity_id, context=context)
+        return user_id
 
     def write(self, cr, uid, ids, vals, context=None):
         """
@@ -59,23 +90,43 @@ class nh_clinical_user_management(orm.Model):
         that are being edited) and then redirects to the res.users
         :meth:`write<openerp.models.Model.write>` method.
 
+        If ``ward_ids`` is edited, a
+        :mod:`responsibility allocation<auditing.nh_clinical_user_responsibility_allocation>`
+        is created and completed to assign the users to those wards.
+
         :returns: ``True``
         :rtype: bool
         """
         user_pool = self.pool['res.users']
         category_pool = self.pool['res.partner.category']
+        allocation_pool = self.pool['nh.clinical.user.responsibility.allocation']
+        activity_pool = self.pool['nh.activity']
         u = user_pool.browse(cr, uid, uid, context=context)
         category_ids = [c.id for c in u.category_id]
         child_ids = []
         for c in category_ids:
             child_ids += category_pool.get_child_of_ids(cr, uid, c, context=context)
-        res = [True]
         for user in self.browse(cr, uid, ids, context=context):
             ucids = [c.id for c in user.category_id]
             if any([i for i in ucids if i not in child_ids]):
                 raise osv.except_osv('Permission Error!', 'You are not allowed to edit this user!')
-            res.append(user_pool.write(cr, uid, user.id, vals, context=context))
-        return all(res)
+        user_data = vals.copy()
+        if vals.get('ward_ids'):
+            user_data.pop('ward_ids', None)
+        res = user_pool.write(cr, uid, ids, user_data, context=context)
+
+        if vals.get('ward_ids'):
+            locations = vals.get('ward_ids')
+            for user in self.browse(cr, uid, ids, context=context):
+                editable = any([c.name not in self._ward_ids_not_editable for c in user.category_id])
+                if not editable:
+                    raise osv.except_osv('Role Error!', 'This user cannot be assigned with ward responsibility!')
+            for user_id in ids:
+                activity_id = allocation_pool.create_activity(cr, uid, {}, {
+                    'responsible_user_id': user_id,
+                    'location_ids': locations}, context=context)
+                activity_pool.complete(cr, uid, activity_id, context=context)
+        return res
 
     def fields_view_get(self, cr, user, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
         """
