@@ -40,15 +40,30 @@ class nh_clinical_user_management(orm.Model):
 
     def _get_ward_ids(self, cr, uid, ids, field, args, context=None):
         res = {}
-
         for user in self.browse(cr, uid, ids, context=context):
             res[user.id] = [loc.id for loc in user.location_ids if loc.usage == 'ward']
         return res
 
+    def _get_categories(self, cr, uid, ids, field, args, context=None):
+        res = {}
+        for user in self.browse(cr, uid, ids, context=context):
+            res[user.id] = [cat.id for cat in user.partner_id.category_id]
+        return res
+
+    def _categories_search(self, cr, uid, obj, name, args, domain=None, context=None):
+        arg1, op, arg2 = args[0]
+        arg2 = arg2 if isinstance(arg2, (list, tuple)) else [arg2]
+        all_ids = self.search(cr, uid, [])
+        value_map = self._get_categories(cr, uid, all_ids, 'category_ids', None, context=context)
+        ids = [k for k, v in value_map.items() if set(v or []) & set(arg2 or [])]
+        return [('id', 'in', ids)]
+
     _columns = {
         'user_id': fields.many2one('res.users', 'User', required=1, ondelete='restrict'),
         'ward_ids': fields.function(_get_ward_ids, type='many2many', relation='nh.clinical.location',
-                                    string='Ward Responsibility', domain=[['usage', '=', 'ward']])
+                                    string='Ward Responsibility', domain=[['usage', '=', 'ward']]),
+        'category_ids': fields.function(_get_categories, type='many2many', relation='res.partner.category',
+                                        string='Roles', fnct_search=_categories_search)
     }
 
     def create(self, cr, uid, vals, context=None):

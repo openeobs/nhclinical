@@ -83,7 +83,7 @@
             <field name="name">Account Administration</field>
             <field name="res_model">nh.clinical.user.management</field>
             <field name="view_mode">tree,form</field>
-            <field name="domain">[['category_id.name','in',['HCA','Nurse','Ward Manager']]]</field>
+            <field name="domain">[['category_ids.name','in',['HCA','Nurse','Ward Manager']]]</field>
             <field name="search_view_id" ref="view_nhc_user_management_search"/>
             <field name="context">{'partner_category_display': 'short'}</field>
         </record>
@@ -91,7 +91,7 @@
             <field name="name">Account Administration</field>
             <field name="res_model">nh.clinical.user.management</field>
             <field name="view_mode">tree,form</field>
-            <field name="domain">[['category_id.name','in',
+            <field name="domain">[['category_ids.name','in',
                 ['HCA','Nurse','Ward Manager','Doctor','Senior Manager','Kiosk','System Administrator','Senior Doctor',
                 'Junior Doctor','Registrar','Consultant','Receptionist']],['login','not in',['adt','admin']]]</field>
             <field name="search_view_id" ref="view_nhc_user_management_search"/>
