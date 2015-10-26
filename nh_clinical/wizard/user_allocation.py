@@ -405,7 +405,7 @@ class user_allocation_wizard(osv.TransientModel):
         'ward_ids': fields.many2many('nh.clinical.location', 'allocation_ward_rel', 'allocation_id', 'location_id',
                                      string='Wards', domain=[['usage', '=', 'ward']]),
         'user_ids': fields.many2many('res.users', 'allocation_user_rel', 'allocation_id', 'user_id', string='Users'),
-        'allocating_user_ids': fields.many2many('nh.clinical.allocating.user', 'allocating_allocation_rel',
+        'allocating_user_ids': fields.many2many('nh.clinical.allocating', 'allocating_allocation_rel',
                                                 'allocation_id', 'allocating_user_id', string='Allocating Users')
     }
     _defaults = {
