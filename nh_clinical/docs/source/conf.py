@@ -308,6 +308,5 @@ intersphinx_mapping = {
     'python': ('https://docs.python.org/', None),
     'odoo': ('https://odoo.com/documentation/master/', None),
     'activity': ('https://nh-activity.readthedocs.org/en/develop/', None)
-
 }
 

@@ -1,8 +1,8 @@
-``spell``
+``Spell``
 =========
 .. automodule:: spell
 
-``spell``
+``Spell``
 ---------
 .. autoclass:: nh_clinical_spell
     :members:

@@ -1,8 +1,8 @@
-``api``
+``API``
 =======
 .. automodule:: api
 
-``api``
+``API``
 -------
 .. autoclass:: nh_clinical_api
     :members:
