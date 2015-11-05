@@ -72,7 +72,7 @@ class nh_clinical_device_session(orm.Model):
     _name = 'nh.clinical.device.session'
     _description = 'Device Session'
     _inherit = ['nh.activity.data']
-    _rec_name = 'device_id'
+    _rec_name = 'device_type_id'
     _columns = {
         'device_type_id': fields.many2one('nh.clinical.device.type', 'Device Type', required=True),
         'device_category_id': fields.related('device_type_id', 'category_id', type='many2one', relation='nh.clinical.device.category', string='Device Category'),
