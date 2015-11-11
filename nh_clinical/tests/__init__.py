@@ -12,9 +12,8 @@ import test_patient
 import test_base_extensions
 import test_doctor
 import test_spell
-import test_allocation_wizards
+# import test_allocation_wizards
 import test_patient_placement_wizard
 import test_responsibility_allocation_wizard
-import test_user_allocation
-import test_userboard
+# import test_user_allocation
 import test_users

@@ -86,7 +86,7 @@ class nh_clinical_user_management(orm.Model):
             user_data.pop('ward_ids', None)
         user_id = user_pool.create(cr, uid, user_data, context=context)
 
-        if vals.get('ward_ids')[0][2]:
+        if vals.get('ward_ids') and vals.get('ward_ids')[0][2]:
             locations = vals.get('ward_ids')
             user = self.browse(cr, uid, user_id, context=context)
             editable = any([c.name not in self._ward_ids_not_editable for c in user.category_id])

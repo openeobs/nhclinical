@@ -18,7 +18,7 @@ class TestUserAllocation(common.SingleTransactionCase):
         cls.group_pool = cls.registry('res.groups')
         cls.user_pool = cls.registry('res.users')
         cls.api_pool = cls.registry('nh.clinical.api')
-        cls.allocating_pool = cls.registry('nh.clinical.allocating.user')
+        cls.allocating_pool = cls.registry('nh.clinical.allocating')
         cls.allocation_pool = cls.registry('nh.clinical.user.allocation')
         cls.resp_pool = cls.registry('nh.clinical.user.responsibility.allocation')
 

@@ -1,216 +1,166 @@
-from openerp.tests.common import SingleTransactionCase
+from openerp.tests import common
+from openerp.osv.orm import except_orm
 
-class TestUsers(SingleTransactionCase):
 
-    def setUp(self):
-        """***setup user management tests***"""
-        super(TestUsers, self).setUp()
-        cr, uid, = self.cr, self.uid
+class TestUserManagement(common.SingleTransactionCase):
+    @classmethod
+    def setUpClass(cls):
+        super(TestUserManagement, cls).setUpClass()
+        cr, uid = cls.cr, cls.uid
 
-        self.users_pool = self.registry('res.users')
-        self.groups_pool = self.registry('res.groups')
-        self.activity_pool = self.registry('nh.activity')
-        self.location_pool = self.registry('nh.clinical.location')
-        self.responsibility_allocation = self.registry('nh.clinical.responsibility.allocation')
-        self.userboard = self.registry('nh.clinical.userboard')
-        self.userboard_admin = self.registry('nh.clinical.admin.userboard')
-        self.apidemo = self.registry('nh.clinical.api.demo')
+        cls.user_pool = cls.registry('res.users')
+        cls.group_pool = cls.registry('res.groups')
+        cls.partner_pool = cls.registry('res.partner')
+        cls.category_pool = cls.registry('res.partner.category')
+        cls.activity_pool = cls.registry('nh.activity')
+        cls.patient_pool = cls.registry('nh.clinical.patient')
+        cls.location_pool = cls.registry('nh.clinical.location')
+        cls.pos_pool = cls.registry('nh.clinical.pos')
+        cls.spell_pool = cls.registry('nh.clinical.spell')
+        # USERBOARD MODELS
+        cls.passwiz_pool = cls.registry('change.password.wizard')
+        cls.uman_pool = cls.registry('nh.clinical.user.management')
 
-    def test_01_responsibility_allocation(self):
+        cls.admin_group_id = cls.group_pool.search(cr, uid, [['name', '=', 'NH Clinical Admin Group']])
+        cls.hca_group_id = cls.group_pool.search(cr, uid, [['name', '=', 'NH Clinical HCA Group']])[0]
+        cls.nurse_group_id = cls.group_pool.search(cr, uid, [['name', '=', 'NH Clinical Nurse Group']])[0]
+        cls.wm_group_id = cls.group_pool.search(cr, uid, [['name', '=', 'NH Clinical Ward Manager Group']])[0]
+        cls.sm_group_id = cls.group_pool.search(cr, uid, [['name', '=', 'NH Clinical Senior Manager Group']])[0]
+        cls.dr_group_id = cls.group_pool.search(cr, uid, [['name', '=', 'NH Clinical Doctor Group']])[0]
+
+        cls.admin_role_id = cls.category_pool.search(cr, uid, [['name', '=', 'System Administrator']])[0]
+        cls.wm_role_id = cls.category_pool.search(cr, uid, [['name', '=', 'Ward Manager']])[0]
+        cls.nurse_role_id = cls.category_pool.search(cr, uid, [['name', '=', 'Nurse']])[0]
+        cls.hca_role_id = cls.category_pool.search(cr, uid, [['name', '=', 'HCA']])[0]
+
+        cls.hospital_id = cls.location_pool.create(cr, uid, {'name': 'Test Hospital', 'code': 'TESTHOSP',
+                                                             'usage': 'hospital'})
+        cls.pos_id = cls.pos_pool.create(cr, uid, {'name': 'Test POS', 'location_id': cls.hospital_id})
+
+        cls.adt_uid = cls.user_pool.create(cr, uid, {'name': 'Admin 0', 'login': 'user_000',
+                                                        'password': 'user_000',
+                                                        'groups_id': [[4, cls.admin_group_id[0]]],
+                                                        'category_id': [[4, cls.admin_role_id]],
+                                                        'pos_id': cls.pos_id})
+        cls.ward_id = cls.location_pool.create(cr, uid, {
+            'name': 'Ward0', 'code': 'W0', 'usage': 'ward', 'parent_id': cls.hospital_id, 'type': 'poc'
+        })
+        cls.bed_id = cls.location_pool.create(cr, uid, {
+            'name': 'Bed0', 'code': 'B0', 'usage': 'bed', 'parent_id': cls.ward_id, 'type': 'poc'
+        })
+        cls.hca_uid = cls.user_pool.create(cr, uid, {
+            'name': 'HCA0', 'login': 'hca0', 'password': 'hca0', 'groups_id': [[4, cls.hca_group_id]],
+            'location_ids': [[5]]
+        })
+        cls.nurse_uid = cls.user_pool.create(cr, uid, {
+            'name': 'NURSE0', 'login': 'n0', 'password': 'n0', 'groups_id': [[4, cls.nurse_group_id]],
+            'location_ids': [[5]]
+        })
+        cls.wm_uid = cls.user_pool.create(cr, uid, {
+            'name': 'WM0', 'login': 'wm0', 'password': 'wm0', 'groups_id': [[4, cls.wm_group_id]],
+            'location_ids': [[5]], 'category_id': [[4, cls.wm_role_id]]
+        })
+        cls.sm_uid = cls.user_pool.create(cr, uid, {
+            'name': 'SM0', 'login': 'sm0', 'password': 'sm0', 'groups_id': [[4, cls.sm_group_id]],
+            'location_ids': [[5]]
+        })
+        cls.dr_uid = cls.user_pool.create(cr, uid, {
+            'name': 'DR0', 'login': 'dr0', 'password': 'dr0', 'groups_id': [[4, cls.dr_group_id]],
+            'location_ids': [[5]]
+        })
+
+    def test_01_change_password_get_default_user_ids(self):
         cr, uid = self.cr, self.uid
-        users = {
-            'ward_managers': {
-                'wm1': ['wm1', 'U'],
-                'wm2': ['wm2', 'T']
-            },
-            'nurses': {
-                'nurse1': ['nurse1', ['U0', 'U1']],
-                'nurse2': ['nurse2', ['T0', 'T1']]
-            },
-            'hcas': {
-                'hca1': ['hca1', ['U0', 'U1', 'T0', 'T1']]
-            },
-            'doctors': {
-                'doctor1': ['doctor1', ['U0', 'U1', 'T0', 'T1']]
-            }
+
+        # Scenario 1: Use context
+        res = self.passwiz_pool._default_user_ids(cr, uid, context={'active_ids': self.adt_uid})
+        self.assertEqual(len(res), 1)
+        self.assertEqual(len(res[0]), 3)
+        self.assertDictEqual(res[0][2], {'user_id': self.adt_uid, 'user_login': 'user_000'})
+
+        # Scenario 2: Use no context
+        res = self.passwiz_pool._default_user_ids(cr, uid, context=None)
+        self.assertEqual(len(res), 0)
+
+    def test_02_user_management_create(self):
+        cr, uid = self.cr, self.uid
+
+        user_data = {
+            'name': 'HCA2', 'login': 'hca2', 'category_id': [[4, self.hca_role_id]]
         }
+        hca_uid = self.uman_pool.create(cr, self.wm_uid, user_data)
+        self.assertTrue(hca_uid, msg="HCA user not created")
+        user = self.user_pool.browse(cr, uid, hca_uid)
+        self.assertEqual(user.name, 'HCA2')
+        self.assertEqual(user.login, 'hca2')
+        groups = [g.name for g in user.groups_id]
+        self.assertTrue('NH Clinical HCA Group' in groups, msg="User created without HCA group")
+        self.assertTrue('Employee' in groups, msg="User created without Employee group")
 
-        self.apidemo.build_unit_test_env1(cr, uid, users=users)
-
-        wm1_id = self.users_pool.search(cr, uid, [('login', '=', 'wm1')])[0]
-
-        nurse1_id = self.users_pool.search(cr, uid, [('login', '=', 'nurse1')])[0]
-
-        ward_U_id = self.location_pool.search(cr, uid, [('code', '=', 'U')])[0]
-        ward_T_id = self.location_pool.search(cr, uid, [('code', '=', 'T')])[0]
-
-        # Adding and Removing a ward responsibility to a ward manager
-        ra_id = self.responsibility_allocation.create(cr, uid, {'user_id': wm1_id, 'location_ids': [[6, False, [ward_T_id, ward_U_id]]]})
-        self.responsibility_allocation.submit(cr, uid, [ra_id])
-        spell_ids = self.activity_pool.search(cr, uid, [('data_model', '=', 'nh.clinical.spell'), ('location_id', 'in', [ward_U_id, ward_T_id])])
-        for spell_id in spell_ids:
-            self.assertTrue(self.activity_pool.search(cr, uid, [('id', '=', spell_id), ('user_ids', 'in', [wm1_id])]))
-        ra_id = self.responsibility_allocation.create(cr, uid, {'user_id': wm1_id, 'location_ids': [[6, False, [ward_U_id]]]})
-        self.responsibility_allocation.submit(cr, uid, [ra_id])
-        spell_ids = self.activity_pool.search(cr, uid, [('data_model', '=', 'nh .clinical.spell'), ('location_id', 'in', [ward_T_id])])
-        for spell_id in spell_ids:
-            self.assertFalse(self.activity_pool.search(cr, uid, [('id', '=', spell_id), ('user_ids', 'in', [wm1_id])]))
-        # Adding and Removing responsibilities to a nurse
-        ra_id = self.responsibility_allocation.create(cr, uid, {'user_id': nurse1_id, 'location_ids': [[6, False, [ward_T_id]]]})
-        self.responsibility_allocation.submit(cr, uid, [ra_id])
-        observation_ids = self.activity_pool.search(cr, uid, [('data_model', 'ilike', '%observation%'), ('location_id', 'child_of', [ward_T_id])])
-        notification_ids = self.activity_pool.search(cr, uid, [('data_model', 'ilike', '%notification%'), ('location_id', 'child_of', [ward_T_id])])
-        for activity_id in observation_ids+notification_ids:
-            self.assertTrue(self.activity_pool.search(cr, uid, [('id', '=', activity_id), ('user_ids', 'in', [nurse1_id])]))
-        observation_ids = self.activity_pool.search(cr, uid, [('data_model', 'ilike', '%observation%'), ('location_id', 'child_of', [ward_U_id])])
-        notification_ids = self.activity_pool.search(cr, uid, [('data_model', 'ilike', '%notification%'), ('location_id', 'child_of', [ward_U_id])])
-        for activity_id in observation_ids+notification_ids:
-            self.assertFalse(self.activity_pool.search(cr, uid, [('id', '=', activity_id), ('user_ids', 'in', [nurse1_id])]))
-
-    def test_02_staff_management_create_and_update(self):
+    def test_03_user_management_write(self):
         cr, uid = self.cr, self.uid
 
-        # STAFF MANAGEMENT CREATE
-        # Creating a HCA
-        new_hca_id = self.userboard.create(cr, uid, {'name': 'Demo HCA', 'login': 'demohca', 'password': 'demohca', 'hca': True})
-        self.assertTrue(new_hca_id, msg='Error on userboard create')
-        check_user_id = self.users_pool.search(cr, uid, [('login', '=', 'demohca')])
-        self.assertTrue(check_user_id, msg='HCA user was not created')        
-        hca_user = self.users_pool.browse(cr, uid, check_user_id[0])
-        check_groups = [g.name for g in hca_user.groups_id]
-        self.assertTrue('NH Clinical HCA Group' in check_groups, msg='HCA user does not have HCA group')
-        # Creating a Nurse
-        new_nurse_id = self.userboard.create(cr, uid, {'name': 'Demo Nurse', 'login': 'demonurse', 'password': 'demonurse', 'nurse': True})
-        self.assertTrue(new_nurse_id, msg='Error on userboard create')
-        check_user_id = self.users_pool.search(cr, uid, [('login', '=', 'demonurse')])
-        self.assertTrue(check_user_id, msg='Nurse user was not created')
-        nurse_user = self.users_pool.browse(cr, uid, check_user_id[0])
-        check_groups = [g.name for g in nurse_user.groups_id]
-        self.assertTrue('NH Clinical Nurse Group' in check_groups, msg='Nurse user does not have Nurse group')
-        # Creating a Doctor
-        new_doctor_id = self.userboard.create(cr, uid, {'name': 'Demo Doctor', 'login': 'demodoctor', 'password': 'demodoctor', 'doctor': True})
-        self.assertTrue(new_doctor_id, msg='Error on userboard create')
-        check_user_id = self.users_pool.search(cr, uid, [('login', '=', 'demodoctor')])
-        self.assertTrue(check_user_id, msg='Doctor user was not created')
-        doctor_user = self.users_pool.browse(cr, uid, check_user_id[0])
-        check_groups = [g.name for g in doctor_user.groups_id]
-        self.assertTrue('NH Clinical Doctor Group' in check_groups, msg='Doctor user does not have Doctor group')
-        # Creating a Ward Manager
-        new_ward_manager_id = self.userboard.create(cr, uid, {'name': 'Demo Ward Manager', 'login': 'demoward_manager', 'password': 'demoward_manager', 'ward_manager': True})
-        self.assertTrue(new_ward_manager_id, msg='Error on userboard create')
-        check_user_id = self.users_pool.search(cr, uid, [('login', '=', 'demoward_manager')])
-        self.assertTrue(check_user_id, msg='Ward Manager user was not created')
-        ward_manager_user = self.users_pool.browse(cr, uid, check_user_id[0])
-        check_groups = [g.name for g in ward_manager_user.groups_id]
-        self.assertTrue('NH Clinical Ward Manager Group' in check_groups, msg='Ward Manager user does not have Ward Manager group')
-        self.assertTrue('Contact Creation' in check_groups, msg='Ward Manager user does not have Contact Creation group')
-        # STAFF MANAGEMENT UPDATE
-        # Adding HCA Group
-        self.assertTrue(self.userboard.write(cr, uid, [new_nurse_id], {'hca': True}), msg='Error on Userboard write')
-        nurse_user = self.users_pool.browse(cr, uid, new_nurse_id)
-        check_groups = [g.name for g in nurse_user.groups_id]
-        self.assertTrue('NH Clinical HCA Group' in check_groups, msg='Nurse user does not have HCA group (after update)')
-        self.assertTrue('NH Clinical Nurse Group' in check_groups, msg='Nurse user does not have Nurse group (after update)')        
-        # Adding Nurse Group
-        self.assertTrue(self.userboard.write(cr, uid, [new_ward_manager_id], {'nurse': True}), msg='Error on Userboard write')
-        ward_manager_user = self.users_pool.browse(cr, uid, new_ward_manager_id)
-        check_groups = [g.name for g in ward_manager_user.groups_id]
-        self.assertTrue('NH Clinical Ward Manager Group' in check_groups, msg='Ward Manager user does not have Ward Manager group (after update)')
-        self.assertTrue('NH Clinical Nurse Group' in check_groups, msg='Ward Manager user does not have Nurse group (after update)')
-        self.assertTrue('Contact Creation' in check_groups, msg='Ward Manager user does not have Contact Creation group (after update)')        
-        # Adding Ward Manager Group
-        self.assertTrue(self.userboard.write(cr, uid, [new_hca_id], {'ward_manager': True}), msg='Error on Userboard write')
-        hca_user = self.users_pool.browse(cr, uid, new_hca_id)
-        check_groups = [g.name for g in hca_user.groups_id]
-        self.assertTrue('NH Clinical HCA Group' in check_groups, msg='HCA user does not have HCA group (after update)')
-        self.assertTrue('NH Clinical Ward Manager Group' in check_groups, msg='HCA user does not have Ward Manager group (after update)')
-        self.assertTrue('Contact Creation' in check_groups, msg='HCA user does not have Contact Creation group (after update)')
-        # Adding Doctor Group and Removing HCA Group
-        self.assertTrue(self.userboard.write(cr, uid, [new_nurse_id], {'hca': False, 'doctor': True}), msg='Error on Userboard write')
-        nurse_user = self.users_pool.browse(cr, uid, new_nurse_id)
-        check_groups = [g.name for g in nurse_user.groups_id]
-        self.assertFalse('NH Clinical HCA Group' in check_groups, msg='Nurse user has HCA group (after 2nd update)')
-        self.assertTrue('NH Clinical Nurse Group' in check_groups, msg='Nurse user does not have Nurse group (after 2nd update)')
-        self.assertTrue('NH Clinical Doctor Group' in check_groups, msg='Nurse user does not have Doctor group (after 2nd update)')
-        
-    def test_03_admin_user_management_create_and_update(self):
+        # Scenario 1: Update HCA user with Ward Manager user
+        user_id = self.uman_pool.search(cr, uid, [['name', '=', 'HCA2']])
+        user_data = {
+            'name': 'TU2', 'login': 'tu2', 'category_id': [[6, 0, [self.nurse_role_id]]]
+        }
+        self.assertTrue(self.uman_pool.write(cr, self.wm_uid, user_id, user_data))
+        user = self.user_pool.browse(cr, uid, user_id)
+        self.assertEqual(user.name, 'TU2')
+        self.assertEqual(user.login, 'tu2')
+        groups = [g.name for g in user.groups_id]
+        self.assertFalse('NH Clinical HCA Group' in groups, msg="HCA group not removed")
+        self.assertTrue('NH Clinical Nurse Group' in groups, msg="Nurse group missing")
+        self.assertTrue('Employee' in groups, msg="Employee group removed")
+
+        # Scenario 2: Update Admin user with HCA user
+        user_data = {
+            'name': 'TU3', 'login': 'tu3', 'category_id': [[6, 0, [self.nurse_role_id]]]
+        }
+        with self.assertRaises(except_orm):
+            self.uman_pool.write(cr, user_id[0], self.adt_uid, user_data)
+
+    def test_04_user_management_allocate_responsibility(self):
         cr, uid = self.cr, self.uid
 
-        # STAFF MANAGEMENT CREATE
-        # Creating a HCA
-        new_hca_id = self.userboard_admin.create(cr, uid, {'name': 'Demo HCA', 'login': 'adminhca', 'password': 'adminhca', 'hca': True})
-        self.assertTrue(new_hca_id, msg='Error on userboard_admin create')
-        check_user_id = self.users_pool.search(cr, uid, [('login', '=', 'adminhca')])
-        self.assertTrue(check_user_id, msg='HCA user was not created')        
-        hca_user = self.users_pool.browse(cr, uid, check_user_id[0])
-        check_groups = [g.name for g in hca_user.groups_id]
-        self.assertTrue('NH Clinical HCA Group' in check_groups, msg='HCA user does not have HCA group')
-        # Creating a Nurse
-        new_nurse_id = self.userboard_admin.create(cr, uid, {'name': 'Demo Nurse', 'login': 'adminnurse', 'password': 'adminnurse', 'nurse': True})
-        self.assertTrue(new_nurse_id, msg='Error on userboard_admin create')
-        check_user_id = self.users_pool.search(cr, uid, [('login', '=', 'adminnurse')])
-        self.assertTrue(check_user_id, msg='Nurse user was not created')
-        nurse_user = self.users_pool.browse(cr, uid, check_user_id[0])
-        check_groups = [g.name for g in nurse_user.groups_id]
-        self.assertTrue('NH Clinical Nurse Group' in check_groups, msg='Nurse user does not have Nurse group')
-        # Creating a Doctor
-        new_doctor_id = self.userboard_admin.create(cr, uid, {'name': 'Demo Doctor', 'login': 'admindoctor', 'password': 'admindoctor', 'doctor': True})
-        self.assertTrue(new_doctor_id, msg='Error on userboard_admin create')
-        check_user_id = self.users_pool.search(cr, uid, [('login', '=', 'admindoctor')])
-        self.assertTrue(check_user_id, msg='Doctor user was not created')
-        doctor_user = self.users_pool.browse(cr, uid, check_user_id[0])
-        check_groups = [g.name for g in doctor_user.groups_id]
-        self.assertTrue('NH Clinical Doctor Group' in check_groups, msg='Doctor user does not have Doctor group')
-        # Creating a Ward Manager
-        new_ward_manager_id = self.userboard_admin.create(cr, uid, {'name': 'Demo Ward Manager', 'login': 'adminward_manager', 'password': 'adminward_manager', 'ward_manager': True})
-        self.assertTrue(new_ward_manager_id, msg='Error on userboard_admin create')
-        check_user_id = self.users_pool.search(cr, uid, [('login', '=', 'adminward_manager')])
-        self.assertTrue(check_user_id, msg='Ward Manager user was not created')
-        ward_manager_user = self.users_pool.browse(cr, uid, check_user_id[0])
-        check_groups = [g.name for g in ward_manager_user.groups_id]
-        self.assertTrue('NH Clinical Ward Manager Group' in check_groups, msg='Ward Manager user does not have Ward Manager group')
-        self.assertTrue('Contact Creation' in check_groups, msg='Ward Manager user does not have Contact Creation group')
-        # Creating an Admin
-        new_admin_id = self.userboard_admin.create(cr, uid, {'name': 'Demo Admin', 'login': 'admintest', 'password': 'admintest', 'admin': True})
-        self.assertTrue(new_admin_id, msg='Error on userboard_admin create')
-        check_user_id = self.users_pool.search(cr, uid, [('login', '=', 'admintest')])
-        self.assertTrue(check_user_id, msg='Admin user was not created')
-        admin_user = self.users_pool.browse(cr, uid, check_user_id[0])
-        check_groups = [g.name for g in admin_user.groups_id]
-        self.assertTrue('NH Clinical Admin Group' in check_groups, msg='Admin user does not have Admin group')
-        self.assertTrue('Contact Creation' in check_groups, msg='Admin user does not have Contact Creation group')
-        # STAFF MANAGEMENT UPDATE
-        # Adding HCA Group
-        self.assertTrue(self.userboard_admin.write(cr, uid, [new_nurse_id], {'hca': True}), msg='Error on Userboard write')
-        nurse_user = self.users_pool.browse(cr, uid, new_nurse_id)
-        check_groups = [g.name for g in nurse_user.groups_id]
-        self.assertTrue('NH Clinical HCA Group' in check_groups, msg='Nurse user does not have HCA group (after update)')
-        self.assertTrue('NH Clinical Nurse Group' in check_groups, msg='Nurse user does not have Nurse group (after update)')        
-        # Adding Nurse Group
-        self.assertTrue(self.userboard_admin.write(cr, uid, [new_ward_manager_id], {'nurse': True}), msg='Error on Userboard write')
-        ward_manager_user = self.users_pool.browse(cr, uid, new_ward_manager_id)
-        check_groups = [g.name for g in ward_manager_user.groups_id]
-        self.assertTrue('NH Clinical Ward Manager Group' in check_groups, msg='Ward Manager user does not have Ward Manager group (after update)')
-        self.assertTrue('NH Clinical Nurse Group' in check_groups, msg='Ward Manager user does not have Nurse group (after update)')
-        self.assertTrue('Contact Creation' in check_groups, msg='Ward Manager user does not have Contact Creation group (after update)')        
-        # Adding Ward Manager Group
-        self.assertTrue(self.userboard_admin.write(cr, uid, [new_hca_id], {'ward_manager': True}), msg='Error on Userboard write')
-        hca_user = self.users_pool.browse(cr, uid, new_hca_id)
-        check_groups = [g.name for g in hca_user.groups_id]
-        self.assertTrue('NH Clinical HCA Group' in check_groups, msg='HCA user does not have HCA group (after update)')
-        self.assertTrue('NH Clinical Ward Manager Group' in check_groups, msg='HCA user does not have Ward Manager group (after update)')
-        self.assertTrue('Contact Creation' in check_groups, msg='HCA user does not have Contact Creation group (after update)')
-        # Adding Doctor Group and Removing HCA Group
-        self.assertTrue(self.userboard_admin.write(cr, uid, [new_nurse_id], {'hca': False, 'doctor': True}), msg='Error on Userboard write')
-        nurse_user = self.users_pool.browse(cr, uid, new_nurse_id)
-        check_groups = [g.name for g in nurse_user.groups_id]
-        self.assertFalse('NH Clinical HCA Group' in check_groups, msg='Nurse user has HCA group (after 2nd update)')
-        self.assertTrue('NH Clinical Nurse Group' in check_groups, msg='Nurse user does not have Nurse group (after 2nd update)')
-        self.assertTrue('NH Clinical Doctor Group' in check_groups, msg='Nurse user does not have Doctor group (after 2nd update)')
-        # Adding Admin Group
-        self.assertTrue(self.userboard_admin.write(cr, uid, [new_doctor_id], {'admin': True}), msg='Error on Userboard write')
-        doctor_user = self.users_pool.browse(cr, uid, new_doctor_id)
-        check_groups = [g.name for g in doctor_user.groups_id]
-        self.assertTrue('NH Clinical Admin Group' in check_groups, msg='Doctor user does not have Admin group (after update)')
-        self.assertTrue('NH Clinical Doctor Group' in check_groups, msg='Doctor user does not have Doctor group (after update)')
-        self.assertTrue('Contact Creation' in check_groups, msg='Doctor user does not have Contact Creation group (after update)')
+        user_id = self.uman_pool.search(cr, uid, [['name', '=', 'TU2']])
+        res = self.uman_pool.allocate_responsibility(cr, self.wm_uid, user_id, context={})
+        self.assertDictEqual(res, {
+            'type': 'ir.actions.act_window', 'res_model': 'nh.clinical.responsibility.allocation',
+            'name': 'Location Responsibility Allocation', 'view_mode': 'form', 'view_type': 'tree,form',
+            'target': 'new', 'context': {'default_user_id': user_id[0]}
+        })
+
+    def test_05_user_management_deactivate(self):
+        cr, uid = self.cr, self.uid
+        user_id = self.uman_pool.search(cr, uid, [['name', '=', 'TU2']])
+
+        # Scenario 1: Deactivate a user
+        self.assertTrue(self.uman_pool.deactivate(cr, self.adt_uid, user_id))
+        user = self.user_pool.browse(cr, uid, user_id[0])
+        self.assertFalse(user.active, msg="User not deactivated")
+
+        # Scenario 2: Attempt to deactivate yourself
+        with self.assertRaises(except_orm):
+            self.uman_pool.deactivate(cr, self.adt_uid, [self.adt_uid])
+
+    def test_06_user_management_activate(self):
+        cr, uid = self.cr, self.uid
+        user_id = self.uman_pool.search(cr, uid, [['active', '=', False]], order='id desc')
+
+        self.assertTrue(self.uman_pool.activate(cr, self.adt_uid, user_id[0]))
+        user = self.user_pool.browse(cr, uid, user_id[0])
+        self.assertTrue(user.active, msg="User not activated")
+
+    def test_07_user_management_fields_view_get(self):
+        cr, uid = self.cr, self.uid
+
+        # Scenario 1: fields_view_get tree view
+        self.assertTrue(self.uman_pool.fields_view_get(cr, uid, view_id=None, view_type='tree', context={}))
+
+        # Scenario 2: fields_view_get form view
+        res = self.uman_pool.fields_view_get(cr, self.wm_uid, context={})
+        self.assertTrue(res)
+        self.assertListEqual(res['fields']['category_id']['domain'],
+                             [['id', 'in', [self.wm_role_id, self.nurse_role_id, self.hca_role_id]]])
