@@ -1,3 +1,4 @@
+# Part of NHClincal. See LICENSE file for full copyright and licensing details.
 from datetime import datetime as dt
 import logging
 

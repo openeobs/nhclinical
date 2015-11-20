@@ -1,3 +1,4 @@
+# Part of NHClincal. See LICENSE file for full copyright and licensing details.
 __author__ = 'Will'
 from mock import MagicMock, patch
 

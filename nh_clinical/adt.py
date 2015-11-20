@@ -1,3 +1,4 @@
+# Part of NHClincal. See LICENSE file for full copyright and licensing details.
 # -*- coding: utf-8 -*-
 """
 ``adt.py`` defines a set of activity types to deal with patient

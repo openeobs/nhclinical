@@ -1,3 +1,4 @@
+# Part of NHClincal. See LICENSE file for full copyright and licensing details.
 """
 ``auditing.py`` defines some activity types to audit some specific
 operations that are not represented by any other objects in the system
