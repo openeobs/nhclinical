@@ -1,3 +1,4 @@
+# Part of NHClincal. See LICENSE file for full copyright and licensing details.
 from mock import MagicMock
 
 from openerp.tests import common

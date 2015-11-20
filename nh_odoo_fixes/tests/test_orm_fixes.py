@@ -1,3 +1,4 @@
+# Part of NHClincal. See LICENSE file for full copyright and licensing details.
 __author__ = 'wearp'
 from datetime import datetime
 import re

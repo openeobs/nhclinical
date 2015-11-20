@@ -1,3 +1,4 @@
+# Part of NHClincal. See LICENSE file for full copyright and licensing details.
 # -*- coding: utf-8 -*-
 """
 ``activity.py`` defines the classes and methods to allow for an audit

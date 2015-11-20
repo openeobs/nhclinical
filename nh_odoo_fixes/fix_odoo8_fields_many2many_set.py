@@ -1,3 +1,4 @@
+# Part of NHClincal. See LICENSE file for full copyright and licensing details.
 from openerp.osv.fields import many2many
 
 def new_set(self, cr, model, id, name, values, user=None, context=None):

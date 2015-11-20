@@ -1,3 +1,4 @@
+# Part of NHClincal. See LICENSE file for full copyright and licensing details.
 from openerp.http import *
 from werkzeug import exceptions
 from werkzeug.wrappers import Response as WerkzeugResponse

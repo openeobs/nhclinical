@@ -1,3 +1,4 @@
+# Part of NHClincal. See LICENSE file for full copyright and licensing details.
 __author__ = 'colinwren'
 import mock
 from openerp.http import *
