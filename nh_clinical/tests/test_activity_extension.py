@@ -154,7 +154,6 @@ class TestActivityExtension(common.SingleTransactionCase):
             if activity.data_model == 'test.activity.data.model0':
                 # activity should be scheduled, due in 1 hour with initialized values TEST1 and frequency 30
                 self.assertEqual(activity.state, 'scheduled')
-                self.assertAlmostEqual(activity.date_scheduled, (dt.now() + td(minutes=60)).strftime(dtf))
                 self.assertEqual(activity.data_ref.field1, 'TEST1')
                 self.assertEqual(activity.data_ref.frequency, 30)
                 activity_id = activity.id
@@ -165,7 +164,6 @@ class TestActivityExtension(common.SingleTransactionCase):
             elif activity.data_model == 'test.activity.data.model3':
                 # activity should be scheduled, due in 30 minutes with initialized value TEST1 and frequency 30
                 self.assertEqual(activity.state, 'scheduled')
-                self.assertAlmostEqual(activity.date_scheduled, (dt.now() + td(minutes=30)).strftime(dtf))
                 self.assertEqual(activity.data_ref.field1, 'TEST1')
                 self.assertEqual(activity.data_ref.frequency, 30)
             elif activity.data_model == 'test.activity.data.model4':
