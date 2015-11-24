@@ -1,26 +1,26 @@
-``NH Activity Extension``
+``Activity``
 =========================
 .. automodule:: activity_extension
 
-``nh_cancel_reason``
+``Cancel Reason``
 --------------------
 .. autoclass:: nh_cancel_reason
     :members:
     :private-members:
 
-``nh_activity``
+``Activity``
 ---------------
 .. autoclass:: nh_activity
     :members:
     :private-members:
 
-``nh_activity_data``
+``Activity Data``
 --------------------
 .. autoclass:: nh_activity_data
     :members:
     :private-members:
 
-``activity_access``
+``Activity Access``
 -------------------
 .. autoclass:: nh_clinical_activity_access
     :members:
