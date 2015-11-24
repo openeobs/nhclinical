@@ -27,14 +27,19 @@ Module Reference
    :maxdepth: 2
 
    activity_extension
-   api
    adt
+   api
    auditing
-   base
+   context
    devices
+   groups
+   location
    operations
+   partner
+   patient
+   pos
    spell
-   user_management
+   user
 
 Additional Notes
 ----------------
