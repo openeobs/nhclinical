@@ -8,7 +8,7 @@ import patient
 import location
 import activity_extension
 import api
-import api_demo
+import tests.api_demo
 import spell
 import operations
 import adt
