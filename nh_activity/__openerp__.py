@@ -11,8 +11,8 @@
     'website': 'http://www.neovahealth.co.uk/',
     'depends': ['nh_odoo_fixes'],
     'data': [
-             'views/activity_view.xml',           
-             'security/ir.model.access.csv'],
+        'views/activity_view.xml',
+        'security/ir.model.access.csv'],
     'application': True,
     'installable': True,
     'active': False,
