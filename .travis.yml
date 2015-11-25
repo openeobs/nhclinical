@@ -30,6 +30,7 @@ virtualenv:
 
 # install dependencies
 install:
+  - pip install --upgrade pip
   - pip install -r requirements.txt
   - git clone --depth=1 https://github.com/OCA/maintainer-quality-tools.git ${HOME}/maintainer-quality-tools
   - export PATH=${HOME}/maintainer-quality-tools/travis:${PATH}
