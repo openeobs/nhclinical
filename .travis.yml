@@ -24,8 +24,9 @@ env:
 
   matrix:
   - LINT_CHECK="1" TESTS="0"
-  - ODOO_REPO="valdecdev/odoo" TESTS="1" INCLUDE="nh_odoo_fixes,nh_activity,nh_clinical" VERSION="openeobs-8-12" SERVER_EXPECTED_ERROR="1"
-  # - ODOO_REPO="odoo/odoo" TESTS="1" INCLUDE="nh_odoo_fixes,nh_clinical,nh_activity"
+  - ODOO_REPO="valdecdev/odoo" TESTS="1" INCLUDE="nh_odoo_fixes,nh_activity,nh_clinical" VERSION="openeobs-8-12" SERVER_EXPECTED_ERRORS="1"
+  - ODOO_REPO='NeovaHealth/odoo" TESTS="1" INCLUDE="nh_odoo_fixes,nh_activity,nh_clinical" VERSION="8.0"
+  - ODOO_REPO="odoo/odoo" TESTS="1" INCLUDE="nh_odoo_fixes,nh_clinical,nh_activity"
 
 virtualenv:
   system_site_packages: true
@@ -41,7 +42,5 @@ install:
 script:
   - travis_run_tests
 
-after_test:
+after_script:
   - coverage report -m
-after_success:
-  - travis_after_tests_success
