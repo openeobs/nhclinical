@@ -35,8 +35,8 @@ virtualenv:
 before_install:
   - wget http://repo1.maven.org/maven2/org/codehaus/sonar/runner/sonar-runner-dist/2.4/sonar-runner-dist-2.4.zip
   - unzip sonar-runner-dist-2.4.zip
-  - echo -e "sonar.host.url=${SONAR_URL}\nsonar.jdbc.username=${SONAR_USERNAME}\nsonar.jdbc.password=${SONAR_PASSWORD}\nsonar.jdbc.url=${SONAR_DBURL}" >> sonar-runner-2.4/conf/sonar-runner.properties
   - mv sonar-runner-2.4 ${HOME}/sonar-runner-2.4
+  - echo -e "sonar.host.url=${SONAR_URL}\nsonar.jdbc.username=${SONAR_USERNAME}\nsonar.jdbc.password=${SONAR_PASSWORD}\nsonar.jdbc.url=${SONAR_DBURL}" >> ${HOME}/sonar-runner-2.4/conf/sonar-runner.properties
 
 install:
   - pip install --upgrade pip
@@ -50,6 +50,6 @@ script:
 
 after_script:
   - coverage xml -o ${HOME}/coverage.xml
-  - echo -e "\nsonar.python.coverage.reportPath=${HOME}/coverage.xml" >> NeovaHealth/nhclinical/sonar-project.properties
-  - cd NeovaHealth/nhclinical
+  - cd ${HOME}/build/NeovaHealth/nhclinical
+  - echo -e "\nsonar.python.coverage.reportPath=${HOME}/coverage.xml" >> sonar-project.properties
   - ${HOME}/sonar-runner-2.4/bin/sonar-runner
