@@ -36,6 +36,7 @@ before_install:
   - wget http://repo1.maven.org/maven2/org/codehaus/sonar/runner/sonar-runner-dist/2.4/sonar-runner-dist-2.4.zip
   - unzip sonar-runner-dist-2.4.zip
   - mv sonar-runner-2.4 ${HOME}/sonar-runner-2.4
+  - rm ${HOME}/sonar-runner-2.4/conf/sonar-runner.properties
   - echo -e "sonar.host.url=${SONAR_URL}\nsonar.jdbc.username=${SONAR_USERNAME}\nsonar.jdbc.password=${SONAR_PASSWORD}\nsonar.jdbc.url=${SONAR_DBURL}" >> ${HOME}/sonar-runner-2.4/conf/sonar-runner.properties
 
 install:
