@@ -32,6 +32,12 @@ virtualenv:
   system_site_packages: true
 
 # install dependencies
+before_install:
+  - wget http://repo1.maven.org/maven2/org/codehaus/sonar/runner/sonar-runner-dist/2.4/sonar-runner-dist-2.4.zip
+  - unzip sonar-runner-dist-2.4.zip
+  - echo -e "sonar.host.url=${SONAR_URL}\nsonar.jdbc.username=${SONAR_USERNAME}\nsonar.jdbc.password=${SONAR_PASSWORD}\nsonar.jdbc.url=${SONAR_DBURL}" >> sonar-runner-dist-2.4/conf/sonar-runner.properties
+  - export PATH=${HOME}/sonar-runner-dist-2.4/bin:${PATH}
+
 install:
   - pip install --upgrade pip
   - pip install -r requirements.txt
@@ -43,4 +49,6 @@ script:
   - travis_run_tests
 
 after_script:
-  - coverage report -m
+  - coverage xml -o ${HOME}/coverage.xml
+  - echo -e "\nsonar.python.coverage.reportPath=${HOME}/coverage.xml" >> ${BUILD_DIR}/NeovaHealth/nhclinical/sonar-project.properties
+  - sonar-runner
