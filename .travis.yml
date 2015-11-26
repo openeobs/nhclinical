@@ -51,4 +51,5 @@ script:
 after_script:
   - coverage xml -o ${HOME}/coverage.xml
   - echo -e "\nsonar.python.coverage.reportPath=${HOME}/coverage.xml" >> NeovaHealth/nhclinical/sonar-project.properties
+  - cd NeovaHealth/nhclinical
   - ${HOME}/sonar-runner-2.4/bin/sonar-runner
