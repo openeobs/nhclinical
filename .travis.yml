@@ -32,7 +32,7 @@ before_install:
 - unzip sonar-runner-dist-2.4.zip
 - mv sonar-runner-2.4 ${HOME}/sonar-runner-2.4
 - rm ${HOME}/sonar-runner-2.4/conf/sonar-runner.properties
-- echo -e "sonar.host.url=${SONAR_URL}\nsonar.jdbc.username=${SONAR_USERNAME}\nsonar.jdbc.password=${SONAR_PASSWORD}\nsonar.jdbc.url=${SONAR_DBURL}"
+- echo -e "sonar.host.url=${SONAR_URL}\nsonar.jdbc.username=${SONAR_USER}\nsonar.jdbc.password=${SONAR_PASSWORD}\nsonar.jdbc.url=${SONAR_DBURL}"
   >> ${HOME}/sonar-runner-2.4/conf/sonar-runner.properties
 install:
 - pip install --upgrade pip
@@ -46,5 +46,6 @@ after_script:
 - coverage xml -o ${HOME}/coverage.xml
 - cd ${HOME}/build/NeovaHealth/nhclinical
 - echo -e "\nsonar.python.coverage.reportPath=${HOME}/coverage.xml" >> sonar-project.properties
+- cat sonar-project.properties
 - ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST -L 2000:localhost:2000 -L 6432:localhost:5432 -fN
 - "${HOME}/sonar-runner-2.4/bin/sonar-runner"
