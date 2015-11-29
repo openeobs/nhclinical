@@ -51,11 +51,10 @@ script:
 after_script:
 - coverage xml -o ${HOME}/build/NeovaHealth/nhclinical/coverage.xml
 - cd ${HOME}/build/NeovaHealth/nhclinical
-- mv ${HOME}/tests test_reports
-# - echo "<?xml version=\"1.0\" encoding=\"utf-8\"?>" > test_report.xml
-# - for rep in ${HOME}/tests/*.xml; do cat "$rep" | grep -v "<?xml " >> test_report.xml; done
+- echo "<?xml version=\"1.0\" encoding=\"utf-8\"?><testsuites>" > test_report.xml
+- for rep in ${HOME}/tests/*.xml; do cat "$rep" | grep -v "<?xml " >> test_report.xml; done
+- echo "</testsuites>" >> test_report.xml
 - echo -e "\nsonar.python.coverage.reportPath=coverage.xml" >> sonar-project.properties
 - echo -e "\nsonar.python.xunit.reportPath=test_report.xml" >> sonar-project.properties
-- echo -e "\nsonar.python.xunit.reportPath=test_reports/*.xml" >> sonar-project.properties
 - ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST -L 2000:localhost:2000 -L 6432:localhost:5432 -fN
 - "${HOME}/sonar-runner-2.4/bin/sonar-runner"
