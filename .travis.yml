@@ -46,5 +46,6 @@ after_script:
 - coverage xml -o ${HOME}/coverage.xml
 - cd ${HOME}/build/NeovaHealth/nhclinical
 - echo -e "\nsonar.python.coverage.reportPath=${HOME}/coverage.xml" >> sonar-project.properties
+- export SSHPASS=$DEPLOY_PASS
 - sshpass -e ssh $DEPLOY_USER@$DEPLOY_HOST -L 2000:localhost:2000 -L 6432:localhost:5432 -fN
 - "${HOME}/sonar-runner-2.4/bin/sonar-runner"
