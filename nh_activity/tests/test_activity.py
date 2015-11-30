@@ -1,17 +1,14 @@
 # Part of NHClincal. See LICENSE file for full copyright and licensing details.
-from mock import MagicMock
-
-from openerp.tests import common
-from openerp.osv.orm import except_orm
-from datetime import datetime as dt
-from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as dtf
-from openerp.tools import config
-
 import logging
 
-_logger = logging.getLogger(__name__)
-
+from datetime import datetime as dt
+from mock import MagicMock
 from faker import Faker
+from openerp.tests import common
+from openerp.osv.orm import except_orm
+from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as dtf
+
+_logger = logging.getLogger(__name__)
 fake = Faker()
 
 
@@ -25,130 +22,229 @@ class TestActivity(common.SingleTransactionCase):
         cls.activity_pool = cls.registry('nh.activity')
         cls.user_pool = cls.registry('res.users')
 
-    def test_create(self):
+    def test_create_creates_an_activity(self):
         cr, uid = self.cr, self.uid
 
-        # Scenario 1: Create an activity
-        activity_id = self.activity_pool.create(cr, uid, {'data_model': 'test.activity.data.model'})
+        activity_id = self.activity_pool.create(
+            cr, uid, {'data_model': 'test.activity.data.model'})
+
         self.assertTrue(activity_id, msg="Activity create failed")
         activity = self.activity_pool.browse(cr, uid, activity_id)
-        self.assertEqual(activity.data_model, 'test.activity.data.model', msg="Activity created with the wrong data model")
-        self.assertEqual(activity.summary, 'Test Activity Model', msg="Activity default summary not added")
-        self.assertEqual(activity.state, 'new', msg="Activity default state not added")
+        self.assertEqual(activity.data_model, 'test.activity.data.model',
+                         msg="Activity created with the wrong data model")
+        self.assertEqual(activity.summary, 'Test Activity Model',
+                         msg="Activity default summary not added")
+        self.assertEqual(activity.state, 'new',
+                         msg="Activity default state not added")
 
-        # Scenario 2: Create an activity without data model
+    def test_create_raises_exception_if_no_data_model_is_passed(self):
+        cr, uid = self.cr, self.uid
         with self.assertRaises(except_orm):
             self.activity_pool.create(cr, uid, {})
 
-        # Scenario 3: Create an activity with a non existent data model
+    def test_create_raises_exception_if_data_model_does_not_exist(self):
+        cr, uid = self.cr, self.uid
         with self.assertRaises(except_orm):
-            self.activity_pool.create(cr, uid, {'data_model': 'test.activity.non.existent.data.model'})
+            self.activity_pool.create(
+                cr, uid,
+                {'data_model': 'test.activity.non.existent.data.model'})
 
-        # Scenario 4: Create an activity with a data model that lacks description
-        activity_id = self.activity_pool.create(cr, uid, {'data_model': 'test.activity.data.model2'})
-        self.assertTrue(activity_id, msg="Activity create failed")
-        activity = self.activity_pool.browse(cr, uid, activity_id)
-        self.assertEqual(activity.data_model, 'test.activity.data.model2', msg="Activity created with the wrong data model")
-        self.assertEqual(activity.summary, 'Undefined Activity', msg="Activity default summary not added")
-
-        # Scenario 5: Create an activity with a data model and description
-        activity_id = self.activity_pool.create(cr, uid, {'data_model': 'test.activity.data.model2', 'summary': 'Test Activity Data Model'})
-        self.assertTrue(activity_id, msg="Activity create failed")
-        activity = self.activity_pool.browse(cr, uid, activity_id)
-        self.assertEqual(activity.data_model, 'test.activity.data.model2', msg="Activity created with the wrong data model")
-        self.assertEqual(activity.summary, 'Test Activity Data Model', msg="Activity set summary incorrect")
-
-    def test_write(self):
+    def test_create_uses_data_model_description_if_no_summary_given(self):
         cr, uid = self.cr, self.uid
 
-        # Scenario 1: Write an activity
-        activity_id = self.activity_pool.create(cr, uid, {'data_model': 'test.activity.data.model'})
+        activity_id = self.activity_pool.create(
+            cr, uid, {'data_model': 'test.activity.data.model2'})
+
+        activity = self.activity_pool.browse(cr, uid, activity_id)
+        self.assertEqual(
+            activity.data_model, 'test.activity.data.model2',
+            msg="Activity created with the wrong data model")
+        # 'Undefined Activity' is _description of nh_activity_data
+        self.assertEqual(
+            activity.summary, 'Undefined Activity',
+            msg="Activity default summary not added")
+
+    def test_create_creates_activity_using_a_summary(self):
+        cr, uid = self.cr, self.uid
+
+        activity_id = self.activity_pool.create(
+            cr, uid,
+            {
+                'data_model': 'test.activity.data.model2',
+                'summary': 'Test Activity Data Model'
+            }
+        )
+
+        activity = self.activity_pool.browse(cr, uid, activity_id)
+        self.assertEqual(
+            activity.data_model,
+            'test.activity.data.model2',
+            msg="Activity created with the wrong data model")
+        self.assertEqual(
+            activity.summary,
+            'Test Activity Data Model', msg="Activity set summary incorrect")
+
+    def test_write_does_not_increment_sequence_if_state_not_changed(self):
+        cr, uid = self.cr, self.uid
+
+        activity_id = self.activity_pool.create(
+            cr, uid, {'data_model': 'test.activity.data.model'})
         cr.execute("select coalesce(max(sequence), 0) from nh_activity")
         sequence = cr.fetchone()[0]
-        self.assertTrue(self.activity_pool.write(cr, uid, activity_id, {'user_id': 1}), msg="Activity Write failed")
-        activity = self.activity_pool.browse(cr, uid, activity_id)
-        self.assertEqual(activity.user_id.id, 1, msg="Activity not written correctly")
-        self.assertNotEqual(activity.sequence, sequence+1, msg="Activity sequence updated incorrectly")
 
-        # Scenario 2: Write an activity state
-        self.assertTrue(self.activity_pool.write(cr, uid, activity_id, {'state': 'started'}), msg="Activity Write failed")
+        self.assertTrue(self.activity_pool.write(
+            cr, uid, activity_id, {'user_id': 1}), msg="Activity Write failed")
         activity = self.activity_pool.browse(cr, uid, activity_id)
-        self.assertEqual(activity.state, 'started', msg="Activity not written correctly")
-        self.assertEqual(activity.sequence, sequence+1, msg="Activity sequence not updated")
+        self.assertEqual(activity.user_id.id, 1,
+                         msg="Activity not written correctly")
+        self.assertNotEqual(activity.sequence, sequence+1,
+                            msg="Activity sequence updated incorrectly")
 
-    def test_get_recursive_created_ids(self):
+    def test_write_increments_sequence_if_state_changed(self):
         cr, uid = self.cr, self.uid
 
-        # Scenario 1: Activity 1 created Activity 2, expected [1,2]
-        activity_id = self.activity_pool.create(cr, uid, {'data_model': 'test.activity.data.model'})
-        activity2_id = self.activity_pool.create(cr, uid, {'creator_id': activity_id,
-                                                           'data_model': 'test.activity.data.model'})
-        rc_ids = self.activity_pool.get_recursive_created_ids(cr, uid, activity_id)
+        activity_id = self.activity_pool.create(
+            cr, uid, {'data_model': 'test.activity.data.model'})
+        cr.execute("select coalesce(max(sequence), 0) from nh_activity")
+        sequence = cr.fetchone()[0]
+
+        activity = self.activity_pool.browse(cr, uid, activity_id)
+        self.assertTrue(self.activity_pool.write(
+            cr, uid, activity_id, {'state': 'started'}),
+            msg="Activity Write failed")
+        self.assertEqual(activity.state, 'started',
+                         msg="Activity not written correctly")
+        self.assertEqual(activity.sequence, sequence+1,
+                         msg="Activity sequence not updated")
+
+    def test_get_recursive_created_ids_returns_id_if_activity_is_not_a_creator(self):
+        cr, uid = self.cr, self.uid
+
+        activity_id = self.activity_pool.create(
+            cr, uid, {'data_model': 'test.activity.data.model'})
+        created_ids = self.activity_pool.get_recursive_created_ids(
+            cr, uid, activity_id)
+        self.assertEquals(activity_id, created_ids[0])
+
+    def test_get_recursive_created_ids_returns_created_id_and_own_id(self):
+        cr, uid = self.cr, self.uid
+
+        activity_id = self.activity_pool.create(
+            cr, uid, {'data_model': 'test.activity.data.model'})
+        activity2_id = self.activity_pool.create(
+            cr, uid, {'creator_id': activity_id,
+                      'data_model': 'test.activity.data.model'})
+        rc_ids = self.activity_pool.get_recursive_created_ids(
+            cr, uid, activity_id)
         self.assertEqual(set(rc_ids), {activity_id, activity2_id})
 
-        # Scenario 2: Get created activities from 2nd activity, expected [2]
-        rc_ids = self.activity_pool.get_recursive_created_ids(cr, uid, activity2_id)
-        self.assertEqual(set(rc_ids), {activity2_id})
-
-        # Scenario 3: Activity 1 created 2 and 3, Activity 2 created 4 and Activity 4 created 5.
-        activity3_id = self.activity_pool.create(cr, uid, {'creator_id': activity_id,
-                                                           'data_model': 'test.activity.data.model'})
-        activity4_id = self.activity_pool.create(cr, uid, {'creator_id': activity2_id,
-                                                           'data_model': 'test.activity.data.model'})
-        activity5_id = self.activity_pool.create(cr, uid, {'creator_id': activity4_id,
-                                                           'data_model': 'test.activity.data.model'})
-        rc_ids = self.activity_pool.get_recursive_created_ids(cr, uid, activity_id)
-        self.assertEqual(set(rc_ids), {activity_id, activity2_id, activity3_id, activity4_id, activity5_id})
-        rc_ids = self.activity_pool.get_recursive_created_ids(cr, uid, activity2_id)
-        self.assertEqual(set(rc_ids), {activity2_id, activity4_id, activity5_id})
-        rc_ids = self.activity_pool.get_recursive_created_ids(cr, uid, activity3_id)
-        self.assertEqual(set(rc_ids), {activity3_id})
-        rc_ids = self.activity_pool.get_recursive_created_ids(cr, uid, activity4_id)
-        self.assertEqual(set(rc_ids), {activity4_id, activity5_id})
-        rc_ids = self.activity_pool.get_recursive_created_ids(cr, uid, activity5_id)
-        self.assertEqual(set(rc_ids), {activity5_id})
-
-    def test_data_model_event_wrapper(self):
+    def test_get_recursive_created_ids_returns_ids_created_by_created_activity(self):
         cr, uid = self.cr, self.uid
 
-        # Scenario 1: Calling an activity method wrapped with @data_model_event
-        activity_id = self.activity_pool.create(cr, uid, {'data_model': 'test.activity.data.model'})
-        self.assertTrue(self.activity_pool.update_activity(cr, uid, activity_id), msg="Event call failed")
+        activity_id = self.activity_pool.create(
+            cr, uid, {'data_model': 'test.activity.data.model'})
+        activity2_id = self.activity_pool.create(
+            cr, uid, {'creator_id': activity_id,
+                      'data_model': 'test.activity.data.model'})
+        activity3_id = self.activity_pool.create(
+            cr, uid, {'creator_id': activity2_id,
+                      'data_model': 'test.activity.data.model'})
 
-        # Scenario 2: Calling event with a non int / long parameter as activity_id
+        rc_ids = self.activity_pool.get_recursive_created_ids(
+            cr, uid, activity_id)
+        self.assertEqual(
+            set(rc_ids), {activity_id, activity2_id, activity3_id})
+        rc_ids = self.activity_pool.get_recursive_created_ids(
+            cr, uid, activity2_id)
+        self.assertEqual(set(rc_ids), {activity2_id, activity3_id})
+        rc_ids = self.activity_pool.get_recursive_created_ids(
+            cr, uid, activity3_id)
+        self.assertEqual(set(rc_ids), {activity3_id})
+
+    def test_update_activity_returns_True(self):
+        cr, uid = self.cr, self.uid
+
+        activity_id = self.activity_pool.create(
+            cr, uid, {'data_model': 'test.activity.data.model'})
+        self.assertTrue(
+            self.activity_pool.update_activity(cr, uid, activity_id),
+            msg="Event call failed")
+
+    def test_update_returns_True_when_passed_list_of_ids(self):
+        cr, uid = self.cr, self.uid
+
+        activity_id = self.activity_pool.create(
+            cr, uid, {'data_model': 'test.activity.data.model'})
+
+        result = self.activity_pool.update_activity(cr, uid, [activity_id])
+        self.assertTrue(result, msg="Event call failed")
+
+    def test_data_model_event_raises_exception_when_passed_non_integer(self):
+        cr, uid = self.cr, self.uid
+
         with self.assertRaises(except_orm):
             self.activity_pool.update_activity(cr, uid, 'activity ID')
 
-        # Scenario 3: Calling event with a activity_id < 1
+    def test_data_model_event_raises_exception_when_passed_integer_less_than_1(self):
+        cr, uid = self.cr, self.uid
+
         with self.assertRaises(except_orm):
             self.activity_pool.update_activity(cr, uid, 0)
 
-        # Scenario 4: Calling an activity method wrapped with @data_model_event using [id] instead of id as parameter.
-        self.assertTrue(self.activity_pool.update_activity(cr, uid, [activity_id]), msg="Event call failed")
-
-    def test_submit(self):
+    def test_submit_creates_new_instance_of_data_model_if_nonexistent(self):
+        # testing nh_activity_data?
         cr, uid = self.cr, self.uid
 
-        # Scenario 1: Submit data to a new activity
-        activity_id = self.activity_pool.create(cr, uid, {'data_model': 'test.activity.data.model'})
+        activity_id = self.activity_pool.create(
+            cr, uid, {'data_model': 'test.activity.data.model'})
         activity = self.activity_pool.browse(cr, uid, activity_id)
-        self.assertFalse(activity.data_ref, msg="Activity Submit pre-State error: The data model already exists")
-        self.assertTrue(self.activity_pool.submit(cr, uid, activity_id, {'field1': 'test'}), msg="Activity Submit failed")
-        activity = self.activity_pool.browse(cr, uid, activity_id)
-        self.assertTrue(activity.data_ref, msg="Activity Data Model not created after submit")
-        self.assertEqual(activity.data_ref._name, 'test.activity.data.model', msg="Wrong Data Model created")
-        self.assertEqual(activity.data_ref.field1, 'test', msg="Data Model data not submitted")
+        self.assertFalse(
+            activity.data_ref,
+            msg="Activity Submit pre-State error: "
+                "The data model already exists")
+        self.assertTrue(
+            self.activity_pool.submit(
+                cr, uid, activity_id, {'field1': 'test'}),
+            msg="Activity Submit failed")
 
-        # Scenario 2: Submit data to an activity that already has data
-        self.assertTrue(self.activity_pool.submit(cr, uid, activity_id, {'field1': 'test2'}), msg="Activity Submit failed")
+        # TODO: test for _get_data_type_selection
         activity = self.activity_pool.browse(cr, uid, activity_id)
-        self.assertEqual(activity.data_ref.field1, 'test2', msg="Data Model data not submitted")
+        self.assertTrue(
+            activity.data_ref,
+            msg="Activity Data Model not created after submit")
+        self.assertEqual(
+            activity.data_ref._name,
+            'test.activity.data.model', msg="Wrong Data Model created")
+        self.assertEqual(
+            activity.data_ref.field1,
+            'test', msg="Data Model data not submitted")
 
-        # Scenario 3: Submit non dictionary type data
+    def test_submit_updates_data_on_an_existent_data_model(self):
+        cr, uid = self.cr, self.uid
+
+        activity_id = self.activity_pool.create(
+            cr, uid, {'data_model': 'test.activity.data.model'})
+        self.assertTrue(self.activity_pool.submit(
+            cr, uid, activity_id, {'field1': 'test'}),
+            msg="Activity Submit failed")
+        activity = self.activity_pool.browse(cr, uid, activity_id)
+        self.assertEqual(activity.data_ref.field1, 'test',
+                         msg="Data Model data not submitted")
+
+    def test_submit_raises_exception_on_non_dict_type(self):
+        cr, uid = self.cr, self.uid
+
+        activity_id = self.activity_pool.create(
+            cr, uid, {'data_model': 'test.activity.data.model'})
         with self.assertRaises(except_orm):
             self.activity_pool.submit(cr, uid, activity_id, 'test3')
 
-        # Scenario 4: Submit data to a completed or cancelled activity (not allowed states)
+    def test_submit_raises_exception_on_completed_and_cancelled_activities(self):
+        cr, uid = self.cr, self.uid
+
+        activity_id = self.activity_pool.create(
+            cr, uid, {'data_model': 'test.activity.data.model'})
+
         self.activity_pool.write(cr, uid, activity_id, {'state': 'completed'})
         with self.assertRaises(except_orm):
             self.activity_pool.submit(cr, uid, activity_id, {'field1': 'test4'})

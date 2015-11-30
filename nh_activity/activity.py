@@ -4,13 +4,14 @@
 ``activity.py`` defines the classes and methods to allow for an audit
 event driven system to be built on top of it.
 """
-from openerp.osv import orm, fields, osv
+import logging
+
 from datetime import datetime
+from functools import wraps
+from openerp.osv import orm, fields, osv
 from openerp import SUPERUSER_ID
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
-from functools import wraps
 
-import logging
 _logger = logging.getLogger(__name__)
 
 
@@ -130,34 +131,45 @@ class nh_activity(orm.Model):
 
     def create(self, cr, uid, vals, context=None):
         """
-        Checks the submitted values and then calls
-        :meth:`create<openerp.models.Model.create>`
+        Creates an activity. Raises an exception if ``data_model``
+        isn't in parameter ``vals`` or if ``data_model`` doesn't exist
+        as a table in the database.
 
-        :returns: :mod:`activity<activity.nh_activity>` id
+        :param vals: must include ``data_model`` key:value pair
+        :type vals: dict
+        :raises: osv.except_osv
+        :returns: id of created :class:`activity<nh_activity>`
         :rtype: int
         """
         if not vals.get('data_model'):
             raise osv.except_osv('Error!', "data_model is not defined!")
+
         data_model_pool = self.pool.get(vals['data_model'])
         if not data_model_pool:
             raise osv.except_osv(
                 'Error!',
-                "data_model does not exist in the model pool!")
+                "data_model does not exist in the model pool!"
+            )
         if 'summary' not in vals:
             vals.update({'summary': data_model_pool._description})
 
         activity_id = super(nh_activity, self).create(cr, uid, vals, context)
-        _logger.debug("activity '%s' created, activity.id=%s" %
-                      (vals.get('data_model'), activity_id))
+        _logger.debug(
+            "activity '%s' created, activity.id=%s" %
+            (vals.get('data_model'), activity_id)
+        )
+
         return activity_id
 
     def write(self, cr, uid, ids, vals, context=None):
         """
-        Calls :meth:`write<openerp.models.Model.write>`.
+        Writes to an activity. ``sequence`` will be updated if the
+        the `state` of the activity is changed.
 
-        It will update the `sequence` field if the activity state is
-        updated.
-
+        :param ids: activity ids to write to
+        :type ids: list
+        :param vals: values to write to activity
+        :type vals: dict
         :returns: ``True``
         :rtype: bool
         """
@@ -169,10 +181,12 @@ class nh_activity(orm.Model):
 
     def get_recursive_created_ids(self, cr, uid, activity_id, context=None):
         """
-        Recursively gets every single activity triggered by this
-        instance or any of the ones triggered by it.
+        Recursively gets ids of all activities created by an activity
+        or all activitie
 
-        :return: :mod:`activity<activity.nh_activity>` ids
+        :param activity_id: id of activity
+        :type activity_id: int
+        :return: list of activity ids
         :rtype: list
         """
         activity = self.browse(cr, uid, activity_id, context=context)
