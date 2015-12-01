@@ -65,7 +65,6 @@ after_script:
 - pip install astroid==1.3.8
 - pip install click pylint-odoo
 - test_pylint | grep 'nh_odoo_fixes\|nh_activity\|nh_clinical' | grep -v '************* Module ' >> pylint_report.txt
-- cat pylint_report.txt
 # Add these files to the Sonar Runner configuration
 - echo -e "\nsonar.python.coverage.reportPath=coverage.xml" >> sonar-project.properties
 - echo -e "\nsonar.python.xunit.reportPath=test_report.xml" >> sonar-project.properties
