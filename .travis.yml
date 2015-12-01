@@ -62,7 +62,7 @@ after_script:
 - for rep in ${HOME}/tests/*.xml; do cat "$rep" | grep -v "<?xml " >> test_report.xml; done
 - echo "</testsuites>" >> test_report.xml
 # Run Pylint with the OCA's rules
-- pip install click
+- pip install click pylint-odoo
 - test_pylint >> pylint_report
 # Add these files to the Sonar Runner configuration
 - echo -e "\nsonar.python.coverage.reportPath=coverage.xml" >> sonar-project.properties
