@@ -28,33 +28,45 @@ env:
 virtualenv:
   system_site_packages: true
 before_install:
+# Install Sonar Runner
 - wget http://repo1.maven.org/maven2/org/codehaus/sonar/runner/sonar-runner-dist/2.4/sonar-runner-dist-2.4.zip
 - unzip sonar-runner-dist-2.4.zip
 - mv sonar-runner-2.4 ${HOME}/sonar-runner-2.4
 - rm ${HOME}/sonar-runner-2.4/conf/sonar-runner.properties
 - echo -e "sonar.host.url=${SONAR_URL}\nsonar.jdbc.username=${SONAR_USER}\nsonar.jdbc.password=${SONAR_PASSWORD}\nsonar.jdbc.url=${SONAR_DBURL}"
   >> ${HOME}/sonar-runner-2.4/conf/sonar-runner.properties
+# Install xml_test_output so can get Unit Test data out as XML
 - git clone --depth=50 https://github.com/Gimpneek/odoo_xml_test_output.git odoo_xml_test_output
 - cd odoo_xml_test_output
 - pip install -r requirements.txt
 - mkdir -p ${HOME}/dependencies
 - mv xml_test_output ${HOME}/dependencies/xml_test_output
+# Reset the directory we're in to the build directory
 - cd ${TRAVIS_BUILD_DIR}
 install:
+# Install the OCA maintainer quality tools
 - pip install --upgrade pip
 - pip install -r requirements.txt
 - git clone --depth=1 https://github.com/OCA/maintainer-quality-tools.git ${HOME}/maintainer-quality-tools
 - export PATH=${HOME}/maintainer-quality-tools/travis:${PATH}
 - travis_install_nightly
 script:
+# Run the tests for the modules defined in INCLUDE environment var
 - travis_run_tests
 after_script:
+# Export the coverage data
 - coverage xml -o ${HOME}/build/NeovaHealth/nhclinical/coverage.xml
 - cd ${HOME}/build/NeovaHealth/nhclinical
+# Compile a testsuites file from all the test XML files
 - echo "<?xml version=\"1.0\" encoding=\"utf-8\"?><testsuites>" > test_report.xml
 - for rep in ${HOME}/tests/*.xml; do cat "$rep" | grep -v "<?xml " >> test_report.xml; done
 - echo "</testsuites>" >> test_report.xml
+# Run Pylint with the OCA's rules
+- pylint --config-file=${HOME}/maintainer-quality-tools/travis/cfg/travis_run_pylint.cfg --load-plugins=pylint_odoo --report=no --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" >> pylint_report
+- pylint --config-file=${HOME}/maintainer-quality-tools/travis/cfg/travis_run_pylint.cfg --load-plugins=pylint_odoo --report=no --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" >> pylint_report
+# Add these files to the Sonar Runner configuration
 - echo -e "\nsonar.python.coverage.reportPath=coverage.xml" >> sonar-project.properties
 - echo -e "\nsonar.python.xunit.reportPath=test_report.xml" >> sonar-project.properties
+- echo -e "\nsonar.python.pylint.reportPath=pylint_report" >> sonar-project.properties
 - ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST -L 2000:localhost:2000 -L 6432:localhost:5432 -fN
 - "${HOME}/sonar-runner-2.4/bin/sonar-runner"
