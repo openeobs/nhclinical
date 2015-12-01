@@ -1,7 +1,7 @@
 <openerp>
     <data noupdate="1">
         <record id="nhc_dev_user" model="res.users">
-            <field name="name">I Am Devloper</field>
+            <field name="name">I Am Developer</field>
             <field name="login">dev</field>
             <field name="password">dev</field>
             <field name="tz">Europe/London</field>
