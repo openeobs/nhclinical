@@ -1,0 +1,16 @@
+<openerp>
+    <data noupdate="1">
+        <record id="nhc_demo_patient_0" model="nh.clinical.patient">
+            <field name="dob">1988-01-01 00:00:00</field>
+            <field name="gender">M</field>
+            <field name="sex">M</field>
+            <field name="ethnicity">A</field>
+            <field name="patient_identifier">9434765919</field>
+            <field name="other_identifier">943476591900</field>
+            <field name="given_name">John</field>
+            <field name="middle_names">Robert</field>
+            <field name="family_name">Doe</field>
+            <field name="current_location_id" ref="nhc_def_conf_location_wa_b1"/>
+        </record>
+    </data>
+</openerp>
