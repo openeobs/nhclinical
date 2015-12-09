@@ -3,6 +3,7 @@
         <!--Patient 0 Spell-->
         <record id="nhc_activity_demo_spell_0" model="nh.activity">
             <field name="state">started</field>
+            <field name="patient_id" ref="nhc_demo_patient_0"/>
             <field name="data_model">nh.clinical.spell</field>
             <field name="date_started">2015-10-10 00:00:00</field>
             <field name="location_id" ref="nhc_def_conf_location_wa_b1"/>
