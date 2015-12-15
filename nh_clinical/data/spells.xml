@@ -1,0 +1,25 @@
+<openerp>
+    <data noupdate="1">
+        <!--Patient 0 Spell-->
+        <record id="nhc_activity_demo_spell_0" model="nh.activity">
+            <field name="state">started</field>
+            <field name="patient_id" ref="nhc_demo_patient_0"/>
+            <field name="data_model">nh.clinical.spell</field>
+            <field name="date_started">2015-10-10 00:00:00</field>
+            <field name="location_id" ref="nhc_def_conf_location_wa_b1"/>
+        </record>
+
+        <record id="nhc_demo_spell_0" model="nh.clinical.spell">
+            <field name="activity_id" ref="nhc_activity_demo_spell_0"/>
+            <field name="patient_id" ref="nhc_demo_patient_0"/>
+            <field name="location_id" ref="nhc_def_conf_location_wa_b1"/>
+            <field name="pos_id" ref="nhc_def_conf_pos_hospital"/>
+            <field name="code">DEMO0001</field>
+            <field name="start_date">2015-10-10 00:00:00</field>
+        </record>
+
+        <record id="nhc_activity_demo_spell_0" model="nh.activity">
+            <field name="data_ref" eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_0'))"/>
+        </record>
+    </data>
+</openerp>

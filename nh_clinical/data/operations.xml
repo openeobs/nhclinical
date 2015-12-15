@@ -1,0 +1,171 @@
+<openerp>
+    <data noupdate="1">
+        <!--Patient 0 ADT Register-->
+        <record id="nhc_activity_demo_register_0" model="nh.activity">
+            <field name="patient_id" ref="nhc_demo_patient_0"/>
+            <field name="state">completed</field>
+            <field name="data_model">nh.clinical.adt.patient.register</field>
+            <field name="date_terminated">2015-10-09 00:00:00</field>
+        </record>
+
+        <record id="nhc_demo_register_0" model="nh.clinical.adt.patient.register">
+            <field name="activity_id" ref="nhc_activity_demo_register_0"/>
+            <field name="patient_id" ref="nhc_demo_patient_0"/>
+            <field name="dob">1988-01-01 00:00:00</field>
+            <field name="gender">M</field>
+            <field name="sex">M</field>
+            <field name="ethnicity">A</field>
+            <field name="patient_identifier">0000000000</field>
+            <field name="other_identifier">0000000000</field>
+            <field name="given_name">John</field>
+            <field name="middle_names">Robert</field>
+            <field name="family_name">Doe</field>
+        </record>
+
+        <record id="nhc_activity_demo_register_0" model="nh.activity">
+            <field name="data_ref" eval="'nh.clinical.adt.patient.register,' + str(ref('nhc_demo_register_0'))"/>
+        </record>
+
+        <!--Patient 1 ADT Register-->
+        <record id="nhc_activity_demo_register_1" model="nh.activity">
+            <field name="patient_id" ref="nhc_demo_patient_1"/>
+            <field name="state">completed</field>
+            <field name="data_model">nh.clinical.adt.patient.register</field>
+            <field name="date_terminated">2015-10-09 01:00:00</field>
+        </record>
+
+        <record id="nhc_demo_register_1" model="nh.clinical.adt.patient.register">
+            <field name="activity_id" ref="nhc_activity_demo_register_1"/>
+            <field name="patient_id" ref="nhc_demo_patient_1"/>
+            <field name="dob">1980-01-01 00:00:00</field>
+            <field name="gender">F</field>
+            <field name="sex">F</field>
+            <field name="ethnicity">B</field>
+            <field name="patient_identifier">1111111111</field>
+            <field name="other_identifier">1111111111</field>
+            <field name="given_name">Jane</field>
+            <field name="middle_names">Amy</field>
+            <field name="family_name">Doe</field>
+        </record>
+
+        <record id="nhc_activity_demo_register_0" model="nh.activity">
+            <field name="data_ref" eval="'nh.clinical.adt.patient.register,' + str(ref('nhc_demo_register_0'))"/>
+        </record>
+
+        <!--Patient 0 ADT Admit-->
+        <record id="nhc_activity_demo_adt_admit_0" model="nh.activity">
+            <field name="patient_id" ref="nhc_demo_patient_0"/>
+            <field name="parent_id" ref="nhc_activity_demo_spell_0"/>
+            <field name="state">completed</field>
+            <field name="data_model">nh.clinical.adt.patient.admit</field>
+            <field name="date_terminated">2015-10-10 00:00:00</field>
+        </record>
+
+        <record id="nhc_demo_adt_admit_0" model="nh.clinical.adt.patient.admit">
+            <field name="activity_id" ref="nhc_activity_demo_adt_admit_0"/>
+            <field name="patient_id" ref="nhc_demo_patient_0"/>
+            <field name="location_id" ref="nhc_def_conf_location_wa"/>
+            <field name="pos_id" ref="nhc_def_conf_pos_hospital"/>
+            <field name="location">A</field>
+            <field name="code">DEMO0001</field>
+            <field name="start_date">2015-10-10 00:00:00</field>
+            <field name="patient_identifier">0000000000</field>
+            <field name="other_identifier">0000000000</field>
+        </record>
+
+        <record id="nhc_activity_demo_adt_admit_0" model="nh.activity">
+            <field name="data_ref" eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_0'))"/>
+        </record>
+
+        <!--Patient 0 Admission-->
+        <record id="nhc_activity_demo_admission_0" model="nh.activity">
+            <field name="patient_id" ref="nhc_demo_patient_0"/>
+            <field name="creator_id" ref="nhc_activity_demo_adt_admit_0"/>
+            <field name="parent_id" ref="nhc_activity_demo_spell_0"/>
+            <field name="spell_activity_id" ref="nhc_activity_demo_spell_0"/>
+            <field name="state">completed</field>
+            <field name="data_model">nh.clinical.patient.admission</field>
+            <field name="location_id" ref="nhc_def_conf_location_wa"/>
+            <field name="date_terminated">2015-10-10 00:00:00</field>
+        </record>
+
+        <record id="nhc_demo_admission_0" model="nh.clinical.patient.admission">
+            <field name="activity_id" ref="nhc_activity_demo_admission_0"/>
+            <field name="patient_id" ref="nhc_demo_patient_0"/>
+            <field name="location_id" ref="nhc_def_conf_location_wa"/>
+            <field name="pos_id" ref="nhc_def_conf_pos_hospital"/>
+            <field name="code">DEMO0001</field>
+            <field name="start_date">2015-10-10 00:00:00</field>
+        </record>
+
+        <record id="nhc_activity_demo_admission_0" model="nh.activity">
+            <field name="data_ref" eval="'nh.clinical.patient.admission,' + str(ref('nhc_demo_admission_0'))"/>
+        </record>
+
+        <!--Patient 0 Placement-->
+        <record id="nhc_activity_demo_placement_0" model="nh.activity">
+            <field name="patient_id" ref="nhc_demo_patient_0"/>
+            <field name="creator_id" ref="nhc_activity_demo_admission_0"/>
+            <field name="parent_id" ref="nhc_activity_demo_spell_0"/>
+            <field name="spell_activity_id" ref="nhc_activity_demo_spell_0"/>
+            <field name="state">completed</field>
+            <field name="data_model">nh.clinical.patient.placement</field>
+            <field name="location_id" ref="nhc_def_conf_location_wa"/>
+            <field name="date_terminated">2015-10-11 00:00:00</field>
+        </record>
+
+        <record id="nhc_demo_placement_0" model="nh.clinical.patient.placement">
+            <field name="activity_id" ref="nhc_activity_demo_placement_0"/>
+            <field name="patient_id" ref="nhc_demo_patient_0"/>
+            <field name="suggested_location_id" ref="nhc_def_conf_location_wa"/>
+            <field name="location_id" ref="nhc_def_conf_location_wa_b1"/>
+        </record>
+
+        <record id="nhc_activity_demo_placement_0" model="nh.activity">
+            <field name="data_ref" eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_0'))"/>
+        </record>
+
+        <!--Patient 0 Movements-->
+        <record id="nhc_activity_demo_move_0" model="nh.activity">
+            <field name="patient_id" ref="nhc_demo_patient_0"/>
+            <field name="creator_id" ref="nhc_activity_demo_admission_0"/>
+            <field name="parent_id" ref="nhc_activity_demo_spell_0"/>
+            <field name="spell_activity_id" ref="nhc_activity_demo_spell_0"/>
+            <field name="state">completed</field>
+            <field name="data_model">nh.clinical.patient.move</field>
+            <field name="date_terminated">2015-10-10 00:00:00</field>
+        </record>
+
+        <record id="nhc_demo_move_0" model="nh.clinical.patient.move">
+            <field name="activity_id" ref="nhc_activity_demo_move_0"/>
+            <field name="patient_id" ref="nhc_demo_patient_0"/>
+            <field name="location_id" ref="nhc_def_conf_location_wa"/>
+        </record>
+
+        <record id="nhc_activity_demo_move_0" model="nh.activity">
+            <field name="data_ref" eval="'nh.clinical.patient.move,' + str(ref('nhc_demo_move_0'))"/>
+        </record>
+
+        <record id="nhc_activity_demo_move_1" model="nh.activity">
+            <field name="patient_id" ref="nhc_demo_patient_0"/>
+            <field name="creator_id" ref="nhc_activity_demo_placement_0"/>
+            <field name="parent_id" ref="nhc_activity_demo_spell_0"/>
+            <field name="spell_activity_id" ref="nhc_activity_demo_spell_0"/>
+            <field name="state">completed</field>
+            <field name="data_model">nh.clinical.patient.move</field>
+            <field name="location_id" ref="nhc_def_conf_location_wa"/>
+            <field name="date_terminated">2015-10-11 00:00:00</field>
+        </record>
+
+        <record id="nhc_demo_move_1" model="nh.clinical.patient.move">
+            <field name="activity_id" ref="nhc_activity_demo_move_1"/>
+            <field name="patient_id" ref="nhc_demo_patient_0"/>
+            <field name="from_location_id" ref="nhc_def_conf_location_wa"/>
+            <field name="location_id" ref="nhc_def_conf_location_wa_b1"/>
+        </record>
+
+        <record id="nhc_activity_demo_move_1" model="nh.activity">
+            <field name="data_ref" eval="'nh.clinical.patient.move,' + str(ref('nhc_demo_move_1'))"/>
+        </record>
+    </data>
+</openerp>
