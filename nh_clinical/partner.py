@@ -2,8 +2,9 @@
 ``partner.py`` extends Odoo classes for doctor and role
 functionality.
 """
-from openerp.osv import orm, fields
 import logging
+
+from openerp.osv import orm, fields
 
 
 _logger = logging.getLogger(__name__)
