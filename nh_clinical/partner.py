@@ -1,3 +1,7 @@
+"""
+``partner.py`` extends Odoo classes for doctor and role
+functionality.
+"""
 from openerp.osv import orm, fields
 import logging
 
@@ -5,12 +9,11 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-# Note - This must go before res_company otherwise a new database will not find the new columns
+# Must precede res_company otherwise new columns will not be located
 class res_partner(orm.Model):
     """
-    Extends Odoo's class
-    :class:`res_partner<openerp.addons.base.res.res_partner.res_partner>`
-    which defines a business entity i.e. customer, supplier, employee.
+    Extends Odoo's `res_partner` which defines a business entity i.e.
+    customer, supplier, employer.
 
     Extension adds boolean field ``doctor`` and ``code`` for doctor
     type.
@@ -21,7 +24,8 @@ class res_partner(orm.Model):
 
     _inherit = 'res.partner'
     _columns = {
-        'doctor': fields.boolean('Doctor', help="Check this box if this contact is a Doctor"),
+        'doctor': fields.boolean(
+            'Doctor', help="Check this box if this contact is a Doctor"),
         'code': fields.char('Code', size=256),
     }
     _defaults = {
@@ -30,8 +34,8 @@ class res_partner(orm.Model):
 
     def create(self, cr, user, vals, context=None):
         """
-        Extends Odoo's :meth:`create()<openerp.models.Model.create>`
-        to update fields ``group_ids`` and ``doctor_id``.
+        Extends Odoo's `create()` to update fields ``group_ids`` and
+        ``doctor_id``.
         """
 
         return super(res_partner, self).create(
@@ -42,10 +46,8 @@ class res_partner(orm.Model):
 
 class res_partner_category_extension(orm.Model):
     """
-    Extends Odoo's class
-    :class:`res_partner_category<openerp.addons.base.res.res_partner.res_partner_category>`
-    to add functionality for roles.
-
+    Extends Odoo's `res_partner_category` to add functionality for
+    roles.
 
     Creates many-to-many relationship between categories (roles) and
     groups, allowing a relation between each role and corresponding
@@ -57,16 +59,16 @@ class res_partner_category_extension(orm.Model):
 
     _inherit = 'res.partner.category'
     _columns = {
-        'group_ids': fields.many2many('res.groups', 'category_group_rel', 'category_id', 'group_id',
-                                      'Related Groups'),
+        'group_ids': fields.many2many(
+            'res.groups', 'category_group_rel', 'category_id', 'group_id',
+            'Related Groups'),
     }
 
     def name_get(self, cr, user, ids, context=None):
         """
-        Extends Odoo's
-        :meth:`name_get()<openerp.addons.base.res.res_partner.res_partner_category.name_get>`
-        method, fetching the short version of category name belonging
-        to ids (without their direct parent).
+        Extends Odoo's `name_get()` method, fetching the short version
+        of category name belonging to ids (without their direct
+        parent).
 
         :param user: user id
         :type user: int
@@ -81,7 +83,8 @@ class res_partner_category_extension(orm.Model):
         else:
             ctx = {}
         ctx['partner_category_display'] = 'short'
-        return super(res_partner_category_extension, self).name_get(cr, user, ids, context=ctx)
+        return super(res_partner_category_extension, self).name_get(
+            cr, user, ids, context=ctx)
 
     def get_child_of_ids(self, cr, uid, id, context=None):
         """
@@ -93,7 +96,8 @@ class res_partner_category_extension(orm.Model):
         :rtype: list
         """
         res = [id]
-        child_ids = self.read(cr, uid, id, ['child_ids'], context=context)['child_ids']
+        child_ids = self.read(
+            cr, uid, id, ['child_ids'], context=context)['child_ids']
         if not child_ids:
             return res
         else:
@@ -104,9 +108,8 @@ class res_partner_category_extension(orm.Model):
 
 class res_partner_title_extension(orm.Model):
     """
-    Extends Odoo's
-    :class:`res_partner_title<openerp.addons.base.res.res_partner.res_partner_title>`
-    to include method ``get_title_by_name()``.
+    Extends Odoo's `res_partner_title` to include method
+    ``get_title_by_name()``.
     """
 
     _inherit = 'res.partner.title'
@@ -126,7 +129,8 @@ class res_partner_title_extension(orm.Model):
         """
 
         title = title.replace('.', '').replace(' ', '').lower()
-        title_id = self.search(cr, uid, [['name', '=', title]], context=context)
+        title_id = self.search(cr, uid, [['name', '=', title]],
+                               context=context)
         if not create:
             return title_id[0] if title_id else False
         else:

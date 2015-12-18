@@ -14,6 +14,6 @@ from . import adt
 from . import devices
 from . import wizard
 from . import auditing
-from tests import test_model
-from tests import api_demo
+from .tests import test_model
+from .tests import api_demo
 

@@ -39,9 +39,8 @@ class nh_clinical_api(orm.AbstractModel):
             nhs_data['other_identifier'] = hospital_number
             if not patient_pool.check_nhs_number(
                     cr, uid, data.get('patient_identifier'), context=context):
-                _logger.warn("""
-                Patient registered from an update call - data available:%s"
-                              """ % data)
+                _logger.warn("Patient registered from an update call - "
+                             "data available:%s", data)
                 self.register(cr, uid, hospital_number, data, context=context)
             else:
                 patient_pool.update(cr, uid, data.get('patient_identifier'),
@@ -54,7 +53,7 @@ class nh_clinical_api(orm.AbstractModel):
         res = activity_pool.submit(cr, uid, update_activity, data,
                                    context=context)
         activity_pool.complete(cr, uid, update_activity, context=context)
-        _logger.debug("Patient updated\n data: %s" % data)
+        _logger.debug("Patient updated\n data: %s", data)
         return res
 
     def register(self, cr, uid, hospital_number, data, context=None):
@@ -79,7 +78,7 @@ class nh_clinical_api(orm.AbstractModel):
         activity_pool.submit(cr, uid, register_activity, data, context=context)
         res = activity_pool.complete(cr, uid, register_activity,
                                      context=context)
-        _logger.debug("Patient registered\n data: %s" % data)
+        _logger.debug("Patient registered\n data: %s", data)
         return res
 
     def admit(self, cr, uid, hospital_number, data, context=None):
@@ -117,7 +116,7 @@ class nh_clinical_api(orm.AbstractModel):
                                                     context=context)
         activity_pool.submit(cr, uid, admit_activity, data, context=context)
         activity_pool.complete(cr, uid, admit_activity, context=context)
-        _logger.debug("Patient admitted\n data: %s" % data)
+        _logger.debug("Patient admitted\n data: %s", data)
         return True
 
     def admit_update(self, cr, uid, hospital_number, data, context=None):
@@ -153,7 +152,7 @@ class nh_clinical_api(orm.AbstractModel):
                                                       context=context)
         activity_pool.submit(cr, uid, update_activity, data, context=context)
         activity_pool.complete(cr, uid, update_activity, context=context)
-        _logger.debug("Admission updated\n data: %s" % data)
+        _logger.debug("Admission updated\n data: %s", data)
         return True
 
     def cancel_admit(self, cr, uid, hospital_number, context=None):
@@ -176,7 +175,7 @@ class nh_clinical_api(orm.AbstractModel):
                                                       context=context)
         activity_pool.submit(cr, uid, cancel_activity, data, context=context)
         activity_pool.complete(cr, uid, cancel_activity, context=context)
-        _logger.debug("Admission cancelled\n data: %s" % data)
+        _logger.debug("Admission cancelled\n data: %s", data)
         return True
 
     def discharge(self, cr, uid, hospital_number, data, context=None):
@@ -212,7 +211,7 @@ class nh_clinical_api(orm.AbstractModel):
         activity_pool.submit(cr, uid, discharge_activity, data,
                              context=context)
         activity_pool.complete(cr, uid, discharge_activity, context=context)
-        _logger.debug("Patient discharged: %s" % hospital_number)
+        _logger.debug("Patient discharged: %s", hospital_number)
         return True
 
     def cancel_discharge(self, cr, uid, hospital_number, context=None):
@@ -237,7 +236,7 @@ class nh_clinical_api(orm.AbstractModel):
                              context=context)
         activity_pool.complete(cr, uid, cancel_discharge_activity,
                                context=context)
-        _logger.debug("Discharge cancelled for patient: %s" % hospital_number)
+        _logger.debug("Discharge cancelled for patient: %s", hospital_number)
         return True
 
     def merge(self, cr, uid, hospital_number, data, context=None):
@@ -264,7 +263,7 @@ class nh_clinical_api(orm.AbstractModel):
                                                     context=context)
         activity_pool.submit(cr, uid, merge_activity, data, context=context)
         activity_pool.complete(cr, uid, merge_activity, context=context)
-        _logger.debug("Patient merged\n data: %s" % data)
+        _logger.debug("Patient merged\n data: %s", data)
         return True
 
     def transfer(self, cr, uid, hospital_number, data, context=None):
@@ -300,7 +299,7 @@ class nh_clinical_api(orm.AbstractModel):
                                                           context=context)
         activity_pool.submit(cr, uid, transfer_activity, data, context=context)
         activity_pool.complete(cr, uid, transfer_activity, context=context)
-        _logger.debug("Patient transferred\n data: %s" % data)
+        _logger.debug("Patient transferred\n data: %s", data)
         return True
 
     def cancel_transfer(self, cr, uid, hospital_number, context=None):
@@ -325,6 +324,6 @@ class nh_clinical_api(orm.AbstractModel):
             {'other_identifier': hospital_number}, context=context)
         activity_pool.complete(cr, uid, cancel_transfer_activity,
                                context=context)
-        _logger.debug("Transfer cancelled for patient: %s" % hospital_number)
+        _logger.debug("Transfer cancelled for patient: %s", hospital_number)
         return True
 
