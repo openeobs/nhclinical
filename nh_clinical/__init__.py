@@ -1,18 +1,19 @@
 # Part of NHClincal. See LICENSE file for full copyright and licensing details.
-import partner
-import user
-import groups
-import context
-import pos
-import patient
-import location
-import activity_extension
-import api
-import tests.api_demo
-import spell
-import operations
-import adt
-import devices
-import wizard
-import auditing
-import tests.test_model
+from . import partner
+from . import user
+from . import groups
+from . import context
+from . import pos
+from . import patient
+from . import location
+from . import activity_extension
+from . import api
+from . import spell
+from . import operations
+from . import adt
+from . import devices
+from . import wizard
+from . import auditing
+from tests import test_model
+from tests import api_demo
+
