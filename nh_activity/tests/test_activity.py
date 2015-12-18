@@ -1,15 +1,14 @@
-# Part of NHClincal. See LICENSE file for full copyright and licensing details.
+# Part of NHClinical. See LICENSE file for full copyright and licensing details
+# -*- coding: utf-8 -*-
 import logging
 
 from datetime import datetime as dt
 from mock import MagicMock
-from faker import Faker
 from openerp.tests import common
 from openerp.osv.orm import except_orm
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as dtf
 
 _logger = logging.getLogger(__name__)
-fake = Faker()
 
 
 class TestActivity(common.SingleTransactionCase):
@@ -17,7 +16,6 @@ class TestActivity(common.SingleTransactionCase):
     @classmethod
     def setUpClass(cls):
         super(TestActivity, cls).setUpClass()
-        cr, uid = cls.cr, cls.uid
         cls.test_model_pool = cls.registry('test.activity.data.model')
         cls.activity_pool = cls.registry('nh.activity')
         cls.user_pool = cls.registry('res.users')
@@ -143,8 +141,9 @@ class TestActivity(common.SingleTransactionCase):
         sequence = cr.fetchone()[0]
 
         activity = self.activity_pool.browse(cr, uid, activity_id)
-        self.assertTrue(self.activity_pool.write(
-            cr, uid, activity_id, {'state': 'started'}),
+        self.assertTrue(
+            self.activity_pool.write(cr, uid, activity_id,
+                                     {'state': 'started'}),
             msg="Activity Write failed")
         self.assertEqual(activity.state, 'started',
                          msg="Activity not written correctly")
@@ -258,8 +257,9 @@ class TestActivity(common.SingleTransactionCase):
 
         activity_id = self.activity_pool.create(
             cr, uid, {'data_model': 'test.activity.data.model'})
-        self.assertTrue(self.activity_pool.submit(
-            cr, uid, activity_id, {'field1': 'test'}),
+        self.assertTrue(
+            self.activity_pool.submit(
+                cr, uid, activity_id, {'field1': 'test'}),
             msg="Activity Submit failed")
         activity = self.activity_pool.browse(cr, uid, activity_id)
         self.assertEqual(activity.data_ref.field1, 'test',
@@ -352,8 +352,8 @@ class TestActivity(common.SingleTransactionCase):
         test_date = dt(year=2015, month=10, day=10, hour=13, minute=0,
                        second=0)
 
-        self.assertTrue(self.activity_pool.schedule(
-            cr, uid, activity_id, test_date),
+        self.assertTrue(
+            self.activity_pool.schedule(cr, uid, activity_id, test_date),
             msg="Activity Schedule failed")
         activity = self.activity_pool.browse(cr, uid, activity_id)
         self.assertEqual(
@@ -614,7 +614,7 @@ class TestActivity(common.SingleTransactionCase):
                                                                 'schedule'))
         self.assertFalse(self.test_model_pool.is_action_allowed('cancelled',
                                                                 'schedule'))
-        
+
     def test_is_action_allowed_when_action_is_start(self):
         self.assertTrue(self.test_model_pool.is_action_allowed('new',
                                                                'start'))
@@ -626,7 +626,7 @@ class TestActivity(common.SingleTransactionCase):
                                                                 'start'))
         self.assertFalse(self.test_model_pool.is_action_allowed('cancelled',
                                                                 'start'))
-        
+
     def test_is_action_allowed_when_action_is_completed(self):
         self.assertTrue(self.test_model_pool.is_action_allowed('new',
                                                                'complete'))
@@ -638,7 +638,7 @@ class TestActivity(common.SingleTransactionCase):
                                                                 'complete'))
         self.assertFalse(self.test_model_pool.is_action_allowed('cancelled',
                                                                 'complete'))
-        
+
     def test_is_action_allowed_when_action_is_cancel(self):
         self.assertTrue(self.test_model_pool.is_action_allowed('new',
                                                                'cancel'))
@@ -650,7 +650,7 @@ class TestActivity(common.SingleTransactionCase):
                                                                'cancel'))
         self.assertFalse(self.test_model_pool.is_action_allowed('cancelled',
                                                                 'cancel'))
-        
+
     def test_is_action_allowed_when_action_is_submit(self):
         self.assertTrue(self.test_model_pool.is_action_allowed('new',
                                                                'submit'))
@@ -674,7 +674,7 @@ class TestActivity(common.SingleTransactionCase):
                                                                 'assign'))
         self.assertFalse(self.test_model_pool.is_action_allowed('cancelled',
                                                                 'assign'))
-        
+
     def test_is_action_allowed_when_action_is_unassign(self):
         self.assertTrue(self.test_model_pool.is_action_allowed('new',
                                                                'unassign'))
@@ -686,7 +686,7 @@ class TestActivity(common.SingleTransactionCase):
                                                                 'unassign'))
         self.assertFalse(self.test_model_pool.is_action_allowed('cancelled',
                                                                 'unassign'))
-        
+
     def test_check_action_schedule_returns_True_from_state_new_scheduled(self):
         self.assertTrue(self.test_model_pool.check_action('new', 'schedule'))
         self.assertTrue(self.test_model_pool.check_action('scheduled',
@@ -699,7 +699,7 @@ class TestActivity(common.SingleTransactionCase):
             self.test_model_pool.check_action('completed', 'schedule')
         with self.assertRaises(except_orm):
             self.test_model_pool.check_action('cancelled', 'schedule')
-        
+
     def test_check_action_start_returns_True_from_state_new_scheduled(self):
         self.assertTrue(self.test_model_pool.check_action('new', 'start'))
         self.assertTrue(self.test_model_pool.check_action('scheduled',
@@ -712,7 +712,7 @@ class TestActivity(common.SingleTransactionCase):
             self.test_model_pool.check_action('completed', 'start')
         with self.assertRaises(except_orm):
             self.test_model_pool.check_action('cancelled', 'start')
-        
+
     def test_check_action_complete_returns_True_from_state_new_scheduled_started(self):
         self.assertTrue(self.test_model_pool.check_action('new', 'complete'))
         self.assertTrue(self.test_model_pool.check_action('scheduled',
@@ -725,7 +725,7 @@ class TestActivity(common.SingleTransactionCase):
             self.test_model_pool.check_action('completed', 'complete')
         with self.assertRaises(except_orm):
             self.test_model_pool.check_action('cancelled', 'complete')
-        
+
     def test_check_action_cancel_returns_True_from_state_new_scheduled_started_completed(self):
         self.assertTrue(self.test_model_pool.check_action('new', 'cancel'))
         self.assertTrue(self.test_model_pool.check_action('scheduled',
@@ -737,7 +737,7 @@ class TestActivity(common.SingleTransactionCase):
     def test_check_action_cancel_raises_exception_from_state_cancelled(self):
         with self.assertRaises(except_orm):
             self.test_model_pool.check_action('cancelled', 'cancel')
-        
+
     def test_check_action_submit_returns_True_from_state_new_scheduled_started(self):
         self.assertTrue(self.test_model_pool.check_action('new', 'submit'))
         self.assertTrue(self.test_model_pool.check_action('scheduled',
@@ -749,7 +749,7 @@ class TestActivity(common.SingleTransactionCase):
             self.test_model_pool.check_action('completed', 'submit')
         with self.assertRaises(except_orm):
             self.test_model_pool.check_action('cancelled', 'submit')
-        
+
     def test_check_action_assign_returns_True_from_new_scheduled_started(self):
         self.assertTrue(self.test_model_pool.check_action('new', 'assign'))
         self.assertTrue(self.test_model_pool.check_action('scheduled',
@@ -761,7 +761,7 @@ class TestActivity(common.SingleTransactionCase):
             self.test_model_pool.check_action('completed', 'assign')
         with self.assertRaises(except_orm):
             self.test_model_pool.check_action('cancelled', 'assign')
-        
+
     def test_check_action_unassign_returns_True_from_new_scheduled_started(self):
         self.assertTrue(self.test_model_pool.check_action('new', 'unassign'))
         self.assertTrue(self.test_model_pool.check_action('scheduled',

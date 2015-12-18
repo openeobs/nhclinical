@@ -1,4 +1,4 @@
-# Part of NHClincal. See LICENSE file for full copyright and licensing details.
+# Part of NHClinical. See LICENSE file for full copyright and licensing details
 # -*- coding: utf-8 -*-
 """
 ``activity.py`` defines the classes and methods to allow for an audit
@@ -24,8 +24,8 @@ def data_model_event(callback=None):
     activity method. The result returned is the one from the data_model
     method.
     """
-    def decorator(f):
-        @wraps(f)
+    def decorator(func):
+        @wraps(func)
         def wrapper(*args, **kwargs):
             self, cr, uid, activity_id = args[:4]
             if isinstance(activity_id, list) and len(activity_id) == 1:
@@ -41,8 +41,9 @@ def data_model_event(callback=None):
                     "activity_id must be > 0, found to be %s" % activity_id)
             activity = self.browse(cr, uid, activity_id)
             data_model = self.pool[activity.data_model]
-            f(*args, **kwargs)
-            res = eval("data_model.%s(*args[1:], **kwargs)" % f.__name__)
+            func(*args, **kwargs)
+            data_model_function = getattr(data_model, func.__name__)
+            res = data_model_function(*args[1:], **kwargs)
             return res
         return wrapper
     return decorator
@@ -50,8 +51,7 @@ def data_model_event(callback=None):
 
 class nh_activity(orm.Model):
     """
-    Class representing any event that needs to be recorded by the
-    system.
+    Class representing any event that needs to be recorded by the system.
 
     Any user executed event that has a starting and ending point in time
     could be represented as an instance of this class.
@@ -154,11 +154,8 @@ class nh_activity(orm.Model):
             vals.update({'summary': data_model_pool._description})
 
         activity_id = super(nh_activity, self).create(cr, uid, vals, context)
-        _logger.debug(
-            "activity '%s' created, activity.id=%s" %
-            (vals.get('data_model'), activity_id)
-        )
-
+        _logger.debug("activity '%s' created, activity.id=%s",
+                      vals.get('data_model'), activity_id)
         return activity_id
 
     def write(self, cr, uid, ids, vals, context=None):
@@ -258,12 +255,12 @@ class nh_activity(orm.Model):
                     'Type Error!',
                     "date must be a datetime or a date formatted string, "
                     "found to be %s" % type(date_scheduled))
-            date_formats = ['%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M',
-                            '%Y-%m-%d %H', '%Y-%m-%d']
+            date_format_list = ['%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M',
+                                '%Y-%m-%d %H', '%Y-%m-%d']
             res = []
-            for df in date_formats:
+            for date_format in date_format_list:
                 try:
-                    datetime.strptime(date_scheduled, df)
+                    datetime.strptime(date_scheduled, date_format)
                 except ValueError:
                     res.append(False)
                 else:
@@ -278,9 +275,9 @@ class nh_activity(orm.Model):
     @data_model_event(callback="assign")
     def assign(self, cr, uid, activity_id, user_id, context=None):
         """
-        Sets ``user_id`` to the specified user if allowed by access
-        rights. See
-        :meth:`data model assign<activity.nh_activity_data.assign>`
+        Sets ``user_id`` to the specified user if allowed by access rights.
+
+        See :meth:`data model assign<activity.nh_activity_data.assign>`
         for full implementation.
 
         :param activity_id: :mod:`activity<activity.nh_activity>` id
@@ -314,8 +311,9 @@ class nh_activity(orm.Model):
     @data_model_event(callback="start")
     def start(self, cr, uid, activity_id, context=None):
         """
-        Sets activity ``state`` to `started`. See
-        :meth:`data model start<activity.nh_activity_data.start>`
+        Sets activity ``state`` to `started`.
+
+        See :meth:`data model start<activity.nh_activity_data.start>`
         for full implementation.
 
         :param activity_id: :mod:`activity<activity.nh_activity>` id
@@ -330,8 +328,7 @@ class nh_activity(orm.Model):
         """
         Sets activity ``state`` to `completed` and records the date and
         user on ``date_terminated`` and ``terminate_uid`` respectively.
-        See
-        :meth:`data model complete<activity.nh_activity_data.complete>`
+        See :meth:`data model complete<activity.nh_activity_data.complete>`
         for full implementation.
 
         :param activity_id: :mod:`activity<activity.nh_activity>` id
@@ -346,8 +343,7 @@ class nh_activity(orm.Model):
         """
         Sets activity ``state`` to `cancelled` and records the date and
         user on ``date_terminated`` and ``terminate_uid`` respectively.
-        See
-        :meth:`data model cancel<activity.nh_activity_data.cancel>`
+        See :meth:`data model cancel<activity.nh_activity_data.cancel>`
         for full implementation.
 
         :param activity_id: :mod:`activity<activity.nh_activity>` id
@@ -424,7 +420,7 @@ class nh_activity_data(orm.AbstractModel):
     def create(self, cr, uid, vals, context=None):
         return super(nh_activity_data, self).create(cr, uid, vals, context)
 
-    def create_activity(self, cr, uid, vals_activity={}, vals_data={},
+    def create_activity(self, cr, uid, vals_activity=None, vals_data=None,
                         context=None):
         """
         Creates a new :mod:`activity<activity.nh_activity>` of the
@@ -439,6 +435,10 @@ class nh_activity_data(orm.AbstractModel):
         :returns: :mod:`activity<activity.nh_activity>` id.
         :rtype: int
         """
+        if not vals_activity:
+            vals_activity = {}
+        if not vals_data:
+            vals_data = {}
         if not isinstance(vals_activity, dict):
             raise osv.except_osv(
                 'Type Error!',
@@ -476,8 +476,8 @@ class nh_activity_data(orm.AbstractModel):
             cr, uid, activity_id,
             {'state': 'started', 'date_started': datetime.now().strftime(DTF)},
             context=context)
-        _logger.debug("activity '%s', activity.id=%s started" %
-                      (activity.data_model, activity.id))
+        _logger.debug("activity '%s', activity.id=%s started",
+                      activity.data_model, activity.id)
         return True
 
     def complete(self, cr, uid, activity_id, context=None):
@@ -496,8 +496,8 @@ class nh_activity_data(orm.AbstractModel):
                             {'state': 'completed', 'terminate_uid': uid,
                              'date_terminated': datetime.now().strftime(DTF)},
                             context=context)
-        _logger.debug("activity '%s', activity.id=%s completed" %
-                      (activity.data_model, activity.id))
+        _logger.debug("activity '%s', activity.id=%s completed",
+                      activity.data_model, activity.id)
         return True
 
     def assign(self, cr, uid, activity_id, user_id, context=None):
@@ -525,14 +525,14 @@ class nh_activity_data(orm.AbstractModel):
                 activity_pool.write(cr, uid, activity_id, {'user_id': user_id},
                                     context=context)
                 _logger.debug("activity '%s', activity.id=%s "
-                              "assigned to user.id=%s" %
-                              (activity.data_model, activity.id, user_id))
+                              "assigned to user.id=%s",
+                              activity.data_model, activity.id, user_id)
             else:
                 activity_pool.write(cr, uid, activity_id,
                                     {'assign_locked': True}, context=context)
                 _logger.debug(
-                    "activity '%s', activity.id=%s locked to user.id=%s!" %
-                    (activity.data_model, activity.id, user_id))
+                    "activity '%s', activity.id=%s locked to user.id=%s!",
+                    activity.data_model, activity.id, user_id)
         return True
 
     def unassign(self, cr, uid, activity_id, context=None):
@@ -557,12 +557,12 @@ class nh_activity_data(orm.AbstractModel):
         if not activity.assign_locked:
             activity_pool.write(cr, uid, activity_id, {'user_id': False},
                                 context=context)
-            _logger.debug("activity '%s', activity.id=%s unassigned" %
-                          (activity.data_model, activity.id))
+            _logger.debug("activity '%s', activity.id=%s unassigned",
+                          activity.data_model, activity.id)
         else:
             _logger.debug(
-                "activity '%s', activity.id=%s cannot be unassigned (locked)" %
-                (activity.data_model, activity.id))
+                "activity '%s', activity.id=%s cannot be unassigned (locked)",
+                activity.data_model, activity.id)
         return True
 
     def cancel(self, cr, uid, activity_id, context=None):
@@ -580,8 +580,8 @@ class nh_activity_data(orm.AbstractModel):
         activity_pool.write(cr, uid, activity_id, {
             'state': 'cancelled', 'terminate_uid': uid,
             'date_terminated': datetime.now().strftime(DTF)}, context=context)
-        _logger.debug("activity '%s', activity.id=%s cancelled" %
-                      (activity.data_model, activity.id))
+        _logger.debug("activity '%s', activity.id=%s cancelled",
+                      activity.data_model, activity.id)
         return True
 
     def schedule(self, cr, uid, activity_id, date_scheduled=None,
@@ -605,12 +605,13 @@ class nh_activity_data(orm.AbstractModel):
                 "Schedule date is neither set on activity nor passed to the "
                 "method")
         date_scheduled = date_scheduled or activity.date_scheduled
-        activity_pool.write(cr, uid, activity_id, {
-            'date_scheduled': date_scheduled, 'state': 'scheduled'},
-            context=context)
+        activity_pool.write(cr, uid, activity_id,
+                            {'date_scheduled': date_scheduled,
+                             'state': 'scheduled'},
+                            context=context)
         _logger.debug(
-            "activity '%s', activity.id=%s scheduled, date_scheduled='%s'" %
-            (activity.data_model, activity.id, date_scheduled))
+            "activity '%s', activity.id=%s scheduled, date_scheduled='%s'",
+            activity.data_model, activity.id, date_scheduled)
         return True
 
     def submit(self, cr, uid, activity_id, vals, context=None):
@@ -631,16 +632,16 @@ class nh_activity_data(orm.AbstractModel):
         data_vals = vals.copy()
         if not activity.data_ref:
             _logger.debug(
-                "activity '%s', activity.id=%s data submitted: %s" %
-                (activity.data_model, activity.id, str(data_vals)))
+                "activity '%s', activity.id=%s data submitted: %s",
+                activity.data_model, activity.id, str(data_vals))
             data_vals.update({'activity_id': activity_id})
             data_id = self.create(cr, uid, data_vals, context)
             activity_pool.write(cr, uid, activity_id, {
                 'data_ref': "%s,%s" % (self._name, data_id)}, context=context)
         else:
             _logger.debug(
-                "activity '%s', activity.id=%s data submitted: %s" %
-                (activity.data_model, activity.id, str(vals)))
+                "activity '%s', activity.id=%s data submitted: %s",
+                activity.data_model, activity.id, str(vals))
             self.write(cr, uid, activity.data_ref.id, vals, context=context)
 
         self.update_activity(cr, SUPERUSER_ID, activity_id, context=context)
@@ -648,8 +649,8 @@ class nh_activity_data(orm.AbstractModel):
 
     def update_activity(self, cr, uid, activity_id, context=None):
         """
-            Hook for data-driven activity update
-            Should be called on methods that change activity data
+        Hook for data-driven activity update.
+        Should be called on methods that change activity data.
         """
         return True
 
@@ -664,8 +665,8 @@ class nh_activity_data(orm.AbstractModel):
             activity_pool.update_activity(cr, SUPERUSER_ID, activity.id,
                                           context)
             _logger.debug(
-                "activity '%s', activity.id=%s data submitted via UI" %
-                (activity.data_model, activity.id))
+                "activity '%s', activity.id=%s data submitted via UI",
+                activity.data_model, activity.id)
         return {'type': 'ir.actions.act_window_close'}
 
     def complete_ui(self, cr, uid, ids, context=None):
@@ -680,6 +681,6 @@ class nh_activity_data(orm.AbstractModel):
                                           context)
             activity_pool.complete(cr, uid, activity.id, context)
             _logger.debug(
-                "activity '%s', activity.id=%s data completed via UI" %
-                (activity.data_model, activity.id))
+                "activity '%s', activity.id=%s data completed via UI",
+                activity.data_model, activity.id)
         return {'type': 'ir.actions.act_window_close'}
