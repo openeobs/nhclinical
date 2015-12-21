@@ -427,8 +427,7 @@ class nh_activity_data(orm.AbstractModel):
             location_id = data.activity_id.patient_id.current_location_id.id
         if not location_id:
             location_id = data.activity_id.spell_activity_id and \
-                          data.activity_id.spell_activity_id.location_id.id \
-                          or False
+                data.activity_id.spell_activity_id.location_id.id or False
 
         if not location_id:
             if data.activity_id.parent_id:
@@ -470,7 +469,7 @@ class nh_activity_data(orm.AbstractModel):
         if not cr.fetchone()[0]:
             return []
         sql = """
-                select 
+                select
                     activity_id,
                     array_agg(user_id) as user_ids
                 from     
@@ -488,7 +487,7 @@ class nh_activity_data(orm.AbstractModel):
                       on model.model = activity.data_model
                       and activity.location_id = ulr.location_id
                       and activity.id = {activity_id}) data
-                group by activity_id                
+                group by activity_id
                 """.format(activity_id=activity_id)
         cr.execute(sql)
         res = cr.dictfetchone()
@@ -547,8 +546,9 @@ class nh_activity_data(orm.AbstractModel):
                 break_trigger = False
                 for domain in trigger_activity.get('domains'):
                     domain_pool = self.pool.get(domain['object'])
-                    search_domain = domain['domain'] + \
-                                    [['parent_id', '=', spell_activity_id]]
+                    search_domain = domain['domain'] + [
+                        ['parent_id', '=', spell_activity_id]
+                    ]
                     if domain_pool.search(cr, uid, search_domain,
                                           context=context):
                         break_trigger = True
@@ -612,7 +612,7 @@ class nh_clinical_activity_access(orm.Model):
     def init(self, cr):
         cr.execute("""
             drop view if exists nh_clinical_activity_access;
-            create or replace view 
+            create or replace view
             nh_clinical_activity_access as(
                 with
                     recursive route(level, path, parent_id, id) as (

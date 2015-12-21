@@ -1,5 +1,11 @@
-from openerp.osv import orm, fields
+# Part of NHClinical. See LICENSE file for full copyright and licensing details
+# -*- coding: utf-8 -*-
+"""
+Extends Odoo's ``res_groups`` and ``ir_model_access``.
+"""
 import logging
+
+from openerp.osv import orm, fields
 
 
 _logger = logging.getLogger(__name__)
@@ -18,7 +24,8 @@ class ir_model_access(orm.Model):
 
     _inherit = 'ir.model.access'
     _columns = {
-        'perm_responsibility': fields.boolean('NH Clinical Activity Responsibility'),
+        'perm_responsibility': fields.boolean(
+            'NH Clinical Activity Responsibility'),
         }
 
 
@@ -50,7 +57,8 @@ class res_groups(orm.Model):
             activity_pool = self.pool['nh.activity']
             user_ids = []
             # iterate through groups
-            for group in self.browse(cr, uid, isinstance(ids, (list, tuple)) and ids or [ids]):
+            for group in self.browse(
+                    cr, uid, isinstance(ids, (list, tuple)) and ids or [ids]):
                 # get all users ids of users who belong to each group
                 user_ids.extend([u.id for u in group.users])
             # update activities with user ids of responsible users
