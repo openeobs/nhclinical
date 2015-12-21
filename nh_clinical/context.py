@@ -1,5 +1,9 @@
-from openerp.osv import orm, fields, osv
+"""
+Defines context.
+"""
 import logging
+
+from openerp.osv import orm, fields, osv
 
 
 _logger = logging.getLogger(__name__)
@@ -17,8 +21,8 @@ class nh_clinical_context(orm.Model):
     _name = 'nh.clinical.context'
     _columns = {
         'name': fields.char('Name', size=100, required=True, select=True),
+        # formatted as a list of applicable models for the context
         'models': fields.text('Applicable Models')
-        #This should be formatted as a python list of the applicable models for the context
     }
 
     def check_model(self, cr, uid, ids, model, context=None):
@@ -36,7 +40,8 @@ class nh_clinical_context(orm.Model):
 
         for c in self.browse(cr, uid, ids, context=context):
             if model not in eval(c.models):
-                raise osv.except_osv('Error!', model + ' not applicable for context: %s' % c.name)
+                raise osv.except_osv(
+                    'Error!',
+                    model + ' not applicable for context: %s' % c.name)
         return True
-
 

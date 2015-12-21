@@ -472,7 +472,7 @@ class nh_activity_data(orm.AbstractModel):
                 select
                     activity_id,
                     array_agg(user_id) as user_ids
-                from     
+                    from
                     (select distinct on (activity.id, ulr.user_id)
                         activity.id as activity_id,
                         ulr.user_id
