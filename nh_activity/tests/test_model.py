@@ -12,11 +12,6 @@ class test_activity_data_model(orm.Model):
         'field1': fields.text('Field1')
     }
 
-    def __init__(self, pool, cr):
-        activity_model = pool['nh.activity']
-
-        super(test_activity_data_model, self).__init__(pool, cr)
-
 
 class test_activity_data_model2(orm.Model):
     _name = 'test.activity.data.model2'
