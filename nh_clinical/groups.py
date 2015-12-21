@@ -64,4 +64,3 @@ class res_groups(orm.Model):
             # update activities with user ids of responsible users
             activity_pool.update_users(cr, uid, user_ids)
         return res
-

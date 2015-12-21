@@ -1016,10 +1016,10 @@ class nh_clinical_adt_patient_merge(orm.Model):
         for model_name in self.pool.models.keys():
             model_pool = self.pool[model_name]
             if model_name.startswith("nh.clinical") and model_pool._auto and \
-                            'patient_id' in model_pool._columns.keys() and \
-                            model_name != self._name and \
-                            model_name != 'nh.clinical.notification' and \
-                            model_name != 'nh.clinical.patient.observation':
+                'patient_id' in model_pool._columns.keys() and \
+                model_name != self._name and \
+                model_name != 'nh.clinical.notification' and model_name != \
+                    'nh.clinical.patient.observation':
                 ids = model_pool.search(
                     cr, uid, [('patient_id', '=', from_id)], context=context)
                 if ids:

@@ -44,4 +44,3 @@ class nh_clinical_context(orm.Model):
                     'Error!',
                     model + ' not applicable for context: %s' % c.name)
         return True
-

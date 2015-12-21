@@ -326,4 +326,3 @@ class nh_clinical_api(orm.AbstractModel):
                                context=context)
         _logger.debug("Transfer cancelled for patient: %s", hospital_number)
         return True
-

@@ -10,7 +10,7 @@
     'author': 'Neova Health',
     'website': 'http://www.neovahealth.co.uk/',
     'depends': ['nh_activity', 'hr'],
-    'data': ['data/data.xml', 
+    'data': ['data/data.xml',
              'views/pos_view.xml',
              'views/location_view.xml',
              'views/patient_view.xml',
