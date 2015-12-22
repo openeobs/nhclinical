@@ -17,11 +17,15 @@ class nh_clinical_patient(osv.Model):
     _gender = [['BOTH', 'Both'], ['F', 'Female'], ['I', 'Intermediate'],
                ['M', 'Male'], ['NSP', 'Not Specified'], ['U', 'Unknown']]
     _ethnicity = [
-        ['A', 'White - British'], ['B', 'White - Irish'], ['C', 'White - Other background'],
-        ['D', 'Mixed - White and Black Caribbean'], ['E', 'Mixed - White and Black African'],
-        ['F', 'Mixed - White and Asian'], ['G', 'Mixed - Other background'], ['H', 'Asian - Indian'],
-        ['J', 'Asian - Pakistani'], ['K', 'Asian - Bangladeshi'], ['L', 'Asian - Other background'],
-        ['M', 'Black - Caribbean'], ['N', 'Black - African'], ['P', 'Black - Other background'], ['R', 'Chinese'],
+        ['A', 'White - British'], ['B', 'White - Irish'],
+        ['C', 'White - Other background'],
+        ['D', 'Mixed - White and Black Caribbean'],
+        ['E', 'Mixed - White and Black African'],
+        ['F', 'Mixed - White and Asian'], ['G', 'Mixed - Other background'],
+        ['H', 'Asian - Indian'], ['J', 'Asian - Pakistani'],
+        ['K', 'Asian - Bangladeshi'], ['L', 'Asian - Other background'],
+        ['M', 'Black - Caribbean'], ['N', 'Black - African'],
+        ['P', 'Black - Other background'], ['R', 'Chinese'],
         ['S', 'Other ethnic group'], ['Z', 'Not stated']
     ]
 
@@ -59,12 +63,15 @@ class nh_clinical_patient(osv.Model):
         """
 
         result = dict.fromkeys(ids, False)
-        for r in self.read(cr, uid, ids, ['family_name', 'given_name', 'middle_names'], context=context):
-            #TODO This needs to be manipulable depending on locale
+        for r in self.read(cr, uid, ids,
+                           ['family_name', 'given_name', 'middle_names'],
+                           context=context):
+            # TODO This needs to be manipulable depending on locale
             result[r['id']] = self._get_fullname(r)
         return result
 
-    def check_hospital_number(self, cr, uid, hospital_number, exception=False, context=None):
+    def check_hospital_number(self, cr, uid, hospital_number, exception=False,
+                              context=None):
         """
         Checks for a patient by `hospital number`.
 
@@ -86,14 +93,19 @@ class nh_clinical_patient(osv.Model):
             result = bool(self.search(cr, uid, domain, context=context))
         if exception:
             if result and eval(exception):
-                raise osv.except_osv('Integrity Error!', 'Patient with Hospital Number %s already exists!'
-                                     % hospital_number)
+                raise osv.except_osv(
+                    'Integrity Error!',
+                    'Patient with Hospital Number %s already exists!'
+                    % hospital_number)
             elif not result and not eval(exception):
-                raise osv.except_osv('Patient Not Found!', 'There is no patient with Hospital Number %s' %
-                                     hospital_number)
+                raise osv.except_osv(
+                    'Patient Not Found!',
+                    'There is no patient with Hospital Number %s'
+                    % hospital_number)
         return result
 
-    def check_nhs_number(self, cr, uid, nhs_number, exception=False, context=None):
+    def check_nhs_number(self, cr, uid, nhs_number, exception=False,
+                         context=None):
         """
         Checks for patient by provided `NHS Number`.
 
@@ -115,14 +127,19 @@ class nh_clinical_patient(osv.Model):
             result = bool(self.search(cr, uid, domain, context=context))
         if exception:
             if result and eval(exception):
-                raise osv.except_osv('Integrity Error!', 'Patient with NHS Number %s already exists!'
-                                     % nhs_number)
+                raise osv.except_osv(
+                    'Integrity Error!',
+                    'Patient with NHS Number %s already exists!'
+                    % nhs_number)
             elif not result and not eval(exception):
-                raise osv.except_osv('Patient Not Found!', 'There is no patient with NHS Number %s' %
-                                     nhs_number)
+                raise osv.except_osv(
+                    'Patient Not Found!',
+                    'There is no patient with NHS Number %s'
+                    % nhs_number)
         return result
 
-    def update(self, cr, uid, identifier, data, selection='other_identifier', context=None):
+    def update(self, cr, uid, identifier, data, selection='other_identifier',
+               context=None):
         """
         Updates patient data by provided hospital number or nhs number,
         instead of patient_id as per usual.
@@ -139,22 +156,29 @@ class nh_clinical_patient(osv.Model):
         :rtype: bool
         """
 
-        patient_id = self.search(cr, uid, [[selection, '=', identifier]], context=context)
+        patient_id = self.search(cr, uid, [[selection, '=', identifier]],
+                                 context=context)
         return self.write(cr, uid, patient_id, data, context=context)
 
     _columns = {
-        'current_location_id': fields.many2one('nh.clinical.location', 'Current Location'),
-        'partner_id': fields.many2one('res.partner', 'Partner', required=True, ondelete='cascade'),
-        'dob': fields.datetime('Date Of Birth'),  # Partner birthdate is NOT a date.
+        'current_location_id': fields.many2one('nh.clinical.location',
+                                               'Current Location'),
+        'partner_id': fields.many2one('res.partner', 'Partner', required=True,
+                                      ondelete='cascade'),
+        # res_partner birthdate is NOT a date
+        'dob': fields.datetime('Date Of Birth'),
         'sex': fields.selection(_gender, 'Sex'),
         'gender': fields.selection(_gender, 'Gender'),
         'ethnicity': fields.selection(_ethnicity, 'Ethnicity'),
-        'patient_identifier': fields.char('Patient Identifier', size=100, select=True, help="NHS Number"),
-        'other_identifier': fields.char('Other Identifier', size=100, select=True, help="Hospital Number"),
+        'patient_identifier': fields.char('Patient Identifier', size=100,
+                                          select=True, help="NHS Number"),
+        'other_identifier': fields.char('Other Identifier', size=100,
+                                        select=True, help="Hospital Number"),
         'given_name': fields.char('Given Name', size=200),
         'middle_names': fields.char('Middle Name(s)', size=200),
         'family_name': fields.char('Family Name', size=200, select=True),
-        'full_name': fields.function(_get_name, type='text', string="Full Name"),
+        'full_name': fields.function(_get_name, type='text',
+                                     string="Full Name"),
         'follower_ids': fields.many2many('res.users',
                                          'user_patient_rel',
                                          'patient_id',
@@ -182,11 +206,14 @@ class nh_clinical_patient(osv.Model):
         if not vals.get('name'):
             vals.update({'name': self._get_fullname(vals)})
         if vals.get('other_identifier'):
-            self.check_hospital_number(cr, uid, vals.get('other_identifier'), exception='True', context=context)
+            self.check_hospital_number(cr, uid, vals.get('other_identifier'),
+                                       exception='True', context=context)
         if vals.get('patient_identifier'):
-            self.check_nhs_number(cr, uid, vals.get('patient_identifier'), exception='True', context=context)
-        return super(nh_clinical_patient, self).create(cr, uid, vals,
-                                                       context=dict(context or {}, mail_create_nosubscribe=True))
+            self.check_nhs_number(cr, uid, vals.get('patient_identifier'),
+                                  exception='True', context=context)
+        return super(nh_clinical_patient, self).create(
+            cr, uid, vals,
+            context=dict(context or {}, mail_create_nosubscribe=True))
 
     def write(self, cr, uid, ids, vals, context=None):
         """
@@ -199,8 +226,11 @@ class nh_clinical_patient(osv.Model):
         title_pool = self.pool['res.partner.title']
         if 'title' in vals.keys():
             if not isinstance(vals.get('title'), int):
-                vals['title'] = title_pool.get_title_by_name(cr, uid, vals['title'], context=context)
-        return super(nh_clinical_patient, self).write(cr, uid, ids, vals, context=context)
+                vals['title'] = title_pool.get_title_by_name(cr, uid,
+                                                             vals['title'],
+                                                             context=context)
+        return super(nh_clinical_patient, self).write(cr, uid, ids, vals,
+                                                      context=context)
 
     def unlink(self, cr, uid, ids, context=None):
         """
@@ -214,9 +244,12 @@ class nh_clinical_patient(osv.Model):
         :rtype: bool
         """
 
-        return super(nh_clinical_patient, self).write(cr, uid, ids, {'active': False}, context=context)
+        return super(nh_clinical_patient, self).write(cr, uid, ids,
+                                                      {'active': False},
+                                                      context=context)
 
-    def check_data(self, cr, uid, data, create=True, exception=True, context=None):
+    def check_data(self, cr, uid, data, create=True, exception=True,
+                   context=None):
         """
         Default will check if patient exists. Either `hospital number`
         (``other_identifier``) or `NHS number` (``patient_identifier``)
@@ -247,37 +280,51 @@ class nh_clinical_patient(osv.Model):
         """
 
         title_pool = self.pool['res.partner.title']
-        if 'patient_identifier' not in data.keys() and 'other_identifier' not in data.keys():
-            raise osv.except_osv('Patient Data Error!', 'Either the Hospital Number or the NHS Number is required to '
-                                                        'register/update a patient.')
+        if 'patient_identifier' not in data.keys() and \
+                'other_identifier' not in data.keys():
+            raise osv.except_osv(
+                'Patient Data Error!',
+                'Either the Hospital Number or the NHS Number is required to '
+                'register/update a patient.')
         if create:
             if data.get('other_identifier'):
-                self.check_hospital_number(cr, uid, data['other_identifier'], exception='True', context=context)
+                self.check_hospital_number(cr, uid, data['other_identifier'],
+                                           exception='True', context=context)
             if data.get('patient_identifier'):
-                self.check_nhs_number(cr, uid, data['patient_identifier'], exception='True', context=context)
+                self.check_nhs_number(cr, uid, data['patient_identifier'],
+                                      exception='True', context=context)
         else:
             if data.get('other_identifier') and data.get('patient_identifier'):
-                domain = ['|',
-                          ['other_identifier', '=', data['other_identifier']],
-                          ['patient_identifier', '=', data['patient_identifier']]]
+                domain = [
+                    '|',
+                    ['other_identifier', '=', data['other_identifier']],
+                    ['patient_identifier', '=', data['patient_identifier']]
+                ]
             elif data.get('other_identifier'):
                 domain = [['other_identifier', '=', data['other_identifier']]]
             else:
-                domain = [['patient_identifier', '=', data['patient_identifier']]]
+                domain = [
+                    ['patient_identifier', '=', data['patient_identifier']]
+                ]
             patient_id = self.search(cr, uid, domain, context=context)
             if not patient_id:
                 if exception:
-                    raise osv.except_osv('Update Error!', 'No patient found with the provided identifier.')
+                    raise osv.except_osv(
+                        'Update Error!',
+                        'No patient found with the provided identifier.')
                 else:
                     return False
             if len(patient_id) > 1:
                 if exception:
-                    raise osv.except_osv('Update Error!', 'Identifiers for more than one patient provided.')
+                    raise osv.except_osv(
+                        'Update Error!',
+                        'Identifiers for more than one patient provided.')
                 else:
                     return False
             data['patient_id'] = patient_id[0]
         if 'title' in data.keys():
             if not isinstance(data.get('title'), int):
-                data['title'] = title_pool.get_title_by_name(cr, uid, data['title'], context=context)
+                data['title'] = title_pool.get_title_by_name(cr, uid,
+                                                             data['title'],
+                                                             context=context)
         return True
-
