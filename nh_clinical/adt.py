@@ -270,11 +270,8 @@ class nh_clinical_adt_patient_admit(orm.Model):
                 [['patient_identifier', '=', vals['patient_identifier']]],
                 context=context)[0]
         data = vals.copy()
-        data.update({
-            'location_id': location_id,
-            'patient_id': patient_id,
-            'pos_id': user.pos_id.id
-        })
+        data.update({'location_id': location_id, 'patient_id': patient_id,
+                     'pos_id': user.pos_id.id})
         return super(nh_clinical_adt_patient_admit, self).submit(
             cr, uid, activity_id, data, context=context)
 
