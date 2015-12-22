@@ -432,8 +432,10 @@ class nh_clinical_patient_discharge(orm.Model):
         move_activity_id = move_pool.create_activity(
             cr, uid,
             {'parent_id': activity.parent_id.id, 'creator_id': activity_id},
-            {'patient_id': activity.data_ref.patient_id.id,
-             'location_id': loc_id}, context=context)
+            {
+                'patient_id': activity.data_ref.patient_id.id,
+                'location_id': loc_id
+            }, context=context)
 
         activity_pool.complete(cr, uid, move_activity_id, context=context)
         activity_pool.complete(cr, uid, activity.parent_id.id, context=context)
@@ -1001,4 +1003,3 @@ class nh_clinical_patient_unfollow(orm.Model):
         for activity_id in follow_activity_ids:
             activity_pool.cancel(cr, uid, activity_id, context=context)
         return res
-
