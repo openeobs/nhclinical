@@ -1,4 +1,4 @@
-# Part of NHClincal. See LICENSE file for full copyright and licensing details.
+# Part of NHClinical. See LICENSE file for full copyright and licensing details
 import test_location
 import test_new_demo
 import test_adt
@@ -16,3 +16,5 @@ import test_spell
 import test_patient_placement_wizard
 import test_responsibility_allocation_wizard
 import test_users
+import test_pas
+
