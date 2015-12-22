@@ -440,9 +440,10 @@ class nh_clinical_patient_discharge(orm.Model):
         activity_pool.complete(cr, uid, move_activity_id, context=context)
         activity_pool.complete(cr, uid, activity.parent_id.id, context=context)
         if activity.data_ref.discharge_date:
-            activity_pool.write(cr, SUPERUSER_ID, activity.parent_id.id, {
-                'date_terminated': activity.data_ref.discharge_date},
-                                context=context)
+            activity_pool.write(
+                cr, SUPERUSER_ID, activity.parent_id.id,
+                {'date_terminated': activity.data_ref.discharge_date},
+                context=context)
         return res
 
     def cancel(self, cr, uid, activity_id, context=None):
