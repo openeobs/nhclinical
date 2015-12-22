@@ -686,7 +686,7 @@ class nh_clinical_doctor(orm.Model):
         return True
 
 
-#FIXME: Here to prevent mail message from complaining when creating a user
+# FIXME: Here to prevent mail message from complaining when creating a user
 class mail_message(osv.Model):
     _name = 'mail.message'
     _inherit = 'mail.message'
@@ -701,4 +701,3 @@ class mail_message(osv.Model):
             return '%s <%s>' % (this.name, this.email)
         else:
             return '%s <%s>' % (this.name, 'No email')
-

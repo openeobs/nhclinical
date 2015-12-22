@@ -97,13 +97,15 @@ class nh_clinical_patient_move(orm.Model):
             location_id = False
         self.write(cr, uid, activity.data_ref.id,
                    {'from_location_id': location_id})
-        patient_pool.write(cr, uid, activity.data_ref.patient_id.id, {
-            'current_location_id': activity.data_ref.location_id.id},
-                           context=context)
+        patient_pool.write(
+            cr, uid, activity.data_ref.patient_id.id,
+            {'current_location_id': activity.data_ref.location_id.id},
+            context=context)
         if activity.parent_id:
-            activity_pool.submit(cr, uid, activity.parent_id.id, {
-                'location_id': activity.data_ref.location_id.id},
-                                 context=context)
+            activity_pool.submit(
+                cr, uid, activity.parent_id.id,
+                {'location_id': activity.data_ref.location_id.id},
+                context=context)
         return super(nh_clinical_patient_move, self).complete(
             cr, uid, activity_id, context)
 
@@ -427,13 +429,11 @@ class nh_clinical_patient_discharge(orm.Model):
             loc_id = activity.parent_id.data_ref.pos_id.lot_discharge_id.id
         else:
             loc_id = activity.parent_id.data_ref.pos_id.location_id.id
-        move_activity_id = move_pool.create_activity(cr, uid, {
-            'parent_id': activity.parent_id.id,
-            'creator_id': activity_id
-        }, {
-            'patient_id': activity.data_ref.patient_id.id,
-            'location_id': loc_id
-        }, context=context)
+        move_activity_id = move_pool.create_activity(
+            cr, uid,
+            {'parent_id': activity.parent_id.id, 'creator_id': activity_id},
+            {'patient_id': activity.data_ref.patient_id.id,
+             'location_id': loc_id}, context=context)
 
         activity_pool.complete(cr, uid, move_activity_id, context=context)
         activity_pool.complete(cr, uid, activity.parent_id.id, context=context)
