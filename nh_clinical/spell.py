@@ -29,42 +29,44 @@ class nh_clinical_spell(orm.Model):
                                   context=None):
         res = {spell_id: False for spell_id in ids}
         sql = """
-            with 
+            with
                 recursive route(level, path, parent_id, id) as (
-                        select 0, id::text, parent_id, id 
-                        from nh_clinical_location 
+                        select 0, id::text, parent_id, id
+                        from nh_clinical_location
                         where parent_id is null
                     union
                         select level + 1, path||','||location.id,
                             location.parent_id, location.id
-                        from nh_clinical_location location 
+                        from nh_clinical_location location
                         join route on location.parent_id = route.id
                 ),
                 parent_location as (
-                    select 
-                        id as location_id, 
-                        ('{'||path||'}')::int[] as ids 
+                    select
+                        id as location_id,
+                        ('{'||path||'}')::int[] as ids
                     from route
                     order by path
                 ),
                 spell_transferred_locations as(
-                    select 
+                    select
                         spell.id as spell_id,
                         spell_activity.id as activity_id,
                         array_agg(move.from_location_id) as location_ids
                     from nh_clinical_patient_move move
                     inner join nh_activity move_activity
                         on move.activity_id = move_activity.id
-                        and move.from_location_id is not null 
+                        and move.from_location_id is not null
                         and move_activity.state = 'completed'
                     inner join nh_activity spell_activity
                         on move_activity.parent_id = spell_activity.id
                     inner join nh_activity transfer_activity
                         on move_activity.creator_id = transfer_activity.id
-                        and transfer_activity.data_model = 'nh.clinical.patient.transfer'
+                        and transfer_activity.data_model =
+                        'nh.clinical.patient.transfer'
                     inner join nh_clinical_spell spell
                         on spell.activity_id = spell_activity.id
-                    where now() at time zone 'UTC' - move_activity.date_terminated < interval '1d'
+                    where now() at time zone 'UTC' -
+                    move_activity.date_terminated < interval '1d'
                         and spell_activity.state = 'started'
                     group by spell_id, spell_activity.id
                 ),
@@ -177,21 +179,21 @@ class nh_clinical_spell(orm.Model):
         if not cr.fetchone()[0]:
             return []
         sql = """
-            with 
+            with
                 recursive route(level, path, parent_id, id) as (
-                        select 0, id::text, parent_id, id 
-                        from nh_clinical_location 
+                        select 0, id::text, parent_id, id
+                        from nh_clinical_location
                         where parent_id is null
                     union
                         select level + 1, path||','||location.id,
                             location.parent_id, location.id
-                        from nh_clinical_location location 
+                        from nh_clinical_location location
                         join route on location.parent_id = route.id
                 ),
                 parent_location as (
-                    select 
-                        id as location_id, 
-                        ('{'||path||'}')::int[] as ids 
+                    select
+                        id as location_id,
+                        ('{'||path||'}')::int[] as ids
                     from route
                     order by path
                 )
