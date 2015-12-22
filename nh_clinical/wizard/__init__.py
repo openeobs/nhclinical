@@ -1,4 +1,4 @@
-# Part of NHClincal. See LICENSE file for full copyright and licensing details.
-import patient_placement_wizard
-import responsibility_allocation_wizard
-import user_allocation
+# Part of NHClinical. See LICENSE file for full copyright and licensing details
+from . import patient_placement_wizard
+from . import responsibility_allocation_wizard
+from . import user_allocation

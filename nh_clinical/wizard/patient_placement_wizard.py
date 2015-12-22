@@ -1,4 +1,4 @@
-# Part of NHClincal. See LICENSE file for full copyright and licensing details.
+# Part of NHClinical. See LICENSE file for full copyright and licensing details
 # -*- coding: utf-8 -*-
 import logging
 
@@ -10,10 +10,14 @@ _logger = logging.getLogger(__name__)
 class nh_clinical_patient_placement_wizard(orm.TransientModel):
     _name = 'nh.clinical.patient.placement.wizard'
     _columns = {
-        'placement_ids': fields.many2many('nh.clinical.patient.placement', 'placement_wiz_rel', 'placement_id', 'wiz_id', 'Placements'),
-        'recent_placement_ids': fields.many2many('nh.clinical.patient.placement', 'recent_placement_wiz_rel', 'placement_id', 'wiz_id', 'Recent Placements'),
+        'placement_ids': fields.many2many('nh.clinical.patient.placement',
+                                          'placement_wiz_rel', 'placement_id',
+                                          'wiz_id', 'Placements'),
+        'recent_placement_ids': fields.many2many(
+            'nh.clinical.patient.placement', 'recent_placement_wiz_rel',
+            'placement_id', 'wiz_id', 'Recent Placements'),
     }
-    
+
     def _get_placement_ids(self, cr, uid, context=None):
         domain = [('state', 'in', ['draft', 'scheduled', 'started'])]
         placement_pool = self.pool['nh.clinical.patient.placement']
@@ -21,7 +25,7 @@ class nh_clinical_patient_placement_wizard(orm.TransientModel):
             cr, uid, domain, context=context
         )
         return placement_ids
-    
+
     def _get_recent_placement_ids(self, cr, uid, context=None):
         domain = [('state', 'in', ['completed'])]
         placement_pool = self.pool['nh.clinical.patient.placement']
@@ -29,8 +33,8 @@ class nh_clinical_patient_placement_wizard(orm.TransientModel):
             cr, uid, domain, limit=3, order="date_terminated desc",
             context=context
         )
-        return placement_ids    
-    
+        return placement_ids
+
     _defaults = {
         'placement_ids': _get_placement_ids,
         'recent_placement_ids': _get_recent_placement_ids,
@@ -39,7 +43,8 @@ class nh_clinical_patient_placement_wizard(orm.TransientModel):
     def _place_patients(self, cr, uid, activity_id, location_id, context=None):
         activity_pool = self.pool['nh.activity']
         activity_pool.start(cr, uid, activity_id, context)
-        activity_pool.submit(cr, uid, activity_id, {'location': location_id}, context)
+        activity_pool.submit(cr, uid, activity_id,
+                             {'location': location_id}, context)
         activity_pool.complete(cr, uid, activity_id, context)
 
     def _get_placements(self, cr, uid, ids, context=None):
@@ -59,7 +64,9 @@ class nh_clinical_patient_placement_wizard(orm.TransientModel):
         self._get_place_patients(cr, uid, ids, context)
         self.write(cr, uid, ids, {
             'placement_ids': [(6, 0, self._get_placement_ids(cr, uid))],
-            'recent_placement_ids': [(6, 0, self._get_recent_placement_ids(cr, uid))]
+            'recent_placement_ids': [
+                (6, 0, self._get_recent_placement_ids(cr, uid))
+            ]
         }, context)
         aw = {
             'type': 'ir.actions.act_window',
