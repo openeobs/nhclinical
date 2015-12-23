@@ -5,8 +5,8 @@
             <field name="gender">M</field>
             <field name="sex">M</field>
             <field name="ethnicity">A</field>
-            <field name="patient_identifier">0000000000</field>
-            <field name="other_identifier">0000000000</field>
+            <field name="patient_identifier">NHSNUM0000</field>
+            <field name="other_identifier">HOSNUM0000</field>
             <field name="given_name">John</field>
             <field name="middle_names">Robert</field>
             <field name="family_name">Doe</field>
@@ -18,11 +18,50 @@
             <field name="gender">F</field>
             <field name="sex">F</field>
             <field name="ethnicity">B</field>
-            <field name="patient_identifier">1111111111</field>
-            <field name="other_identifier">1111111111</field>
+            <field name="patient_identifier">NHSNUM0001</field>
+            <field name="other_identifier">HOSNUM0001</field>
             <field name="given_name">Jane</field>
             <field name="middle_names">Amy</field>
             <field name="family_name">Doe</field>
+        </record>
+
+        <record id="nhc_demo_patient_2" model="nh.clinical.patient">
+            <field name="dob">1984-01-01 00:00:00</field>
+            <field name="gender">F</field>
+            <field name="sex">F</field>
+            <field name="ethnicity">C</field>
+            <field name="patient_identifier">NHSNUM0002</field>
+            <field name="other_identifier">HOSNUM0002</field>
+            <field name="given_name">Jenni</field>
+            <field name="middle_names">April</field>
+            <field name="family_name">Doe</field>
+            <field name="current_location_id" ref="nhc_def_conf_location_wa_b2"/>
+        </record>
+
+        <record id="nhc_demo_patient_3" model="nh.clinical.patient">
+            <field name="dob">1974-01-01 00:00:00</field>
+            <field name="gender">M</field>
+            <field name="sex">M</field>
+            <field name="ethnicity">D</field>
+            <field name="patient_identifier">NHSNUM0003</field>
+            <field name="other_identifier">HOSNUM0003</field>
+            <field name="given_name">James</field>
+            <field name="middle_names">Xen</field>
+            <field name="family_name">Doe</field>
+            <field name="current_location_id" ref="nhc_def_conf_location_wb_b1"/>
+        </record>
+
+        <record id="nhc_demo_patient_4" model="nh.clinical.patient">
+            <field name="dob">1979-01-01 00:00:00</field>
+            <field name="gender">M</field>
+            <field name="sex">M</field>
+            <field name="ethnicity">E</field>
+            <field name="patient_identifier">NHSNUM0004</field>
+            <field name="other_identifier">HOSNUM0004</field>
+            <field name="given_name">Juan</field>
+            <field name="middle_names">Chupacabra</field>
+            <field name="family_name">Doe</field>
+            <field name="current_location_id" ref="nhc_def_conf_location_wb_b2"/>
         </record>
     </data>
 </openerp>
