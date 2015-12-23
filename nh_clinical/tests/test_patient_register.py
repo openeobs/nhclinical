@@ -156,7 +156,7 @@ class TestPatientRegister(TransactionCase):
         register_data = {
             'family_name': 'Doe',
             'given_name': 'John',
-            'other_identifier': '0000000000',
+            'other_identifier': 'HOSNUM0000',
             'dob': '1984-10-01 00:00:00',
             'gender': 'M',
             'sex': 'M'
@@ -173,7 +173,7 @@ class TestPatientRegister(TransactionCase):
         register_data = {
             'family_name': 'Doe',
             'given_name': 'John',
-            'other_identifier': '0000000000',
+            'other_identifier': 'HOSNUM0000',
             'dob': '1984-10-01 00:00:00',
             'gender': 'M',
             'sex': 'M'
