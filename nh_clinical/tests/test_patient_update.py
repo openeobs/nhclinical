@@ -132,7 +132,7 @@ class TestPatientUpdate(TransactionCase):
                          msg="Patient Update: wrong patient data")
 
     def test_adt_patient_update_using_NHS_number_updates_patient(self):
-        cr, uid = self.cr, self.uid
+        cr = self.cr
         update_data = {
             'family_name': 'Fupdate',
             'given_name': 'Gupdate',
@@ -150,7 +150,7 @@ class TestPatientUpdate(TransactionCase):
             cr, self.adt_uid, update_activity_id))
 
     def test_adt_patient_update_create_activity_raises_exception_if_no_patient_is_found(self):
-        cr, uid = self.cr, self.uid
+        cr = self.cr
         update_data = {
             'family_name': 'Fupdate',
             'given_name': 'Gupdate',
@@ -164,7 +164,7 @@ class TestPatientUpdate(TransactionCase):
             self.update_pool.create_activity(cr, self.adt_uid, {}, update_data)
 
     def test_adt_patient_update_submit_raises_exception_if_no_patient_is_found(self):
-        cr, uid = self.cr, self.uid
+        cr = self.cr
         update_data = {
             'family_name': 'Fupdate',
             'given_name': 'Gupdate',

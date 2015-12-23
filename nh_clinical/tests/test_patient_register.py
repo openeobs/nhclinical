@@ -110,7 +110,7 @@ class TestPatientRegister(TransactionCase):
                          msg="Patient Register: wrong patient data registered")
 
     def test_adt_patient_register_using_NHS_number_creates_patient(self):
-        cr, uid = self.cr, self.uid
+        cr = self.cr
         register_data = {
             'family_name': 'Family',
             'given_name': 'Given',
@@ -130,7 +130,7 @@ class TestPatientRegister(TransactionCase):
                         msg="Patient Register: patient id not returned")
 
     def test_adt_patient_register_using_hospital_and_NHS_number_creates_patient(self):
-        cr, uid = self.cr, self.uid
+        cr = self.cr
         register_data = {
             'family_name': 'Family',
             'given_name': 'Given',
@@ -167,7 +167,7 @@ class TestPatientRegister(TransactionCase):
                                                register_data)
 
     def test_adt_patient_register_submit_raises_exception_if_patient_already_registered(self):
-        cr, uid = self.cr, self.uid
+        cr = self.cr
         # Patient with same other_identifier already registered
         # (see data/patients.xml)
         register_data = {
