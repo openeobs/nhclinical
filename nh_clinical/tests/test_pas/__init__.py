@@ -8,5 +8,4 @@ import test_patient_merge
 import test_patient_swap_beds
 import test_patient_transfer
 import test_patient_transfer_cancel
-import test_patient_update
 import test_spell_update

@@ -18,3 +18,4 @@ import test_responsibility_allocation_wizard
 import test_users
 import test_pas
 import test_patient_register
+import test_patient_update
