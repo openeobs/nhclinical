@@ -10,11 +10,6 @@
         </record>
         
         <!-- Location Lots -->
-        <record id="nhc_def_conf_pos_hospital" model="nh.clinical.pos">
-            <field name="name">Greenfield University Hospital</field>
-            <field name="location_id" ref="nhc_def_conf_location_guh"/>
-            <field name="company_id" ref="base.main_company"/>
-        </record>
         <record id="nhc_def_conf_location_lot_admission" model="nh.clinical.location">
             <field name="name">Admission Location</field>
             <field name="code">ADML-GUH</field>
