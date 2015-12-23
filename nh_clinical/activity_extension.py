@@ -527,7 +527,7 @@ class nh_activity_data(orm.AbstractModel):
                 spell_activity_id = spell_pool.browse(
                     cr, uid, spell_id, context=context).activity_id.id
             else:
-                False
+                return False
 
         else:
             return True
