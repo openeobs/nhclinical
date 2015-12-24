@@ -150,7 +150,6 @@ class TestPatientRegister(TransactionCase):
                         msg="Patient Register: patient id not returned")
 
     def test_adt_patient_register_create_activity_raises_exception_if_patient_already_registered(self):
-        cr, uid = self.cr, self.uid
         # Patient with same other_identifier already registered
         # (see data/patients.xml)
         register_data = {
@@ -163,7 +162,7 @@ class TestPatientRegister(TransactionCase):
         }
 
         with self.assertRaises(except_orm):
-            self.register_pool.create_activity(cr, self.adt_uid, {},
+            self.register_pool.create_activity(self.cr, self.adt_uid, {},
                                                register_data)
 
     def test_adt_patient_register_submit_raises_exception_if_patient_already_registered(self):

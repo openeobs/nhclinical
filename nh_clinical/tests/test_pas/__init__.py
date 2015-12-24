@@ -1,6 +1,5 @@
 # Part of NHClinical. See LICENSE file for full copyright and licensing details
-# coding=utf-8
-import test_patient_admit
+# -*- coding: utf-8 -*-
 import test_patient_admit_cancel
 import test_patient_discharge
 import test_patient_discharge_cancel

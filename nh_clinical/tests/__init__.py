@@ -1,4 +1,5 @@
 # Part of NHClinical. See LICENSE file for full copyright and licensing details
+# -*- coding: utf-8 -*-
 import test_location
 import test_new_demo
 import test_adt
@@ -16,6 +17,6 @@ import test_spell
 import test_patient_placement_wizard
 import test_responsibility_allocation_wizard
 import test_users
-import test_pas
 import test_patient_register
 import test_patient_update
+import test_patient_admit
