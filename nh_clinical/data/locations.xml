@@ -30,6 +30,13 @@
             <field name="usage">ward</field>
             <field name="parent_id" ref="nhc_def_conf_location_guh"/>
         </record>
+        <record id="nhc_def_conf_location_we" model="nh.clinical.location">
+            <field name="name">Ward E</field>
+            <field name="code">E</field>
+            <field name="type">poc</field>
+            <field name="usage">ward</field>
+            <field name="parent_id" ref="nhc_def_conf_location_guh"/>
+        </record>
 
         <!--Ward A Beds-->
         <record id="nhc_def_conf_location_wa_b1" model="nh.clinical.location">
@@ -837,5 +844,34 @@
             <field name="parent_id" ref="nhc_def_conf_location_wd_bay4"/>
         </record>
 
+        <!--Ward E Beds-->
+        <record id="nhc_def_conf_location_we_b1" model="nh.clinical.location">
+            <field name="name">Bed 01</field>
+            <field name="code">E01</field>
+            <field name="type">poc</field>
+            <field name="usage">bed</field>
+            <field name="parent_id" ref="nhc_def_conf_location_we"/>
+        </record>
+        <record id="nhc_def_conf_location_we_b2" model="nh.clinical.location">
+            <field name="name">Bed 02</field>
+            <field name="code">E02</field>
+            <field name="type">poc</field>
+            <field name="usage">bed</field>
+            <field name="parent_id" ref="nhc_def_conf_location_we"/>
+        </record>
+        <record id="nhc_def_conf_location_we_b3" model="nh.clinical.location">
+            <field name="name">Bed 03</field>
+            <field name="code">E03</field>
+            <field name="type">poc</field>
+            <field name="usage">bed</field>
+            <field name="parent_id" ref="nhc_def_conf_location_we"/>
+        </record>
+        <record id="nhc_def_conf_location_we_b4" model="nh.clinical.location">
+            <field name="name">Bed 04</field>
+            <field name="code">E04</field>
+            <field name="type">poc</field>
+            <field name="usage">bed</field>
+            <field name="parent_id" ref="nhc_def_conf_location_we"/>
+        </record>
     </data>
 </openerp>
