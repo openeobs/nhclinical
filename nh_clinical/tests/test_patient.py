@@ -1,4 +1,5 @@
-# Part of NHClincal. See LICENSE file for full copyright and licensing details.
+# Part of NHClinical. See LICENSE file for full copyright and licensing details
+# -*- coding: utf-8 -*-
 import logging
 
 from openerp.tests import common
@@ -11,8 +12,6 @@ class TestClinicalPatient(common.SingleTransactionCase):
     @classmethod
     def setUpClass(cls):
         super(TestClinicalPatient, cls).setUpClass()
-        cr, uid = cls.cr, cls.uid
-
         cls.patient_pool = cls.registry('nh.clinical.patient')
         cls.partner_pool = cls.registry('res.partner')
 
@@ -66,18 +65,22 @@ class TestClinicalPatient(common.SingleTransactionCase):
         patient_id = self.patient_pool.create(cr, uid, {
             'other_identifier': 'TESTHN001', 'given_name': 'John',
             'family_name': 'Smith', 'middle_names': 'Clarke'})
-        result = self.patient_pool._get_name(cr, uid, [patient_id], fn=None, args=None)
+        result = self.patient_pool._get_name(cr, uid, [patient_id], fn=None,
+                                             args=None)
         self.assertEquals('Smith, John Clarke', result[patient_id])
 
         # Scenario 2: Only one name field is present in record.
         patient_id_1 = self.patient_pool.create(cr, uid, {
             'other_identifier': 'TESTHN002', 'given_name': 'John'})
-        result = self.patient_pool._get_name(cr, uid, [patient_id_1], fn=None, args=None)
+        result = self.patient_pool._get_name(cr, uid, [patient_id_1], fn=None,
+                                             args=None)
         self.assertEquals(', John', result[patient_id_1])
 
         # Scenario 3: No names are present in patient record.
-        patient_id_2 = self.patient_pool.create(cr, uid, {'other_identifier': 'TESTHN003'})
-        result = self.patient_pool._get_name(cr, uid, [patient_id_2], fn=None, args=None)
+        patient_id_2 = self.patient_pool.create(
+            cr, uid, {'other_identifier': 'TESTHN003'})
+        result = self.patient_pool._get_name(cr, uid, [patient_id_2], fn=None,
+                                             args=None)
         self.assertEquals(',', result[patient_id_2])
 
     def test_03_check_hospital_number(self):
@@ -93,11 +96,13 @@ class TestClinicalPatient(common.SingleTransactionCase):
 
         # Scenario 3: if exception is True and hospital_number is correct.
         with self.assertRaises(except_orm):
-            self.patient_pool.check_hospital_number(cr, uid, 'TESTHN001', exception='True')
+            self.patient_pool.check_hospital_number(cr, uid, 'TESTHN001',
+                                                    exception='True')
 
         # Scenario 4: if exception is False and hospital_number is incorrect.
         with self.assertRaises(except_orm):
-            self.patient_pool.check_hospital_number(cr, uid, 'TESTHN009', exception='False')
+            self.patient_pool.check_hospital_number(cr, uid, 'TESTHN009',
+                                                    exception='False')
 
     def test_04_check_nhs_number(self):
         cr, uid = self.cr, self.uid
@@ -113,16 +118,19 @@ class TestClinicalPatient(common.SingleTransactionCase):
 
         # Scenario 3: if exception is True and nhs_number is correct.
         with self.assertRaises(except_orm):
-            self.patient_pool.check_nhs_number(cr, uid, 'TESTPI001', exception='True')
+            self.patient_pool.check_nhs_number(cr, uid, 'TESTPI001',
+                                               exception='True')
 
         # Scenario 4: if exception is True and nhs_number is incorrect.
         with self.assertRaises(except_orm):
-            self.patient_pool.check_nhs_number(cr, uid, 'TESTPI002', exception='False')
+            self.patient_pool.check_nhs_number(cr, uid, 'TESTPI002',
+                                               exception='False')
 
     def test_05_create(self):
         cr, uid = self.cr, self.uid
 
-        patient_id = self.patient_pool.create(cr, uid, {'other_identifier': 'TESTHN004'})
+        patient_id = self.patient_pool.create(
+            cr, uid, {'other_identifier': 'TESTHN004'})
         patient = self.patient_pool.browse(cr, uid, [patient_id])
         self.assertEquals(patient_id, patient.id)
         self.assertEquals('TESTHN004', patient.other_identifier)
@@ -131,27 +139,34 @@ class TestClinicalPatient(common.SingleTransactionCase):
         self.assertEquals(',', patient.name)
 
         # test for that a partner is created in res_partner.
-        self.assertEquals(patient_id, self.partner_pool.browse(cr, uid, [patient_id]).id)
+        self.assertEquals(patient_id,
+                          self.partner_pool.browse(cr, uid, [patient_id]).id)
 
         # test when 'name' is in vals
-        patient_id = self.patient_pool.create(cr, uid, {'other_identifier': 'TESTHN005', 'name': 'Smith, John'})
+        patient_id = self.patient_pool.create(
+            cr, uid, {'other_identifier': 'TESTHN005', 'name': 'Smith, John'})
         patient = self.patient_pool.browse(cr, uid, [patient_id])
         self.assertEquals('Smith, John', patient.name)
 
     def test_06_write(self):
         cr, uid = self.cr, self.uid
 
-        patient_id = self.patient_pool.search(cr, uid, [['other_identifier', '=', 'TESTHN004']])
-        self.assertTrue(self.patient_pool.write(cr, uid, patient_id, {'title': 'test'}))
-        self.assertTrue(self.patient_pool.write(cr, uid, patient_id, {'family_name': 'testfamily'}))
+        patient_id = self.patient_pool.search(
+            cr, uid, [['other_identifier', '=', 'TESTHN004']])
+        self.assertTrue(self.patient_pool.write(cr, uid, patient_id,
+                                                {'title': 'test'}))
+        self.assertTrue(self.patient_pool.write(cr, uid, patient_id,
+                                                {'family_name': 'testfamily'}))
 
     def test_07_unlink(self):
         cr, uid = self.cr, self.uid
 
-        patient_id = self.patient_pool.create(cr, uid, {'other_identifier': 'TEST_UNLINK'})
+        patient_id = self.patient_pool.create(
+            cr, uid, {'other_identifier': 'TEST_UNLINK'})
         self.patient_pool.unlink(cr, uid, [patient_id])
         # unlink sets the field 'active' to False, making it invisible to users
-        self.assertFalse(self.patient_pool.browse(cr, uid, [patient_id]).active)
+        self.assertFalse(
+            self.patient_pool.browse(cr, uid, [patient_id]).active)
 
     def test_08_check_data(self):
         cr, uid = self.cr, self.uid
@@ -176,7 +191,8 @@ class TestClinicalPatient(common.SingleTransactionCase):
             self.patient_pool.check_data(cr, uid, data)
 
         # Scenario 3: Data with an existing NHS number
-        data.update({'other_identifier': 'TESTHN009', 'patient_identifier': 'TESTPI001'})
+        data.update({'other_identifier': 'TESTHN009',
+                     'patient_identifier': 'TESTPI001'})
         with self.assertRaises(except_orm):
             self.patient_pool.check_data(cr, uid, data)
 
@@ -185,8 +201,10 @@ class TestClinicalPatient(common.SingleTransactionCase):
         self.assertTrue(self.patient_pool.check_data(cr, uid, data))
         self.assertTrue(isinstance(data.get('title'), int))
 
-        # Scenario 5: Update data, no existing patient with Hospital Number or NHS Number
-        data.update({'other_identifier': 'TESTHN008', 'patient_identifier': 'TESTNHS08'})
+        # Scenario 5:
+        # Update data, no existing patient with Hospital Number or NHS Number.
+        data.update({'other_identifier': 'TESTHN008',
+                     'patient_identifier': 'TESTNHS08'})
         with self.assertRaises(except_orm):
             self.patient_pool.check_data(cr, uid, data, create=False)
 
@@ -194,21 +212,26 @@ class TestClinicalPatient(common.SingleTransactionCase):
         data.update({'other_identifier': 'TESTHN008'})
         with self.assertRaises(except_orm):
             self.patient_pool.check_data(cr, uid, data, create=False)
-        self.assertFalse(self.patient_pool.check_data(cr, uid, data, create=False, exception=False))
+        self.assertFalse(self.patient_pool.check_data(
+            cr, uid, data, create=False, exception=False))
 
         # Scenario 7: Update data, no existing patient with NHS Number
         data.update({'patient_identifier': 'TESTNHS08'})
         with self.assertRaises(except_orm):
             self.patient_pool.check_data(cr, uid, data, create=False)
-        self.assertFalse(self.patient_pool.check_data(cr, uid, data, create=False, exception=False))
+        self.assertFalse(self.patient_pool.check_data(
+            cr, uid, data, create=False, exception=False))
 
         # Scenario 8: Update data, 2 identifiers for 2 different patients
-        data.update({'other_identifier': 'TESTHN001', 'patient_identifier': 'TESTPI001'})
+        data.update({'other_identifier': 'TESTHN001',
+                     'patient_identifier': 'TESTPI001'})
         with self.assertRaises(except_orm):
             self.patient_pool.check_data(cr, uid, data, create=False)
-        self.assertFalse(self.patient_pool.check_data(cr, uid, data, create=False, exception=False))
+        self.assertFalse(self.patient_pool.check_data(
+            cr, uid, data, create=False, exception=False))
 
         # Scenario 9: Correct update data
         data.update({'other_identifier': 'TESTHN009'})
-        self.assertTrue(self.patient_pool.check_data(cr, uid, data, create=False))
+        self.assertTrue(self.patient_pool.check_data(cr, uid, data,
+                                                     create=False))
         self.assertTrue(data.get('patient_id'))
