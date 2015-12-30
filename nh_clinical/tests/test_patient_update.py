@@ -149,7 +149,7 @@ class TestPatientUpdate(TransactionCase):
         self.assertTrue(self.activity_pool.complete(
             cr, self.adt_uid, update_activity_id))
 
-    def test_adt_patient_update_create_activity_raises_exception_if_no_patient_is_found(self):
+    def test_adt_patient_update_create_activity_no_patient_found_except(self):
         cr = self.cr
         update_data = {
             'family_name': 'Fupdate',
@@ -163,7 +163,7 @@ class TestPatientUpdate(TransactionCase):
         with self.assertRaises(except_orm):
             self.update_pool.create_activity(cr, self.adt_uid, {}, update_data)
 
-    def test_adt_patient_update_submit_raises_exception_if_no_patient_is_found(self):
+    def test_adt_patient_update_submit_raises_except_if_no_patient_found(self):
         cr = self.cr
         update_data = {
             'family_name': 'Fupdate',

@@ -151,7 +151,7 @@ class TestActivity(common.SingleTransactionCase):
         self.assertEqual(activity.sequence, sequence+1,
                          msg="Activity sequence not updated")
 
-    def test_get_recursive_created_ids_returns_id_if_activity_is_not_a_creator(self):
+    def test_get_recursive_created_ids_returns_non_creator_activity_id(self):
         cr, uid = self.cr, self.uid
 
         activity_id = self.activity_pool.create(
@@ -172,7 +172,7 @@ class TestActivity(common.SingleTransactionCase):
             cr, uid, activity_id)
         self.assertEqual(set(rc_ids), {activity_id, activity2_id})
 
-    def test_get_recursive_created_ids_returns_ids_created_by_created_activity(self):
+    def test_get_recursive_created_ids_returns_ids_of_created_activities(self):
         cr, uid = self.cr, self.uid
 
         activity_id = self.activity_pool.create(
@@ -219,7 +219,7 @@ class TestActivity(common.SingleTransactionCase):
         with self.assertRaises(except_orm):
             self.activity_pool.update_activity(cr, uid, 'activity ID')
 
-    def test_data_model_event_raises_exception_when_passed_integer_less_than_1(self):
+    def test_data_model_event_raises_exception_when_integer_less_than_1(self):
         cr, uid = self.cr, self.uid
 
         with self.assertRaises(except_orm):
@@ -274,7 +274,7 @@ class TestActivity(common.SingleTransactionCase):
         with self.assertRaises(except_orm):
             self.activity_pool.submit(cr, uid, activity_id, 'test3')
 
-    def test_submit_raises_exception_on_completed_and_cancelled_activities(self):
+    def test_submit_raises_except_on_completed_and_cancelled_activities(self):
         cr, uid = self.cr, self.uid
 
         activity_id = self.activity_pool.create(
@@ -309,7 +309,7 @@ class TestActivity(common.SingleTransactionCase):
             activity.date_scheduled, test_date[0],
             msg="Activity date_scheduled not updated after schedule")
 
-    def test_schedule_raises_exception_when_passed_wrongly_formatted_scheduled_date(self):
+    def test_schedule_raises_except_when_bad_formatted_scheduled_date(self):
         cr, uid = self.cr, self.uid
 
         activity_id = self.activity_pool.create(
@@ -384,7 +384,7 @@ class TestActivity(common.SingleTransactionCase):
             '2015-10-07 00:00:00',
             msg="Activity date_scheduled not updated after schedule")
 
-    def test_schedule_cannot_schedule_when_activity_is_started_completed_cancelled(self):
+    def test_schedule_dont_schedule_activity_started_completed_cancelled(self):
         cr, uid = self.cr, self.uid
 
         activity_id = self.activity_pool.create(
@@ -415,7 +415,7 @@ class TestActivity(common.SingleTransactionCase):
         self.assertEqual(activity.user_id.id, uid,
                          msg="User id not updated after Assign")
 
-    def test_assign_raises_exception_when_assigning_already_assigned_activity(self):
+    def test_assign_raises_except_when_assign_already_assigned_activity(self):
         cr, uid = self.cr, self.uid
 
         activity_id = self.activity_pool.create(
@@ -425,7 +425,7 @@ class TestActivity(common.SingleTransactionCase):
         with self.assertRaises(except_orm):
             self.activity_pool.assign(cr, uid, activity_id, user_ids[0])
 
-    def test_assign_raises_exception_when_sending_incorrect_user_id_argument(self):
+    def test_assign_raises_exception_when_sending_wrong_user_id_argument(self):
         cr, uid = self.cr, self.uid
 
         activity_id = self.activity_pool.create(
@@ -434,7 +434,7 @@ class TestActivity(common.SingleTransactionCase):
         with self.assertRaises(except_orm):
             self.activity_pool.assign(cr, uid, activity_id, 'User ID')
 
-    def test_assign_raises_exception_when_assigning_activity_complete_cancelled(self):
+    def test_assign_raise_except_when_assign_activity_complete_cancelled(self):
         cr, uid = self.cr, self.uid
 
         activity_id = self.activity_pool.create(
@@ -488,7 +488,7 @@ class TestActivity(common.SingleTransactionCase):
         with self.assertRaises(except_orm):
             self.activity_pool.unassign(cr, uid, activity_id)
 
-    def test_unassign_raises_exception_when_activity_is_completed_cancelled(self):
+    def test_unassign_raises_except_when_activity_is_completed_cancelled(self):
         cr, uid = self.cr, self.uid
 
         activity_id = self.activity_pool.create(
@@ -694,7 +694,14 @@ class TestActivity(common.SingleTransactionCase):
         self.assertTrue(self.test_model_pool.check_action('scheduled',
                                                           'schedule'))
 
-    def test_check_action_schedule_raises_exception_from_state_started_completed_cancelled(self):
+    def test_schedule_raises_except_from_state_started_completed_cancel(self):
+        """
+        Test check_action "schedule" raises an exception
+        when triggered from states:
+         - started
+         - completed
+         - cancelled
+        """
         with self.assertRaises(except_orm):
             self.test_model_pool.check_action('started', 'schedule')
         with self.assertRaises(except_orm):
@@ -707,7 +714,14 @@ class TestActivity(common.SingleTransactionCase):
         self.assertTrue(self.test_model_pool.check_action('scheduled',
                                                           'start'))
 
-    def test_check_action_start_raises_exception_from_state_started_completed_cancelled(self):
+    def test_start_raises_except_from_state_started_completed_cancelled(self):
+        """
+        Test check_action "start" raises an exception
+        when triggered from states:
+         - started
+         - completed
+         - cancelled
+        """
         with self.assertRaises(except_orm):
             self.test_model_pool.check_action('started', 'start')
         with self.assertRaises(except_orm):
@@ -715,38 +729,65 @@ class TestActivity(common.SingleTransactionCase):
         with self.assertRaises(except_orm):
             self.test_model_pool.check_action('cancelled', 'start')
 
-    def test_check_action_complete_returns_True_from_state_new_scheduled_started(self):
+    def test_complete_returns_True_from_state_new_scheduled_started(self):
+        """
+        Test check_action "complete" returns boolean ``True``
+        when triggered from states:
+         - new
+         - scheduled
+         - started
+        """
         self.assertTrue(self.test_model_pool.check_action('new', 'complete'))
         self.assertTrue(self.test_model_pool.check_action('scheduled',
                                                           'complete'))
         self.assertTrue(self.test_model_pool.check_action('started',
                                                           'complete'))
 
-    def test_check_action_complete_raises_exception_from_state_completed_cancelled(self):
+    def test_complete_raises_exception_from_state_completed_cancelled(self):
+        """
+        Test check_action "complete" raises an exception
+        when triggered from states:
+         - completed
+         - cancelled
+        """
         with self.assertRaises(except_orm):
             self.test_model_pool.check_action('completed', 'complete')
         with self.assertRaises(except_orm):
             self.test_model_pool.check_action('cancelled', 'complete')
 
-    def test_check_action_cancel_returns_True_from_state_new_scheduled_started_completed(self):
+    def test_check_action_cancel_returns_True_from_state_new_scheduled(self):
         self.assertTrue(self.test_model_pool.check_action('new', 'cancel'))
         self.assertTrue(self.test_model_pool.check_action('scheduled',
                                                           'cancel'))
+
+    def test_cancel_returns_True_from_state_started_completed(self):
+        """
+        Test check_action "cancel" returns boolean ``True``
+        when triggered from states:
+         - started
+         - completed
+        """
         self.assertTrue(self.test_model_pool.check_action('started', 'cancel'))
         self.assertTrue(self.test_model_pool.check_action('completed',
                                                           'cancel'))
 
-    def test_check_action_cancel_raises_exception_from_state_cancelled(self):
+    def test_cancel_raises_exception_from_state_cancelled(self):
         with self.assertRaises(except_orm):
             self.test_model_pool.check_action('cancelled', 'cancel')
 
-    def test_check_action_submit_returns_True_from_state_new_scheduled_started(self):
+    def test_submit_returns_True_from_state_new_scheduled_started(self):
         self.assertTrue(self.test_model_pool.check_action('new', 'submit'))
         self.assertTrue(self.test_model_pool.check_action('scheduled',
                                                           'submit'))
         self.assertTrue(self.test_model_pool.check_action('started', 'submit'))
 
-    def test_check_aciton_submit_raises_exception_from_state_completed_cancelled(self):
+    def test_submit_raises_exception_from_state_completed_cancelled(self):
+        """
+        Test check_action "submit" raises an exception
+        when triggered from states:
+         - completed
+         - cancelled
+        """
         with self.assertRaises(except_orm):
             self.test_model_pool.check_action('completed', 'submit')
         with self.assertRaises(except_orm):
@@ -758,20 +799,39 @@ class TestActivity(common.SingleTransactionCase):
                                                           'assign'))
         self.assertTrue(self.test_model_pool.check_action('started', 'assign'))
 
-    def test_check_action_assign_raises_exception_from_completed_cancelled(self):
+    def test_assign_raises_exception_from_completed_cancelled(self):
+        """
+        Test check_action "assign" raises an exception
+        when triggered from states:
+         - completed
+         - cancelled
+        """
         with self.assertRaises(except_orm):
             self.test_model_pool.check_action('completed', 'assign')
         with self.assertRaises(except_orm):
             self.test_model_pool.check_action('cancelled', 'assign')
 
-    def test_check_action_unassign_returns_True_from_new_scheduled_started(self):
+    def test_unassign_returns_True_from_new_scheduled_started(self):
+        """
+        Test check_action "unassign" returns boolean ``True``
+        when triggered from states:
+         - new
+         - scheduled
+         - started
+        """
         self.assertTrue(self.test_model_pool.check_action('new', 'unassign'))
         self.assertTrue(self.test_model_pool.check_action('scheduled',
                                                           'unassign'))
         self.assertTrue(self.test_model_pool.check_action('started',
                                                           'unassign'))
 
-    def test_check_action_unassign_raises_exception_from_completed_cancelled(self):
+    def test_unassign_raises_exception_from_completed_cancelled(self):
+        """
+        Test check_action "unassign" raises an exception
+        when triggered from states:
+         - completed
+         - cancelled
+        """
         with self.assertRaises(except_orm):
             self.test_model_pool.check_action('completed', 'unassign')
         with self.assertRaises(except_orm):

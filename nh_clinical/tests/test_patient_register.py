@@ -129,7 +129,7 @@ class TestPatientRegister(TransactionCase):
         self.assertTrue(patient_id,
                         msg="Patient Register: patient id not returned")
 
-    def test_adt_patient_register_using_hospital_and_NHS_number_creates_patient(self):
+    def test_adt_patient_register_creates_patient_using_hosp_and_NHS_num(self):
         cr = self.cr
         register_data = {
             'family_name': 'Family',
@@ -149,7 +149,7 @@ class TestPatientRegister(TransactionCase):
         self.assertTrue(patient_id,
                         msg="Patient Register: patient id not returned")
 
-    def test_adt_patient_register_create_activity_raises_exception_if_patient_already_registered(self):
+    def test_adt_create_activity_exception_if_patient_already_registered(self):
         # Patient with same other_identifier already registered
         # (see data/patients.xml)
         register_data = {
@@ -165,9 +165,9 @@ class TestPatientRegister(TransactionCase):
             self.register_pool.create_activity(self.cr, self.adt_uid, {},
                                                register_data)
 
-    def test_adt_patient_register_submit_raises_exception_if_patient_already_registered(self):
+    def test_adt_patient_register_raises_except_with_registered_patient(self):
         cr = self.cr
-        # Patient with same other_identifier already registered
+        # Patient with same other_identifier is ALREADY registered
         # (see data/patients.xml)
         register_data = {
             'family_name': 'Doe',
