@@ -1,21 +1,36 @@
 # -*- coding: utf-8 -*-
+"""
+``activity.py`` defines the classes and methods to allow for an audit
+event driven system to be built on top of it.
+"""
 from openerp.osv import orm, fields, osv
 from datetime import datetime
 from openerp import SUPERUSER_ID
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
+from functools import wraps
 
 import logging
 _logger = logging.getLogger(__name__)
 
 
 def data_model_event(callback=None):
+    """
+    Decorator for activity methods. This will automatically call a
+    method with the same name on the
+    :mod:`data model<activity.nh_activity_data>` related to the
+    :mod:`activity<activity.nh_activity>` instance after calling the
+    activity method. The result returned is the one from the data_model
+    method.
+    """
     def decorator(f):
+        @wraps(f)
         def wrapper(*args, **kwargs):
             self, cr, uid, activity_id = args[:4]
             if isinstance(activity_id, list) and len(activity_id) == 1:
                 activity_id = activity_id[0]
             if not isinstance(activity_id, (int, long)):
-                raise osv.except_osv('Type Error!', "activity_id must be int or long, found to be %s" % type(activity_id))
+                raise osv.except_osv('Type Error!', "activity_id must be int or long, found to be %s" %
+                                     type(activity_id))
             elif activity_id < 1:
                 raise osv.except_osv('ID Error!', "activity_id must be > 0, found to be %s" % activity_id)
             activity = self.browse(cr, uid, activity_id)
@@ -28,7 +43,17 @@ def data_model_event(callback=None):
 
 
 class nh_activity(orm.Model):
-    """ activity
+    """
+    Class representing any event that needs to be recorded by the
+    system.
+
+    Any user executed event that has a starting and ending point in time
+    could be represented as an instance of this class.
+
+    Most of them will need extra information recorded within them and
+    that is why this class is closely related to the
+    :mod:`data model<activity.nh_activity_data>` classes, which could be
+    also named activity type.
     """
     _name = 'nh.activity'
     _rec_name = 'summary'
@@ -81,14 +106,6 @@ class nh_activity(orm.Model):
         'assign_locked': fields.boolean("Assign Locked")
     }
 
-    # Fixing the '_sql_constraints' attribute below doesn't automatically change the database structure.
-    # While creating a brand new database, no error should be risen (despite this specific case was not tested).
-    # To update an existing database structure, this SQL instruction needs to be manually entered into the database:
-    #
-    # ALTER TABLE nh_activity ADD CONSTRAINT data_ref_unique UNIQUE (data_ref);
-    #
-    # (N.B: no single or double quotes are needed, but the semicolon at the end of the instruction is needed)
-    #
     _sql_constraints = [('data_ref_unique', 'unique(data_ref)', 'Data reference must be unique!')]
 
     _defaults = {
@@ -97,6 +114,13 @@ class nh_activity(orm.Model):
     }
 
     def create(self, cr, uid, vals, context=None):
+        """
+        Checks the submitted values and then calls
+        :meth:`create<openerp.models.Model.create>`
+
+        :returns: :mod:`activity<activity.nh_activity>` id
+        :rtype: int
+        """
         if not vals.get('data_model'):
             raise osv.except_osv('Error!', "data_model is not defined!")
         data_model_pool = self.pool.get(vals['data_model'])
@@ -110,6 +134,15 @@ class nh_activity(orm.Model):
         return activity_id
 
     def write(self, cr, uid, ids, vals, context=None):
+        """
+        Calls :meth:`write<openerp.models.Model.write>`.
+
+        It will update the `sequence` field if the activity state is
+        updated.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         if 'state' in vals:
             cr.execute("select coalesce(max(sequence), 0) from nh_activity")
             sequence = cr.fetchone()[0] + 1
@@ -117,6 +150,13 @@ class nh_activity(orm.Model):
         return super(nh_activity, self).write(cr, uid, ids, vals, context)
 
     def get_recursive_created_ids(self, cr, uid, activity_id, context=None):
+        """
+        Recursively gets every single activity triggered by this
+        instance or any of the ones triggered by it.
+
+        :return: :mod:`activity<activity.nh_activity>` ids
+        :rtype: list
+        """
         activity = self.browse(cr, uid, activity_id, context=context)
         if not activity.created_ids:
             return [activity_id]
@@ -126,14 +166,34 @@ class nh_activity(orm.Model):
                 created_ids += self.get_recursive_created_ids(cr, uid, created.id, context=context)
             return created_ids
 
-    # DATA API
-
     @data_model_event(callback="update_activity")
     def update_activity(self, cr, uid, activity_id, context=None):
+        """
+        This method is meant to refresh any real time data that needs
+        to be refreshed on the activity. Does nothing as default.
+        Included for potential utility on some activity types.
+
+        :param activity_id: :mod:`activity<activity.nh_activity>` id
+        :type activity_id: int
+        :returns: ``True``
+        :rtype: bool
+        """
         return True
 
     @data_model_event(callback="submit")
     def submit(self, cr, uid, activity_id, vals, context=None):
+        """
+        Updates activity data. See
+        :meth:`data model submit<activity.nh_activity_data.submit>` for
+        full implementation.
+
+        :param activity_id: :mod:`activity<activity.nh_activity>` id
+        :type activity_id: int
+        :param vals: dictionary containing {field_name: new_value}
+        :type vals: dict
+        :returns: ``True``
+        :rtype: bool
+        """
         if not isinstance(vals, dict):
             raise osv.except_osv('Type Error!', "vals must be a dict, found to be %s" % type(vals))
         return True
@@ -141,6 +201,19 @@ class nh_activity(orm.Model):
     # MGMT API
     @data_model_event(callback="schedule")
     def schedule(self, cr, uid, activity_id, date_scheduled=None, context=None):
+        """
+        Sets ``date_scheduled`` to the specified date and changes the
+        activity state to `scheduled`. See
+        :meth:`data model schedule<activity.nh_activity_data.schedule>`
+        for full implementation.
+
+        :param activity_id: :mod:`activity<activity.nh_activity>` id
+        :type activity_id: int
+        :param date_scheduled: date formatted string
+        :type date_scheduled: str
+        :returns: ``True``
+        :rtype: bool
+        """
         if date_scheduled:
             if isinstance(date_scheduled, datetime):
                 return True
@@ -162,28 +235,90 @@ class nh_activity(orm.Model):
 
     @data_model_event(callback="assign")
     def assign(self, cr, uid, activity_id, user_id, context=None):
+        """
+        Sets ``user_id`` to the specified user if allowed by access
+        rights. See
+        :meth:`data model assign<activity.nh_activity_data.assign>`
+        for full implementation.
+
+        :param activity_id: :mod:`activity<activity.nh_activity>` id
+        :type activity_id: int
+        :param user_id: res.users id
+        :type user_id: int
+        :returns: ``True``
+        :rtype: bool
+        """
         if not isinstance(user_id, (int, long)):
             raise osv.except_osv('Type Error!', "user_id must be int or long, found to be %s" % type(user_id))
         return True
 
     @data_model_event(callback="unassign")
     def unassign(self, cr, uid, activity_id, context=None):
+        """
+        Sets ``user_id`` to `False`. Only the current owner of the
+        activity is allowed to do this action. See
+        :meth:`data model unassign<activity.nh_activity_data.unassign>`
+        for full implementation.
+
+        :param activity_id: :mod:`activity<activity.nh_activity>` id
+        :type activity_id: int
+        :returns: ``True``
+        :rtype: bool
+        """
         return True
 
     @data_model_event(callback="start")
     def start(self, cr, uid, activity_id, context=None):
+        """
+        Sets activity ``state`` to `started`. See
+        :meth:`data model start<activity.nh_activity_data.start>`
+        for full implementation.
+
+        :param activity_id: :mod:`activity<activity.nh_activity>` id
+        :type activity_id: int
+        :returns: ``True``
+        :rtype: bool
+        """
         return True
 
     @data_model_event(callback="complete")
     def complete(self, cr, uid, activity_id, context=None):
+        """
+        Sets activity ``state`` to `completed` and records the date and
+        user on ``date_terminated`` and ``terminate_uid`` respectively.
+        See
+        :meth:`data model complete<activity.nh_activity_data.complete>`
+        for full implementation.
+
+        :param activity_id: :mod:`activity<activity.nh_activity>` id
+        :type activity_id: int
+        :returns: ``True``
+        :rtype: bool
+        """
         return True
 
     @data_model_event(callback="cancel")
     def cancel(self, cr, uid, activity_id, context=None):
+        """
+        Sets activity ``state`` to `cancelled` and records the date and
+        user on ``date_terminated`` and ``terminate_uid`` respectively.
+        See
+        :meth:`data model cancel<activity.nh_activity_data.cancel>`
+        for full implementation.
+
+        :param activity_id: :mod:`activity<activity.nh_activity>` id
+        :type activity_id: int
+        :returns: ``True``
+        :rtype: bool
+        """
         return True
 
 
 class nh_activity_data(orm.AbstractModel):
+    """
+    Abstract class that relates to activity from which every activity
+    type will inherit from.
+    """
     _name = 'nh.activity.data'
     _transitions = {
         'new': ['schedule', 'start', 'complete', 'cancel', 'submit', 'assign', 'unassign'],
@@ -201,6 +336,17 @@ class nh_activity_data(orm.AbstractModel):
     _form_description = None
 
     def is_action_allowed(self, state, action):
+        """
+        Tells us if the specified action is allowed in the specified
+        state.
+
+        :param state: state of the activity where we want to execute the action.
+        :type state: str
+        :param action: action we want to execute.
+        :type action: str
+        :returns: ``True`` or ``False``
+        :rtype: bool
+        """
         return action in self._transitions[state]
 
     def check_action(self, state, action):
@@ -225,6 +371,17 @@ class nh_activity_data(orm.AbstractModel):
         return super(nh_activity_data, self).create(cr, uid, vals, context)
 
     def create_activity(self, cr, uid, vals_activity={}, vals_data={}, context=None):
+        """
+        Creates a new :mod:`activity<activity.nh_activity>` of the
+        current data type.
+
+        :param vals_activity: values to save in the :mod:`activity<activity.nh_activity>`
+        :type vals_activity: dict
+        :param vals_data: values to save in the :mod:`data model<activity.nh_activity_data`
+        :type vals_data: dict
+        :returns: :mod:`activity<activity.nh_activity>` id.
+        :rtype: int
+        """
         if not isinstance(vals_activity, dict):
             raise osv.except_osv('Type Error!', 'vals_activity must be a dict, found {}'.format(type(vals_activity)))
         if not isinstance(vals_data, dict):
@@ -237,6 +394,14 @@ class nh_activity_data(orm.AbstractModel):
         return new_activity_id
 
     def start(self, cr, uid, activity_id, context=None):
+        """
+        Starts an activity and sets its ``date_started``.
+
+        :param activity_id: :mod:`activity<activity.nh_activity>` id
+        :type activity_id: int
+        :returns: ``True``
+        :rtype: bool
+        """
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
         self.check_action(activity.state, 'start')
@@ -245,6 +410,14 @@ class nh_activity_data(orm.AbstractModel):
         return True
 
     def complete(self, cr, uid, activity_id, context=None):
+        """
+        Completes an activity and sets its ``date_terminated``.
+
+        :param activity_id: :mod:`activity<activity.nh_activity>` id
+        :type activity_id: int
+        :returns: ``True``
+        :rtype: bool
+        """
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
         self.check_action(activity.state, 'complete')
@@ -256,12 +429,16 @@ class nh_activity_data(orm.AbstractModel):
 
     def assign(self, cr, uid, activity_id, user_id, context=None):
         """
-        Assigns activity to a user. Raises an exception if the activity
-        is already assigned to another user. If the activity is already
-        assigned to the same user, then the activity is locked.
-        :param activity_id:
-        :param user_id:
-        :return: True
+        Assigns activity to a user. Raises an exception if it is already
+        assigned to another user. If it is already assigned to the same
+        user, then the activity is locked.
+
+        :param activity_id: :mod:`activity<activity.nh_activity>` id
+        :type activity_id: int
+        :param user_id: res.users id
+        :type user_id: int
+        :returns: ``True``
+        :rtype: bool
         """
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
@@ -281,11 +458,14 @@ class nh_activity_data(orm.AbstractModel):
 
     def unassign(self, cr, uid, activity_id, context=None):
         """
-        Unassigns an activity. Raises an exception if activity is not
-        assigned. Raised an exception if another user tries to unassign
+        Unassigns an activity. Raises an exception if it is not
+        assigned. Raises an exception if another user tries to unassign
         an activity not assigned to them.
-        :param activity_id:
-        :return: True
+
+        :param activity_id: :mod:`activity<activity.nh_activity>` id
+        :type activity_id: int
+        :returns: ``True``
+        :rtype: bool
         """
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
@@ -303,6 +483,14 @@ class nh_activity_data(orm.AbstractModel):
         return True
 
     def cancel(self, cr, uid, activity_id, context=None):
+        """
+        Cancels an activity and sets its ``date_terminated``.
+
+        :param activity_id: :mod:`activity<activity.nh_activity>` id
+        :type activity_id: int
+        :returns: ``True``
+        :rtype: bool
+        """
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context)
         self.check_action(activity.state, 'cancel')
@@ -312,6 +500,16 @@ class nh_activity_data(orm.AbstractModel):
         return True
 
     def schedule(self, cr, uid, activity_id, date_scheduled=None, context=None):
+        """
+        Schedules an activity and sets its ``date_scheduled``.
+
+        :param activity_id: :mod:`activity<activity.nh_activity>` id
+        :type activity_id: int
+        :param date_scheduled: date formatted string
+        :type date_scheduled: str
+        :returns: ``True``
+        :rtype: bool
+        """
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
         self.check_action(activity.state, 'schedule')
@@ -324,6 +522,17 @@ class nh_activity_data(orm.AbstractModel):
         return True
 
     def submit(self, cr, uid, activity_id, vals, context=None):
+        """
+        Updates submitted data. It creates a new instance of the data
+        model if it does not exist yet.
+
+        :param activity_id: :mod:`activity<activity.nh_activity>` id
+        :type activity_id: int
+        :param vals: values to update
+        :type vals: dict
+        :returns: ``True``
+        :rtype: bool
+        """
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
         self.check_action(activity.state, 'submit')
