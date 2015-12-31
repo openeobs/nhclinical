@@ -1,7 +1,12 @@
-# Part of NHClincal. See LICENSE file for full copyright and licensing details.
+# Part of NHClinical. See LICENSE file for full copyright and licensing details
+# -*- encoding: utf-8 -*-
 __author__ = 'colinwren'
 import mock
-from openerp.http import *
+import openerp
+import psycopg2
+import werkzeug
+from openerp.http import Root, Response
+from openerp.modules.registry import RegistryManager
 from openerp.tests import DB as DB_NAME
 from openerp.tests.common import SingleTransactionCase
 from werkzeug.test import EnvironBuilder
@@ -14,7 +19,10 @@ _logger = logging.getLogger(__name__)
 class TestCookieFix(SingleTransactionCase):
 
     def setUp(self):
-        """Set up a Werkzeug environment, create the root Odoo's server app for sending Response objects through it."""
+        """
+        Set up a Werkzeug environment, create the root Odoo's server app
+        for sending Response objects through it.
+        """
         env_build = EnvironBuilder(method='GET', path='/web/database/selector')
         self.env = env_build.get_environ()
         self.req = Request(self.env)
@@ -32,7 +40,8 @@ class TestCookieFix(SingleTransactionCase):
 
         def _dispatch_nodb():
             try:
-                func, arguments = root.nodb_routing_map.bind_to_environ(request.httprequest.environ).match()
+                func, arguments = root.nodb_routing_map.bind_to_environ(
+                    request.httprequest.environ).match()
             except werkzeug.exceptions.HTTPException, e:
                 return request._handle_exception(e)
             request.set_handler(func, arguments, "none")
@@ -46,7 +55,8 @@ class TestCookieFix(SingleTransactionCase):
         cookies = [l for l in cookie[1].split('; ')]
         cookie_data = [kv.split('=') for kv in cookies]
         cookie_age = [int(c[1]) for c in cookie_data if c[0] == 'Max-Age'][0]
-        self.assertEqual(cookie_age, 3600*12, 'Our cookie fix is not functioning as expected')
+        self.assertEqual(cookie_age, 3600*12,
+                         'Our cookie fix is not functioning as expected')
 
     def test_02_original_cookie_fix(self):
         """Using an instance of the app with the original cookie fix applied
@@ -61,7 +71,8 @@ class TestCookieFix(SingleTransactionCase):
 
         def _dispatch_nodb():
             try:
-                func, arguments = root.nodb_routing_map.bind_to_environ(request.httprequest.environ).match()
+                func, arguments = root.nodb_routing_map.bind_to_environ(
+                    request.httprequest.environ).match()
             except werkzeug.exceptions.HTTPException, e:
                 return request._handle_exception(e)
             request.set_handler(func, arguments, "none")
@@ -79,8 +90,9 @@ class TestCookieFix(SingleTransactionCase):
         self.assertNotEqual(cookie_age, 3600*12, err)
 
     def test_03_sending_string_response(self):
-        """Sending a base string as a response
-        and expecting it to be converted to a response with cookie set to cookie fix time.
+        """
+        Sending a base string as a response and expecting it to be converted
+        to a response with cookie set to cookie fix time.
         """
         root = Root()
         self.req.app = root
@@ -98,10 +110,13 @@ class TestCookieFix(SingleTransactionCase):
         self.assertEqual(cookie_age, 3600*12, err)
 
     def test_04_sending_odoo_qweb_template_response(self):
-        """Test that an Odoo's response is correctly processed and has our 'cookies time fix'.
+        """
+        Test that an Odoo's response is correctly processed
+        and has our 'cookies time fix'.
 
-        Send a response that is a 'qweb template' via a Odoo's Response instance.
-        Make sure that the Response.flatten() method is called and the response has our 'cookies time fix'.
+        Send a 'qweb template' response via a Odoo's Response instance.
+        Make sure that the Response.flatten() method is called
+        and the response has our 'cookies time fix'.
         """
         root = Root()
         self.req.app = root
@@ -112,7 +127,8 @@ class TestCookieFix(SingleTransactionCase):
 
         def _dispatch_nodb():
             try:
-                func, arguments = root.nodb_routing_map.bind_to_environ(request.httprequest.environ).match()
+                func, arguments = root.nodb_routing_map.bind_to_environ(
+                    request.httprequest.environ).match()
             except werkzeug.exceptions.HTTPException, e:
                 return request._handle_exception(e)
             request.set_handler(func, arguments, "none")
@@ -122,15 +138,19 @@ class TestCookieFix(SingleTransactionCase):
         with request:
             result = _dispatch_nodb()
 
-        # Set the 'template' property to make the object pass the 'is_qweb' check
+        # Set the 'template' property
+        # to make the object pass the 'is_qweb' check.
         result.template = 'fake_template'
 
-        # Mock the Response.flatten() method (it's not what is being tested here)
+        # Mock the Response.flatten() method
+        # (it's not what is being tested here)
         # and check the mock has actually been called.
         def log_mock_called():
-            _logger.debug('Mock of Response.flatten() method called during the test')
+            _logger.debug(
+                'Mock of Response.flatten() method called during the test')
 
-        with mock.patch.object(Response, 'flatten', side_effect=log_mock_called) as mock_method:
+        with mock.patch.object(Response, 'flatten',
+                               side_effect=log_mock_called) as mock_method:
             response = root.get_response(request, result, explicit_session)
 
         mock_method.assert_any_call()
@@ -140,29 +160,36 @@ class TestCookieFix(SingleTransactionCase):
         cookies = [l for l in cookie[1].split('; ')]
         cookie_data = [kv.split('=') for kv in cookies]
         cookie_age = [int(c[1]) for c in cookie_data if c[0] == 'Max-Age'][0]
-        self.assertEqual(cookie_age, 3600*12, 'Our cookie fix is not functioning as expected')
+        self.assertEqual(cookie_age, 3600*12,
+                         'Our cookie fix is not functioning as expected')
 
     def test_05_raising_exception_during_qweb_response_rendering(self):
-        """Test that an exception is raised during an Odoo's response processing.
+        """
+        Test that an exception is raised during an Odoo's response processing.
 
         This test use a double 'mocking' strategy:
-            - Python's mock library, to mock a method and make it returning the exception
-            - Odoo's _patch_method(), to swap an Odoo's model's method with another custom-defined one
+            - Python's mock library, to mock a method and make it returning
+              the exception
+            - Odoo's _patch_method(), to swap an Odoo's model's method
+              with another custom-defined one
         """
         root = Root()
         self.req.app = root
         explicit_session = root.setup_session(self.req)
-        self.req.session.db = DB_NAME  # force the DB name into request's session data
+        self.req.session.db = DB_NAME  # put DB name into request session data
         root.setup_lang(self.req)
         request = root.get_request(self.req)
 
-        self.assertIsNotNone(request.session.db, 'Database not in the request object. Test aborted.')
+        self.assertIsNotNone(request.session.db,
+                             'Database not in the request object. '
+                             'Test aborted.')
 
         # Extract and hack part of the Odoo's Root.dispatch() method,
         # and use it to generate a valid Odoo's Response object.
         def _dispatch_nodb():
             try:
-                func, arguments = root.nodb_routing_map.bind_to_environ(request.httprequest.environ).match()
+                func, arguments = root.nodb_routing_map.bind_to_environ(
+                    request.httprequest.environ).match()
             except werkzeug.exceptions.HTTPException, e:
                 return request._handle_exception(e)
             request.set_handler(func, arguments, "none")
@@ -172,7 +199,7 @@ class TestCookieFix(SingleTransactionCase):
         with request:
             db = request.session.db
             if db:
-                openerp.modules.registry.RegistryManager.check_registry_signaling(db)
+                RegistryManager.check_registry_signaling(db)
                 try:
                     with openerp.tools.mute_logger('openerp.sql_db'):
                         ir_http = request.registry['ir.http']
@@ -185,38 +212,50 @@ class TestCookieFix(SingleTransactionCase):
                     result = _dispatch_nodb()
                 else:
                     result = ir_http._dispatch()
-                    openerp.modules.registry.RegistryManager.signal_caches_change(db)
+                    RegistryManager.signal_caches_change(db)
             else:
                 result = _dispatch_nodb()
 
-            # Set the 'template' property to make the Response object pass the 'is_qweb' check
+            # Set the 'template' property to make the Response object
+            # pass the 'is_qweb' check.
             result.template = 'fake_template'
 
-            # Mock the Response.flatten() method (because it's not what is being tested here)
+            # Mock the Response.flatten() method
+            # (because it's not what is being tested here)
             # and check that the mock has actually been called.
             def log_mock_called():
-                _logger.debug('Mock of Response.flatten() method called during the test')
+                _logger.debug(
+                    'Mock of Response.flatten() method called during the test')
                 raise Exception('Expected exception raised during the test.')
 
-            # This method is called (by the Odoo's model) instead of the 'swapped' one below
+            # This method is called (by the Odoo's model)
+            # instead of the 'swapped' one below.
             def mock_handle_exception(*args, **kwargs):
                 e = args[1]
                 return 'Exception: {}'.format(e)
 
-            with mock.patch.object(Response, 'flatten', side_effect=log_mock_called) as mock_method:
-                # Use Odoo's 'patching' way to swap a method, called inside the get_response() method, with another defined here above
-                request.registry['ir.http']._patch_method('_handle_exception', mock_handle_exception)
+            with mock.patch.object(Response, 'flatten',
+                                   side_effect=log_mock_called) as mock_method:
+                # Use Odoo's 'patching' way to swap a method,
+                # called inside the get_response() method,
+                # with another defined here above.
+                request.registry['ir.http']._patch_method(
+                    '_handle_exception', mock_handle_exception)
 
-                response = root.get_response(request, result, explicit_session)  # eventually run the method to test !
+                # eventually run the method to test !
+                response = root.get_response(request, result, explicit_session)
 
-                request.registry['ir.http']._revert_method('_handle_exception')  # stop the Odoo's patcher
+                # stop the Odoo's patcher
+                request.registry['ir.http']._revert_method('_handle_exception')
 
         mock_method.assert_any_call()
-        self.assertIn('Exception: Expected exception raised during the test.', response.response)
+        self.assertIn('Exception: Expected exception raised during the test.',
+                      response.response)
 
         # Assert that our response has the expected cookies, correctly set
         cookie = [h for h in response.headers if h[0] == 'Set-Cookie'][0]
         cookies = [l for l in cookie[1].split('; ')]
         cookie_data = [kv.split('=') for kv in cookies]
         cookie_age = [int(c[1]) for c in cookie_data if c[0] == 'Max-Age'][0]
-        self.assertEqual(cookie_age, 3600*12, 'Our cookie fix is not functioning as expected')
+        self.assertEqual(cookie_age, 3600*12,
+                         'Our cookie fix is not functioning as expected')
