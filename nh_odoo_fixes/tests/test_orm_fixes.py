@@ -1,4 +1,5 @@
-# Part of NHClincal. See LICENSE file for full copyright and licensing details.
+# Part of NHClinical. See LICENSE file for full copyright and licensing details
+# -*- encoding: utf-8 -*-
 __author__ = 'wearp'
 from datetime import datetime
 import re
@@ -36,6 +37,7 @@ class TestORMFixes(TransactionCase):
     def test_03_utc_timestamp_with_tz_in_context_excepts_pytz_exceptions(self):
         cr, uid = self.cr, self.uid
 
-        timestamp = fields.datetime.utc_timestamp(cr, uid, self.date, context={'tz': '??'})
+        timestamp = fields.datetime.utc_timestamp(cr, uid, self.date,
+                                                  context={'tz': '??'})
         result = re.match(self.pattern, timestamp)
         self.assertEquals(result.string, timestamp)

@@ -1,4 +1,5 @@
-# Part of NHClincal. See LICENSE file for full copyright and licensing details.
+# Part of NHClinical. See LICENSE file for full copyright and licensing details
+# -*- coding: utf-8 -*-
 import logging
 
 from openerp.tests.common import SingleTransactionCase
@@ -23,9 +24,8 @@ class test_base_nhdemo(SingleTransactionCase):
         global cr, uid
         cr, uid = self.cr, self.uid
 
-
         super(test_base_nhdemo, self).setUp()
-        
+
     def test_user(self):
         global cr, uid
         print "TEST res.users"
@@ -36,7 +36,7 @@ class test_base_nhdemo(SingleTransactionCase):
         api_demo.create(cr, uid, 'res.users', 'user_ward_manager')
         api_demo.create(cr, uid, 'res.users', 'user_doctor')
         api_demo.create(cr, uid, 'res.users', 'user_adt')
-        
+
     def test_location(self):
         global cr, uid
         print "TEST nh.clinical.location"
@@ -50,7 +50,7 @@ class test_base_nhdemo(SingleTransactionCase):
 
     def test_patient(self):
         global cr, uid
-        print "TEST nh.clinical.patient"        
+        print "TEST nh.clinical.patient"
         api_demo = self.registry('nh.clinical.api.demo')
         api_demo.create(cr, uid, 'nh.clinical.patient')
 
@@ -58,11 +58,11 @@ class test_base_nhdemo(SingleTransactionCase):
         global cr, uid
         print "TEST nh.clinical.pos"
         api_demo = self.registry('nh.clinical.api.demo')
-        api_demo.create(cr, uid, 'nh.clinical.pos')        
-        
+        api_demo.create(cr, uid, 'nh.clinical.pos')
+
     def test_device(self):
         global cr, uid
         print "TEST nh.clinical.device and type"
         api_demo = self.registry('nh.clinical.api.demo')
         api_demo.create(cr, uid, 'nh.clinical.device.type')
-        api_demo.create(cr, uid, 'nh.clinical.device')   
+        api_demo.create(cr, uid, 'nh.clinical.device')

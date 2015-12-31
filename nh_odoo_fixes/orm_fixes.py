@@ -1,4 +1,5 @@
-# Part of NHClincal. See LICENSE file for full copyright and licensing details.
+# Part of NHClinical. See LICENSE file for full copyright and licensing details
+# -*- encoding: utf-8 -*-
 from datetime import datetime
 import logging
 
@@ -13,6 +14,7 @@ from pytz.exceptions import UnknownTimeZoneError, NonExistentTimeError
 
 _logger = logging.getLogger(__name__)
 
+
 @staticmethod
 def utc_timestamp(cr, uid, timestamp, context=None):
     assert isinstance(timestamp, datetime), 'Datetime instance expected'
@@ -20,7 +22,8 @@ def utc_timestamp(cr, uid, timestamp, context=None):
         tz_name = context['tz']
     else:
         reg = registry.RegistryManager.get(cr.dbname)
-        tz_name = reg.get('res.users').read(cr, openerp.SUPERUSER_ID, uid, ['tz'])['tz']
+        tz_name = reg.get('res.users').read(
+            cr, openerp.SUPERUSER_ID, uid, ['tz'])['tz']
 
     if tz_name:
         try:
