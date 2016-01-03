@@ -19,7 +19,7 @@ addons:
 env:
   global:
   - VERSION="8.0" TESTS="0" LINT_CHECK="0" TRANSIFEX="0" OPTIONS="--test-report-directory=${HOME}/tests"
-    EXCLUDE="xml_test_output"
+    EXCLUDE="xml_test_output" SONAR="0"
   - secure: pqiKNs/ThGodrO83snBuPJUqnt3E2kEjUEUJfIkNRVBDoTsIdfLx9xmwRbKk8/mihOOhc+ks6Mx6dUTH1+tXf3Mj4X/P8OuiAbL1aRK6liVK5ItzjS4nmHMgGSY7GVZQk2r0NZWiUdiGGdMkkxtJwhVE7leMS9hNyh+vXLB3xJrHV0qQkWYE3yILAWs5atRrU3RiD1vXY2xvmrUFFTQKOuk4XrZA4Hu9gi+GnekBTbHRQRRynklrQ4CFANRpYIRHqRAY3vKg/3rqKByVS+BPffZW9z2KokV4UrAnxePTC114/9zBEAfI6cw5smryFoUqOLc6cqukXZ8oW0+bPVvsGrR85U9eY2Vz7/es2f9spUmmbjxkj5nSmxIENlc7XlhmCXDAiD+MTU1cUEVuk1eXtm2Nyo0G8t3ql2VUEGvPw916kNvP58qNXdtQGYstU8Gnxc8xvi4lQkqCMFy1Eszd9P9pWqO95XB8WLApOOqW+IuhQDXa5+nxNnr9NwyE6kBDHvv202gOFe+lC0aRKlkzhqHT61CiDa/DcI+Di/3zIpLQ0g2TDOwyXbKSiibyOeEKmMBM6dfMRjPrOKsSGPeeCWSIVuY+8AUeOAOxT7qZgOaGzhU3bwttSiAwbJo8+eCUeL91BXuNWci98A8J1dRsS1n4CFNNvUjs+7p/Pa4zq7c=
   - secure: i5LWEMxf3nRnyvG+F341bwByArcoeCzSXt87DrNbNYbbmzbcDD3eh9FUJ/vX5GB61Lqy1CcrDSv1OLl4MiQGkzQqNoQL1yC2nqij9ZCj/Zfm3M/Al9bwsX9JVNLITDFsXfutu3/9g3uLl5bKNI+esVD3t3dljTAytm/fxjrZ8o/dzN+SLfm0do5Tinr80WlOXiq64mcLU50ndDoUnBYFn1iJYB1Kmt6uqvpVbnTfkIJMQH+KJFpTAiTKQXuzCoOHLL7n5t/9reJNTlncgvpnoYhr0irVFRnqxok3YdtOd7qjpjQuXxqRjvR9ZP9+13ZXzgJwMnvInfnjo/edfGyudA3eZDkaBHbQUj+p61SOJPr4vZ4oWFLi+0p2FvaNZuhcamGRBx2YHWrUCAZWM3GkMSzaGY5MefShb6WFDIgDuzd044FDtMOjTJzX7T3A5OGFRvNzAhWF4YySyyMzfegt1WuUDRNQy1mnKF0YWy5YqckXD5R9s420o1OaPi9r1BppMlPAHHgL2QX6fAsEBfEzhh2o2gg45Fgqdibyb9KhTbY71BE4TPflSP67HZhad0wOIu+Vz/5UGkLra1A5DHmiSdfyxcsudx7G5UQU5WF22adAhZp9QW2IGvRh1XW9VbbmmLI/5urW+IlWDQlRu5fmsozXG3fiO9iJL9amfH6x9l8=
   - secure: LPDRZjj97Y8D860h9GkDoYc+FaJwWzaBzWp/QRLk2ZpyHD0ewbnnLkcjDvCkaFIoUNh61yrYCuNKEMNzSC7RlCYmxzdRSpkwZcKdPU3NIxS+wB4HSKOAOEIfFhcKvH5M3BUBEIIO+qmUy4YMBzPqM5TZbBr/adMqzdv6m42zisXhacJYwJDhCkOcGwcqiH8A3TQdyBrK/oS18fd1lXiunyG+xOAuakYlOzxvPKDaAnB/XFDyPSLwB8FS9K/+CmFAzgfRQlg2uH6Ipn/T7eOja4YfLKdSoPFZxph/Inu480rZtyllxFHHyxZE73LV1rRs6Q5Y3VyskLCSRvTv6GjABZ3jSMwSkZEg/CKnDcYpFT9k5Aqg7pybB3XaOYsea3Uaby16oijMR3lHxTLLCTIDETJKO0+RNMvnQd4nFYrJh6+RzH0y5fJYEkNU8bFylkTSJDFU30UOSfut9nxbiQi3/NN+IQsHSs0R6drZxjuSXc55AuT2AvUt1ByGE8G9WNNircCyxazxy+NBwR2C7Ubque2e9aMC0ZbgERZ+Qd0Cww2FQ01fdgsIcxMbgF9RNFXSTDnrl/TPaXlX5RG4LRQE40eoKQBBY7wGEgUFbEiAIImFg+Mr/I2h5tdI6H9C2D79wPzo0Po3Rm34q7jaHPwNULtC6Zz6Pl1t69F+b0ESn60=
@@ -31,7 +31,7 @@ env:
   matrix:
   - LINT_CHECK="1"
   - ODOO_REPO="valdecdev/odoo" TESTS="1" INCLUDE="nh_odoo_fixes,nh_activity,nh_clinical"
-    VERSION="openeobs-8-12" SERVER_EXPECTED_ERRORS="1"
+    VERSION="openeobs-8-12" SERVER_EXPECTED_ERRORS="1" SONAR="1"
 virtualenv:
   system_site_packages: true
 before_install:
@@ -65,4 +65,4 @@ after_script:
 - echo -e "\nsonar.python.coverage.reportPath=coverage.xml" >> sonar-project.properties
 - echo -e "\nsonar.python.xunit.reportPath=test_report.xml" >> sonar-project.properties
 - ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST -L 2000:localhost:2000 -L 6432:localhost:5432 -fN
-- "${HOME}/sonar-runner-2.4/bin/sonar-runner"
+- if [ "$SONAR" == "1" ] ; then "${HOME}/sonar-runner-2.4/bin/sonar-runner" ; fi
