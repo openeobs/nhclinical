@@ -14,10 +14,10 @@ class test_base_nhdemo(SingleTransactionCase):
     def tearDownClass(cls):
         if config['test_commit']:
             cls.cr.commit()
-            print "COMMIT"
+            _logger.info('COMMIT')
         else:
             cls.cr.rollback()
-            print "ROLLBACK"
+            _logger.info("ROLLBACK")
         cls.cr.close()
 
     def setUp(self):
@@ -28,7 +28,7 @@ class test_base_nhdemo(SingleTransactionCase):
 
     def test_user(self):
         global cr, uid
-        print "TEST res.users"
+        _logger.info("TEST res.users")
         api_demo = self.registry('nh.clinical.api.demo')
         api_demo.create(cr, uid, 'res.users')
         api_demo.create(cr, uid, 'res.users', 'user_hca')
@@ -39,7 +39,7 @@ class test_base_nhdemo(SingleTransactionCase):
 
     def test_location(self):
         global cr, uid
-        print "TEST nh.clinical.location"
+        _logger.info("TEST nh.clinical.location")
         api_demo = self.registry('nh.clinical.api.demo')
         api_demo.create(cr, uid, 'nh.clinical.location')
         api_demo.create(cr, uid, 'nh.clinical.location', 'location_pos')
@@ -50,19 +50,19 @@ class test_base_nhdemo(SingleTransactionCase):
 
     def test_patient(self):
         global cr, uid
-        print "TEST nh.clinical.patient"
+        _logger.info("TEST nh.clinical.patient")
         api_demo = self.registry('nh.clinical.api.demo')
         api_demo.create(cr, uid, 'nh.clinical.patient')
 
     def test_pos(self):
         global cr, uid
-        print "TEST nh.clinical.pos"
+        _logger.info("TEST nh.clinical.pos")
         api_demo = self.registry('nh.clinical.api.demo')
         api_demo.create(cr, uid, 'nh.clinical.pos')
 
     def test_device(self):
         global cr, uid
-        print "TEST nh.clinical.device and type"
+        _logger.info("TEST nh.clinical.device and type")
         api_demo = self.registry('nh.clinical.api.demo')
         api_demo.create(cr, uid, 'nh.clinical.device.type')
         api_demo.create(cr, uid, 'nh.clinical.device')
