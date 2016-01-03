@@ -29,7 +29,9 @@ class nh_clinical_api_demo(orm.AbstractModel):
             self._fake.seed(self._seed)
         return self._fake
 
-    def demo_data(self, cr, uid, model, values_method=None):
+    def demo_data(self, cr, uid, model, values_method=None, values=None):
+        if not values:
+            values = {}
         api_demo_data = self.pool['nh.clinical.api.demo.data']
         values_method = values_method or\
             api_demo_data._default_values_methods.get(model)
@@ -632,9 +634,7 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
 # -############ base ##############-
 
     # -##### res.users #####-
-    def _user_base(self, cr, uid, values=None):
-        if not values:
-            values = {}
+    def _user_base(self, cr, uid, values={}):
         fake = self.next_seed_fake()
         i = 0
         login = (values.get('name') or fake.first_name()).lower()
@@ -1094,8 +1094,7 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         return v
 
     def observation_blood_sugar(self, cr, uid, values=None):
-        if not values:
-            values = {}
+
         fake = self.next_seed_fake()
         v = {'blood_sugar': float(fake.random_int(min=1, max=100))}
         v.update(values)
