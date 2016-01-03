@@ -632,7 +632,9 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
 # -############ base ##############-
 
     # -##### res.users #####-
-    def _user_base(self, cr, uid, values={}):
+    def _user_base(self, cr, uid, values=None):
+        if not values:
+            values = {}
         fake = self.next_seed_fake()
         i = 0
         login = (values.get('name') or fake.first_name()).lower()
