@@ -50,9 +50,11 @@ class BaseTest(SingleTransactionCase):
         super(BaseTest, self).setUp()
 
     def create_activity(self, cr, uid, data_model, vals_activity=None,
-                        vals_data={}, context=None):
+                        vals_data=None, context=None):
         if not vals_activity:
             vals_activity = {}
+        if not vals_data:
+            vals_data = {}
         model_pool = self.registry(data_model)
         activity_id = model_pool.create_activity(cr, uid, vals_activity,
                                                  vals_data, context)

@@ -29,7 +29,7 @@ class nh_clinical_api_demo(orm.AbstractModel):
             self._fake.seed(self._seed)
         return self._fake
 
-    def demo_data(self, cr, uid, model, values_method=None, values={}):
+    def demo_data(self, cr, uid, model, values_method=None):
         api_demo_data = self.pool['nh.clinical.api.demo.data']
         values_method = values_method or\
             api_demo_data._default_values_methods.get(model)
@@ -41,8 +41,10 @@ class nh_clinical_api_demo(orm.AbstractModel):
             method=values_method))
         return v
 
-    def create(self, cr, uid, model, values_method=None, values={},
+    def create(self, cr, uid, model, values_method=None, values=None,
                context=None):
+        if not values:
+            values = {}
         model_pool = self.pool[model]
         v = self.demo_data(cr, uid, model, values_method, values)
         _logger.debug("Creating DEMO resource '%s', values: %s" % (model, v))
@@ -50,7 +52,11 @@ class nh_clinical_api_demo(orm.AbstractModel):
         return res_id
 
     def create_activity(self, cr, uid, model, values_method=None,
-                        activity_values={}, data_values={}, context=None):
+                        activity_values=None, data_values=None, context=None):
+        if not data_values:
+            data_values = {}
+        if not activity_values:
+            activity_values = {}
         model_pool = self.pool[model]
         v = self.demo_data(cr, uid, model, values_method, data_values)
         _logger.debug("Creating DEMO resource '%s', values: %s" % (model, v))
@@ -338,10 +344,12 @@ class nh_clinical_api_demo(orm.AbstractModel):
 
         return patient_ids
 
-    def get_available_bed(self, cr, uid, location_ids=[], pos_id=None):
+    def get_available_bed(self, cr, uid, location_ids=None, pos_id=None):
         """
         Method
         """
+        if not location_ids:
+            location_ids = []
         location_pool = self.pool['nh.clinical.location']
         fake = self.next_seed_fake()
         # find available in passed location_ids
@@ -417,11 +425,15 @@ class nh_clinical_api_demo(orm.AbstractModel):
                 cr, uid, 'res.users', 'user_adt', {'pos_id': pos_id})
         return adt_uid
 
-    def register_admit(self, cr, uid, pos_id, register_values={},
-                       admit_values={}, return_id=False):
+    def register_admit(self, cr, uid, pos_id, register_values=None,
+                       admit_values=None, return_id=False):
         """
         Registers and admits patient to POS. Missing data will be generated
         """
+        if not register_values:
+            register_values = {}
+        if not admit_values:
+            admit_values = {}
         activity_pool = self.pool['nh.activity']
         # ensure pos_id is set
         if not pos_id:
@@ -450,11 +462,13 @@ class nh_clinical_api_demo(orm.AbstractModel):
         else:
             return activity_pool.browse(cr, uid, admit_activity_id)
 
-    def register_admission(self, cr, uid, ward_location_id, register_values={},
-                           admit_values={}, return_id=False):
+    def register_admission(self, cr, uid, ward_location_id,
+                           register_values=None, return_id=False):
         """
         Registers and admits patient to POS. Missing data will be generated
         """
+        if not register_values:
+            register_values = {}
         location_pool = self.pool['nh.clinical.location']
         activity_pool = self.pool['nh.activity']
         # ensure pos_id is set
@@ -481,13 +495,17 @@ class nh_clinical_api_demo(orm.AbstractModel):
             return False
 
     def register_admit_place(self, cr, uid, bed_location_id=None,
-                             register_values={}, admit_values={},
+                             register_values=None, admit_values=None,
                              return_id=False):
         """
         Registers, admits and places patient into bed_location_id if vacant
         otherwise found among existing ones or created.
         Missing data will be generated
         """
+        if not register_values:
+            register_values = {}
+        if not admit_values:
+            admit_values = {}
         activity_pool = self.pool['nh.activity']
         location_pool = self.pool['nh.clinical.location']
         bed_location = location_pool.browse(cr, uid, bed_location_id)
@@ -513,7 +531,9 @@ class nh_clinical_api_demo(orm.AbstractModel):
         else:
             return activity_pool.browse(cr, uid, placement_activity_id)
 
-    def submit_ews_observations(self, cr, uid, bed_codes=[], ews_count=3):
+    def submit_ews_observations(self, cr, uid, bed_codes=None, ews_count=3):
+        if not bed_codes:
+            bed_codes = []
         location_pool = self.pool['nh.clinical.location']
         activity_pool = self.pool['nh.activity']
         user_pool = self.pool['res.users']
@@ -522,10 +542,10 @@ class nh_clinical_api_demo(orm.AbstractModel):
                                             ['name', 'ilike', '%hospital%']])
         pos = imd_pool.read(cr, uid, imd_ids, ['res_id'])
         if not pos:
-            print "POS hospital is not found. Exiting..."
+            _logger.info("POS hospital is not found. Exiting...")
             exit(1)
         pos_id = pos[0]['res_id']
-        print bed_codes
+        _logger.info(bed_codes)
         if not bed_codes:
             bed_ids = location_pool.search(cr, uid, [['pos_id', '=', pos_id],
                                                      ['usage', '=', 'bed']])
@@ -633,7 +653,9 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         }
         return v
 
-    def user_hca(self, cr, uid, values={}):
+    def user_hca(self, cr, uid, values=None):
+        if not values:
+            values = {}
         imd_pool = self.pool['ir.model.data']
         group = imd_pool.get_object(cr, uid, "nh_clinical", "group_nhc_hca")
         v = self._user_base(cr, uid)
@@ -641,7 +663,9 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         v.update(values)
         return v
 
-    def user_nurse(self, cr, uid, values={}):
+    def user_nurse(self, cr, uid, values=None):
+        if not values:
+            values = {}
         imd_pool = self.pool['ir.model.data']
         group = imd_pool.get_object(cr, uid, "nh_clinical", "group_nhc_nurse")
         v = self._user_base(cr, uid)
@@ -649,7 +673,9 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         v.update(values)
         return v
 
-    def user_ward_manager(self, cr, uid, values={}):
+    def user_ward_manager(self, cr, uid, values=None):
+        if not values:
+            values = {}
         imd_pool = self.pool['ir.model.data']
         group = imd_pool.get_object(cr, uid, "nh_clinical",
                                     "group_nhc_ward_manager")
@@ -658,7 +684,9 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         v.update(values)
         return v
 
-    def user_receptionist(self, cr, uid, values={}):
+    def user_receptionist(self, cr, uid, values=None):
+        if not values:
+            values = {}
         imd_pool = self.pool['ir.model.data']
         group = imd_pool.get_object(cr, uid, "nh_clinical",
                                     "group_nhc_receptionist")
@@ -667,7 +695,9 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         v.update(values)
         return v
 
-    def user_junior_doctor(self, cr, uid, values={}):
+    def user_junior_doctor(self, cr, uid, values=None):
+        if not values:
+            values = {}
         imd_pool = self.pool['ir.model.data']
         group = imd_pool.get_object(cr, uid, "nh_clinical",
                                     "group_nhc_junior_doctor")
@@ -676,7 +706,9 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         v.update(values)
         return v
 
-    def user_registrar(self, cr, uid, values={}):
+    def user_registrar(self, cr, uid, values=None):
+        if not values:
+            values = {}
         imd_pool = self.pool['ir.model.data']
         group = imd_pool.get_object(cr, uid, "nh_clinical",
                                     "group_nhc_registrar")
@@ -685,7 +717,9 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         v.update(values)
         return v
 
-    def user_consultant(self, cr, uid, values={}):
+    def user_consultant(self, cr, uid, values=None):
+        if not values:
+            values = {}
         imd_pool = self.pool['ir.model.data']
         group = imd_pool.get_object(cr, uid, "nh_clinical",
                                     "group_nhc_consultant")
@@ -694,7 +728,9 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         v.update(values)
         return v
 
-    def user_doctor(self, cr, uid, values={}):
+    def user_doctor(self, cr, uid, values=None):
+        if not values:
+            values = {}
         imd_pool = self.pool['ir.model.data']
         group = imd_pool.get_object(cr, uid, "nh_clinical",
                                     "group_nhc_doctor")
@@ -703,7 +739,9 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         v.update(values)
         return v
 
-    def user_adt(self, cr, uid, values={}):
+    def user_adt(self, cr, uid, values=None):
+        if not values:
+            values = {}
         imd_pool = self.pool['ir.model.data']
         group = imd_pool.get_object(cr, uid, "nh_clinical",
                                     "group_nhc_adt")
@@ -719,7 +757,9 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
 
     # -#### location ####-
 
-    def location_pos(self, cr, uid, values={}):
+    def location_pos(self, cr, uid, values=None):
+        if not values:
+            values = {}
         fake = self.next_seed_fake()
         code = "POS_"+str(fake.random_int(min=100, max=999))
         v = {
@@ -731,7 +771,9 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         v.update(values)
         return v
 
-    def location_discharge(self, cr, uid, values={}):
+    def location_discharge(self, cr, uid, values=None):
+        if not values:
+            values = {}
         fake = self.next_seed_fake()
         code = "DISCHARGE_"+str(fake.random_int(min=100, max=999))
         v = {
@@ -743,7 +785,9 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         v.update(values)
         return v
 
-    def location_admission(self, cr, uid, values={}):
+    def location_admission(self, cr, uid, values=None):
+        if not values:
+            values = {}
         fake = self.next_seed_fake()
         code = "ADMISSION_"+str(fake.random_int(min=100, max=999))
         v = {
@@ -755,7 +799,9 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         v.update(values)
         return v
 
-    def location_ward(self, cr, uid, values={}):
+    def location_ward(self, cr, uid, values=None):
+        if not values:
+            values = {}
         fake = self.next_seed_fake()
         code = "ward_"+str(fake.random_int(min=100, max=999))
         v = {
@@ -767,7 +813,9 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         v.update(values)
         return v
 
-    def location_bed(self, cr, uid, values={}):
+    def location_bed(self, cr, uid, values=None):
+        if not values:
+            values = {}
         fake = self.next_seed_fake()
         code = "bed_"+str(fake.random_int(min=100, max=999))
         v = {
@@ -780,7 +828,9 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         return v
 
     # -#### patient ####-
-    def patient(self, cr, uid, values={}):
+    def patient(self, cr, uid, values=None):
+        if not values:
+            values = {}
         fake = self.next_seed_fake()
         name = fake.first_name()
         last_name = fake.last_name(),
@@ -803,7 +853,9 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         return v
 
     # -#### pos ####-
-    def pos(self, cr, uid, values={}):
+    def pos(self, cr, uid, values=None):
+        if not values:
+            values = {}
         fake = self.next_seed_fake()
         api_demo = self.pool['nh.clinical.api.demo']
         v = {'name': "(POS) HOSPITAL_"+str(fake.random_int(min=100, max=999))}
@@ -821,7 +873,9 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         return v
 
     # -#### device.category ####-
-    def device_category(self, cr, uid, values={}):
+    def device_category(self, cr, uid, values=None):
+        if not values:
+            values = {}
         fake = self.next_seed_fake()
         flow_directions = dict(
             self.pool['nh.clinical.device.category']._columns[
@@ -833,7 +887,9 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         return v
 
     # -#### device.type ####-
-    def device_type(self, cr, uid, values={}):
+    def device_type(self, cr, uid, values=None):
+        if not values:
+            values = {}
         fake = self.next_seed_fake()
         if 'category_id' not in values:
             category_id = fake.random_element(
@@ -851,7 +907,9 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         return v
 
     # -#### device ####-
-    def device(self, cr, uid, values={}):
+    def device(self, cr, uid, values=None):
+        if not values:
+            values = {}
         fake = self.next_seed_fake()
         if 'type_id' not in values:
             type_id = fake.random_element(
@@ -870,7 +928,9 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         return v
 
 # -######### activity types ###########-
-    def adt_register(self, cr, uid, values={}):
+    def adt_register(self, cr, uid, values=None):
+        if not values:
+            values = {}
         fake = self.next_seed_fake()
         gender = fake.random_element(['M', 'F'])
         v = {
@@ -888,7 +948,9 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         v.update(values)
         return v
 
-    def adt_admit(self, cr, uid, values={}):
+    def adt_admit(self, cr, uid, values=None):
+        if not values:
+            values = {}
         fake = self.next_seed_fake()
         api_demo = self.pool['nh.clinical.api.demo']
         activity_pool = self.pool['nh.activity']
@@ -922,7 +984,9 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         v.update(values)
         return v
 
-    def adt_discharge(self, cr, uid, values={}):
+    def adt_discharge(self, cr, uid, values=None):
+        if not values:
+            values = {}
         fake = self.next_seed_fake()
         activity_pool = self.pool['nh.activity']
         patient_pool = self.pool['nh.clinical.patient']
@@ -939,7 +1003,9 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         v.update(values)
         return v
 
-    def observation_ews(self, cr, uid, values={}):
+    def observation_ews(self, cr, uid, values=None):
+        if not values:
+            values = {}
         fake = self.next_seed_fake()
         # pos_id = 'pos_id' in values and values.pop('pos_id') or False
 
@@ -995,7 +1061,9 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         v.update(values)
         return v
 
-    def observation_weight(self, cr, uid, values={}):
+    def observation_weight(self, cr, uid, values=None):
+        if not values:
+            values = {}
         fake = self.next_seed_fake()
         v = {}
         assert 'patient_id' in values, "'patient_id' is not in values!"
@@ -1003,7 +1071,9 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         v.update(values)
         return v
 
-    def observation_height(self, cr, uid, values={}):
+    def observation_height(self, cr, uid, values=None):
+        if not values:
+            values = {}
         fake = self.next_seed_fake()
         v = {}
         assert 'patient_id' in values, "'patient_id' is not in values!"
@@ -1011,7 +1081,9 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         v.update(values)
         return v
 
-    def diabetes(self, cr, uid, values={}):
+    def diabetes(self, cr, uid, values=None):
+        if not values:
+            values = {}
         fake = self.next_seed_fake()
         v = {}
         assert 'patient_id' in values, "'patient_id' is not in values!"
@@ -1019,7 +1091,9 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         v.update(values)
         return v
 
-    def observation_blood_sugar(self, cr, uid, values={}):
+    def observation_blood_sugar(self, cr, uid, values=None):
+        if not values:
+            values = {}
         fake = self.next_seed_fake()
         v = {'blood_sugar': float(fake.random_int(min=1, max=100))}
         v.update(values)
