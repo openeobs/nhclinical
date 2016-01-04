@@ -1,5 +1,5 @@
 # Part of NHClinical. See LICENSE file for full copyright and licensing details
-# -*- encoding: utf-8 -*-
+# -*- coding: utf-8 -*-
 from datetime import datetime
 import logging
 

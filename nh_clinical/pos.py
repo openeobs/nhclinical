@@ -1,3 +1,5 @@
+# Part of NHClinical. See LICENSE file for full copyright and licensing details
+# -*- coding: utf-8 -*-
 """
 Defines POS class and extends Odoo's res_company.
 """

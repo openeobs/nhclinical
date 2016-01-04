@@ -1,5 +1,5 @@
 # Part of NHClinical. See LICENSE file for full copyright and licensing details
-# -*- encoding: utf-8 -*-
+# -*- coding: utf-8 -*-
 from openerp.osv.expression import (OR_OPERATOR, AND_OPERATOR, ExtendedLeaf,
                                     create_substitution_leaf, MAGIC_COLUMNS,
                                     normalize_domain, TRUE_LEAF, traceback,
