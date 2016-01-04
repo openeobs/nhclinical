@@ -1,0 +1,44 @@
+<openerp>
+    <data noupdate="1">
+
+        <record id="nhc_demo_patient_0" model="nh.clinical.patient">
+            <field name="dob">1988-01-01 00:00:00</field>
+            <field name="gender">M</field>
+            <field name="sex">M</field>
+            <field name="ethnicity">A</field>
+            <field name="patient_identifier">NHSNUM0000</field>
+            <field name="other_identifier">HOSNUM0000</field>
+            <field name="given_name">John</field>
+            <field name="middle_names">Robert</field>
+            <field name="family_name">Doe</field>
+            <field name="current_location_id" ref="nhc_def_conf_location_wa_b1"/>
+        </record>
+
+        <record id="nhc_demo_patient_2" model="nh.clinical.patient">
+            <field name="dob">1984-01-01 00:00:00</field>
+            <field name="gender">F</field>
+            <field name="sex">F</field>
+            <field name="ethnicity">C</field>
+            <field name="patient_identifier">NHSNUM0002</field>
+            <field name="other_identifier">HOSNUM0002</field>
+            <field name="given_name">Jenni</field>
+            <field name="middle_names">April</field>
+            <field name="family_name">Doe</field>
+            <field name="current_location_id" ref="nhc_def_conf_location_wa_b2"/>
+        </record>
+
+        <record id="nhc_demo_patient_5" model="nh.clinical.patient">
+            <field name="dob">1969-01-01 00:00:00</field>
+            <field name="gender">M</field>
+            <field name="sex">M</field>
+            <field name="ethnicity">F</field>
+            <field name="patient_identifier">NHSNUM0005</field>
+            <field name="other_identifier">HOSNUM0005</field>
+            <field name="given_name">Jack</field>
+            <field name="middle_names">Jack</field>
+            <field name="family_name">Doe</field>
+            <field name="current_location_id" ref="nhc_def_conf_location_wa"/>
+        </record>
+
+    </data>
+</openerp>
