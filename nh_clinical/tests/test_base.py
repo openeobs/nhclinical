@@ -24,10 +24,10 @@ class BaseTest(SingleTransactionCase):
     def tearDownClass(cls):
         if config['test_commit']:
             cls.cr.commit()
-            _logger.info("COMMIT")
+            _logger.debug("COMMIT")
         else:
             cls.cr.rollback()
-            _logger.info("ROLLBACK")
+            _logger.debug("ROLLBACK")
         cls.cr.close()
 
     def setUp(self):
@@ -51,9 +51,9 @@ class BaseTest(SingleTransactionCase):
 
     def create_activity(self, cr, uid, data_model, vals_activity=None,
                         vals_data=None, context=None):
-        if not vals_activity:
+        if vals_activity is None:
             vals_activity = {}
-        if not vals_data:
+        if vals_data is None:
             vals_data = {}
         model_pool = self.registry(data_model)
         activity_id = model_pool.create_activity(cr, uid, vals_activity,
@@ -193,19 +193,23 @@ class BaseTest(SingleTransactionCase):
                       "data: %s" % (location_id, data))
         return location_id
 
-    def create_device_type(self):
+    def create_device_type(self, data=None):
+        if data is None:
+            data = {}
         device_type_id = device_type_pool.create(cr, uid,
                                                  self.data_device_type())
         _logger.debug("Device type created id=%s" % device_type_id)
         return device_type_id
 
-    def create_device(self):
+    def create_device(self, data=None):
+        if data is None:
+            data = {}
         device_id = device_pool.create(cr, uid, self.data_device())
         _logger.debug("Device created id=%s" % device_id)
         return device_id
 
     def data_patient(self, data=None):
-        if not data:
+        if data is None:
             data = {}
         fake.seed(next_seed())
         family_name = data.get('family_name') or fake.last_name()
@@ -226,7 +230,7 @@ class BaseTest(SingleTransactionCase):
         return res
 
     def data_adt_user(self, data=None):
-        if not data:
+        if data is None:
             data = {}
         fake.seed(next_seed())
         adt_group = imd_pool.get_object(cr, uid, "nh_clinical",
@@ -244,7 +248,7 @@ class BaseTest(SingleTransactionCase):
         return res
 
     def data_bed_location(self, parent_id, data=None):
-        if not data:
+        if data is None:
             data = {}
         fake.seed(next_seed())
         code = "BED_"+str(fake.random_int(min=100, max=999))
@@ -258,7 +262,7 @@ class BaseTest(SingleTransactionCase):
         return res
 
     def data_ward_location(self, parent_id, data=None):
-        if not data:
+        if data is None:
             data = {}
         fake.seed(next_seed())
         code = "WARD_"+str(fake.random_int(min=100, max=999))
@@ -272,7 +276,7 @@ class BaseTest(SingleTransactionCase):
         return res
 
     def data_nurse_user(self, location_ids, data=None):
-        if not data:
+        if data is None:
             data = {}
         fake.seed(next_seed())
         nurse_group = imd_pool.get_object(cr, uid, "nh_clinical",
@@ -290,7 +294,7 @@ class BaseTest(SingleTransactionCase):
         return res
 
     def data_pos_location(self, data=None):
-        if not data:
+        if data is None:
             data = {}
         fake.seed(next_seed())
         code = "POS_"+str(fake.random_int(min=100, max=999))
@@ -304,7 +308,7 @@ class BaseTest(SingleTransactionCase):
         return res
 
     def data_admission_location(self, data=None):
-        if not data:
+        if data is None:
             data = {}
         fake.seed(next_seed())
         code = "ADMISSION_LOCATION_"+str(fake.random_int(min=100, max=999))
@@ -318,7 +322,7 @@ class BaseTest(SingleTransactionCase):
         return res
 
     def data_discharge_location(self, data=None):
-        if not data:
+        if data is None:
             data = {}
         fake.seed(next_seed())
         code = "DISCHARGE_LOCATION_"+str(fake.random_int(min=100, max=999))
@@ -332,7 +336,7 @@ class BaseTest(SingleTransactionCase):
         return res
 
     def data_pos(self, data=None):
-        if not data:
+        if data is None:
             data = {}
         fake.seed(next_seed())
         location_id = data.get('location_id') or self.create_pos_location()
@@ -347,7 +351,7 @@ class BaseTest(SingleTransactionCase):
         return res
 
     def data_device_type(self, data=None):
-        if not data:
+        if data is None:
             data = {}
         fake.seed(next_seed())
         flow_directions = ['none', 'in', 'out', 'both']
@@ -360,7 +364,7 @@ class BaseTest(SingleTransactionCase):
         return res
 
     def data_device(self, data=None):
-        if not data:
+        if data is None:
             data = {}
         fake.seed(next_seed())
         type_id = data.get('type_id') or device_type_pool.create(

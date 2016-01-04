@@ -1,8 +1,10 @@
 # Part of NHClinical. See LICENSE file for full copyright and licensing details
-# -*- encoding: utf-8 -*-
+# -*- coding: utf-8 -*-
+__author__ = 'wearp'
 from datetime import datetime
 import re
 from mock import patch
+
 from openerp.osv import fields
 from openerp.tests.common import TransactionCase
 
@@ -11,7 +13,7 @@ class TestORMFixes(TransactionCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.pattern = re.compile(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}")
+        cls.pattern = re.compile(r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}')
         cls.date = datetime.now()
         cls.context = {'tz': 'GB'}
 
