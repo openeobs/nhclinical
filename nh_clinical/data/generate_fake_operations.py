@@ -71,7 +71,7 @@ class OperationsGenerator(object):
                 Comment('Spell data for patient {0}'.format(patient_id))
             )
             self.create_activity_spell_record(patient_id, patient,
-                                                  admit_offset)
+                                              admit_offset)
             self.create_spell_record(patient_id, patient, admit_offset)
             self.update_activity_spell(patient_id)
 
@@ -92,10 +92,9 @@ class OperationsGenerator(object):
             self.create_admission_record(patient_id, patient, admit_offset)
             self.update_activity_admission(patient_id)
 
-
             # Generate placement data
-            location = patient.find('field[@name=\'current_location_id\']')\
-            .attrib['ref']
+            location_el = patient.find('field[@name=\'current_location_id\']')
+            location = location_el.attrib['ref']
             if '_b' in location[-6:]:
                 self.data.append(
                     Comment(
@@ -104,7 +103,7 @@ class OperationsGenerator(object):
                 )
                 self.create_activity_placement_record(patient_id, patient,
                                                       admit_offset)
-                self.create_placement_record(patient_id, patient, admit_offset)
+                self.create_placement_record(patient_id, patient)
                 self.update_activity_placement(patient_id)
 
     def create_activity_spell_record(self, patient_id, patient, admit_offset):
@@ -681,7 +680,7 @@ class OperationsGenerator(object):
             }
         )
 
-    def create_placement_record(self, patient_id, patient, admit_offset):
+    def create_placement_record(self, patient_id, patient):
         # Create nh.clinical.adt.patient.admit record with id & data
         activity_admit_record = SubElement(
             self.data,
