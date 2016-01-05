@@ -1,325 +1,5 @@
 <openerp>
   <data noupdate="1">
-    <!--Placement data for patient 65-->
-    <record id="nhc_activity_demo_placement_65" model="nh.activity">
-      <field name="patient_id" ref="nhc_demo_patient_65" />
-      <field name="creator_id" ref="nhc_activity_demo_admission_65" />
-      <field name="parent_id" ref="nhc_activity_demo_spell_65" />
-      <field name="spell_activity_id" ref="nhc_activity_demo_spell_65" />
-      <field name="state">completed</field>
-      <field name="data_model">nh.clinical.patient.placement</field>
-      <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
-    </record>
-    <record id="nhc_demo_placement_65" model="nh.clinical.patient.placement">
-      <field name="activity_id" ref="nhc_activity_demo_placement_65" />
-      <field name="patient_id" ref="nhc_demo_patient_65" />
-      <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
-      <field name="location_id" ref="nhc_def_conf_location_wc_b1" />
-    </record>
-    <record id="nhc_activity_demo_placement_65" model="nh.activity">
-      <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_65'))" name="data_ref" />
-    </record>
-    <!--Placement data for patient 66-->
-    <record id="nhc_activity_demo_placement_66" model="nh.activity">
-      <field name="patient_id" ref="nhc_demo_patient_66" />
-      <field name="creator_id" ref="nhc_activity_demo_admission_66" />
-      <field name="parent_id" ref="nhc_activity_demo_spell_66" />
-      <field name="spell_activity_id" ref="nhc_activity_demo_spell_66" />
-      <field name="state">completed</field>
-      <field name="data_model">nh.clinical.patient.placement</field>
-      <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
-    </record>
-    <record id="nhc_demo_placement_66" model="nh.clinical.patient.placement">
-      <field name="activity_id" ref="nhc_activity_demo_placement_66" />
-      <field name="patient_id" ref="nhc_demo_patient_66" />
-      <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
-      <field name="location_id" ref="nhc_def_conf_location_wc_b2" />
-    </record>
-    <record id="nhc_activity_demo_placement_66" model="nh.activity">
-      <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_66'))" name="data_ref" />
-    </record>
-    <!--Placement data for patient 67-->
-    <record id="nhc_activity_demo_placement_67" model="nh.activity">
-      <field name="patient_id" ref="nhc_demo_patient_67" />
-      <field name="creator_id" ref="nhc_activity_demo_admission_67" />
-      <field name="parent_id" ref="nhc_activity_demo_spell_67" />
-      <field name="spell_activity_id" ref="nhc_activity_demo_spell_67" />
-      <field name="state">completed</field>
-      <field name="data_model">nh.clinical.patient.placement</field>
-      <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
-    </record>
-    <record id="nhc_demo_placement_67" model="nh.clinical.patient.placement">
-      <field name="activity_id" ref="nhc_activity_demo_placement_67" />
-      <field name="patient_id" ref="nhc_demo_patient_67" />
-      <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
-      <field name="location_id" ref="nhc_def_conf_location_wc_b3" />
-    </record>
-    <record id="nhc_activity_demo_placement_67" model="nh.activity">
-      <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_67'))" name="data_ref" />
-    </record>
-    <!--Placement data for patient 68-->
-    <record id="nhc_activity_demo_placement_68" model="nh.activity">
-      <field name="patient_id" ref="nhc_demo_patient_68" />
-      <field name="creator_id" ref="nhc_activity_demo_admission_68" />
-      <field name="parent_id" ref="nhc_activity_demo_spell_68" />
-      <field name="spell_activity_id" ref="nhc_activity_demo_spell_68" />
-      <field name="state">completed</field>
-      <field name="data_model">nh.clinical.patient.placement</field>
-      <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
-    </record>
-    <record id="nhc_demo_placement_68" model="nh.clinical.patient.placement">
-      <field name="activity_id" ref="nhc_activity_demo_placement_68" />
-      <field name="patient_id" ref="nhc_demo_patient_68" />
-      <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
-      <field name="location_id" ref="nhc_def_conf_location_wc_b4" />
-    </record>
-    <record id="nhc_activity_demo_placement_68" model="nh.activity">
-      <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_68'))" name="data_ref" />
-    </record>
-    <!--Placement data for patient 69-->
-    <record id="nhc_activity_demo_placement_69" model="nh.activity">
-      <field name="patient_id" ref="nhc_demo_patient_69" />
-      <field name="creator_id" ref="nhc_activity_demo_admission_69" />
-      <field name="parent_id" ref="nhc_activity_demo_spell_69" />
-      <field name="spell_activity_id" ref="nhc_activity_demo_spell_69" />
-      <field name="state">completed</field>
-      <field name="data_model">nh.clinical.patient.placement</field>
-      <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
-    </record>
-    <record id="nhc_demo_placement_69" model="nh.clinical.patient.placement">
-      <field name="activity_id" ref="nhc_activity_demo_placement_69" />
-      <field name="patient_id" ref="nhc_demo_patient_69" />
-      <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
-      <field name="location_id" ref="nhc_def_conf_location_wc_b5" />
-    </record>
-    <record id="nhc_activity_demo_placement_69" model="nh.activity">
-      <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_69'))" name="data_ref" />
-    </record>
-    <!--Placement data for patient 70-->
-    <record id="nhc_activity_demo_placement_70" model="nh.activity">
-      <field name="patient_id" ref="nhc_demo_patient_70" />
-      <field name="creator_id" ref="nhc_activity_demo_admission_70" />
-      <field name="parent_id" ref="nhc_activity_demo_spell_70" />
-      <field name="spell_activity_id" ref="nhc_activity_demo_spell_70" />
-      <field name="state">completed</field>
-      <field name="data_model">nh.clinical.patient.placement</field>
-      <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
-    </record>
-    <record id="nhc_demo_placement_70" model="nh.clinical.patient.placement">
-      <field name="activity_id" ref="nhc_activity_demo_placement_70" />
-      <field name="patient_id" ref="nhc_demo_patient_70" />
-      <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
-      <field name="location_id" ref="nhc_def_conf_location_wc_b6" />
-    </record>
-    <record id="nhc_activity_demo_placement_70" model="nh.activity">
-      <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_70'))" name="data_ref" />
-    </record>
-    <!--Placement data for patient 71-->
-    <record id="nhc_activity_demo_placement_71" model="nh.activity">
-      <field name="patient_id" ref="nhc_demo_patient_71" />
-      <field name="creator_id" ref="nhc_activity_demo_admission_71" />
-      <field name="parent_id" ref="nhc_activity_demo_spell_71" />
-      <field name="spell_activity_id" ref="nhc_activity_demo_spell_71" />
-      <field name="state">completed</field>
-      <field name="data_model">nh.clinical.patient.placement</field>
-      <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
-    </record>
-    <record id="nhc_demo_placement_71" model="nh.clinical.patient.placement">
-      <field name="activity_id" ref="nhc_activity_demo_placement_71" />
-      <field name="patient_id" ref="nhc_demo_patient_71" />
-      <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
-      <field name="location_id" ref="nhc_def_conf_location_wc_b7" />
-    </record>
-    <record id="nhc_activity_demo_placement_71" model="nh.activity">
-      <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_71'))" name="data_ref" />
-    </record>
-    <!--Placement data for patient 72-->
-    <record id="nhc_activity_demo_placement_72" model="nh.activity">
-      <field name="patient_id" ref="nhc_demo_patient_72" />
-      <field name="creator_id" ref="nhc_activity_demo_admission_72" />
-      <field name="parent_id" ref="nhc_activity_demo_spell_72" />
-      <field name="spell_activity_id" ref="nhc_activity_demo_spell_72" />
-      <field name="state">completed</field>
-      <field name="data_model">nh.clinical.patient.placement</field>
-      <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
-    </record>
-    <record id="nhc_demo_placement_72" model="nh.clinical.patient.placement">
-      <field name="activity_id" ref="nhc_activity_demo_placement_72" />
-      <field name="patient_id" ref="nhc_demo_patient_72" />
-      <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
-      <field name="location_id" ref="nhc_def_conf_location_wc_b8" />
-    </record>
-    <record id="nhc_activity_demo_placement_72" model="nh.activity">
-      <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_72'))" name="data_ref" />
-    </record>
-    <!--Placement data for patient 73-->
-    <record id="nhc_activity_demo_placement_73" model="nh.activity">
-      <field name="patient_id" ref="nhc_demo_patient_73" />
-      <field name="creator_id" ref="nhc_activity_demo_admission_73" />
-      <field name="parent_id" ref="nhc_activity_demo_spell_73" />
-      <field name="spell_activity_id" ref="nhc_activity_demo_spell_73" />
-      <field name="state">completed</field>
-      <field name="data_model">nh.clinical.patient.placement</field>
-      <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
-    </record>
-    <record id="nhc_demo_placement_73" model="nh.clinical.patient.placement">
-      <field name="activity_id" ref="nhc_activity_demo_placement_73" />
-      <field name="patient_id" ref="nhc_demo_patient_73" />
-      <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
-      <field name="location_id" ref="nhc_def_conf_location_wc_b9" />
-    </record>
-    <record id="nhc_activity_demo_placement_73" model="nh.activity">
-      <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_73'))" name="data_ref" />
-    </record>
-    <!--Placement data for patient 74-->
-    <record id="nhc_activity_demo_placement_74" model="nh.activity">
-      <field name="patient_id" ref="nhc_demo_patient_74" />
-      <field name="creator_id" ref="nhc_activity_demo_admission_74" />
-      <field name="parent_id" ref="nhc_activity_demo_spell_74" />
-      <field name="spell_activity_id" ref="nhc_activity_demo_spell_74" />
-      <field name="state">completed</field>
-      <field name="data_model">nh.clinical.patient.placement</field>
-      <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
-    </record>
-    <record id="nhc_demo_placement_74" model="nh.clinical.patient.placement">
-      <field name="activity_id" ref="nhc_activity_demo_placement_74" />
-      <field name="patient_id" ref="nhc_demo_patient_74" />
-      <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
-      <field name="location_id" ref="nhc_def_conf_location_wc_b10" />
-    </record>
-    <record id="nhc_activity_demo_placement_74" model="nh.activity">
-      <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_74'))" name="data_ref" />
-    </record>
-    <!--Placement data for patient 75-->
-    <record id="nhc_activity_demo_placement_75" model="nh.activity">
-      <field name="patient_id" ref="nhc_demo_patient_75" />
-      <field name="creator_id" ref="nhc_activity_demo_admission_75" />
-      <field name="parent_id" ref="nhc_activity_demo_spell_75" />
-      <field name="spell_activity_id" ref="nhc_activity_demo_spell_75" />
-      <field name="state">completed</field>
-      <field name="data_model">nh.clinical.patient.placement</field>
-      <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
-    </record>
-    <record id="nhc_demo_placement_75" model="nh.clinical.patient.placement">
-      <field name="activity_id" ref="nhc_activity_demo_placement_75" />
-      <field name="patient_id" ref="nhc_demo_patient_75" />
-      <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
-      <field name="location_id" ref="nhc_def_conf_location_wc_b11" />
-    </record>
-    <record id="nhc_activity_demo_placement_75" model="nh.activity">
-      <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_75'))" name="data_ref" />
-    </record>
-    <!--Placement data for patient 76-->
-    <record id="nhc_activity_demo_placement_76" model="nh.activity">
-      <field name="patient_id" ref="nhc_demo_patient_76" />
-      <field name="creator_id" ref="nhc_activity_demo_admission_76" />
-      <field name="parent_id" ref="nhc_activity_demo_spell_76" />
-      <field name="spell_activity_id" ref="nhc_activity_demo_spell_76" />
-      <field name="state">completed</field>
-      <field name="data_model">nh.clinical.patient.placement</field>
-      <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
-    </record>
-    <record id="nhc_demo_placement_76" model="nh.clinical.patient.placement">
-      <field name="activity_id" ref="nhc_activity_demo_placement_76" />
-      <field name="patient_id" ref="nhc_demo_patient_76" />
-      <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
-      <field name="location_id" ref="nhc_def_conf_location_wc_b12" />
-    </record>
-    <record id="nhc_activity_demo_placement_76" model="nh.activity">
-      <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_76'))" name="data_ref" />
-    </record>
-    <!--Placement data for patient 77-->
-    <record id="nhc_activity_demo_placement_77" model="nh.activity">
-      <field name="patient_id" ref="nhc_demo_patient_77" />
-      <field name="creator_id" ref="nhc_activity_demo_admission_77" />
-      <field name="parent_id" ref="nhc_activity_demo_spell_77" />
-      <field name="spell_activity_id" ref="nhc_activity_demo_spell_77" />
-      <field name="state">completed</field>
-      <field name="data_model">nh.clinical.patient.placement</field>
-      <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
-    </record>
-    <record id="nhc_demo_placement_77" model="nh.clinical.patient.placement">
-      <field name="activity_id" ref="nhc_activity_demo_placement_77" />
-      <field name="patient_id" ref="nhc_demo_patient_77" />
-      <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
-      <field name="location_id" ref="nhc_def_conf_location_wc_b13" />
-    </record>
-    <record id="nhc_activity_demo_placement_77" model="nh.activity">
-      <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_77'))" name="data_ref" />
-    </record>
-    <!--Placement data for patient 78-->
-    <record id="nhc_activity_demo_placement_78" model="nh.activity">
-      <field name="patient_id" ref="nhc_demo_patient_78" />
-      <field name="creator_id" ref="nhc_activity_demo_admission_78" />
-      <field name="parent_id" ref="nhc_activity_demo_spell_78" />
-      <field name="spell_activity_id" ref="nhc_activity_demo_spell_78" />
-      <field name="state">completed</field>
-      <field name="data_model">nh.clinical.patient.placement</field>
-      <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
-    </record>
-    <record id="nhc_demo_placement_78" model="nh.clinical.patient.placement">
-      <field name="activity_id" ref="nhc_activity_demo_placement_78" />
-      <field name="patient_id" ref="nhc_demo_patient_78" />
-      <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
-      <field name="location_id" ref="nhc_def_conf_location_wc_b14" />
-    </record>
-    <record id="nhc_activity_demo_placement_78" model="nh.activity">
-      <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_78'))" name="data_ref" />
-    </record>
-    <!--Placement data for patient 79-->
-    <record id="nhc_activity_demo_placement_79" model="nh.activity">
-      <field name="patient_id" ref="nhc_demo_patient_79" />
-      <field name="creator_id" ref="nhc_activity_demo_admission_79" />
-      <field name="parent_id" ref="nhc_activity_demo_spell_79" />
-      <field name="spell_activity_id" ref="nhc_activity_demo_spell_79" />
-      <field name="state">completed</field>
-      <field name="data_model">nh.clinical.patient.placement</field>
-      <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
-    </record>
-    <record id="nhc_demo_placement_79" model="nh.clinical.patient.placement">
-      <field name="activity_id" ref="nhc_activity_demo_placement_79" />
-      <field name="patient_id" ref="nhc_demo_patient_79" />
-      <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
-      <field name="location_id" ref="nhc_def_conf_location_wc_b15" />
-    </record>
-    <record id="nhc_activity_demo_placement_79" model="nh.activity">
-      <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_79'))" name="data_ref" />
-    </record>
-    <!--Placement data for patient 80-->
-    <record id="nhc_activity_demo_placement_80" model="nh.activity">
-      <field name="patient_id" ref="nhc_demo_patient_80" />
-      <field name="creator_id" ref="nhc_activity_demo_admission_80" />
-      <field name="parent_id" ref="nhc_activity_demo_spell_80" />
-      <field name="spell_activity_id" ref="nhc_activity_demo_spell_80" />
-      <field name="state">completed</field>
-      <field name="data_model">nh.clinical.patient.placement</field>
-      <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
-    </record>
-    <record id="nhc_demo_placement_80" model="nh.clinical.patient.placement">
-      <field name="activity_id" ref="nhc_activity_demo_placement_80" />
-      <field name="patient_id" ref="nhc_demo_patient_80" />
-      <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
-      <field name="location_id" ref="nhc_def_conf_location_wc_b16" />
-    </record>
-    <record id="nhc_activity_demo_placement_80" model="nh.activity">
-      <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_80'))" name="data_ref" />
-    </record>
     <!--Placement data for patient 81-->
     <record id="nhc_activity_demo_placement_81" model="nh.activity">
       <field name="patient_id" ref="nhc_demo_patient_81" />
@@ -329,13 +9,13 @@
       <field name="state">completed</field>
       <field name="data_model">nh.clinical.patient.placement</field>
       <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
     </record>
     <record id="nhc_demo_placement_81" model="nh.clinical.patient.placement">
       <field name="activity_id" ref="nhc_activity_demo_placement_81" />
       <field name="patient_id" ref="nhc_demo_patient_81" />
       <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
-      <field name="location_id" ref="nhc_def_conf_location_wc_b17" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b1" />
     </record>
     <record id="nhc_activity_demo_placement_81" model="nh.activity">
       <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_81'))" name="data_ref" />
@@ -349,13 +29,13 @@
       <field name="state">completed</field>
       <field name="data_model">nh.clinical.patient.placement</field>
       <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
     </record>
     <record id="nhc_demo_placement_82" model="nh.clinical.patient.placement">
       <field name="activity_id" ref="nhc_activity_demo_placement_82" />
       <field name="patient_id" ref="nhc_demo_patient_82" />
       <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
-      <field name="location_id" ref="nhc_def_conf_location_wc_b18" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b2" />
     </record>
     <record id="nhc_activity_demo_placement_82" model="nh.activity">
       <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_82'))" name="data_ref" />
@@ -369,13 +49,13 @@
       <field name="state">completed</field>
       <field name="data_model">nh.clinical.patient.placement</field>
       <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
     </record>
     <record id="nhc_demo_placement_83" model="nh.clinical.patient.placement">
       <field name="activity_id" ref="nhc_activity_demo_placement_83" />
       <field name="patient_id" ref="nhc_demo_patient_83" />
       <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
-      <field name="location_id" ref="nhc_def_conf_location_wc_b19" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b3" />
     </record>
     <record id="nhc_activity_demo_placement_83" model="nh.activity">
       <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_83'))" name="data_ref" />
@@ -395,7 +75,7 @@
       <field name="activity_id" ref="nhc_activity_demo_placement_84" />
       <field name="patient_id" ref="nhc_demo_patient_84" />
       <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
-      <field name="location_id" ref="nhc_def_conf_location_wc_b20" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b4" />
     </record>
     <record id="nhc_activity_demo_placement_84" model="nh.activity">
       <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_84'))" name="data_ref" />
@@ -409,13 +89,13 @@
       <field name="state">completed</field>
       <field name="data_model">nh.clinical.patient.placement</field>
       <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
     </record>
     <record id="nhc_demo_placement_85" model="nh.clinical.patient.placement">
       <field name="activity_id" ref="nhc_activity_demo_placement_85" />
       <field name="patient_id" ref="nhc_demo_patient_85" />
       <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
-      <field name="location_id" ref="nhc_def_conf_location_wc_b21" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b5" />
     </record>
     <record id="nhc_activity_demo_placement_85" model="nh.activity">
       <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_85'))" name="data_ref" />
@@ -435,7 +115,7 @@
       <field name="activity_id" ref="nhc_activity_demo_placement_86" />
       <field name="patient_id" ref="nhc_demo_patient_86" />
       <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
-      <field name="location_id" ref="nhc_def_conf_location_wc_b22" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b6" />
     </record>
     <record id="nhc_activity_demo_placement_86" model="nh.activity">
       <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_86'))" name="data_ref" />
@@ -455,7 +135,7 @@
       <field name="activity_id" ref="nhc_activity_demo_placement_87" />
       <field name="patient_id" ref="nhc_demo_patient_87" />
       <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
-      <field name="location_id" ref="nhc_def_conf_location_wc_b23" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b7" />
     </record>
     <record id="nhc_activity_demo_placement_87" model="nh.activity">
       <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_87'))" name="data_ref" />
@@ -469,13 +149,13 @@
       <field name="state">completed</field>
       <field name="data_model">nh.clinical.patient.placement</field>
       <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
     </record>
     <record id="nhc_demo_placement_88" model="nh.clinical.patient.placement">
       <field name="activity_id" ref="nhc_activity_demo_placement_88" />
       <field name="patient_id" ref="nhc_demo_patient_88" />
       <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
-      <field name="location_id" ref="nhc_def_conf_location_wc_b24" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b8" />
     </record>
     <record id="nhc_activity_demo_placement_88" model="nh.activity">
       <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_88'))" name="data_ref" />
@@ -489,13 +169,13 @@
       <field name="state">completed</field>
       <field name="data_model">nh.clinical.patient.placement</field>
       <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
     </record>
     <record id="nhc_demo_placement_89" model="nh.clinical.patient.placement">
       <field name="activity_id" ref="nhc_activity_demo_placement_89" />
       <field name="patient_id" ref="nhc_demo_patient_89" />
       <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
-      <field name="location_id" ref="nhc_def_conf_location_wc_b25" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b9" />
     </record>
     <record id="nhc_activity_demo_placement_89" model="nh.activity">
       <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_89'))" name="data_ref" />
@@ -509,13 +189,13 @@
       <field name="state">completed</field>
       <field name="data_model">nh.clinical.patient.placement</field>
       <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
     </record>
     <record id="nhc_demo_placement_90" model="nh.clinical.patient.placement">
       <field name="activity_id" ref="nhc_activity_demo_placement_90" />
       <field name="patient_id" ref="nhc_demo_patient_90" />
       <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
-      <field name="location_id" ref="nhc_def_conf_location_wc_b26" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b10" />
     </record>
     <record id="nhc_activity_demo_placement_90" model="nh.activity">
       <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_90'))" name="data_ref" />
@@ -535,7 +215,7 @@
       <field name="activity_id" ref="nhc_activity_demo_placement_91" />
       <field name="patient_id" ref="nhc_demo_patient_91" />
       <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
-      <field name="location_id" ref="nhc_def_conf_location_wc_b27" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b11" />
     </record>
     <record id="nhc_activity_demo_placement_91" model="nh.activity">
       <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_91'))" name="data_ref" />
@@ -555,10 +235,330 @@
       <field name="activity_id" ref="nhc_activity_demo_placement_92" />
       <field name="patient_id" ref="nhc_demo_patient_92" />
       <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
-      <field name="location_id" ref="nhc_def_conf_location_wc_b28" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b12" />
     </record>
     <record id="nhc_activity_demo_placement_92" model="nh.activity">
       <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_92'))" name="data_ref" />
+    </record>
+    <!--Placement data for patient 93-->
+    <record id="nhc_activity_demo_placement_93" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_93" />
+      <field name="creator_id" ref="nhc_activity_demo_admission_93" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_93" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_93" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.placement</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_placement_93" model="nh.clinical.patient.placement">
+      <field name="activity_id" ref="nhc_activity_demo_placement_93" />
+      <field name="patient_id" ref="nhc_demo_patient_93" />
+      <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b13" />
+    </record>
+    <record id="nhc_activity_demo_placement_93" model="nh.activity">
+      <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_93'))" name="data_ref" />
+    </record>
+    <!--Placement data for patient 94-->
+    <record id="nhc_activity_demo_placement_94" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_94" />
+      <field name="creator_id" ref="nhc_activity_demo_admission_94" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_94" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_94" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.placement</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_placement_94" model="nh.clinical.patient.placement">
+      <field name="activity_id" ref="nhc_activity_demo_placement_94" />
+      <field name="patient_id" ref="nhc_demo_patient_94" />
+      <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b14" />
+    </record>
+    <record id="nhc_activity_demo_placement_94" model="nh.activity">
+      <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_94'))" name="data_ref" />
+    </record>
+    <!--Placement data for patient 95-->
+    <record id="nhc_activity_demo_placement_95" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_95" />
+      <field name="creator_id" ref="nhc_activity_demo_admission_95" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_95" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_95" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.placement</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_placement_95" model="nh.clinical.patient.placement">
+      <field name="activity_id" ref="nhc_activity_demo_placement_95" />
+      <field name="patient_id" ref="nhc_demo_patient_95" />
+      <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b15" />
+    </record>
+    <record id="nhc_activity_demo_placement_95" model="nh.activity">
+      <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_95'))" name="data_ref" />
+    </record>
+    <!--Placement data for patient 96-->
+    <record id="nhc_activity_demo_placement_96" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_96" />
+      <field name="creator_id" ref="nhc_activity_demo_admission_96" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_96" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_96" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.placement</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_placement_96" model="nh.clinical.patient.placement">
+      <field name="activity_id" ref="nhc_activity_demo_placement_96" />
+      <field name="patient_id" ref="nhc_demo_patient_96" />
+      <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b16" />
+    </record>
+    <record id="nhc_activity_demo_placement_96" model="nh.activity">
+      <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_96'))" name="data_ref" />
+    </record>
+    <!--Placement data for patient 97-->
+    <record id="nhc_activity_demo_placement_97" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_97" />
+      <field name="creator_id" ref="nhc_activity_demo_admission_97" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_97" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_97" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.placement</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_placement_97" model="nh.clinical.patient.placement">
+      <field name="activity_id" ref="nhc_activity_demo_placement_97" />
+      <field name="patient_id" ref="nhc_demo_patient_97" />
+      <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b17" />
+    </record>
+    <record id="nhc_activity_demo_placement_97" model="nh.activity">
+      <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_97'))" name="data_ref" />
+    </record>
+    <!--Placement data for patient 98-->
+    <record id="nhc_activity_demo_placement_98" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_98" />
+      <field name="creator_id" ref="nhc_activity_demo_admission_98" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_98" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_98" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.placement</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_placement_98" model="nh.clinical.patient.placement">
+      <field name="activity_id" ref="nhc_activity_demo_placement_98" />
+      <field name="patient_id" ref="nhc_demo_patient_98" />
+      <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b18" />
+    </record>
+    <record id="nhc_activity_demo_placement_98" model="nh.activity">
+      <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_98'))" name="data_ref" />
+    </record>
+    <!--Placement data for patient 99-->
+    <record id="nhc_activity_demo_placement_99" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_99" />
+      <field name="creator_id" ref="nhc_activity_demo_admission_99" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_99" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_99" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.placement</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_placement_99" model="nh.clinical.patient.placement">
+      <field name="activity_id" ref="nhc_activity_demo_placement_99" />
+      <field name="patient_id" ref="nhc_demo_patient_99" />
+      <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b19" />
+    </record>
+    <record id="nhc_activity_demo_placement_99" model="nh.activity">
+      <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_99'))" name="data_ref" />
+    </record>
+    <!--Placement data for patient 100-->
+    <record id="nhc_activity_demo_placement_100" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_100" />
+      <field name="creator_id" ref="nhc_activity_demo_admission_100" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_100" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_100" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.placement</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_placement_100" model="nh.clinical.patient.placement">
+      <field name="activity_id" ref="nhc_activity_demo_placement_100" />
+      <field name="patient_id" ref="nhc_demo_patient_100" />
+      <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b20" />
+    </record>
+    <record id="nhc_activity_demo_placement_100" model="nh.activity">
+      <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_100'))" name="data_ref" />
+    </record>
+    <!--Placement data for patient 101-->
+    <record id="nhc_activity_demo_placement_101" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_101" />
+      <field name="creator_id" ref="nhc_activity_demo_admission_101" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_101" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_101" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.placement</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_placement_101" model="nh.clinical.patient.placement">
+      <field name="activity_id" ref="nhc_activity_demo_placement_101" />
+      <field name="patient_id" ref="nhc_demo_patient_101" />
+      <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b21" />
+    </record>
+    <record id="nhc_activity_demo_placement_101" model="nh.activity">
+      <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_101'))" name="data_ref" />
+    </record>
+    <!--Placement data for patient 102-->
+    <record id="nhc_activity_demo_placement_102" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_102" />
+      <field name="creator_id" ref="nhc_activity_demo_admission_102" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_102" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_102" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.placement</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_placement_102" model="nh.clinical.patient.placement">
+      <field name="activity_id" ref="nhc_activity_demo_placement_102" />
+      <field name="patient_id" ref="nhc_demo_patient_102" />
+      <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b22" />
+    </record>
+    <record id="nhc_activity_demo_placement_102" model="nh.activity">
+      <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_102'))" name="data_ref" />
+    </record>
+    <!--Placement data for patient 103-->
+    <record id="nhc_activity_demo_placement_103" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_103" />
+      <field name="creator_id" ref="nhc_activity_demo_admission_103" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_103" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_103" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.placement</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_placement_103" model="nh.clinical.patient.placement">
+      <field name="activity_id" ref="nhc_activity_demo_placement_103" />
+      <field name="patient_id" ref="nhc_demo_patient_103" />
+      <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b23" />
+    </record>
+    <record id="nhc_activity_demo_placement_103" model="nh.activity">
+      <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_103'))" name="data_ref" />
+    </record>
+    <!--Placement data for patient 104-->
+    <record id="nhc_activity_demo_placement_104" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_104" />
+      <field name="creator_id" ref="nhc_activity_demo_admission_104" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_104" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_104" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.placement</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_placement_104" model="nh.clinical.patient.placement">
+      <field name="activity_id" ref="nhc_activity_demo_placement_104" />
+      <field name="patient_id" ref="nhc_demo_patient_104" />
+      <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b24" />
+    </record>
+    <record id="nhc_activity_demo_placement_104" model="nh.activity">
+      <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_104'))" name="data_ref" />
+    </record>
+    <!--Placement data for patient 105-->
+    <record id="nhc_activity_demo_placement_105" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_105" />
+      <field name="creator_id" ref="nhc_activity_demo_admission_105" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_105" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_105" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.placement</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_placement_105" model="nh.clinical.patient.placement">
+      <field name="activity_id" ref="nhc_activity_demo_placement_105" />
+      <field name="patient_id" ref="nhc_demo_patient_105" />
+      <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b25" />
+    </record>
+    <record id="nhc_activity_demo_placement_105" model="nh.activity">
+      <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_105'))" name="data_ref" />
+    </record>
+    <!--Placement data for patient 106-->
+    <record id="nhc_activity_demo_placement_106" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_106" />
+      <field name="creator_id" ref="nhc_activity_demo_admission_106" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_106" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_106" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.placement</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_placement_106" model="nh.clinical.patient.placement">
+      <field name="activity_id" ref="nhc_activity_demo_placement_106" />
+      <field name="patient_id" ref="nhc_demo_patient_106" />
+      <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b26" />
+    </record>
+    <record id="nhc_activity_demo_placement_106" model="nh.activity">
+      <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_106'))" name="data_ref" />
+    </record>
+    <!--Placement data for patient 107-->
+    <record id="nhc_activity_demo_placement_107" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_107" />
+      <field name="creator_id" ref="nhc_activity_demo_admission_107" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_107" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_107" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.placement</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_placement_107" model="nh.clinical.patient.placement">
+      <field name="activity_id" ref="nhc_activity_demo_placement_107" />
+      <field name="patient_id" ref="nhc_demo_patient_107" />
+      <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b27" />
+    </record>
+    <record id="nhc_activity_demo_placement_107" model="nh.activity">
+      <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_107'))" name="data_ref" />
+    </record>
+    <!--Placement data for patient 108-->
+    <record id="nhc_activity_demo_placement_108" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_108" />
+      <field name="creator_id" ref="nhc_activity_demo_admission_108" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_108" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_108" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.placement</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_placement_108" model="nh.clinical.patient.placement">
+      <field name="activity_id" ref="nhc_activity_demo_placement_108" />
+      <field name="patient_id" ref="nhc_demo_patient_108" />
+      <field name="suggested_location_id" ref="nhc_def_conf_location_wc" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b28" />
+    </record>
+    <record id="nhc_activity_demo_placement_108" model="nh.activity">
+      <field eval="'nh.clinical.patient.placement,' + str(ref('nhc_demo_placement_108'))" name="data_ref" />
     </record>
   </data>
 </openerp>
