@@ -1,0 +1,1412 @@
+<openerp>
+  <data noupdate="1">
+    <!--ADT Admit data for patient 33-->
+    <record id="nhc_activity_demo_adt_admit_33" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_33" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_33" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.adt.patient.admit</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_adt_admit_33" model="nh.clinical.adt.patient.admit">
+      <field name="activity_id" ref="nhc_activity_demo_adt_admit_33" />
+      <field name="patient_id" ref="nhc_demo_patient_33" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="location">A</field>
+      <field name="code">DEMO0033</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+      <field name="patient_identifier">NHSNUM0033</field>
+      <field name="other_identifier">HOSNUM0033</field>
+    </record>
+    <record id="nhc_demo_adt_admit_33" model="nh.activity">
+      <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_33'))" name="data_ref" />
+    </record>
+    <!--Actual Admit data for patient 33-->
+    <record id="nhc_activity_demo_admission_33" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_33" />
+      <field name="creator_id" ref="nhc_activity_demo_adt_admit_33" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_33" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_33" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.admission</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_admission_33" model="nh.clinical.patient.admission">
+      <field name="activity_id" ref="nhc_activity_demo_admission_33" />
+      <field name="patient_id" ref="nhc_demo_patient_33" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0033</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_admission_33" model="nh.activity">
+      <field eval="'nh.clinical.patient.admission,' + str(ref('nhc_demo_admission_33'))" name="data_ref" />
+    </record>
+    <!--ADT Admit data for patient 34-->
+    <record id="nhc_activity_demo_adt_admit_34" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_34" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_34" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.adt.patient.admit</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_adt_admit_34" model="nh.clinical.adt.patient.admit">
+      <field name="activity_id" ref="nhc_activity_demo_adt_admit_34" />
+      <field name="patient_id" ref="nhc_demo_patient_34" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="location">A</field>
+      <field name="code">DEMO0034</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+      <field name="patient_identifier">NHSNUM0034</field>
+      <field name="other_identifier">HOSNUM0034</field>
+    </record>
+    <record id="nhc_demo_adt_admit_34" model="nh.activity">
+      <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_34'))" name="data_ref" />
+    </record>
+    <!--Actual Admit data for patient 34-->
+    <record id="nhc_activity_demo_admission_34" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_34" />
+      <field name="creator_id" ref="nhc_activity_demo_adt_admit_34" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_34" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_34" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.admission</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_admission_34" model="nh.clinical.patient.admission">
+      <field name="activity_id" ref="nhc_activity_demo_admission_34" />
+      <field name="patient_id" ref="nhc_demo_patient_34" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0034</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_admission_34" model="nh.activity">
+      <field eval="'nh.clinical.patient.admission,' + str(ref('nhc_demo_admission_34'))" name="data_ref" />
+    </record>
+    <!--ADT Admit data for patient 35-->
+    <record id="nhc_activity_demo_adt_admit_35" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_35" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_35" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.adt.patient.admit</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_adt_admit_35" model="nh.clinical.adt.patient.admit">
+      <field name="activity_id" ref="nhc_activity_demo_adt_admit_35" />
+      <field name="patient_id" ref="nhc_demo_patient_35" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="location">A</field>
+      <field name="code">DEMO0035</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+      <field name="patient_identifier">NHSNUM0035</field>
+      <field name="other_identifier">HOSNUM0035</field>
+    </record>
+    <record id="nhc_demo_adt_admit_35" model="nh.activity">
+      <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_35'))" name="data_ref" />
+    </record>
+    <!--Actual Admit data for patient 35-->
+    <record id="nhc_activity_demo_admission_35" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_35" />
+      <field name="creator_id" ref="nhc_activity_demo_adt_admit_35" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_35" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_35" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.admission</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_admission_35" model="nh.clinical.patient.admission">
+      <field name="activity_id" ref="nhc_activity_demo_admission_35" />
+      <field name="patient_id" ref="nhc_demo_patient_35" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0035</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_admission_35" model="nh.activity">
+      <field eval="'nh.clinical.patient.admission,' + str(ref('nhc_demo_admission_35'))" name="data_ref" />
+    </record>
+    <!--ADT Admit data for patient 36-->
+    <record id="nhc_activity_demo_adt_admit_36" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_36" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_36" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.adt.patient.admit</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_adt_admit_36" model="nh.clinical.adt.patient.admit">
+      <field name="activity_id" ref="nhc_activity_demo_adt_admit_36" />
+      <field name="patient_id" ref="nhc_demo_patient_36" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="location">A</field>
+      <field name="code">DEMO0036</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+      <field name="patient_identifier">NHSNUM0036</field>
+      <field name="other_identifier">HOSNUM0036</field>
+    </record>
+    <record id="nhc_demo_adt_admit_36" model="nh.activity">
+      <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_36'))" name="data_ref" />
+    </record>
+    <!--Actual Admit data for patient 36-->
+    <record id="nhc_activity_demo_admission_36" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_36" />
+      <field name="creator_id" ref="nhc_activity_demo_adt_admit_36" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_36" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_36" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.admission</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_admission_36" model="nh.clinical.patient.admission">
+      <field name="activity_id" ref="nhc_activity_demo_admission_36" />
+      <field name="patient_id" ref="nhc_demo_patient_36" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0036</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_admission_36" model="nh.activity">
+      <field eval="'nh.clinical.patient.admission,' + str(ref('nhc_demo_admission_36'))" name="data_ref" />
+    </record>
+    <!--ADT Admit data for patient 37-->
+    <record id="nhc_activity_demo_adt_admit_37" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_37" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_37" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.adt.patient.admit</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_adt_admit_37" model="nh.clinical.adt.patient.admit">
+      <field name="activity_id" ref="nhc_activity_demo_adt_admit_37" />
+      <field name="patient_id" ref="nhc_demo_patient_37" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="location">A</field>
+      <field name="code">DEMO0037</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+      <field name="patient_identifier">NHSNUM0037</field>
+      <field name="other_identifier">HOSNUM0037</field>
+    </record>
+    <record id="nhc_demo_adt_admit_37" model="nh.activity">
+      <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_37'))" name="data_ref" />
+    </record>
+    <!--Actual Admit data for patient 37-->
+    <record id="nhc_activity_demo_admission_37" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_37" />
+      <field name="creator_id" ref="nhc_activity_demo_adt_admit_37" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_37" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_37" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.admission</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_admission_37" model="nh.clinical.patient.admission">
+      <field name="activity_id" ref="nhc_activity_demo_admission_37" />
+      <field name="patient_id" ref="nhc_demo_patient_37" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0037</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_admission_37" model="nh.activity">
+      <field eval="'nh.clinical.patient.admission,' + str(ref('nhc_demo_admission_37'))" name="data_ref" />
+    </record>
+    <!--ADT Admit data for patient 38-->
+    <record id="nhc_activity_demo_adt_admit_38" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_38" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_38" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.adt.patient.admit</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_adt_admit_38" model="nh.clinical.adt.patient.admit">
+      <field name="activity_id" ref="nhc_activity_demo_adt_admit_38" />
+      <field name="patient_id" ref="nhc_demo_patient_38" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="location">A</field>
+      <field name="code">DEMO0038</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+      <field name="patient_identifier">NHSNUM0038</field>
+      <field name="other_identifier">HOSNUM0038</field>
+    </record>
+    <record id="nhc_demo_adt_admit_38" model="nh.activity">
+      <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_38'))" name="data_ref" />
+    </record>
+    <!--Actual Admit data for patient 38-->
+    <record id="nhc_activity_demo_admission_38" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_38" />
+      <field name="creator_id" ref="nhc_activity_demo_adt_admit_38" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_38" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_38" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.admission</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_admission_38" model="nh.clinical.patient.admission">
+      <field name="activity_id" ref="nhc_activity_demo_admission_38" />
+      <field name="patient_id" ref="nhc_demo_patient_38" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0038</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_admission_38" model="nh.activity">
+      <field eval="'nh.clinical.patient.admission,' + str(ref('nhc_demo_admission_38'))" name="data_ref" />
+    </record>
+    <!--ADT Admit data for patient 39-->
+    <record id="nhc_activity_demo_adt_admit_39" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_39" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_39" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.adt.patient.admit</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_adt_admit_39" model="nh.clinical.adt.patient.admit">
+      <field name="activity_id" ref="nhc_activity_demo_adt_admit_39" />
+      <field name="patient_id" ref="nhc_demo_patient_39" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="location">A</field>
+      <field name="code">DEMO0039</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+      <field name="patient_identifier">NHSNUM0039</field>
+      <field name="other_identifier">HOSNUM0039</field>
+    </record>
+    <record id="nhc_demo_adt_admit_39" model="nh.activity">
+      <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_39'))" name="data_ref" />
+    </record>
+    <!--Actual Admit data for patient 39-->
+    <record id="nhc_activity_demo_admission_39" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_39" />
+      <field name="creator_id" ref="nhc_activity_demo_adt_admit_39" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_39" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_39" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.admission</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_admission_39" model="nh.clinical.patient.admission">
+      <field name="activity_id" ref="nhc_activity_demo_admission_39" />
+      <field name="patient_id" ref="nhc_demo_patient_39" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0039</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_admission_39" model="nh.activity">
+      <field eval="'nh.clinical.patient.admission,' + str(ref('nhc_demo_admission_39'))" name="data_ref" />
+    </record>
+    <!--ADT Admit data for patient 40-->
+    <record id="nhc_activity_demo_adt_admit_40" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_40" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_40" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.adt.patient.admit</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_adt_admit_40" model="nh.clinical.adt.patient.admit">
+      <field name="activity_id" ref="nhc_activity_demo_adt_admit_40" />
+      <field name="patient_id" ref="nhc_demo_patient_40" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="location">A</field>
+      <field name="code">DEMO0040</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+      <field name="patient_identifier">NHSNUM0040</field>
+      <field name="other_identifier">HOSNUM0040</field>
+    </record>
+    <record id="nhc_demo_adt_admit_40" model="nh.activity">
+      <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_40'))" name="data_ref" />
+    </record>
+    <!--Actual Admit data for patient 40-->
+    <record id="nhc_activity_demo_admission_40" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_40" />
+      <field name="creator_id" ref="nhc_activity_demo_adt_admit_40" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_40" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_40" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.admission</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_admission_40" model="nh.clinical.patient.admission">
+      <field name="activity_id" ref="nhc_activity_demo_admission_40" />
+      <field name="patient_id" ref="nhc_demo_patient_40" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0040</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_admission_40" model="nh.activity">
+      <field eval="'nh.clinical.patient.admission,' + str(ref('nhc_demo_admission_40'))" name="data_ref" />
+    </record>
+    <!--ADT Admit data for patient 41-->
+    <record id="nhc_activity_demo_adt_admit_41" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_41" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_41" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.adt.patient.admit</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_adt_admit_41" model="nh.clinical.adt.patient.admit">
+      <field name="activity_id" ref="nhc_activity_demo_adt_admit_41" />
+      <field name="patient_id" ref="nhc_demo_patient_41" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="location">A</field>
+      <field name="code">DEMO0041</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+      <field name="patient_identifier">NHSNUM0041</field>
+      <field name="other_identifier">HOSNUM0041</field>
+    </record>
+    <record id="nhc_demo_adt_admit_41" model="nh.activity">
+      <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_41'))" name="data_ref" />
+    </record>
+    <!--Actual Admit data for patient 41-->
+    <record id="nhc_activity_demo_admission_41" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_41" />
+      <field name="creator_id" ref="nhc_activity_demo_adt_admit_41" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_41" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_41" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.admission</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_admission_41" model="nh.clinical.patient.admission">
+      <field name="activity_id" ref="nhc_activity_demo_admission_41" />
+      <field name="patient_id" ref="nhc_demo_patient_41" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0041</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_admission_41" model="nh.activity">
+      <field eval="'nh.clinical.patient.admission,' + str(ref('nhc_demo_admission_41'))" name="data_ref" />
+    </record>
+    <!--ADT Admit data for patient 42-->
+    <record id="nhc_activity_demo_adt_admit_42" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_42" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_42" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.adt.patient.admit</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_adt_admit_42" model="nh.clinical.adt.patient.admit">
+      <field name="activity_id" ref="nhc_activity_demo_adt_admit_42" />
+      <field name="patient_id" ref="nhc_demo_patient_42" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="location">A</field>
+      <field name="code">DEMO0042</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+      <field name="patient_identifier">NHSNUM0042</field>
+      <field name="other_identifier">HOSNUM0042</field>
+    </record>
+    <record id="nhc_demo_adt_admit_42" model="nh.activity">
+      <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_42'))" name="data_ref" />
+    </record>
+    <!--Actual Admit data for patient 42-->
+    <record id="nhc_activity_demo_admission_42" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_42" />
+      <field name="creator_id" ref="nhc_activity_demo_adt_admit_42" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_42" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_42" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.admission</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_admission_42" model="nh.clinical.patient.admission">
+      <field name="activity_id" ref="nhc_activity_demo_admission_42" />
+      <field name="patient_id" ref="nhc_demo_patient_42" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0042</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_admission_42" model="nh.activity">
+      <field eval="'nh.clinical.patient.admission,' + str(ref('nhc_demo_admission_42'))" name="data_ref" />
+    </record>
+    <!--ADT Admit data for patient 43-->
+    <record id="nhc_activity_demo_adt_admit_43" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_43" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_43" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.adt.patient.admit</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_adt_admit_43" model="nh.clinical.adt.patient.admit">
+      <field name="activity_id" ref="nhc_activity_demo_adt_admit_43" />
+      <field name="patient_id" ref="nhc_demo_patient_43" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="location">A</field>
+      <field name="code">DEMO0043</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+      <field name="patient_identifier">NHSNUM0043</field>
+      <field name="other_identifier">HOSNUM0043</field>
+    </record>
+    <record id="nhc_demo_adt_admit_43" model="nh.activity">
+      <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_43'))" name="data_ref" />
+    </record>
+    <!--Actual Admit data for patient 43-->
+    <record id="nhc_activity_demo_admission_43" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_43" />
+      <field name="creator_id" ref="nhc_activity_demo_adt_admit_43" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_43" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_43" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.admission</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_admission_43" model="nh.clinical.patient.admission">
+      <field name="activity_id" ref="nhc_activity_demo_admission_43" />
+      <field name="patient_id" ref="nhc_demo_patient_43" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0043</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_admission_43" model="nh.activity">
+      <field eval="'nh.clinical.patient.admission,' + str(ref('nhc_demo_admission_43'))" name="data_ref" />
+    </record>
+    <!--ADT Admit data for patient 44-->
+    <record id="nhc_activity_demo_adt_admit_44" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_44" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_44" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.adt.patient.admit</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_adt_admit_44" model="nh.clinical.adt.patient.admit">
+      <field name="activity_id" ref="nhc_activity_demo_adt_admit_44" />
+      <field name="patient_id" ref="nhc_demo_patient_44" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="location">A</field>
+      <field name="code">DEMO0044</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+      <field name="patient_identifier">NHSNUM0044</field>
+      <field name="other_identifier">HOSNUM0044</field>
+    </record>
+    <record id="nhc_demo_adt_admit_44" model="nh.activity">
+      <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_44'))" name="data_ref" />
+    </record>
+    <!--Actual Admit data for patient 44-->
+    <record id="nhc_activity_demo_admission_44" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_44" />
+      <field name="creator_id" ref="nhc_activity_demo_adt_admit_44" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_44" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_44" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.admission</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_admission_44" model="nh.clinical.patient.admission">
+      <field name="activity_id" ref="nhc_activity_demo_admission_44" />
+      <field name="patient_id" ref="nhc_demo_patient_44" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0044</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_admission_44" model="nh.activity">
+      <field eval="'nh.clinical.patient.admission,' + str(ref('nhc_demo_admission_44'))" name="data_ref" />
+    </record>
+    <!--ADT Admit data for patient 45-->
+    <record id="nhc_activity_demo_adt_admit_45" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_45" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_45" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.adt.patient.admit</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_adt_admit_45" model="nh.clinical.adt.patient.admit">
+      <field name="activity_id" ref="nhc_activity_demo_adt_admit_45" />
+      <field name="patient_id" ref="nhc_demo_patient_45" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="location">A</field>
+      <field name="code">DEMO0045</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+      <field name="patient_identifier">NHSNUM0045</field>
+      <field name="other_identifier">HOSNUM0045</field>
+    </record>
+    <record id="nhc_demo_adt_admit_45" model="nh.activity">
+      <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_45'))" name="data_ref" />
+    </record>
+    <!--Actual Admit data for patient 45-->
+    <record id="nhc_activity_demo_admission_45" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_45" />
+      <field name="creator_id" ref="nhc_activity_demo_adt_admit_45" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_45" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_45" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.admission</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_admission_45" model="nh.clinical.patient.admission">
+      <field name="activity_id" ref="nhc_activity_demo_admission_45" />
+      <field name="patient_id" ref="nhc_demo_patient_45" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0045</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_admission_45" model="nh.activity">
+      <field eval="'nh.clinical.patient.admission,' + str(ref('nhc_demo_admission_45'))" name="data_ref" />
+    </record>
+    <!--ADT Admit data for patient 46-->
+    <record id="nhc_activity_demo_adt_admit_46" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_46" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_46" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.adt.patient.admit</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_adt_admit_46" model="nh.clinical.adt.patient.admit">
+      <field name="activity_id" ref="nhc_activity_demo_adt_admit_46" />
+      <field name="patient_id" ref="nhc_demo_patient_46" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="location">A</field>
+      <field name="code">DEMO0046</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+      <field name="patient_identifier">NHSNUM0046</field>
+      <field name="other_identifier">HOSNUM0046</field>
+    </record>
+    <record id="nhc_demo_adt_admit_46" model="nh.activity">
+      <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_46'))" name="data_ref" />
+    </record>
+    <!--Actual Admit data for patient 46-->
+    <record id="nhc_activity_demo_admission_46" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_46" />
+      <field name="creator_id" ref="nhc_activity_demo_adt_admit_46" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_46" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_46" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.admission</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_admission_46" model="nh.clinical.patient.admission">
+      <field name="activity_id" ref="nhc_activity_demo_admission_46" />
+      <field name="patient_id" ref="nhc_demo_patient_46" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0046</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_admission_46" model="nh.activity">
+      <field eval="'nh.clinical.patient.admission,' + str(ref('nhc_demo_admission_46'))" name="data_ref" />
+    </record>
+    <!--ADT Admit data for patient 47-->
+    <record id="nhc_activity_demo_adt_admit_47" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_47" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_47" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.adt.patient.admit</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_adt_admit_47" model="nh.clinical.adt.patient.admit">
+      <field name="activity_id" ref="nhc_activity_demo_adt_admit_47" />
+      <field name="patient_id" ref="nhc_demo_patient_47" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="location">A</field>
+      <field name="code">DEMO0047</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+      <field name="patient_identifier">NHSNUM0047</field>
+      <field name="other_identifier">HOSNUM0047</field>
+    </record>
+    <record id="nhc_demo_adt_admit_47" model="nh.activity">
+      <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_47'))" name="data_ref" />
+    </record>
+    <!--Actual Admit data for patient 47-->
+    <record id="nhc_activity_demo_admission_47" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_47" />
+      <field name="creator_id" ref="nhc_activity_demo_adt_admit_47" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_47" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_47" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.admission</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_admission_47" model="nh.clinical.patient.admission">
+      <field name="activity_id" ref="nhc_activity_demo_admission_47" />
+      <field name="patient_id" ref="nhc_demo_patient_47" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0047</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_admission_47" model="nh.activity">
+      <field eval="'nh.clinical.patient.admission,' + str(ref('nhc_demo_admission_47'))" name="data_ref" />
+    </record>
+    <!--ADT Admit data for patient 48-->
+    <record id="nhc_activity_demo_adt_admit_48" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_48" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_48" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.adt.patient.admit</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_adt_admit_48" model="nh.clinical.adt.patient.admit">
+      <field name="activity_id" ref="nhc_activity_demo_adt_admit_48" />
+      <field name="patient_id" ref="nhc_demo_patient_48" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="location">A</field>
+      <field name="code">DEMO0048</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+      <field name="patient_identifier">NHSNUM0048</field>
+      <field name="other_identifier">HOSNUM0048</field>
+    </record>
+    <record id="nhc_demo_adt_admit_48" model="nh.activity">
+      <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_48'))" name="data_ref" />
+    </record>
+    <!--Actual Admit data for patient 48-->
+    <record id="nhc_activity_demo_admission_48" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_48" />
+      <field name="creator_id" ref="nhc_activity_demo_adt_admit_48" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_48" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_48" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.admission</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_admission_48" model="nh.clinical.patient.admission">
+      <field name="activity_id" ref="nhc_activity_demo_admission_48" />
+      <field name="patient_id" ref="nhc_demo_patient_48" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0048</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_admission_48" model="nh.activity">
+      <field eval="'nh.clinical.patient.admission,' + str(ref('nhc_demo_admission_48'))" name="data_ref" />
+    </record>
+    <!--ADT Admit data for patient 49-->
+    <record id="nhc_activity_demo_adt_admit_49" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_49" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_49" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.adt.patient.admit</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_adt_admit_49" model="nh.clinical.adt.patient.admit">
+      <field name="activity_id" ref="nhc_activity_demo_adt_admit_49" />
+      <field name="patient_id" ref="nhc_demo_patient_49" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="location">A</field>
+      <field name="code">DEMO0049</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+      <field name="patient_identifier">NHSNUM0049</field>
+      <field name="other_identifier">HOSNUM0049</field>
+    </record>
+    <record id="nhc_demo_adt_admit_49" model="nh.activity">
+      <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_49'))" name="data_ref" />
+    </record>
+    <!--Actual Admit data for patient 49-->
+    <record id="nhc_activity_demo_admission_49" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_49" />
+      <field name="creator_id" ref="nhc_activity_demo_adt_admit_49" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_49" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_49" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.admission</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_admission_49" model="nh.clinical.patient.admission">
+      <field name="activity_id" ref="nhc_activity_demo_admission_49" />
+      <field name="patient_id" ref="nhc_demo_patient_49" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0049</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_admission_49" model="nh.activity">
+      <field eval="'nh.clinical.patient.admission,' + str(ref('nhc_demo_admission_49'))" name="data_ref" />
+    </record>
+    <!--ADT Admit data for patient 50-->
+    <record id="nhc_activity_demo_adt_admit_50" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_50" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_50" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.adt.patient.admit</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_adt_admit_50" model="nh.clinical.adt.patient.admit">
+      <field name="activity_id" ref="nhc_activity_demo_adt_admit_50" />
+      <field name="patient_id" ref="nhc_demo_patient_50" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="location">A</field>
+      <field name="code">DEMO0050</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+      <field name="patient_identifier">NHSNUM0050</field>
+      <field name="other_identifier">HOSNUM0050</field>
+    </record>
+    <record id="nhc_demo_adt_admit_50" model="nh.activity">
+      <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_50'))" name="data_ref" />
+    </record>
+    <!--Actual Admit data for patient 50-->
+    <record id="nhc_activity_demo_admission_50" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_50" />
+      <field name="creator_id" ref="nhc_activity_demo_adt_admit_50" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_50" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_50" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.admission</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_admission_50" model="nh.clinical.patient.admission">
+      <field name="activity_id" ref="nhc_activity_demo_admission_50" />
+      <field name="patient_id" ref="nhc_demo_patient_50" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0050</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_admission_50" model="nh.activity">
+      <field eval="'nh.clinical.patient.admission,' + str(ref('nhc_demo_admission_50'))" name="data_ref" />
+    </record>
+    <!--ADT Admit data for patient 51-->
+    <record id="nhc_activity_demo_adt_admit_51" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_51" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_51" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.adt.patient.admit</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_adt_admit_51" model="nh.clinical.adt.patient.admit">
+      <field name="activity_id" ref="nhc_activity_demo_adt_admit_51" />
+      <field name="patient_id" ref="nhc_demo_patient_51" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="location">A</field>
+      <field name="code">DEMO0051</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+      <field name="patient_identifier">NHSNUM0051</field>
+      <field name="other_identifier">HOSNUM0051</field>
+    </record>
+    <record id="nhc_demo_adt_admit_51" model="nh.activity">
+      <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_51'))" name="data_ref" />
+    </record>
+    <!--Actual Admit data for patient 51-->
+    <record id="nhc_activity_demo_admission_51" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_51" />
+      <field name="creator_id" ref="nhc_activity_demo_adt_admit_51" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_51" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_51" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.admission</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_admission_51" model="nh.clinical.patient.admission">
+      <field name="activity_id" ref="nhc_activity_demo_admission_51" />
+      <field name="patient_id" ref="nhc_demo_patient_51" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0051</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_admission_51" model="nh.activity">
+      <field eval="'nh.clinical.patient.admission,' + str(ref('nhc_demo_admission_51'))" name="data_ref" />
+    </record>
+    <!--ADT Admit data for patient 52-->
+    <record id="nhc_activity_demo_adt_admit_52" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_52" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_52" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.adt.patient.admit</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_adt_admit_52" model="nh.clinical.adt.patient.admit">
+      <field name="activity_id" ref="nhc_activity_demo_adt_admit_52" />
+      <field name="patient_id" ref="nhc_demo_patient_52" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="location">A</field>
+      <field name="code">DEMO0052</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+      <field name="patient_identifier">NHSNUM0052</field>
+      <field name="other_identifier">HOSNUM0052</field>
+    </record>
+    <record id="nhc_demo_adt_admit_52" model="nh.activity">
+      <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_52'))" name="data_ref" />
+    </record>
+    <!--Actual Admit data for patient 52-->
+    <record id="nhc_activity_demo_admission_52" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_52" />
+      <field name="creator_id" ref="nhc_activity_demo_adt_admit_52" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_52" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_52" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.admission</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_admission_52" model="nh.clinical.patient.admission">
+      <field name="activity_id" ref="nhc_activity_demo_admission_52" />
+      <field name="patient_id" ref="nhc_demo_patient_52" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0052</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_admission_52" model="nh.activity">
+      <field eval="'nh.clinical.patient.admission,' + str(ref('nhc_demo_admission_52'))" name="data_ref" />
+    </record>
+    <!--ADT Admit data for patient 53-->
+    <record id="nhc_activity_demo_adt_admit_53" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_53" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_53" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.adt.patient.admit</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_adt_admit_53" model="nh.clinical.adt.patient.admit">
+      <field name="activity_id" ref="nhc_activity_demo_adt_admit_53" />
+      <field name="patient_id" ref="nhc_demo_patient_53" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="location">A</field>
+      <field name="code">DEMO0053</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+      <field name="patient_identifier">NHSNUM0053</field>
+      <field name="other_identifier">HOSNUM0053</field>
+    </record>
+    <record id="nhc_demo_adt_admit_53" model="nh.activity">
+      <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_53'))" name="data_ref" />
+    </record>
+    <!--Actual Admit data for patient 53-->
+    <record id="nhc_activity_demo_admission_53" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_53" />
+      <field name="creator_id" ref="nhc_activity_demo_adt_admit_53" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_53" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_53" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.admission</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_admission_53" model="nh.clinical.patient.admission">
+      <field name="activity_id" ref="nhc_activity_demo_admission_53" />
+      <field name="patient_id" ref="nhc_demo_patient_53" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0053</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_admission_53" model="nh.activity">
+      <field eval="'nh.clinical.patient.admission,' + str(ref('nhc_demo_admission_53'))" name="data_ref" />
+    </record>
+    <!--ADT Admit data for patient 54-->
+    <record id="nhc_activity_demo_adt_admit_54" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_54" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_54" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.adt.patient.admit</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_adt_admit_54" model="nh.clinical.adt.patient.admit">
+      <field name="activity_id" ref="nhc_activity_demo_adt_admit_54" />
+      <field name="patient_id" ref="nhc_demo_patient_54" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="location">A</field>
+      <field name="code">DEMO0054</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+      <field name="patient_identifier">NHSNUM0054</field>
+      <field name="other_identifier">HOSNUM0054</field>
+    </record>
+    <record id="nhc_demo_adt_admit_54" model="nh.activity">
+      <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_54'))" name="data_ref" />
+    </record>
+    <!--Actual Admit data for patient 54-->
+    <record id="nhc_activity_demo_admission_54" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_54" />
+      <field name="creator_id" ref="nhc_activity_demo_adt_admit_54" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_54" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_54" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.admission</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_admission_54" model="nh.clinical.patient.admission">
+      <field name="activity_id" ref="nhc_activity_demo_admission_54" />
+      <field name="patient_id" ref="nhc_demo_patient_54" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0054</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_admission_54" model="nh.activity">
+      <field eval="'nh.clinical.patient.admission,' + str(ref('nhc_demo_admission_54'))" name="data_ref" />
+    </record>
+    <!--ADT Admit data for patient 55-->
+    <record id="nhc_activity_demo_adt_admit_55" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_55" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_55" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.adt.patient.admit</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_adt_admit_55" model="nh.clinical.adt.patient.admit">
+      <field name="activity_id" ref="nhc_activity_demo_adt_admit_55" />
+      <field name="patient_id" ref="nhc_demo_patient_55" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="location">A</field>
+      <field name="code">DEMO0055</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+      <field name="patient_identifier">NHSNUM0055</field>
+      <field name="other_identifier">HOSNUM0055</field>
+    </record>
+    <record id="nhc_demo_adt_admit_55" model="nh.activity">
+      <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_55'))" name="data_ref" />
+    </record>
+    <!--Actual Admit data for patient 55-->
+    <record id="nhc_activity_demo_admission_55" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_55" />
+      <field name="creator_id" ref="nhc_activity_demo_adt_admit_55" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_55" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_55" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.admission</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_admission_55" model="nh.clinical.patient.admission">
+      <field name="activity_id" ref="nhc_activity_demo_admission_55" />
+      <field name="patient_id" ref="nhc_demo_patient_55" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0055</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_admission_55" model="nh.activity">
+      <field eval="'nh.clinical.patient.admission,' + str(ref('nhc_demo_admission_55'))" name="data_ref" />
+    </record>
+    <!--ADT Admit data for patient 56-->
+    <record id="nhc_activity_demo_adt_admit_56" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_56" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_56" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.adt.patient.admit</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_adt_admit_56" model="nh.clinical.adt.patient.admit">
+      <field name="activity_id" ref="nhc_activity_demo_adt_admit_56" />
+      <field name="patient_id" ref="nhc_demo_patient_56" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="location">A</field>
+      <field name="code">DEMO0056</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+      <field name="patient_identifier">NHSNUM0056</field>
+      <field name="other_identifier">HOSNUM0056</field>
+    </record>
+    <record id="nhc_demo_adt_admit_56" model="nh.activity">
+      <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_56'))" name="data_ref" />
+    </record>
+    <!--Actual Admit data for patient 56-->
+    <record id="nhc_activity_demo_admission_56" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_56" />
+      <field name="creator_id" ref="nhc_activity_demo_adt_admit_56" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_56" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_56" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.admission</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_admission_56" model="nh.clinical.patient.admission">
+      <field name="activity_id" ref="nhc_activity_demo_admission_56" />
+      <field name="patient_id" ref="nhc_demo_patient_56" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0056</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_admission_56" model="nh.activity">
+      <field eval="'nh.clinical.patient.admission,' + str(ref('nhc_demo_admission_56'))" name="data_ref" />
+    </record>
+    <!--ADT Admit data for patient 57-->
+    <record id="nhc_activity_demo_adt_admit_57" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_57" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_57" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.adt.patient.admit</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_adt_admit_57" model="nh.clinical.adt.patient.admit">
+      <field name="activity_id" ref="nhc_activity_demo_adt_admit_57" />
+      <field name="patient_id" ref="nhc_demo_patient_57" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="location">A</field>
+      <field name="code">DEMO0057</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+      <field name="patient_identifier">NHSNUM0057</field>
+      <field name="other_identifier">HOSNUM0057</field>
+    </record>
+    <record id="nhc_demo_adt_admit_57" model="nh.activity">
+      <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_57'))" name="data_ref" />
+    </record>
+    <!--Actual Admit data for patient 57-->
+    <record id="nhc_activity_demo_admission_57" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_57" />
+      <field name="creator_id" ref="nhc_activity_demo_adt_admit_57" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_57" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_57" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.admission</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_admission_57" model="nh.clinical.patient.admission">
+      <field name="activity_id" ref="nhc_activity_demo_admission_57" />
+      <field name="patient_id" ref="nhc_demo_patient_57" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0057</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_admission_57" model="nh.activity">
+      <field eval="'nh.clinical.patient.admission,' + str(ref('nhc_demo_admission_57'))" name="data_ref" />
+    </record>
+    <!--ADT Admit data for patient 58-->
+    <record id="nhc_activity_demo_adt_admit_58" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_58" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_58" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.adt.patient.admit</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_adt_admit_58" model="nh.clinical.adt.patient.admit">
+      <field name="activity_id" ref="nhc_activity_demo_adt_admit_58" />
+      <field name="patient_id" ref="nhc_demo_patient_58" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="location">A</field>
+      <field name="code">DEMO0058</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+      <field name="patient_identifier">NHSNUM0058</field>
+      <field name="other_identifier">HOSNUM0058</field>
+    </record>
+    <record id="nhc_demo_adt_admit_58" model="nh.activity">
+      <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_58'))" name="data_ref" />
+    </record>
+    <!--Actual Admit data for patient 58-->
+    <record id="nhc_activity_demo_admission_58" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_58" />
+      <field name="creator_id" ref="nhc_activity_demo_adt_admit_58" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_58" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_58" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.admission</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_admission_58" model="nh.clinical.patient.admission">
+      <field name="activity_id" ref="nhc_activity_demo_admission_58" />
+      <field name="patient_id" ref="nhc_demo_patient_58" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0058</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_admission_58" model="nh.activity">
+      <field eval="'nh.clinical.patient.admission,' + str(ref('nhc_demo_admission_58'))" name="data_ref" />
+    </record>
+    <!--ADT Admit data for patient 59-->
+    <record id="nhc_activity_demo_adt_admit_59" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_59" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_59" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.adt.patient.admit</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_adt_admit_59" model="nh.clinical.adt.patient.admit">
+      <field name="activity_id" ref="nhc_activity_demo_adt_admit_59" />
+      <field name="patient_id" ref="nhc_demo_patient_59" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="location">A</field>
+      <field name="code">DEMO0059</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+      <field name="patient_identifier">NHSNUM0059</field>
+      <field name="other_identifier">HOSNUM0059</field>
+    </record>
+    <record id="nhc_demo_adt_admit_59" model="nh.activity">
+      <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_59'))" name="data_ref" />
+    </record>
+    <!--Actual Admit data for patient 59-->
+    <record id="nhc_activity_demo_admission_59" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_59" />
+      <field name="creator_id" ref="nhc_activity_demo_adt_admit_59" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_59" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_59" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.admission</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_admission_59" model="nh.clinical.patient.admission">
+      <field name="activity_id" ref="nhc_activity_demo_admission_59" />
+      <field name="patient_id" ref="nhc_demo_patient_59" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0059</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_admission_59" model="nh.activity">
+      <field eval="'nh.clinical.patient.admission,' + str(ref('nhc_demo_admission_59'))" name="data_ref" />
+    </record>
+    <!--ADT Admit data for patient 60-->
+    <record id="nhc_activity_demo_adt_admit_60" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_60" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_60" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.adt.patient.admit</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_adt_admit_60" model="nh.clinical.adt.patient.admit">
+      <field name="activity_id" ref="nhc_activity_demo_adt_admit_60" />
+      <field name="patient_id" ref="nhc_demo_patient_60" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="location">A</field>
+      <field name="code">DEMO0060</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+      <field name="patient_identifier">NHSNUM0060</field>
+      <field name="other_identifier">HOSNUM0060</field>
+    </record>
+    <record id="nhc_demo_adt_admit_60" model="nh.activity">
+      <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_60'))" name="data_ref" />
+    </record>
+    <!--Actual Admit data for patient 60-->
+    <record id="nhc_activity_demo_admission_60" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_60" />
+      <field name="creator_id" ref="nhc_activity_demo_adt_admit_60" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_60" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_60" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.admission</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_admission_60" model="nh.clinical.patient.admission">
+      <field name="activity_id" ref="nhc_activity_demo_admission_60" />
+      <field name="patient_id" ref="nhc_demo_patient_60" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0060</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_admission_60" model="nh.activity">
+      <field eval="'nh.clinical.patient.admission,' + str(ref('nhc_demo_admission_60'))" name="data_ref" />
+    </record>
+    <!--ADT Admit data for patient 61-->
+    <record id="nhc_activity_demo_adt_admit_61" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_61" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_61" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.adt.patient.admit</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_adt_admit_61" model="nh.clinical.adt.patient.admit">
+      <field name="activity_id" ref="nhc_activity_demo_adt_admit_61" />
+      <field name="patient_id" ref="nhc_demo_patient_61" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="location">A</field>
+      <field name="code">DEMO0061</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+      <field name="patient_identifier">NHSNUM0061</field>
+      <field name="other_identifier">HOSNUM0061</field>
+    </record>
+    <record id="nhc_demo_adt_admit_61" model="nh.activity">
+      <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_61'))" name="data_ref" />
+    </record>
+    <!--Actual Admit data for patient 61-->
+    <record id="nhc_activity_demo_admission_61" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_61" />
+      <field name="creator_id" ref="nhc_activity_demo_adt_admit_61" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_61" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_61" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.admission</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_admission_61" model="nh.clinical.patient.admission">
+      <field name="activity_id" ref="nhc_activity_demo_admission_61" />
+      <field name="patient_id" ref="nhc_demo_patient_61" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0061</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_admission_61" model="nh.activity">
+      <field eval="'nh.clinical.patient.admission,' + str(ref('nhc_demo_admission_61'))" name="data_ref" />
+    </record>
+    <!--ADT Admit data for patient 62-->
+    <record id="nhc_activity_demo_adt_admit_62" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_62" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_62" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.adt.patient.admit</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_adt_admit_62" model="nh.clinical.adt.patient.admit">
+      <field name="activity_id" ref="nhc_activity_demo_adt_admit_62" />
+      <field name="patient_id" ref="nhc_demo_patient_62" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="location">A</field>
+      <field name="code">DEMO0062</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+      <field name="patient_identifier">NHSNUM0062</field>
+      <field name="other_identifier">HOSNUM0062</field>
+    </record>
+    <record id="nhc_demo_adt_admit_62" model="nh.activity">
+      <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_62'))" name="data_ref" />
+    </record>
+    <!--Actual Admit data for patient 62-->
+    <record id="nhc_activity_demo_admission_62" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_62" />
+      <field name="creator_id" ref="nhc_activity_demo_adt_admit_62" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_62" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_62" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.admission</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_admission_62" model="nh.clinical.patient.admission">
+      <field name="activity_id" ref="nhc_activity_demo_admission_62" />
+      <field name="patient_id" ref="nhc_demo_patient_62" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0062</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_admission_62" model="nh.activity">
+      <field eval="'nh.clinical.patient.admission,' + str(ref('nhc_demo_admission_62'))" name="data_ref" />
+    </record>
+    <!--ADT Admit data for patient 63-->
+    <record id="nhc_activity_demo_adt_admit_63" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_63" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_63" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.adt.patient.admit</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_adt_admit_63" model="nh.clinical.adt.patient.admit">
+      <field name="activity_id" ref="nhc_activity_demo_adt_admit_63" />
+      <field name="patient_id" ref="nhc_demo_patient_63" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="location">A</field>
+      <field name="code">DEMO0063</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+      <field name="patient_identifier">NHSNUM0063</field>
+      <field name="other_identifier">HOSNUM0063</field>
+    </record>
+    <record id="nhc_demo_adt_admit_63" model="nh.activity">
+      <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_63'))" name="data_ref" />
+    </record>
+    <!--Actual Admit data for patient 63-->
+    <record id="nhc_activity_demo_admission_63" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_63" />
+      <field name="creator_id" ref="nhc_activity_demo_adt_admit_63" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_63" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_63" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.admission</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_admission_63" model="nh.clinical.patient.admission">
+      <field name="activity_id" ref="nhc_activity_demo_admission_63" />
+      <field name="patient_id" ref="nhc_demo_patient_63" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0063</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_admission_63" model="nh.activity">
+      <field eval="'nh.clinical.patient.admission,' + str(ref('nhc_demo_admission_63'))" name="data_ref" />
+    </record>
+    <!--ADT Admit data for patient 64-->
+    <record id="nhc_activity_demo_adt_admit_64" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_64" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_64" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.adt.patient.admit</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_adt_admit_64" model="nh.clinical.adt.patient.admit">
+      <field name="activity_id" ref="nhc_activity_demo_adt_admit_64" />
+      <field name="patient_id" ref="nhc_demo_patient_64" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="location">A</field>
+      <field name="code">DEMO0064</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+      <field name="patient_identifier">NHSNUM0064</field>
+      <field name="other_identifier">HOSNUM0064</field>
+    </record>
+    <record id="nhc_demo_adt_admit_64" model="nh.activity">
+      <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_64'))" name="data_ref" />
+    </record>
+    <!--Actual Admit data for patient 64-->
+    <record id="nhc_activity_demo_admission_64" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_64" />
+      <field name="creator_id" ref="nhc_activity_demo_adt_admit_64" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_64" />
+      <field name="spell_activity_id" ref="nhc_activity_demo_spell_64" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.admission</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_admission_64" model="nh.clinical.patient.admission">
+      <field name="activity_id" ref="nhc_activity_demo_admission_64" />
+      <field name="patient_id" ref="nhc_demo_patient_64" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0064</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_admission_64" model="nh.activity">
+      <field eval="'nh.clinical.patient.admission,' + str(ref('nhc_demo_admission_64'))" name="data_ref" />
+    </record>
+  </data>
+</openerp>

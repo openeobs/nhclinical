@@ -1,0 +1,612 @@
+<openerp>
+  <data noupdate="1">
+    <!--Spell data for patient 65-->
+    <record id="nhc_activity_demo_spell_65" model="nh.activity">
+      <field name="state">started</field>
+      <field name="patient_id" ref="nhc_demo_patient_65" />
+      <field name="data_model">nh.clinical.spell</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc_b1" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_started" />
+    </record>
+    <record id="nhc_demo_spell_65" model="nh.clinical.spell">
+      <field name="activity_id" ref="nhc_activity_demo_spell_65" />
+      <field name="patient_id" ref="nhc_demo_patient_65" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b1" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0065</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_spell_65" model="nh.activity">
+      <field eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_65'))" name="data_ref" />
+    </record>
+    <!--Spell data for patient 66-->
+    <record id="nhc_activity_demo_spell_66" model="nh.activity">
+      <field name="state">started</field>
+      <field name="patient_id" ref="nhc_demo_patient_66" />
+      <field name="data_model">nh.clinical.spell</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc_b2" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_started" />
+    </record>
+    <record id="nhc_demo_spell_66" model="nh.clinical.spell">
+      <field name="activity_id" ref="nhc_activity_demo_spell_66" />
+      <field name="patient_id" ref="nhc_demo_patient_66" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b2" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0066</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_spell_66" model="nh.activity">
+      <field eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_66'))" name="data_ref" />
+    </record>
+    <!--Spell data for patient 67-->
+    <record id="nhc_activity_demo_spell_67" model="nh.activity">
+      <field name="state">started</field>
+      <field name="patient_id" ref="nhc_demo_patient_67" />
+      <field name="data_model">nh.clinical.spell</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc_b3" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_started" />
+    </record>
+    <record id="nhc_demo_spell_67" model="nh.clinical.spell">
+      <field name="activity_id" ref="nhc_activity_demo_spell_67" />
+      <field name="patient_id" ref="nhc_demo_patient_67" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b3" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0067</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_spell_67" model="nh.activity">
+      <field eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_67'))" name="data_ref" />
+    </record>
+    <!--Spell data for patient 68-->
+    <record id="nhc_activity_demo_spell_68" model="nh.activity">
+      <field name="state">started</field>
+      <field name="patient_id" ref="nhc_demo_patient_68" />
+      <field name="data_model">nh.clinical.spell</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc_b4" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_started" />
+    </record>
+    <record id="nhc_demo_spell_68" model="nh.clinical.spell">
+      <field name="activity_id" ref="nhc_activity_demo_spell_68" />
+      <field name="patient_id" ref="nhc_demo_patient_68" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b4" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0068</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_spell_68" model="nh.activity">
+      <field eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_68'))" name="data_ref" />
+    </record>
+    <!--Spell data for patient 69-->
+    <record id="nhc_activity_demo_spell_69" model="nh.activity">
+      <field name="state">started</field>
+      <field name="patient_id" ref="nhc_demo_patient_69" />
+      <field name="data_model">nh.clinical.spell</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc_b5" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_started" />
+    </record>
+    <record id="nhc_demo_spell_69" model="nh.clinical.spell">
+      <field name="activity_id" ref="nhc_activity_demo_spell_69" />
+      <field name="patient_id" ref="nhc_demo_patient_69" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b5" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0069</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_spell_69" model="nh.activity">
+      <field eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_69'))" name="data_ref" />
+    </record>
+    <!--Spell data for patient 70-->
+    <record id="nhc_activity_demo_spell_70" model="nh.activity">
+      <field name="state">started</field>
+      <field name="patient_id" ref="nhc_demo_patient_70" />
+      <field name="data_model">nh.clinical.spell</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc_b6" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_started" />
+    </record>
+    <record id="nhc_demo_spell_70" model="nh.clinical.spell">
+      <field name="activity_id" ref="nhc_activity_demo_spell_70" />
+      <field name="patient_id" ref="nhc_demo_patient_70" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b6" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0070</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_spell_70" model="nh.activity">
+      <field eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_70'))" name="data_ref" />
+    </record>
+    <!--Spell data for patient 71-->
+    <record id="nhc_activity_demo_spell_71" model="nh.activity">
+      <field name="state">started</field>
+      <field name="patient_id" ref="nhc_demo_patient_71" />
+      <field name="data_model">nh.clinical.spell</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc_b7" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_started" />
+    </record>
+    <record id="nhc_demo_spell_71" model="nh.clinical.spell">
+      <field name="activity_id" ref="nhc_activity_demo_spell_71" />
+      <field name="patient_id" ref="nhc_demo_patient_71" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b7" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0071</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_spell_71" model="nh.activity">
+      <field eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_71'))" name="data_ref" />
+    </record>
+    <!--Spell data for patient 72-->
+    <record id="nhc_activity_demo_spell_72" model="nh.activity">
+      <field name="state">started</field>
+      <field name="patient_id" ref="nhc_demo_patient_72" />
+      <field name="data_model">nh.clinical.spell</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc_b8" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_started" />
+    </record>
+    <record id="nhc_demo_spell_72" model="nh.clinical.spell">
+      <field name="activity_id" ref="nhc_activity_demo_spell_72" />
+      <field name="patient_id" ref="nhc_demo_patient_72" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b8" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0072</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_spell_72" model="nh.activity">
+      <field eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_72'))" name="data_ref" />
+    </record>
+    <!--Spell data for patient 73-->
+    <record id="nhc_activity_demo_spell_73" model="nh.activity">
+      <field name="state">started</field>
+      <field name="patient_id" ref="nhc_demo_patient_73" />
+      <field name="data_model">nh.clinical.spell</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc_b9" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_started" />
+    </record>
+    <record id="nhc_demo_spell_73" model="nh.clinical.spell">
+      <field name="activity_id" ref="nhc_activity_demo_spell_73" />
+      <field name="patient_id" ref="nhc_demo_patient_73" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b9" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0073</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_spell_73" model="nh.activity">
+      <field eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_73'))" name="data_ref" />
+    </record>
+    <!--Spell data for patient 74-->
+    <record id="nhc_activity_demo_spell_74" model="nh.activity">
+      <field name="state">started</field>
+      <field name="patient_id" ref="nhc_demo_patient_74" />
+      <field name="data_model">nh.clinical.spell</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc_b10" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_started" />
+    </record>
+    <record id="nhc_demo_spell_74" model="nh.clinical.spell">
+      <field name="activity_id" ref="nhc_activity_demo_spell_74" />
+      <field name="patient_id" ref="nhc_demo_patient_74" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b10" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0074</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_spell_74" model="nh.activity">
+      <field eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_74'))" name="data_ref" />
+    </record>
+    <!--Spell data for patient 75-->
+    <record id="nhc_activity_demo_spell_75" model="nh.activity">
+      <field name="state">started</field>
+      <field name="patient_id" ref="nhc_demo_patient_75" />
+      <field name="data_model">nh.clinical.spell</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc_b11" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_started" />
+    </record>
+    <record id="nhc_demo_spell_75" model="nh.clinical.spell">
+      <field name="activity_id" ref="nhc_activity_demo_spell_75" />
+      <field name="patient_id" ref="nhc_demo_patient_75" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b11" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0075</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_spell_75" model="nh.activity">
+      <field eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_75'))" name="data_ref" />
+    </record>
+    <!--Spell data for patient 76-->
+    <record id="nhc_activity_demo_spell_76" model="nh.activity">
+      <field name="state">started</field>
+      <field name="patient_id" ref="nhc_demo_patient_76" />
+      <field name="data_model">nh.clinical.spell</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc_b12" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_started" />
+    </record>
+    <record id="nhc_demo_spell_76" model="nh.clinical.spell">
+      <field name="activity_id" ref="nhc_activity_demo_spell_76" />
+      <field name="patient_id" ref="nhc_demo_patient_76" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b12" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0076</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_spell_76" model="nh.activity">
+      <field eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_76'))" name="data_ref" />
+    </record>
+    <!--Spell data for patient 77-->
+    <record id="nhc_activity_demo_spell_77" model="nh.activity">
+      <field name="state">started</field>
+      <field name="patient_id" ref="nhc_demo_patient_77" />
+      <field name="data_model">nh.clinical.spell</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc_b13" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_started" />
+    </record>
+    <record id="nhc_demo_spell_77" model="nh.clinical.spell">
+      <field name="activity_id" ref="nhc_activity_demo_spell_77" />
+      <field name="patient_id" ref="nhc_demo_patient_77" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b13" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0077</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_spell_77" model="nh.activity">
+      <field eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_77'))" name="data_ref" />
+    </record>
+    <!--Spell data for patient 78-->
+    <record id="nhc_activity_demo_spell_78" model="nh.activity">
+      <field name="state">started</field>
+      <field name="patient_id" ref="nhc_demo_patient_78" />
+      <field name="data_model">nh.clinical.spell</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc_b14" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_started" />
+    </record>
+    <record id="nhc_demo_spell_78" model="nh.clinical.spell">
+      <field name="activity_id" ref="nhc_activity_demo_spell_78" />
+      <field name="patient_id" ref="nhc_demo_patient_78" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b14" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0078</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_spell_78" model="nh.activity">
+      <field eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_78'))" name="data_ref" />
+    </record>
+    <!--Spell data for patient 79-->
+    <record id="nhc_activity_demo_spell_79" model="nh.activity">
+      <field name="state">started</field>
+      <field name="patient_id" ref="nhc_demo_patient_79" />
+      <field name="data_model">nh.clinical.spell</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc_b15" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_started" />
+    </record>
+    <record id="nhc_demo_spell_79" model="nh.clinical.spell">
+      <field name="activity_id" ref="nhc_activity_demo_spell_79" />
+      <field name="patient_id" ref="nhc_demo_patient_79" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b15" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0079</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_spell_79" model="nh.activity">
+      <field eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_79'))" name="data_ref" />
+    </record>
+    <!--Spell data for patient 80-->
+    <record id="nhc_activity_demo_spell_80" model="nh.activity">
+      <field name="state">started</field>
+      <field name="patient_id" ref="nhc_demo_patient_80" />
+      <field name="data_model">nh.clinical.spell</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc_b16" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_started" />
+    </record>
+    <record id="nhc_demo_spell_80" model="nh.clinical.spell">
+      <field name="activity_id" ref="nhc_activity_demo_spell_80" />
+      <field name="patient_id" ref="nhc_demo_patient_80" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b16" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0080</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_spell_80" model="nh.activity">
+      <field eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_80'))" name="data_ref" />
+    </record>
+    <!--Spell data for patient 81-->
+    <record id="nhc_activity_demo_spell_81" model="nh.activity">
+      <field name="state">started</field>
+      <field name="patient_id" ref="nhc_demo_patient_81" />
+      <field name="data_model">nh.clinical.spell</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc_b17" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_started" />
+    </record>
+    <record id="nhc_demo_spell_81" model="nh.clinical.spell">
+      <field name="activity_id" ref="nhc_activity_demo_spell_81" />
+      <field name="patient_id" ref="nhc_demo_patient_81" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b17" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0081</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_spell_81" model="nh.activity">
+      <field eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_81'))" name="data_ref" />
+    </record>
+    <!--Spell data for patient 82-->
+    <record id="nhc_activity_demo_spell_82" model="nh.activity">
+      <field name="state">started</field>
+      <field name="patient_id" ref="nhc_demo_patient_82" />
+      <field name="data_model">nh.clinical.spell</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc_b18" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_started" />
+    </record>
+    <record id="nhc_demo_spell_82" model="nh.clinical.spell">
+      <field name="activity_id" ref="nhc_activity_demo_spell_82" />
+      <field name="patient_id" ref="nhc_demo_patient_82" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b18" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0082</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_spell_82" model="nh.activity">
+      <field eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_82'))" name="data_ref" />
+    </record>
+    <!--Spell data for patient 83-->
+    <record id="nhc_activity_demo_spell_83" model="nh.activity">
+      <field name="state">started</field>
+      <field name="patient_id" ref="nhc_demo_patient_83" />
+      <field name="data_model">nh.clinical.spell</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc_b19" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_started" />
+    </record>
+    <record id="nhc_demo_spell_83" model="nh.clinical.spell">
+      <field name="activity_id" ref="nhc_activity_demo_spell_83" />
+      <field name="patient_id" ref="nhc_demo_patient_83" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b19" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0083</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_spell_83" model="nh.activity">
+      <field eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_83'))" name="data_ref" />
+    </record>
+    <!--Spell data for patient 84-->
+    <record id="nhc_activity_demo_spell_84" model="nh.activity">
+      <field name="state">started</field>
+      <field name="patient_id" ref="nhc_demo_patient_84" />
+      <field name="data_model">nh.clinical.spell</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc_b20" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_started" />
+    </record>
+    <record id="nhc_demo_spell_84" model="nh.clinical.spell">
+      <field name="activity_id" ref="nhc_activity_demo_spell_84" />
+      <field name="patient_id" ref="nhc_demo_patient_84" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b20" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0084</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_spell_84" model="nh.activity">
+      <field eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_84'))" name="data_ref" />
+    </record>
+    <!--Spell data for patient 85-->
+    <record id="nhc_activity_demo_spell_85" model="nh.activity">
+      <field name="state">started</field>
+      <field name="patient_id" ref="nhc_demo_patient_85" />
+      <field name="data_model">nh.clinical.spell</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc_b21" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_started" />
+    </record>
+    <record id="nhc_demo_spell_85" model="nh.clinical.spell">
+      <field name="activity_id" ref="nhc_activity_demo_spell_85" />
+      <field name="patient_id" ref="nhc_demo_patient_85" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b21" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0085</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_spell_85" model="nh.activity">
+      <field eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_85'))" name="data_ref" />
+    </record>
+    <!--Spell data for patient 86-->
+    <record id="nhc_activity_demo_spell_86" model="nh.activity">
+      <field name="state">started</field>
+      <field name="patient_id" ref="nhc_demo_patient_86" />
+      <field name="data_model">nh.clinical.spell</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc_b22" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_started" />
+    </record>
+    <record id="nhc_demo_spell_86" model="nh.clinical.spell">
+      <field name="activity_id" ref="nhc_activity_demo_spell_86" />
+      <field name="patient_id" ref="nhc_demo_patient_86" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b22" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0086</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_spell_86" model="nh.activity">
+      <field eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_86'))" name="data_ref" />
+    </record>
+    <!--Spell data for patient 87-->
+    <record id="nhc_activity_demo_spell_87" model="nh.activity">
+      <field name="state">started</field>
+      <field name="patient_id" ref="nhc_demo_patient_87" />
+      <field name="data_model">nh.clinical.spell</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc_b23" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_started" />
+    </record>
+    <record id="nhc_demo_spell_87" model="nh.clinical.spell">
+      <field name="activity_id" ref="nhc_activity_demo_spell_87" />
+      <field name="patient_id" ref="nhc_demo_patient_87" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b23" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0087</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_spell_87" model="nh.activity">
+      <field eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_87'))" name="data_ref" />
+    </record>
+    <!--Spell data for patient 88-->
+    <record id="nhc_activity_demo_spell_88" model="nh.activity">
+      <field name="state">started</field>
+      <field name="patient_id" ref="nhc_demo_patient_88" />
+      <field name="data_model">nh.clinical.spell</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc_b24" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_started" />
+    </record>
+    <record id="nhc_demo_spell_88" model="nh.clinical.spell">
+      <field name="activity_id" ref="nhc_activity_demo_spell_88" />
+      <field name="patient_id" ref="nhc_demo_patient_88" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b24" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0088</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_spell_88" model="nh.activity">
+      <field eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_88'))" name="data_ref" />
+    </record>
+    <!--Spell data for patient 89-->
+    <record id="nhc_activity_demo_spell_89" model="nh.activity">
+      <field name="state">started</field>
+      <field name="patient_id" ref="nhc_demo_patient_89" />
+      <field name="data_model">nh.clinical.spell</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc_b25" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_started" />
+    </record>
+    <record id="nhc_demo_spell_89" model="nh.clinical.spell">
+      <field name="activity_id" ref="nhc_activity_demo_spell_89" />
+      <field name="patient_id" ref="nhc_demo_patient_89" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b25" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0089</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_spell_89" model="nh.activity">
+      <field eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_89'))" name="data_ref" />
+    </record>
+    <!--Spell data for patient 90-->
+    <record id="nhc_activity_demo_spell_90" model="nh.activity">
+      <field name="state">started</field>
+      <field name="patient_id" ref="nhc_demo_patient_90" />
+      <field name="data_model">nh.clinical.spell</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc_b26" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_started" />
+    </record>
+    <record id="nhc_demo_spell_90" model="nh.clinical.spell">
+      <field name="activity_id" ref="nhc_activity_demo_spell_90" />
+      <field name="patient_id" ref="nhc_demo_patient_90" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b26" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0090</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_spell_90" model="nh.activity">
+      <field eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_90'))" name="data_ref" />
+    </record>
+    <!--Spell data for patient 91-->
+    <record id="nhc_activity_demo_spell_91" model="nh.activity">
+      <field name="state">started</field>
+      <field name="patient_id" ref="nhc_demo_patient_91" />
+      <field name="data_model">nh.clinical.spell</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc_b27" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_started" />
+    </record>
+    <record id="nhc_demo_spell_91" model="nh.clinical.spell">
+      <field name="activity_id" ref="nhc_activity_demo_spell_91" />
+      <field name="patient_id" ref="nhc_demo_patient_91" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b27" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0091</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_spell_91" model="nh.activity">
+      <field eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_91'))" name="data_ref" />
+    </record>
+    <!--Spell data for patient 92-->
+    <record id="nhc_activity_demo_spell_92" model="nh.activity">
+      <field name="state">started</field>
+      <field name="patient_id" ref="nhc_demo_patient_92" />
+      <field name="data_model">nh.clinical.spell</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc_b28" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_started" />
+    </record>
+    <record id="nhc_demo_spell_92" model="nh.clinical.spell">
+      <field name="activity_id" ref="nhc_activity_demo_spell_92" />
+      <field name="patient_id" ref="nhc_demo_patient_92" />
+      <field name="location_id" ref="nhc_def_conf_location_wc_b28" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0092</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_spell_92" model="nh.activity">
+      <field eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_92'))" name="data_ref" />
+    </record>
+    <!--Spell data for patient 93-->
+    <record id="nhc_activity_demo_spell_93" model="nh.activity">
+      <field name="state">started</field>
+      <field name="patient_id" ref="nhc_demo_patient_93" />
+      <field name="data_model">nh.clinical.spell</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_started" />
+    </record>
+    <record id="nhc_demo_spell_93" model="nh.clinical.spell">
+      <field name="activity_id" ref="nhc_activity_demo_spell_93" />
+      <field name="patient_id" ref="nhc_demo_patient_93" />
+      <field name="location_id" ref="nhc_def_conf_location_wc" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0093</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_spell_93" model="nh.activity">
+      <field eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_93'))" name="data_ref" />
+    </record>
+    <!--Spell data for patient 94-->
+    <record id="nhc_activity_demo_spell_94" model="nh.activity">
+      <field name="state">started</field>
+      <field name="patient_id" ref="nhc_demo_patient_94" />
+      <field name="data_model">nh.clinical.spell</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_started" />
+    </record>
+    <record id="nhc_demo_spell_94" model="nh.clinical.spell">
+      <field name="activity_id" ref="nhc_activity_demo_spell_94" />
+      <field name="patient_id" ref="nhc_demo_patient_94" />
+      <field name="location_id" ref="nhc_def_conf_location_wc" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0094</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_spell_94" model="nh.activity">
+      <field eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_94'))" name="data_ref" />
+    </record>
+    <!--Spell data for patient 95-->
+    <record id="nhc_activity_demo_spell_95" model="nh.activity">
+      <field name="state">started</field>
+      <field name="patient_id" ref="nhc_demo_patient_95" />
+      <field name="data_model">nh.clinical.spell</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_started" />
+    </record>
+    <record id="nhc_demo_spell_95" model="nh.clinical.spell">
+      <field name="activity_id" ref="nhc_activity_demo_spell_95" />
+      <field name="patient_id" ref="nhc_demo_patient_95" />
+      <field name="location_id" ref="nhc_def_conf_location_wc" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0095</field>
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_spell_95" model="nh.activity">
+      <field eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_95'))" name="data_ref" />
+    </record>
+    <!--Spell data for patient 96-->
+    <record id="nhc_activity_demo_spell_96" model="nh.activity">
+      <field name="state">started</field>
+      <field name="patient_id" ref="nhc_demo_patient_96" />
+      <field name="data_model">nh.clinical.spell</field>
+      <field name="location_id" ref="nhc_def_conf_location_wc" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_started" />
+    </record>
+    <record id="nhc_demo_spell_96" model="nh.clinical.spell">
+      <field name="activity_id" ref="nhc_activity_demo_spell_96" />
+      <field name="patient_id" ref="nhc_demo_patient_96" />
+      <field name="location_id" ref="nhc_def_conf_location_wc" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0096</field>
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="start_date" />
+    </record>
+    <record id="nhc_activity_demo_spell_96" model="nh.activity">
+      <field eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_96'))" name="data_ref" />
+    </record>
+  </data>
+</openerp>
