@@ -54,6 +54,69 @@ class OperationsGenerator(object):
         ward_location = re.match(self.ward_regex, bed_string)
         return ward_location.groups()[0]
 
+    def generate_spell_data(self, patient_id, patient, admit_offset):
+        # Generate Spell data
+        self.data.append(
+            Comment('Spell data for patient {0}'.format(patient_id))
+        )
+        self.create_activity_spell_record(patient_id, patient,
+                                          admit_offset)
+        self.create_spell_record(patient_id, patient, admit_offset)
+        self.update_activity_spell(patient_id)
+
+    def generate_admit_movement_data(self, patient_id, patient, admit_offset):
+        # Generate Admit Movement Data
+        self.data.append(
+            Comment('Admit movement for patient {0}'.format(patient_id))
+        )
+        self.create_activity_admit_movement_record(patient_id, patient,
+                                                   admit_offset)
+        self.create_admit_movement_record(patient_id, patient,
+                                          admit_offset)
+        self.update_activity_admit_movement(patient_id)
+
+    def generate_adt_admit_data(self, patient_id, patient, admit_offset):
+        # Generate ADT Admit data
+        self.data.append(
+            Comment('ADT Admit data for patient {0}'.format(patient_id))
+        )
+        self.create_activity_admit_record(patient_id, admit_offset)
+        self.create_admit_record(patient_id, patient, admit_offset)
+        self.update_activity_admit(patient_id)
+
+    def generate_admission_data(self, patient_id, patient, admit_offset):
+        # Generate Admission data
+        self.data.append(
+            Comment('Actual Admit data for patient {0}'.format(patient_id))
+        )
+        self.create_activity_admission_record(patient_id, patient,
+                                              admit_offset)
+        self.create_admission_record(patient_id, patient, admit_offset)
+        self.update_activity_admission(patient_id)
+
+    def generate_placement_data(self, patient_id, patient, admit_offset):
+        self.data.append(
+            Comment(
+                'Placement data for patient {0}'.format(patient_id)
+            )
+        )
+        self.create_activity_placement_record(patient_id, patient,
+                                              admit_offset)
+        self.create_placement_record(patient_id, patient)
+        self.update_activity_placement(patient_id)
+
+    def generate_placement_movement_data(self, patient_id, patient,
+                                         admit_offset):
+        # Generate Spell Movement Data
+        self.data.append(
+            Comment('Spell movement for patient {0}'.format(patient_id))
+        )
+        self.create_activity_placement_movement_record(patient_id, patient,
+                                                       admit_offset)
+        self.create_placement_movement_record(patient_id, patient,
+                                              admit_offset)
+        self.update_activity_placement_movement(patient_id)
+
     def admit_patients(self):
         """
         Read the patients in the document and admit them to the locations they
@@ -66,45 +129,17 @@ class OperationsGenerator(object):
             patient_id = patient_id_match.groups()[0]
             admit_offset = random.choice(self.admit_offset_list)
 
-            # Generate Spell data
-            self.data.append(
-                Comment('Spell data for patient {0}'.format(patient_id))
-            )
-            self.create_activity_spell_record(patient_id, patient,
+            self.generate_spell_data(patient_id, patient, admit_offset)
+            self.generate_adt_admit_data(patient_id, patient, admit_offset)
+            self.generate_admission_data(patient_id, patient, admit_offset)
+            self.generate_admit_movement_data(patient_id, patient,
                                               admit_offset)
-            self.create_spell_record(patient_id, patient, admit_offset)
-            self.update_activity_spell(patient_id)
-
-            # Generate ADT Admit data
-            self.data.append(
-                Comment('ADT Admit data for patient {0}'.format(patient_id))
-            )
-            self.create_activity_admit_record(patient_id, admit_offset)
-            self.create_admit_record(patient_id, patient, admit_offset)
-            self.update_activity_admit(patient_id)
-
-            # Generate Admission data
-            self.data.append(
-                Comment('Actual Admit data for patient {0}'.format(patient_id))
-            )
-            self.create_activity_admission_record(patient_id, patient,
-                                                  admit_offset)
-            self.create_admission_record(patient_id, patient, admit_offset)
-            self.update_activity_admission(patient_id)
 
             # Generate placement data
             location_el = patient.find('field[@name=\'current_location_id\']')
             location = location_el.attrib['ref']
             if '_b' in location[-6:]:
-                self.data.append(
-                    Comment(
-                        'Placement data for patient {0}'.format(patient_id)
-                    )
-                )
-                self.create_activity_placement_record(patient_id, patient,
-                                                      admit_offset)
-                self.create_placement_record(patient_id, patient)
-                self.update_activity_placement(patient_id)
+                self.generate_placement_data(patient_id, patient, admit_offset)
 
     def create_activity_spell_record(self, patient_id, patient, admit_offset):
         # Create nh.activity ADT admission record with id
@@ -242,6 +277,143 @@ class OperationsGenerator(object):
         # Create activity ref
         eval_string = '\'nh.clinical.spell,\' + ' \
                       'str(ref(\'nhc_demo_spell_{0}\'))'
+        SubElement(
+            update_activity_admit_record,
+            'field',
+            {
+                'name': 'data_ref',
+                'eval': eval_string.format(patient_id)
+            }
+        )
+
+    def create_activity_admit_movement_record(self, patient_id, patient,
+                                              admit_offset):
+        activity_admit_record = SubElement(
+            self.data,
+            'record',
+            {
+                'model': 'nh.activity',
+                'id': 'nhc_activity_demo_admit_move_{0}'.format(patient_id)
+            }
+        )
+
+        # Create patient_id reference
+        SubElement(
+            activity_admit_record,
+            'field',
+            {
+                'name': 'patient_id',
+                'ref': 'nhc_demo_patient_{0}'.format(patient_id)
+            }
+        )
+
+        # Create creator_id reference
+        SubElement(
+            activity_admit_record,
+            'field',
+            {
+                'name': 'creator_id',
+                'ref': 'nhc_activity_demo_admission_{0}'.format(patient_id)
+            }
+        )
+
+        # Create parent_id reference
+        SubElement(
+            activity_admit_record,
+            'field',
+            {
+                'name': 'parent_id',
+                'ref': 'nhc_activity_demo_spell_{0}'.format(patient_id)
+            }
+        )
+
+        # Create spell_activity_id reference
+        SubElement(
+            activity_admit_record,
+            'field',
+            {
+                'name': 'spell_activity_id',
+                'ref': 'nhc_activity_demo_spell_{0}'.format(patient_id)
+            }
+        )
+
+        # Create state
+        state_field = SubElement(activity_admit_record, 'field',
+                                 {'name': 'state'})
+        state_field.text = 'completed'
+
+        # Create activity data model
+        activity_admit_model = SubElement(activity_admit_record,
+                                          'field',
+                                          {'name': 'data_model'})
+        activity_admit_model.text = 'nh.clinical.patient.move'
+
+        # Create activity date terminated
+        SubElement(
+            activity_admit_record,
+            'field',
+            {
+                'name': 'date_started',
+                'eval': self.admit_date_eval_string.format(admit_offset)
+            }
+        )
+
+    def create_admit_movement_record(self, patient_id, patient, admit_offset):
+        activity_admit_record = SubElement(
+            self.data,
+            'record',
+            {
+                'model': 'nh.clinical.patient.move',
+                'id': 'nhc_demo_admit_move_{0}'.format(patient_id)
+            }
+        )
+
+        # Create activity_id reference
+        SubElement(
+            activity_admit_record,
+            'field',
+            {
+                'name': 'activity_id',
+                'ref': 'nhc_activity_demo_admit_move_{0}'.format(patient_id)
+            }
+        )
+
+        # Create patient_id reference
+        SubElement(
+            activity_admit_record,
+            'field',
+            {
+                'name': 'patient_id',
+                'ref': 'nhc_demo_patient_{0}'.format(patient_id)
+            }
+        )
+
+        # Create parent_id reference
+        location = patient.find('field[@name=\'current_location_id\']')\
+            .attrib['ref']
+        SubElement(
+            activity_admit_record,
+            'field',
+            {
+                'name': 'location_id',
+                'ref': self.remove_bed(location)
+            }
+        )
+
+    def update_activity_admit_movement(self, patient_id):
+        # Create nh.clinical.adt.patient.admit record with id & data
+        update_activity_admit_record = SubElement(
+            self.data,
+            'record',
+            {
+                'model': 'nh.activity',
+                'id': 'nhc_activity_demo_admit_move_{0}'.format(patient_id)
+            }
+        )
+
+        # Create activity ref
+        eval_string = '\'nh.clinical.patient.move,\' + ' \
+                      'str(ref(\'nhc_demo_admit_move_{0}\'))'
         SubElement(
             update_activity_admit_record,
             'field',
@@ -756,7 +928,166 @@ class OperationsGenerator(object):
             }
         )
 
+    def create_activity_placement_movement_record(self, patient_id, patient,
+                                                  admit_offset):
+        activity_admit_record = SubElement(
+            self.data,
+            'record',
+            {
+                'model': 'nh.activity',
+                'id': 'nhc_activity_demo_placement_move_{0}'.format(patient_id)
+            }
+        )
 
-wards = ['a', 'b', 'c', 'd', 'e']
+        # Create patient_id reference
+        SubElement(
+            activity_admit_record,
+            'field',
+            {
+                'name': 'patient_id',
+                'ref': 'nhc_demo_patient_{0}'.format(patient_id)
+            }
+        )
+
+        # Create creator_id reference
+        SubElement(
+            activity_admit_record,
+            'field',
+            {
+                'name': 'creator_id',
+                'ref': 'nhc_activity_demo_placement_{0}'.format(patient_id)
+            }
+        )
+
+        # Create parent_id reference
+        SubElement(
+            activity_admit_record,
+            'field',
+            {
+                'name': 'parent_id',
+                'ref': 'nhc_activity_demo_spell_{0}'.format(patient_id)
+            }
+        )
+
+        # Create spell_activity_id reference
+        SubElement(
+            activity_admit_record,
+            'field',
+            {
+                'name': 'spell_activity_id',
+                'ref': 'nhc_activity_demo_spell_{0}'.format(patient_id)
+            }
+        )
+
+        # Create state
+        state_field = SubElement(activity_admit_record, 'field',
+                                 {'name': 'state'})
+        state_field.text = 'completed'
+
+        # Create activity data model
+        activity_admit_model = SubElement(activity_admit_record,
+                                          'field',
+                                          {'name': 'data_model'})
+        activity_admit_model.text = 'nh.clinical.patient.move'
+
+        # Create parent_id reference
+        location = patient.find('field[@name=\'current_location_id\']')\
+            .attrib['ref']
+        SubElement(
+            activity_admit_record,
+            'field',
+            {
+                'name': 'location_id',
+                'ref': self.remove_bed(location)
+            }
+        )
+
+        # Create activity date terminated
+        SubElement(
+            activity_admit_record,
+            'field',
+            {
+                'name': 'date_started',
+                'eval': self.admit_date_eval_string.format(admit_offset)
+            }
+        )
+
+    def create_placement_movement_record(self, patient_id, patient,
+                                         admit_offset):
+        activity_admit_record = SubElement(
+            self.data,
+            'record',
+            {
+                'model': 'nh.clinical.patient.move',
+                'id': 'nhc_demo_placement_move_{0}'.format(patient_id)
+            }
+        )
+
+        # Create activity_id reference
+        SubElement(
+            activity_admit_record,
+            'field',
+            {
+                'name': 'activity_id',
+                'ref': 'nhc_activity_demo_placement_move_{0}'.format(
+                        patient_id)
+            }
+        )
+
+        # Create patient_id reference
+        SubElement(
+            activity_admit_record,
+            'field',
+            {
+                'name': 'patient_id',
+                'ref': 'nhc_demo_patient_{0}'.format(patient_id)
+            }
+        )
+
+        # Create parent_id reference
+        location = patient.find('field[@name=\'current_location_id\']')\
+            .attrib['ref']
+        SubElement(
+            activity_admit_record,
+            'field',
+            {
+                'name': 'from_location_id',
+                'ref': self.remove_bed(location)
+            }
+        )
+        SubElement(
+            activity_admit_record,
+            'field',
+            {
+                'name': 'location_id',
+                'ref': location
+            }
+        )
+
+    def update_activity_placement_movement(self, patient_id):
+        # Create nh.clinical.adt.patient.admit record with id & data
+        update_activity_admit_record = SubElement(
+            self.data,
+            'record',
+            {
+                'model': 'nh.activity',
+                'id': 'nhc_activity_demo_placement_move_{0}'.format(patient_id)
+            }
+        )
+
+        # Create activity ref
+        eval_string = '\'nh.clinical.patient.move,\' + ' \
+                      'str(ref(\'nhc_demo_placement_move_{0}\'))'
+        SubElement(
+            update_activity_admit_record,
+            'field',
+            {
+                'name': 'data_ref',
+                'eval': eval_string.format(patient_id)
+            }
+        )
+
+
+wards = ['a']
 for ward in wards:
     OperationsGenerator(ward)
