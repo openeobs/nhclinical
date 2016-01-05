@@ -400,7 +400,7 @@ class OperationsGenerator(object):
             'record',
             {
                 'model': 'nh.activity',
-                'id': 'nhc_demo_adt_admit_{0}'.format(patient_id)
+                'id': 'nhc_activity_demo_adt_admit_{0}'.format(patient_id)
             }
         )
 

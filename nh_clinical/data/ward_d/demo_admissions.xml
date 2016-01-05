@@ -19,7 +19,7 @@
       <field name="patient_identifier">NHSNUM0097</field>
       <field name="other_identifier">HOSNUM0097</field>
     </record>
-    <record id="nhc_demo_adt_admit_97" model="nh.activity">
+    <record id="nhc_activity_demo_adt_admit_97" model="nh.activity">
       <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_97'))" name="data_ref" />
     </record>
     <!--Actual Admit data for patient 97-->
@@ -63,7 +63,7 @@
       <field name="patient_identifier">NHSNUM0098</field>
       <field name="other_identifier">HOSNUM0098</field>
     </record>
-    <record id="nhc_demo_adt_admit_98" model="nh.activity">
+    <record id="nhc_activity_demo_adt_admit_98" model="nh.activity">
       <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_98'))" name="data_ref" />
     </record>
     <!--Actual Admit data for patient 98-->
@@ -107,7 +107,7 @@
       <field name="patient_identifier">NHSNUM0099</field>
       <field name="other_identifier">HOSNUM0099</field>
     </record>
-    <record id="nhc_demo_adt_admit_99" model="nh.activity">
+    <record id="nhc_activity_demo_adt_admit_99" model="nh.activity">
       <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_99'))" name="data_ref" />
     </record>
     <!--Actual Admit data for patient 99-->
@@ -151,7 +151,7 @@
       <field name="patient_identifier">NHSNUM0100</field>
       <field name="other_identifier">HOSNUM0100</field>
     </record>
-    <record id="nhc_demo_adt_admit_100" model="nh.activity">
+    <record id="nhc_activity_demo_adt_admit_100" model="nh.activity">
       <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_100'))" name="data_ref" />
     </record>
     <!--Actual Admit data for patient 100-->
@@ -195,7 +195,7 @@
       <field name="patient_identifier">NHSNUM0101</field>
       <field name="other_identifier">HOSNUM0101</field>
     </record>
-    <record id="nhc_demo_adt_admit_101" model="nh.activity">
+    <record id="nhc_activity_demo_adt_admit_101" model="nh.activity">
       <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_101'))" name="data_ref" />
     </record>
     <!--Actual Admit data for patient 101-->
@@ -239,7 +239,7 @@
       <field name="patient_identifier">NHSNUM0102</field>
       <field name="other_identifier">HOSNUM0102</field>
     </record>
-    <record id="nhc_demo_adt_admit_102" model="nh.activity">
+    <record id="nhc_activity_demo_adt_admit_102" model="nh.activity">
       <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_102'))" name="data_ref" />
     </record>
     <!--Actual Admit data for patient 102-->
@@ -283,7 +283,7 @@
       <field name="patient_identifier">NHSNUM0103</field>
       <field name="other_identifier">HOSNUM0103</field>
     </record>
-    <record id="nhc_demo_adt_admit_103" model="nh.activity">
+    <record id="nhc_activity_demo_adt_admit_103" model="nh.activity">
       <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_103'))" name="data_ref" />
     </record>
     <!--Actual Admit data for patient 103-->
@@ -327,7 +327,7 @@
       <field name="patient_identifier">NHSNUM0104</field>
       <field name="other_identifier">HOSNUM0104</field>
     </record>
-    <record id="nhc_demo_adt_admit_104" model="nh.activity">
+    <record id="nhc_activity_demo_adt_admit_104" model="nh.activity">
       <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_104'))" name="data_ref" />
     </record>
     <!--Actual Admit data for patient 104-->
@@ -371,7 +371,7 @@
       <field name="patient_identifier">NHSNUM0105</field>
       <field name="other_identifier">HOSNUM0105</field>
     </record>
-    <record id="nhc_demo_adt_admit_105" model="nh.activity">
+    <record id="nhc_activity_demo_adt_admit_105" model="nh.activity">
       <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_105'))" name="data_ref" />
     </record>
     <!--Actual Admit data for patient 105-->
@@ -415,7 +415,7 @@
       <field name="patient_identifier">NHSNUM0106</field>
       <field name="other_identifier">HOSNUM0106</field>
     </record>
-    <record id="nhc_demo_adt_admit_106" model="nh.activity">
+    <record id="nhc_activity_demo_adt_admit_106" model="nh.activity">
       <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_106'))" name="data_ref" />
     </record>
     <!--Actual Admit data for patient 106-->
@@ -459,7 +459,7 @@
       <field name="patient_identifier">NHSNUM0107</field>
       <field name="other_identifier">HOSNUM0107</field>
     </record>
-    <record id="nhc_demo_adt_admit_107" model="nh.activity">
+    <record id="nhc_activity_demo_adt_admit_107" model="nh.activity">
       <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_107'))" name="data_ref" />
     </record>
     <!--Actual Admit data for patient 107-->
@@ -503,7 +503,7 @@
       <field name="patient_identifier">NHSNUM0108</field>
       <field name="other_identifier">HOSNUM0108</field>
     </record>
-    <record id="nhc_demo_adt_admit_108" model="nh.activity">
+    <record id="nhc_activity_demo_adt_admit_108" model="nh.activity">
       <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_108'))" name="data_ref" />
     </record>
     <!--Actual Admit data for patient 108-->
@@ -547,7 +547,7 @@
       <field name="patient_identifier">NHSNUM0109</field>
       <field name="other_identifier">HOSNUM0109</field>
     </record>
-    <record id="nhc_demo_adt_admit_109" model="nh.activity">
+    <record id="nhc_activity_demo_adt_admit_109" model="nh.activity">
       <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_109'))" name="data_ref" />
     </record>
     <!--Actual Admit data for patient 109-->
@@ -591,7 +591,7 @@
       <field name="patient_identifier">NHSNUM0110</field>
       <field name="other_identifier">HOSNUM0110</field>
     </record>
-    <record id="nhc_demo_adt_admit_110" model="nh.activity">
+    <record id="nhc_activity_demo_adt_admit_110" model="nh.activity">
       <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_110'))" name="data_ref" />
     </record>
     <!--Actual Admit data for patient 110-->
@@ -635,7 +635,7 @@
       <field name="patient_identifier">NHSNUM0111</field>
       <field name="other_identifier">HOSNUM0111</field>
     </record>
-    <record id="nhc_demo_adt_admit_111" model="nh.activity">
+    <record id="nhc_activity_demo_adt_admit_111" model="nh.activity">
       <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_111'))" name="data_ref" />
     </record>
     <!--Actual Admit data for patient 111-->
@@ -679,7 +679,7 @@
       <field name="patient_identifier">NHSNUM0112</field>
       <field name="other_identifier">HOSNUM0112</field>
     </record>
-    <record id="nhc_demo_adt_admit_112" model="nh.activity">
+    <record id="nhc_activity_demo_adt_admit_112" model="nh.activity">
       <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_112'))" name="data_ref" />
     </record>
     <!--Actual Admit data for patient 112-->
@@ -723,7 +723,7 @@
       <field name="patient_identifier">NHSNUM0113</field>
       <field name="other_identifier">HOSNUM0113</field>
     </record>
-    <record id="nhc_demo_adt_admit_113" model="nh.activity">
+    <record id="nhc_activity_demo_adt_admit_113" model="nh.activity">
       <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_113'))" name="data_ref" />
     </record>
     <!--Actual Admit data for patient 113-->
@@ -767,7 +767,7 @@
       <field name="patient_identifier">NHSNUM0114</field>
       <field name="other_identifier">HOSNUM0114</field>
     </record>
-    <record id="nhc_demo_adt_admit_114" model="nh.activity">
+    <record id="nhc_activity_demo_adt_admit_114" model="nh.activity">
       <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_114'))" name="data_ref" />
     </record>
     <!--Actual Admit data for patient 114-->
@@ -811,7 +811,7 @@
       <field name="patient_identifier">NHSNUM0115</field>
       <field name="other_identifier">HOSNUM0115</field>
     </record>
-    <record id="nhc_demo_adt_admit_115" model="nh.activity">
+    <record id="nhc_activity_demo_adt_admit_115" model="nh.activity">
       <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_115'))" name="data_ref" />
     </record>
     <!--Actual Admit data for patient 115-->
@@ -855,7 +855,7 @@
       <field name="patient_identifier">NHSNUM0116</field>
       <field name="other_identifier">HOSNUM0116</field>
     </record>
-    <record id="nhc_demo_adt_admit_116" model="nh.activity">
+    <record id="nhc_activity_demo_adt_admit_116" model="nh.activity">
       <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_116'))" name="data_ref" />
     </record>
     <!--Actual Admit data for patient 116-->
@@ -899,7 +899,7 @@
       <field name="patient_identifier">NHSNUM0117</field>
       <field name="other_identifier">HOSNUM0117</field>
     </record>
-    <record id="nhc_demo_adt_admit_117" model="nh.activity">
+    <record id="nhc_activity_demo_adt_admit_117" model="nh.activity">
       <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_117'))" name="data_ref" />
     </record>
     <!--Actual Admit data for patient 117-->
@@ -943,7 +943,7 @@
       <field name="patient_identifier">NHSNUM0118</field>
       <field name="other_identifier">HOSNUM0118</field>
     </record>
-    <record id="nhc_demo_adt_admit_118" model="nh.activity">
+    <record id="nhc_activity_demo_adt_admit_118" model="nh.activity">
       <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_118'))" name="data_ref" />
     </record>
     <!--Actual Admit data for patient 118-->
@@ -987,7 +987,7 @@
       <field name="patient_identifier">NHSNUM0119</field>
       <field name="other_identifier">HOSNUM0119</field>
     </record>
-    <record id="nhc_demo_adt_admit_119" model="nh.activity">
+    <record id="nhc_activity_demo_adt_admit_119" model="nh.activity">
       <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_119'))" name="data_ref" />
     </record>
     <!--Actual Admit data for patient 119-->
@@ -1031,7 +1031,7 @@
       <field name="patient_identifier">NHSNUM0120</field>
       <field name="other_identifier">HOSNUM0120</field>
     </record>
-    <record id="nhc_demo_adt_admit_120" model="nh.activity">
+    <record id="nhc_activity_demo_adt_admit_120" model="nh.activity">
       <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_120'))" name="data_ref" />
     </record>
     <!--Actual Admit data for patient 120-->
@@ -1075,7 +1075,7 @@
       <field name="patient_identifier">NHSNUM0121</field>
       <field name="other_identifier">HOSNUM0121</field>
     </record>
-    <record id="nhc_demo_adt_admit_121" model="nh.activity">
+    <record id="nhc_activity_demo_adt_admit_121" model="nh.activity">
       <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_121'))" name="data_ref" />
     </record>
     <!--Actual Admit data for patient 121-->
@@ -1119,7 +1119,7 @@
       <field name="patient_identifier">NHSNUM0122</field>
       <field name="other_identifier">HOSNUM0122</field>
     </record>
-    <record id="nhc_demo_adt_admit_122" model="nh.activity">
+    <record id="nhc_activity_demo_adt_admit_122" model="nh.activity">
       <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_122'))" name="data_ref" />
     </record>
     <!--Actual Admit data for patient 122-->
@@ -1163,7 +1163,7 @@
       <field name="patient_identifier">NHSNUM0123</field>
       <field name="other_identifier">HOSNUM0123</field>
     </record>
-    <record id="nhc_demo_adt_admit_123" model="nh.activity">
+    <record id="nhc_activity_demo_adt_admit_123" model="nh.activity">
       <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_123'))" name="data_ref" />
     </record>
     <!--Actual Admit data for patient 123-->
@@ -1207,7 +1207,7 @@
       <field name="patient_identifier">NHSNUM0124</field>
       <field name="other_identifier">HOSNUM0124</field>
     </record>
-    <record id="nhc_demo_adt_admit_124" model="nh.activity">
+    <record id="nhc_activity_demo_adt_admit_124" model="nh.activity">
       <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_124'))" name="data_ref" />
     </record>
     <!--Actual Admit data for patient 124-->
@@ -1251,7 +1251,7 @@
       <field name="patient_identifier">NHSNUM0125</field>
       <field name="other_identifier">HOSNUM0125</field>
     </record>
-    <record id="nhc_demo_adt_admit_125" model="nh.activity">
+    <record id="nhc_activity_demo_adt_admit_125" model="nh.activity">
       <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_125'))" name="data_ref" />
     </record>
     <!--Actual Admit data for patient 125-->
@@ -1295,7 +1295,7 @@
       <field name="patient_identifier">NHSNUM0126</field>
       <field name="other_identifier">HOSNUM0126</field>
     </record>
-    <record id="nhc_demo_adt_admit_126" model="nh.activity">
+    <record id="nhc_activity_demo_adt_admit_126" model="nh.activity">
       <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_126'))" name="data_ref" />
     </record>
     <!--Actual Admit data for patient 126-->
@@ -1339,7 +1339,7 @@
       <field name="patient_identifier">NHSNUM0127</field>
       <field name="other_identifier">HOSNUM0127</field>
     </record>
-    <record id="nhc_demo_adt_admit_127" model="nh.activity">
+    <record id="nhc_activity_demo_adt_admit_127" model="nh.activity">
       <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_127'))" name="data_ref" />
     </record>
     <!--Actual Admit data for patient 127-->
@@ -1383,7 +1383,7 @@
       <field name="patient_identifier">NHSNUM0128</field>
       <field name="other_identifier">HOSNUM0128</field>
     </record>
-    <record id="nhc_demo_adt_admit_128" model="nh.activity">
+    <record id="nhc_activity_demo_adt_admit_128" model="nh.activity">
       <field eval="'nh.clinical.adt.patient.admit,' + str(ref('nhc_demo_adt_admit_128'))" name="data_ref" />
     </record>
     <!--Actual Admit data for patient 128-->
