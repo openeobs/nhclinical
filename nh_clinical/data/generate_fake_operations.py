@@ -92,14 +92,20 @@ class OperationsGenerator(object):
             self.create_admission_record(patient_id, patient, admit_offset)
             self.update_activity_admission(patient_id)
 
+
             # Generate placement data
-            self.data.append(
-                Comment('Placement data for patient {0}'.format(patient_id))
-            )
-            self.create_activity_placement_record(patient_id, patient,
-                                                  admit_offset)
-            self.create_placement_record(patient_id, patient, admit_offset)
-            self.update_activity_placement(patient_id)
+            location = patient.find('field[@name=\'current_location_id\']')\
+            .attrib['ref']
+            if '_b' in location[-6:]:
+                self.data.append(
+                    Comment(
+                        'Placement data for patient {0}'.format(patient_id)
+                    )
+                )
+                self.create_activity_placement_record(patient_id, patient,
+                                                      admit_offset)
+                self.create_placement_record(patient_id, patient, admit_offset)
+                self.update_activity_placement(patient_id)
 
     def create_activity_spell_record(self, patient_id, patient, admit_offset):
         # Create nh.activity ADT admission record with id
