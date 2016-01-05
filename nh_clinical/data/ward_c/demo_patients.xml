@@ -1,0 +1,388 @@
+<openerp>
+  <data noupdate="1">
+    <record id="nhc_demo_patient_65" model="nh.clinical.patient">
+      <field name="dob">2008-07-07 00:00:00</field>
+      <field name="gender">F</field>
+      <field name="sex">F</field>
+      <field name="ethnicity">D</field>
+      <field name="patient_identifier">NHSNUM0065</field>
+      <field name="other_identifier">HOSNUM0065</field>
+      <field name="given_name">Julisa</field>
+      <field name="middle_names">Brisa</field>
+      <field name="family_name">Funk</field>
+      <field name="current_location_id" ref="nhc_def_conf_location_wc_b1" />
+    </record>
+    <record id="nhc_demo_patient_66" model="nh.clinical.patient">
+      <field name="dob">1976-03-22 00:00:00</field>
+      <field name="gender">F</field>
+      <field name="sex">F</field>
+      <field name="ethnicity">L</field>
+      <field name="patient_identifier">NHSNUM0066</field>
+      <field name="other_identifier">HOSNUM0066</field>
+      <field name="given_name">Shaneka</field>
+      <field name="middle_names">Lovina</field>
+      <field name="family_name">Rutherford</field>
+      <field name="current_location_id" ref="nhc_def_conf_location_wc_b2" />
+    </record>
+    <record id="nhc_demo_patient_67" model="nh.clinical.patient">
+      <field name="dob">1986-10-24 00:00:00</field>
+      <field name="gender">M</field>
+      <field name="sex">M</field>
+      <field name="ethnicity">J</field>
+      <field name="patient_identifier">NHSNUM0067</field>
+      <field name="other_identifier">HOSNUM0067</field>
+      <field name="given_name">Delmer</field>
+      <field name="middle_names">Isidor</field>
+      <field name="family_name">Ratke</field>
+      <field name="current_location_id" ref="nhc_def_conf_location_wc_b3" />
+    </record>
+    <record id="nhc_demo_patient_68" model="nh.clinical.patient">
+      <field name="dob">1985-10-04 00:00:00</field>
+      <field name="gender">F</field>
+      <field name="sex">F</field>
+      <field name="ethnicity">B</field>
+      <field name="patient_identifier">NHSNUM0068</field>
+      <field name="other_identifier">HOSNUM0068</field>
+      <field name="given_name">Dani</field>
+      <field name="middle_names">Sherri</field>
+      <field name="family_name">Kemmer</field>
+      <field name="current_location_id" ref="nhc_def_conf_location_wc_b4" />
+    </record>
+    <record id="nhc_demo_patient_69" model="nh.clinical.patient">
+      <field name="dob">1994-03-12 00:00:00</field>
+      <field name="gender">F</field>
+      <field name="sex">F</field>
+      <field name="ethnicity">A</field>
+      <field name="patient_identifier">NHSNUM0069</field>
+      <field name="other_identifier">HOSNUM0069</field>
+      <field name="given_name">Rosalyn</field>
+      <field name="middle_names">Madaline</field>
+      <field name="family_name">Schulist</field>
+      <field name="current_location_id" ref="nhc_def_conf_location_wc_b5" />
+    </record>
+    <record id="nhc_demo_patient_70" model="nh.clinical.patient">
+      <field name="dob">1996-08-28 00:00:00</field>
+      <field name="gender">M</field>
+      <field name="sex">M</field>
+      <field name="ethnicity">C</field>
+      <field name="patient_identifier">NHSNUM0070</field>
+      <field name="other_identifier">HOSNUM0070</field>
+      <field name="given_name">Jadiel</field>
+      <field name="middle_names">Smith</field>
+      <field name="family_name">Lesch</field>
+      <field name="current_location_id" ref="nhc_def_conf_location_wc_b6" />
+    </record>
+    <record id="nhc_demo_patient_71" model="nh.clinical.patient">
+      <field name="dob">1971-01-31 00:00:00</field>
+      <field name="gender">M</field>
+      <field name="sex">M</field>
+      <field name="ethnicity">G</field>
+      <field name="patient_identifier">NHSNUM0071</field>
+      <field name="other_identifier">HOSNUM0071</field>
+      <field name="given_name">Kenyatta</field>
+      <field name="middle_names">Buren</field>
+      <field name="family_name">Donnelly</field>
+      <field name="current_location_id" ref="nhc_def_conf_location_wc_b7" />
+    </record>
+    <record id="nhc_demo_patient_72" model="nh.clinical.patient">
+      <field name="dob">1999-04-11 00:00:00</field>
+      <field name="gender">M</field>
+      <field name="sex">M</field>
+      <field name="ethnicity">P</field>
+      <field name="patient_identifier">NHSNUM0072</field>
+      <field name="other_identifier">HOSNUM0072</field>
+      <field name="given_name">Kirt</field>
+      <field name="middle_names">Colon</field>
+      <field name="family_name">Greenfelder</field>
+      <field name="current_location_id" ref="nhc_def_conf_location_wc_b8" />
+    </record>
+    <record id="nhc_demo_patient_73" model="nh.clinical.patient">
+      <field name="dob">1996-11-25 00:00:00</field>
+      <field name="gender">M</field>
+      <field name="sex">M</field>
+      <field name="ethnicity">Z</field>
+      <field name="patient_identifier">NHSNUM0073</field>
+      <field name="other_identifier">HOSNUM0073</field>
+      <field name="given_name">Esequiel</field>
+      <field name="middle_names">Krish</field>
+      <field name="family_name">Kovacek</field>
+      <field name="current_location_id" ref="nhc_def_conf_location_wc_b9" />
+    </record>
+    <record id="nhc_demo_patient_74" model="nh.clinical.patient">
+      <field name="dob">1970-10-25 00:00:00</field>
+      <field name="gender">F</field>
+      <field name="sex">F</field>
+      <field name="ethnicity">F</field>
+      <field name="patient_identifier">NHSNUM0074</field>
+      <field name="other_identifier">HOSNUM0074</field>
+      <field name="given_name">Bernita</field>
+      <field name="middle_names">Azul</field>
+      <field name="family_name">Pagac</field>
+      <field name="current_location_id" ref="nhc_def_conf_location_wc_b10" />
+    </record>
+    <record id="nhc_demo_patient_75" model="nh.clinical.patient">
+      <field name="dob">2008-04-28 00:00:00</field>
+      <field name="gender">M</field>
+      <field name="sex">M</field>
+      <field name="ethnicity">S</field>
+      <field name="patient_identifier">NHSNUM0075</field>
+      <field name="other_identifier">HOSNUM0075</field>
+      <field name="given_name">Shyheim</field>
+      <field name="middle_names">Dameon</field>
+      <field name="family_name">DuBuque</field>
+      <field name="current_location_id" ref="nhc_def_conf_location_wc_b11" />
+    </record>
+    <record id="nhc_demo_patient_76" model="nh.clinical.patient">
+      <field name="dob">2011-04-22 00:00:00</field>
+      <field name="gender">M</field>
+      <field name="sex">M</field>
+      <field name="ethnicity">B</field>
+      <field name="patient_identifier">NHSNUM0076</field>
+      <field name="other_identifier">HOSNUM0076</field>
+      <field name="given_name">Cristobal</field>
+      <field name="middle_names">Francisco</field>
+      <field name="family_name">Ward</field>
+      <field name="current_location_id" ref="nhc_def_conf_location_wc_b12" />
+    </record>
+    <record id="nhc_demo_patient_77" model="nh.clinical.patient">
+      <field name="dob">2005-04-27 00:00:00</field>
+      <field name="gender">M</field>
+      <field name="sex">M</field>
+      <field name="ethnicity">A</field>
+      <field name="patient_identifier">NHSNUM0077</field>
+      <field name="other_identifier">HOSNUM0077</field>
+      <field name="given_name">Budd</field>
+      <field name="middle_names">Todd</field>
+      <field name="family_name">Windler</field>
+      <field name="current_location_id" ref="nhc_def_conf_location_wc_b13" />
+    </record>
+    <record id="nhc_demo_patient_78" model="nh.clinical.patient">
+      <field name="dob">1983-05-09 00:00:00</field>
+      <field name="gender">M</field>
+      <field name="sex">M</field>
+      <field name="ethnicity">M</field>
+      <field name="patient_identifier">NHSNUM0078</field>
+      <field name="other_identifier">HOSNUM0078</field>
+      <field name="given_name">Danny</field>
+      <field name="middle_names">Reilly</field>
+      <field name="family_name">Shanahan</field>
+      <field name="current_location_id" ref="nhc_def_conf_location_wc_b14" />
+    </record>
+    <record id="nhc_demo_patient_79" model="nh.clinical.patient">
+      <field name="dob">1976-11-13 00:00:00</field>
+      <field name="gender">M</field>
+      <field name="sex">M</field>
+      <field name="ethnicity">M</field>
+      <field name="patient_identifier">NHSNUM0079</field>
+      <field name="other_identifier">HOSNUM0079</field>
+      <field name="given_name">Warner</field>
+      <field name="middle_names">Halsey</field>
+      <field name="family_name">Fadel</field>
+      <field name="current_location_id" ref="nhc_def_conf_location_wc_b15" />
+    </record>
+    <record id="nhc_demo_patient_80" model="nh.clinical.patient">
+      <field name="dob">2010-10-03 00:00:00</field>
+      <field name="gender">F</field>
+      <field name="sex">F</field>
+      <field name="ethnicity">R</field>
+      <field name="patient_identifier">NHSNUM0080</field>
+      <field name="other_identifier">HOSNUM0080</field>
+      <field name="given_name">Sydell</field>
+      <field name="middle_names">Miley</field>
+      <field name="family_name">Gorczany</field>
+      <field name="current_location_id" ref="nhc_def_conf_location_wc_b16" />
+    </record>
+    <record id="nhc_demo_patient_81" model="nh.clinical.patient">
+      <field name="dob">2001-09-24 00:00:00</field>
+      <field name="gender">M</field>
+      <field name="sex">M</field>
+      <field name="ethnicity">L</field>
+      <field name="patient_identifier">NHSNUM0081</field>
+      <field name="other_identifier">HOSNUM0081</field>
+      <field name="given_name">Augustus</field>
+      <field name="middle_names">Rayshawn</field>
+      <field name="family_name">Pfeffer</field>
+      <field name="current_location_id" ref="nhc_def_conf_location_wc_b17" />
+    </record>
+    <record id="nhc_demo_patient_82" model="nh.clinical.patient">
+      <field name="dob">1987-07-20 00:00:00</field>
+      <field name="gender">M</field>
+      <field name="sex">M</field>
+      <field name="ethnicity">M</field>
+      <field name="patient_identifier">NHSNUM0082</field>
+      <field name="other_identifier">HOSNUM0082</field>
+      <field name="given_name">Oran</field>
+      <field name="middle_names">Lum</field>
+      <field name="family_name">Berge</field>
+      <field name="current_location_id" ref="nhc_def_conf_location_wc_b18" />
+    </record>
+    <record id="nhc_demo_patient_83" model="nh.clinical.patient">
+      <field name="dob">1995-12-05 00:00:00</field>
+      <field name="gender">F</field>
+      <field name="sex">F</field>
+      <field name="ethnicity">G</field>
+      <field name="patient_identifier">NHSNUM0083</field>
+      <field name="other_identifier">HOSNUM0083</field>
+      <field name="given_name">Frieda</field>
+      <field name="middle_names">Mari</field>
+      <field name="family_name">Cormier</field>
+      <field name="current_location_id" ref="nhc_def_conf_location_wc_b19" />
+    </record>
+    <record id="nhc_demo_patient_84" model="nh.clinical.patient">
+      <field name="dob">1987-04-06 00:00:00</field>
+      <field name="gender">M</field>
+      <field name="sex">M</field>
+      <field name="ethnicity">C</field>
+      <field name="patient_identifier">NHSNUM0084</field>
+      <field name="other_identifier">HOSNUM0084</field>
+      <field name="given_name">Hilbert</field>
+      <field name="middle_names">Jaron</field>
+      <field name="family_name">Altenwerth</field>
+      <field name="current_location_id" ref="nhc_def_conf_location_wc_b20" />
+    </record>
+    <record id="nhc_demo_patient_85" model="nh.clinical.patient">
+      <field name="dob">1987-10-28 00:00:00</field>
+      <field name="gender">M</field>
+      <field name="sex">M</field>
+      <field name="ethnicity">B</field>
+      <field name="patient_identifier">NHSNUM0085</field>
+      <field name="other_identifier">HOSNUM0085</field>
+      <field name="given_name">Rishi</field>
+      <field name="middle_names">Morgan</field>
+      <field name="family_name">Harber</field>
+      <field name="current_location_id" ref="nhc_def_conf_location_wc_b21" />
+    </record>
+    <record id="nhc_demo_patient_86" model="nh.clinical.patient">
+      <field name="dob">2009-04-29 00:00:00</field>
+      <field name="gender">F</field>
+      <field name="sex">F</field>
+      <field name="ethnicity">Z</field>
+      <field name="patient_identifier">NHSNUM0086</field>
+      <field name="other_identifier">HOSNUM0086</field>
+      <field name="given_name">Margarite</field>
+      <field name="middle_names">Imelda</field>
+      <field name="family_name">Jerde</field>
+      <field name="current_location_id" ref="nhc_def_conf_location_wc_b22" />
+    </record>
+    <record id="nhc_demo_patient_87" model="nh.clinical.patient">
+      <field name="dob">1987-09-30 00:00:00</field>
+      <field name="gender">M</field>
+      <field name="sex">M</field>
+      <field name="ethnicity">D</field>
+      <field name="patient_identifier">NHSNUM0087</field>
+      <field name="other_identifier">HOSNUM0087</field>
+      <field name="given_name">Skip</field>
+      <field name="middle_names">Arba</field>
+      <field name="family_name">Prosacco</field>
+      <field name="current_location_id" ref="nhc_def_conf_location_wc_b23" />
+    </record>
+    <record id="nhc_demo_patient_88" model="nh.clinical.patient">
+      <field name="dob">2000-08-08 00:00:00</field>
+      <field name="gender">M</field>
+      <field name="sex">M</field>
+      <field name="ethnicity">J</field>
+      <field name="patient_identifier">NHSNUM0088</field>
+      <field name="other_identifier">HOSNUM0088</field>
+      <field name="given_name">Elian</field>
+      <field name="middle_names">Isham</field>
+      <field name="family_name">Batz</field>
+      <field name="current_location_id" ref="nhc_def_conf_location_wc_b24" />
+    </record>
+    <record id="nhc_demo_patient_89" model="nh.clinical.patient">
+      <field name="dob">1981-08-11 00:00:00</field>
+      <field name="gender">M</field>
+      <field name="sex">M</field>
+      <field name="ethnicity">P</field>
+      <field name="patient_identifier">NHSNUM0089</field>
+      <field name="other_identifier">HOSNUM0089</field>
+      <field name="given_name">Archie</field>
+      <field name="middle_names">Oran</field>
+      <field name="family_name">Schuppe</field>
+      <field name="current_location_id" ref="nhc_def_conf_location_wc_b25" />
+    </record>
+    <record id="nhc_demo_patient_90" model="nh.clinical.patient">
+      <field name="dob">2004-02-05 00:00:00</field>
+      <field name="gender">M</field>
+      <field name="sex">M</field>
+      <field name="ethnicity">P</field>
+      <field name="patient_identifier">NHSNUM0090</field>
+      <field name="other_identifier">HOSNUM0090</field>
+      <field name="given_name">Sigmund</field>
+      <field name="middle_names">Brennan</field>
+      <field name="family_name">Jakubowski</field>
+      <field name="current_location_id" ref="nhc_def_conf_location_wc_b26" />
+    </record>
+    <record id="nhc_demo_patient_91" model="nh.clinical.patient">
+      <field name="dob">2007-05-22 00:00:00</field>
+      <field name="gender">M</field>
+      <field name="sex">M</field>
+      <field name="ethnicity">G</field>
+      <field name="patient_identifier">NHSNUM0091</field>
+      <field name="other_identifier">HOSNUM0091</field>
+      <field name="given_name">Tolbert</field>
+      <field name="middle_names">Adan</field>
+      <field name="family_name">Kling</field>
+      <field name="current_location_id" ref="nhc_def_conf_location_wc_b27" />
+    </record>
+    <record id="nhc_demo_patient_92" model="nh.clinical.patient">
+      <field name="dob">1974-04-16 00:00:00</field>
+      <field name="gender">F</field>
+      <field name="sex">F</field>
+      <field name="ethnicity">M</field>
+      <field name="patient_identifier">NHSNUM0092</field>
+      <field name="other_identifier">HOSNUM0092</field>
+      <field name="given_name">Stacy</field>
+      <field name="middle_names">Fernanda</field>
+      <field name="family_name">Glover</field>
+      <field name="current_location_id" ref="nhc_def_conf_location_wc_b28" />
+    </record>
+    <record id="nhc_demo_patient_93" model="nh.clinical.patient">
+      <field name="dob">1995-05-01 00:00:00</field>
+      <field name="gender">M</field>
+      <field name="sex">M</field>
+      <field name="ethnicity">G</field>
+      <field name="patient_identifier">NHSNUM0093</field>
+      <field name="other_identifier">HOSNUM0093</field>
+      <field name="given_name">Harlow</field>
+      <field name="middle_names">Benjiman</field>
+      <field name="family_name">Torphy</field>
+      <field name="current_location_id" ref="nhc_def_conf_location_wc" />
+    </record>
+    <record id="nhc_demo_patient_94" model="nh.clinical.patient">
+      <field name="dob">1977-06-09 00:00:00</field>
+      <field name="gender">F</field>
+      <field name="sex">F</field>
+      <field name="ethnicity">H</field>
+      <field name="patient_identifier">NHSNUM0094</field>
+      <field name="other_identifier">HOSNUM0094</field>
+      <field name="given_name">Jena</field>
+      <field name="middle_names">Linda</field>
+      <field name="family_name">Quitzon</field>
+      <field name="current_location_id" ref="nhc_def_conf_location_wc" />
+    </record>
+    <record id="nhc_demo_patient_95" model="nh.clinical.patient">
+      <field name="dob">1981-03-23 00:00:00</field>
+      <field name="gender">M</field>
+      <field name="sex">M</field>
+      <field name="ethnicity">L</field>
+      <field name="patient_identifier">NHSNUM0095</field>
+      <field name="other_identifier">HOSNUM0095</field>
+      <field name="given_name">Hillery</field>
+      <field name="middle_names">Shea</field>
+      <field name="family_name">Rempel</field>
+      <field name="current_location_id" ref="nhc_def_conf_location_wc" />
+    </record>
+    <record id="nhc_demo_patient_96" model="nh.clinical.patient">
+      <field name="dob">1997-01-25 00:00:00</field>
+      <field name="gender">F</field>
+      <field name="sex">F</field>
+      <field name="ethnicity">P</field>
+      <field name="patient_identifier">NHSNUM0096</field>
+      <field name="other_identifier">HOSNUM0096</field>
+      <field name="given_name">Mikalah</field>
+      <field name="middle_names">Alesia</field>
+      <field name="family_name">Aufderhar</field>
+      <field name="current_location_id" ref="nhc_def_conf_location_wc" />
+    </record>
+  </data>
+</openerp>
