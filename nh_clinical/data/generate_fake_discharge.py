@@ -550,6 +550,6 @@ class DischargeGenerator(object):
         )
 
 
-wards = ['a']
+wards = ['a', 'b', 'c', 'd', 'e']
 for ward in wards:
     DischargeGenerator(ward, 0, 5)

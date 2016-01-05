@@ -1,0 +1,304 @@
+<openerp>
+  <data noupdate="1">
+    <!--ADT Discharge data for patient 69-->
+    <record id="nhc_activity_demo_adt_discharge_69" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_69" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_69" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.adt.patient.discharge</field>
+      <field eval="(datetime.now()).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_adt_discharge_69" model="nh.clinical.adt.patient.discharge">
+      <field name="activity_id" ref="nhc_activity_demo_adt_discharge_69" />
+      <field name="patient_id" ref="nhc_demo_patient_69" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="location">A</field>
+      <field name="patient_identifier">NHSNUM0069</field>
+      <field name="other_identifier">HOSNUM0069</field>
+      <field eval="(datetime.now()).strftime('%Y-%m-%d 00:00:00')" name="discharge_date" />
+    </record>
+    <record id="nhc_activity_demo_adt_discharge_69" model="nh.activity">
+      <field eval="'nh.clinical.adt.patient.discharge,' + str(ref('nhc_demo_adt_discharge_69'))" name="data_ref" />
+    </record>
+    <!--Actual Discharge for patient 69-->
+    <record id="nhc_activity_demo_discharge_69" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_69" />
+      <field name="creator_id" ref="nhc_activity_demo_adt_discharge_69" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_69" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.discharge</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now()).strftime('%Y-%m-%d 00:00:00')" name="discharge_date" />
+    </record>
+    <record id="nhc_demo_discharge_69" model="nh.clinical.patient.discharge">
+      <field name="activity_id" ref="nhc_activity_demo_discharge_69" />
+      <field name="patient_id" ref="nhc_demo_patient_69" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0069</field>
+      <field eval="(datetime.now()).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_activity_demo_discharge_69" model="nh.activity">
+      <field eval="'nh.clinical.patient.discharge,' + str(ref('nhc_demo_discharge_69'))" name="data_ref" />
+    </record>
+    <!--Spell closure for patient 69-->
+    <record id="nhc_activity_demo_spell_69" model="nh.activity">
+      <field name="state">completed</field>
+      <field name="patient_id" ref="nhc_demo_patient_69" />
+      <field name="data_model">nh.clinical.spell</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now()).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_spell_69" model="nh.clinical.spell">
+      <field name="activity_id" ref="nhc_activity_demo_spell_69" />
+      <field name="patient_id" ref="nhc_demo_patient_69" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0069</field>
+      <field eval="(datetime.now()).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_activity_demo_spell_69" model="nh.activity">
+      <field eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_69'))" name="data_ref" />
+    </record>
+    <!--ADT Discharge data for patient 70-->
+    <record id="nhc_activity_demo_adt_discharge_70" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_70" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_70" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.adt.patient.discharge</field>
+      <field eval="(datetime.now()).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_adt_discharge_70" model="nh.clinical.adt.patient.discharge">
+      <field name="activity_id" ref="nhc_activity_demo_adt_discharge_70" />
+      <field name="patient_id" ref="nhc_demo_patient_70" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="location">A</field>
+      <field name="patient_identifier">NHSNUM0070</field>
+      <field name="other_identifier">HOSNUM0070</field>
+      <field eval="(datetime.now()).strftime('%Y-%m-%d 00:00:00')" name="discharge_date" />
+    </record>
+    <record id="nhc_activity_demo_adt_discharge_70" model="nh.activity">
+      <field eval="'nh.clinical.adt.patient.discharge,' + str(ref('nhc_demo_adt_discharge_70'))" name="data_ref" />
+    </record>
+    <!--Actual Discharge for patient 70-->
+    <record id="nhc_activity_demo_discharge_70" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_70" />
+      <field name="creator_id" ref="nhc_activity_demo_adt_discharge_70" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_70" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.discharge</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now()).strftime('%Y-%m-%d 00:00:00')" name="discharge_date" />
+    </record>
+    <record id="nhc_demo_discharge_70" model="nh.clinical.patient.discharge">
+      <field name="activity_id" ref="nhc_activity_demo_discharge_70" />
+      <field name="patient_id" ref="nhc_demo_patient_70" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0070</field>
+      <field eval="(datetime.now()).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_activity_demo_discharge_70" model="nh.activity">
+      <field eval="'nh.clinical.patient.discharge,' + str(ref('nhc_demo_discharge_70'))" name="data_ref" />
+    </record>
+    <!--Spell closure for patient 70-->
+    <record id="nhc_activity_demo_spell_70" model="nh.activity">
+      <field name="state">completed</field>
+      <field name="patient_id" ref="nhc_demo_patient_70" />
+      <field name="data_model">nh.clinical.spell</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now()).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_spell_70" model="nh.clinical.spell">
+      <field name="activity_id" ref="nhc_activity_demo_spell_70" />
+      <field name="patient_id" ref="nhc_demo_patient_70" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0070</field>
+      <field eval="(datetime.now()).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_activity_demo_spell_70" model="nh.activity">
+      <field eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_70'))" name="data_ref" />
+    </record>
+    <!--ADT Discharge data for patient 71-->
+    <record id="nhc_activity_demo_adt_discharge_71" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_71" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_71" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.adt.patient.discharge</field>
+      <field eval="(datetime.now()).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_adt_discharge_71" model="nh.clinical.adt.patient.discharge">
+      <field name="activity_id" ref="nhc_activity_demo_adt_discharge_71" />
+      <field name="patient_id" ref="nhc_demo_patient_71" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="location">A</field>
+      <field name="patient_identifier">NHSNUM0071</field>
+      <field name="other_identifier">HOSNUM0071</field>
+      <field eval="(datetime.now()).strftime('%Y-%m-%d 00:00:00')" name="discharge_date" />
+    </record>
+    <record id="nhc_activity_demo_adt_discharge_71" model="nh.activity">
+      <field eval="'nh.clinical.adt.patient.discharge,' + str(ref('nhc_demo_adt_discharge_71'))" name="data_ref" />
+    </record>
+    <!--Actual Discharge for patient 71-->
+    <record id="nhc_activity_demo_discharge_71" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_71" />
+      <field name="creator_id" ref="nhc_activity_demo_adt_discharge_71" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_71" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.discharge</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now()).strftime('%Y-%m-%d 00:00:00')" name="discharge_date" />
+    </record>
+    <record id="nhc_demo_discharge_71" model="nh.clinical.patient.discharge">
+      <field name="activity_id" ref="nhc_activity_demo_discharge_71" />
+      <field name="patient_id" ref="nhc_demo_patient_71" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0071</field>
+      <field eval="(datetime.now()).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_activity_demo_discharge_71" model="nh.activity">
+      <field eval="'nh.clinical.patient.discharge,' + str(ref('nhc_demo_discharge_71'))" name="data_ref" />
+    </record>
+    <!--Spell closure for patient 71-->
+    <record id="nhc_activity_demo_spell_71" model="nh.activity">
+      <field name="state">completed</field>
+      <field name="patient_id" ref="nhc_demo_patient_71" />
+      <field name="data_model">nh.clinical.spell</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now()).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_spell_71" model="nh.clinical.spell">
+      <field name="activity_id" ref="nhc_activity_demo_spell_71" />
+      <field name="patient_id" ref="nhc_demo_patient_71" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0071</field>
+      <field eval="(datetime.now()).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_activity_demo_spell_71" model="nh.activity">
+      <field eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_71'))" name="data_ref" />
+    </record>
+    <!--ADT Discharge data for patient 72-->
+    <record id="nhc_activity_demo_adt_discharge_72" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_72" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_72" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.adt.patient.discharge</field>
+      <field eval="(datetime.now()).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_adt_discharge_72" model="nh.clinical.adt.patient.discharge">
+      <field name="activity_id" ref="nhc_activity_demo_adt_discharge_72" />
+      <field name="patient_id" ref="nhc_demo_patient_72" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="location">A</field>
+      <field name="patient_identifier">NHSNUM0072</field>
+      <field name="other_identifier">HOSNUM0072</field>
+      <field eval="(datetime.now()).strftime('%Y-%m-%d 00:00:00')" name="discharge_date" />
+    </record>
+    <record id="nhc_activity_demo_adt_discharge_72" model="nh.activity">
+      <field eval="'nh.clinical.adt.patient.discharge,' + str(ref('nhc_demo_adt_discharge_72'))" name="data_ref" />
+    </record>
+    <!--Actual Discharge for patient 72-->
+    <record id="nhc_activity_demo_discharge_72" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_72" />
+      <field name="creator_id" ref="nhc_activity_demo_adt_discharge_72" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_72" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.discharge</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now()).strftime('%Y-%m-%d 00:00:00')" name="discharge_date" />
+    </record>
+    <record id="nhc_demo_discharge_72" model="nh.clinical.patient.discharge">
+      <field name="activity_id" ref="nhc_activity_demo_discharge_72" />
+      <field name="patient_id" ref="nhc_demo_patient_72" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0072</field>
+      <field eval="(datetime.now()).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_activity_demo_discharge_72" model="nh.activity">
+      <field eval="'nh.clinical.patient.discharge,' + str(ref('nhc_demo_discharge_72'))" name="data_ref" />
+    </record>
+    <!--Spell closure for patient 72-->
+    <record id="nhc_activity_demo_spell_72" model="nh.activity">
+      <field name="state">completed</field>
+      <field name="patient_id" ref="nhc_demo_patient_72" />
+      <field name="data_model">nh.clinical.spell</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now()).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_spell_72" model="nh.clinical.spell">
+      <field name="activity_id" ref="nhc_activity_demo_spell_72" />
+      <field name="patient_id" ref="nhc_demo_patient_72" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0072</field>
+      <field eval="(datetime.now()).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_activity_demo_spell_72" model="nh.activity">
+      <field eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_72'))" name="data_ref" />
+    </record>
+    <!--ADT Discharge data for patient 73-->
+    <record id="nhc_activity_demo_adt_discharge_73" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_73" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_73" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.adt.patient.discharge</field>
+      <field eval="(datetime.now()).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_adt_discharge_73" model="nh.clinical.adt.patient.discharge">
+      <field name="activity_id" ref="nhc_activity_demo_adt_discharge_73" />
+      <field name="patient_id" ref="nhc_demo_patient_73" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="location">A</field>
+      <field name="patient_identifier">NHSNUM0073</field>
+      <field name="other_identifier">HOSNUM0073</field>
+      <field eval="(datetime.now()).strftime('%Y-%m-%d 00:00:00')" name="discharge_date" />
+    </record>
+    <record id="nhc_activity_demo_adt_discharge_73" model="nh.activity">
+      <field eval="'nh.clinical.adt.patient.discharge,' + str(ref('nhc_demo_adt_discharge_73'))" name="data_ref" />
+    </record>
+    <!--Actual Discharge for patient 73-->
+    <record id="nhc_activity_demo_discharge_73" model="nh.activity">
+      <field name="patient_id" ref="nhc_demo_patient_73" />
+      <field name="creator_id" ref="nhc_activity_demo_adt_discharge_73" />
+      <field name="parent_id" ref="nhc_activity_demo_spell_73" />
+      <field name="state">completed</field>
+      <field name="data_model">nh.clinical.patient.discharge</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now()).strftime('%Y-%m-%d 00:00:00')" name="discharge_date" />
+    </record>
+    <record id="nhc_demo_discharge_73" model="nh.clinical.patient.discharge">
+      <field name="activity_id" ref="nhc_activity_demo_discharge_73" />
+      <field name="patient_id" ref="nhc_demo_patient_73" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0073</field>
+      <field eval="(datetime.now()).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_activity_demo_discharge_73" model="nh.activity">
+      <field eval="'nh.clinical.patient.discharge,' + str(ref('nhc_demo_discharge_73'))" name="data_ref" />
+    </record>
+    <!--Spell closure for patient 73-->
+    <record id="nhc_activity_demo_spell_73" model="nh.activity">
+      <field name="state">completed</field>
+      <field name="patient_id" ref="nhc_demo_patient_73" />
+      <field name="data_model">nh.clinical.spell</field>
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field eval="(datetime.now()).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_demo_spell_73" model="nh.clinical.spell">
+      <field name="activity_id" ref="nhc_activity_demo_spell_73" />
+      <field name="patient_id" ref="nhc_demo_patient_73" />
+      <field name="location_id" ref="nhc_def_conf_location_wb" />
+      <field name="pos_id" ref="nhc_def_conf_pos_hospital" />
+      <field name="code">DEMO0073</field>
+      <field eval="(datetime.now()).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+    </record>
+    <record id="nhc_activity_demo_spell_73" model="nh.activity">
+      <field eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_73'))" name="data_ref" />
+    </record>
+  </data>
+</openerp>
