@@ -133,6 +133,15 @@ class DischargeGenerator(object):
                 'ref': 'nhc_activity_demo_spell_{0}'.format(patient_id)
             }
         )
+        SubElement(
+            activity_admit_record,
+            'field',
+            {
+                'name': 'spell_activity_id',
+                'ref': 'nhc_activity_demo_spell_{0}'.format(patient_id)
+            }
+        )
+
 
         state_field = SubElement(activity_admit_record, 'field',
                                  {'name': 'state'})
@@ -287,6 +296,15 @@ class DischargeGenerator(object):
             'field',
             {
                 'name': 'parent_id',
+                'ref': 'nhc_activity_demo_spell_{0}'.format(patient_id)
+            }
+        )
+
+        SubElement(
+            activity_admit_record,
+            'field',
+            {
+                'name': 'spell_activity_id',
                 'ref': 'nhc_activity_demo_spell_{0}'.format(patient_id)
             }
         )
@@ -552,4 +570,4 @@ class DischargeGenerator(object):
 
 wards = ['a', 'b', 'c', 'd', 'e']
 for ward in wards:
-    DischargeGenerator(ward, 0, 5)
+    DischargeGenerator(ward, 0, 4)
