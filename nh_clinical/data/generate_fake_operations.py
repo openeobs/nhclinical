@@ -140,6 +140,8 @@ class OperationsGenerator(object):
             location = location_el.attrib['ref']
             if '_b' in location[-6:]:
                 self.generate_placement_data(patient_id, patient, admit_offset)
+                self.generate_placement_movement_data(patient_id, patient,
+                                                      admit_offset)
 
     def create_activity_spell_record(self, patient_id, patient, admit_offset):
         # Create nh.activity ADT admission record with id
