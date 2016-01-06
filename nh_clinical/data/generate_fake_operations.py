@@ -129,11 +129,11 @@ class OperationsGenerator(object):
             patient_id = patient_id_match.groups()[0]
             admit_offset = random.choice(self.admit_offset_list)
 
-            # self.generate_spell_data(patient_id, patient, admit_offset)
-            # self.generate_adt_admit_data(patient_id, patient, admit_offset)
-            # self.generate_admission_data(patient_id, patient, admit_offset)
-            # self.generate_admit_movement_data(patient_id, patient,
-            #                                   admit_offset)
+            self.generate_spell_data(patient_id, patient, admit_offset)
+            self.generate_adt_admit_data(patient_id, patient, admit_offset)
+            self.generate_admission_data(patient_id, patient, admit_offset)
+            self.generate_admit_movement_data(patient_id, patient,
+                                              admit_offset)
 
             # Generate placement data
             location_el = patient.find('field[@name=\'current_location_id\']')
