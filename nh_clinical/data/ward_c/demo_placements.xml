@@ -9,7 +9,7 @@
       <field name="state">completed</field>
       <field name="data_model">nh.clinical.patient.placement</field>
       <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
     </record>
     <record id="nhc_demo_placement_81" model="nh.clinical.patient.placement">
       <field name="activity_id" ref="nhc_activity_demo_placement_81" />
@@ -29,7 +29,7 @@
       <field name="state">completed</field>
       <field name="data_model">nh.clinical.patient.move</field>
       <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
     </record>
     <record id="nhc_demo_placement_move_81" model="nh.clinical.patient.move">
       <field name="activity_id" ref="nhc_activity_demo_placement_move_81" />
@@ -49,7 +49,7 @@
       <field name="state">completed</field>
       <field name="data_model">nh.clinical.patient.placement</field>
       <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
     </record>
     <record id="nhc_demo_placement_82" model="nh.clinical.patient.placement">
       <field name="activity_id" ref="nhc_activity_demo_placement_82" />
@@ -69,7 +69,7 @@
       <field name="state">completed</field>
       <field name="data_model">nh.clinical.patient.move</field>
       <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
     </record>
     <record id="nhc_demo_placement_move_82" model="nh.clinical.patient.move">
       <field name="activity_id" ref="nhc_activity_demo_placement_move_82" />
@@ -89,7 +89,7 @@
       <field name="state">completed</field>
       <field name="data_model">nh.clinical.patient.placement</field>
       <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
     </record>
     <record id="nhc_demo_placement_83" model="nh.clinical.patient.placement">
       <field name="activity_id" ref="nhc_activity_demo_placement_83" />
@@ -109,7 +109,7 @@
       <field name="state">completed</field>
       <field name="data_model">nh.clinical.patient.move</field>
       <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
     </record>
     <record id="nhc_demo_placement_move_83" model="nh.clinical.patient.move">
       <field name="activity_id" ref="nhc_activity_demo_placement_move_83" />
@@ -129,7 +129,7 @@
       <field name="state">completed</field>
       <field name="data_model">nh.clinical.patient.placement</field>
       <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
     </record>
     <record id="nhc_demo_placement_84" model="nh.clinical.patient.placement">
       <field name="activity_id" ref="nhc_activity_demo_placement_84" />
@@ -149,7 +149,7 @@
       <field name="state">completed</field>
       <field name="data_model">nh.clinical.patient.move</field>
       <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
     </record>
     <record id="nhc_demo_placement_move_84" model="nh.clinical.patient.move">
       <field name="activity_id" ref="nhc_activity_demo_placement_move_84" />
@@ -329,7 +329,7 @@
       <field name="state">completed</field>
       <field name="data_model">nh.clinical.patient.placement</field>
       <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
     </record>
     <record id="nhc_demo_placement_89" model="nh.clinical.patient.placement">
       <field name="activity_id" ref="nhc_activity_demo_placement_89" />
@@ -349,7 +349,7 @@
       <field name="state">completed</field>
       <field name="data_model">nh.clinical.patient.move</field>
       <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
     </record>
     <record id="nhc_demo_placement_move_89" model="nh.clinical.patient.move">
       <field name="activity_id" ref="nhc_activity_demo_placement_move_89" />
@@ -449,7 +449,7 @@
       <field name="state">completed</field>
       <field name="data_model">nh.clinical.patient.placement</field>
       <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
     </record>
     <record id="nhc_demo_placement_92" model="nh.clinical.patient.placement">
       <field name="activity_id" ref="nhc_activity_demo_placement_92" />
@@ -469,7 +469,7 @@
       <field name="state">completed</field>
       <field name="data_model">nh.clinical.patient.move</field>
       <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
     </record>
     <record id="nhc_demo_placement_move_92" model="nh.clinical.patient.move">
       <field name="activity_id" ref="nhc_activity_demo_placement_move_92" />
@@ -609,7 +609,7 @@
       <field name="state">completed</field>
       <field name="data_model">nh.clinical.patient.placement</field>
       <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
     </record>
     <record id="nhc_demo_placement_96" model="nh.clinical.patient.placement">
       <field name="activity_id" ref="nhc_activity_demo_placement_96" />
@@ -629,7 +629,7 @@
       <field name="state">completed</field>
       <field name="data_model">nh.clinical.patient.move</field>
       <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
     </record>
     <record id="nhc_demo_placement_move_96" model="nh.clinical.patient.move">
       <field name="activity_id" ref="nhc_activity_demo_placement_move_96" />
@@ -769,7 +769,7 @@
       <field name="state">completed</field>
       <field name="data_model">nh.clinical.patient.placement</field>
       <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
     </record>
     <record id="nhc_demo_placement_100" model="nh.clinical.patient.placement">
       <field name="activity_id" ref="nhc_activity_demo_placement_100" />
@@ -789,7 +789,7 @@
       <field name="state">completed</field>
       <field name="data_model">nh.clinical.patient.move</field>
       <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
     </record>
     <record id="nhc_demo_placement_move_100" model="nh.clinical.patient.move">
       <field name="activity_id" ref="nhc_activity_demo_placement_move_100" />
@@ -929,7 +929,7 @@
       <field name="state">completed</field>
       <field name="data_model">nh.clinical.patient.placement</field>
       <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
     </record>
     <record id="nhc_demo_placement_104" model="nh.clinical.patient.placement">
       <field name="activity_id" ref="nhc_activity_demo_placement_104" />
@@ -949,7 +949,7 @@
       <field name="state">completed</field>
       <field name="data_model">nh.clinical.patient.move</field>
       <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
     </record>
     <record id="nhc_demo_placement_move_104" model="nh.clinical.patient.move">
       <field name="activity_id" ref="nhc_activity_demo_placement_move_104" />
@@ -1049,7 +1049,7 @@
       <field name="state">completed</field>
       <field name="data_model">nh.clinical.patient.placement</field>
       <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
     </record>
     <record id="nhc_demo_placement_107" model="nh.clinical.patient.placement">
       <field name="activity_id" ref="nhc_activity_demo_placement_107" />
@@ -1069,7 +1069,7 @@
       <field name="state">completed</field>
       <field name="data_model">nh.clinical.patient.move</field>
       <field name="location_id" ref="nhc_def_conf_location_wc" />
-      <field eval="(datetime.now() + timedelta(-1)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
+      <field eval="(datetime.now() + timedelta(-2)).strftime('%Y-%m-%d 00:00:00')" name="date_terminated" />
     </record>
     <record id="nhc_demo_placement_move_107" model="nh.clinical.patient.move">
       <field name="activity_id" ref="nhc_activity_demo_placement_move_107" />
