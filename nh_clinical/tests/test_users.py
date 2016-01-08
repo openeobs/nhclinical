@@ -17,6 +17,7 @@ class TestUsers(SingleTransactionCase):
         cls.groups_pool = cls.registry('res.groups')
         cls.partner_pool = cls.registry('res.partner')
         cls.title_pool = cls.registry('res.partner.title')
+        cls.category_pool = cls.registry('res.partner.category')
         cls.activity_pool = cls.registry('nh.activity')
         cls.patient_pool = cls.registry('nh.clinical.patient')
         cls.location_pool = cls.registry('nh.clinical.location')
@@ -28,15 +29,26 @@ class TestUsers(SingleTransactionCase):
 
         cls.admin_group_id = cls.groups_pool.search(cr, uid, [['name', '=', 'NH Clinical Admin Group']])
         cls.dr_group_id = cls.groups_pool.search(cr, uid, [['name', '=', 'NH Clinical Doctor Group']])[0]
+        cls.wm_group_id = cls.groups_pool.search(cr, uid, [['name', '=', 'NH Clinical Ward Manager Group']])[0]
+        cls.nurse_group_id = cls.groups_pool.search(cr, uid, [['name', '=', 'NH Clinical Nurse Group']])[0]
+        cls.hca_group_id = cls.groups_pool.search(cr, uid, [['name', '=', 'NH Clinical HCA Group']])[0]
+        cls.employee_group_id = cls.groups_pool.search(cr, uid, [['name', '=', 'Employee']])[0]
+        cls.cc_group_id = cls.groups_pool.search(cr, uid, [['name', '=', 'Contact Creation']])[0]
+
+        cls.admin_role_id = cls.category_pool.search(cr, uid, [['name', '=', 'System Administrator']])[0]
+        cls.wm_role_id = cls.category_pool.search(cr, uid, [['name', '=', 'Ward Manager']])[0]
+        cls.nurse_role_id = cls.category_pool.search(cr, uid, [['name', '=', 'Nurse']])[0]
+        cls.hca_role_id = cls.category_pool.search(cr, uid, [['name', '=', 'HCA']])[0]
 
         cls.hospital_id = cls.location_pool.create(cr, uid, {'name': 'Test Hospital', 'code': 'TESTHOSP',
                                                              'usage': 'hospital'})
         cls.pos_id = cls.pos_pool.create(cr, uid, {'name': 'Test POS', 'location_id': cls.hospital_id})
 
         cls.adt_uid = cls.user_pool.create(cr, uid, {'name': 'Admin 0', 'login': 'user_000',
-                                                        'password': 'user_000',
-                                                        'groups_id': [[4, cls.admin_group_id[0]]],
-                                                        'pos_id': cls.pos_id})
+                                                     'password': 'user_000',
+                                                     'groups_id': [[4, cls.admin_group_id[0]]],
+                                                     'category_id': [[4, cls.admin_role_id]],
+                                                     'pos_id': cls.pos_id})
 
         cls.admin_uid = cls.user_pool.create(cr, uid, {'name': 'Admin 1', 'login': 'user_001',
                                                         'password': 'user_001',
@@ -59,7 +71,106 @@ class TestUsers(SingleTransactionCase):
         with self.assertRaises(except_orm):
             self.user_pool.check_pos(cr, uid, self.admin_uid, exception=True)
 
-    def test_02_create(self):
+    def test_02_update_group_vals(self):
+        cr, uid = self.cr, self.uid
+
+        vals = {
+            'groups_id': [[4, self.admin_group_id[0]]]
+        }
+        check_vals = vals.copy()
+
+        # Scenario 1: Update values without updating category_id field
+        self.assertTrue(self.user_pool.update_group_vals(cr, uid, False, vals))
+        self.assertDictEqual(vals, check_vals)
+
+        # Scenario 2: Update values with incorrect formatted category_id field values
+        vals['category_id'] = 7
+        with self.assertRaises(except_orm):
+            self.user_pool.update_group_vals(cr, uid, False, vals)
+        vals['category_id'] = [7]
+        with self.assertRaises(except_orm):
+            self.user_pool.update_group_vals(cr, uid, False, vals)
+        vals['category_id'] = [[7]]
+        with self.assertRaises(except_orm):
+            self.user_pool.update_group_vals(cr, uid, False, vals)
+
+        # Scenario 3.1: Add a category with groups_id having values
+        vals = {
+            'groups_id': [(4, self.admin_group_id[0])],
+            'category_id': [(4, self.wm_role_id)]
+        }
+        self.assertTrue(self.user_pool.update_group_vals(cr, uid, False, vals))
+        self.assertIn((4, self.wm_group_id), vals['groups_id'])
+        self.assertIn((4, self.cc_group_id), vals['groups_id'])
+        self.assertIn((4, self.admin_group_id[0]), vals['groups_id'])
+
+        # Scenario 3.2: Add a category with groups_id not having values
+        vals = {'category_id': [(4, self.wm_role_id)]}
+        self.assertTrue(self.user_pool.update_group_vals(cr, uid, False, vals))
+        self.assertIn((4, self.wm_group_id), vals.get('groups_id'))
+        self.assertIn((4, self.cc_group_id), vals['groups_id'])
+        self.assertNotIn((4, self.admin_group_id[0]), vals['groups_id'])
+
+        # Scenario 4.1: Remove a category with no user_id provided
+        vals = {
+            'category_id': [(3, self.wm_role_id)]
+        }
+        self.assertTrue(self.user_pool.update_group_vals(cr, uid, False, vals))
+        self.assertIn((3, self.wm_group_id), vals['groups_id'])
+        self.assertIn((3, self.cc_group_id), vals['groups_id'])
+        self.assertNotIn((3, self.employee_group_id), vals['groups_id'])
+
+        # Scenario 4.2: Remove all categories no user_id provided
+        vals = {'category_id': [[5]]}
+        self.assertTrue(self.user_pool.update_group_vals(cr, uid, False, vals))
+        self.assertIn((3, self.wm_group_id), vals['groups_id'])
+        self.assertIn((3, self.hca_group_id), vals['groups_id'])
+        self.assertIn((3, self.nurse_group_id), vals['groups_id'])
+        self.assertIn((3, self.dr_group_id), vals['groups_id'])
+        self.assertIn((3, self.cc_group_id), vals['groups_id'])
+        self.assertNotIn((3, self.employee_group_id), vals['groups_id'])
+
+        # Scenario 4.3: Remove a category with user_id provided
+        vals = {
+            'category_id': [(3, self.wm_role_id)]
+        }
+        self.assertTrue(self.user_pool.update_group_vals(cr, uid, self.adt_uid, vals))
+        self.assertIn((3, self.wm_group_id), vals['groups_id'])
+        self.assertNotIn((3, self.cc_group_id), vals['groups_id'])
+        self.assertNotIn((3, self.employee_group_id), vals['groups_id'])
+
+        # Scenario 4.4: Add and remove a category
+        vals = {
+            'category_id': [(3, self.wm_role_id), (4, self.admin_role_id)]
+        }
+        self.assertTrue(self.user_pool.update_group_vals(cr, uid, False, vals))
+        self.assertIn((3, self.wm_group_id), vals['groups_id'])
+        self.assertIn((4, self.admin_group_id[0]), vals['groups_id'])
+        self.assertIn((4, self.cc_group_id), vals['groups_id'])
+        self.assertNotIn((3, self.cc_group_id), vals['groups_id'])
+        self.assertNotIn((3, self.employee_group_id), vals['groups_id'])
+
+        # Scenario 5.1: Replace categories with user_id provided
+        vals = {
+            'category_id': [[6, 0, [self.wm_role_id]]]
+        }
+        self.assertTrue(self.user_pool.update_group_vals(cr, uid, self.adt_uid, vals))
+        self.assertIn((3, self.admin_group_id[0]), vals['groups_id'])
+        self.assertIn((4, self.wm_group_id), vals['groups_id'])
+        self.assertNotIn((4, self.cc_group_id), vals['groups_id'])
+        self.assertNotIn((3, self.cc_group_id), vals['groups_id'])
+        self.assertNotIn((3, self.employee_group_id), vals['groups_id'])
+
+        # Scenario 5.2: Replace categories with no user_id provided
+        vals = {'category_id': [[6, 0, [self.wm_role_id]]]}
+        self.assertTrue(self.user_pool.update_group_vals(cr, uid, False, vals))
+        self.assertNotIn((3, self.admin_group_id[0]), vals['groups_id'])
+        self.assertIn((4, self.wm_group_id), vals['groups_id'])
+        self.assertIn((4, self.cc_group_id), vals['groups_id'])
+        self.assertNotIn((3, self.cc_group_id), vals['groups_id'])
+        self.assertNotIn((3, self.employee_group_id), vals['groups_id'])
+
+    def test_03_create(self):
         cr, uid = self.cr, self.uid
 
         # Scenario 1: Create a new user linked to a doctor object
@@ -71,7 +182,7 @@ class TestUsers(SingleTransactionCase):
         user = self.user_pool.browse(cr, uid, user_id)
         self.assertTrue(user.partner_id.doctor)
 
-    def test_03_name_get(self):
+    def test_04_name_get(self):
         cr, uid = self.cr, self.uid
 
         # Scenario 1: Get name for a normal user
@@ -101,7 +212,7 @@ class TestUsers(SingleTransactionCase):
         name = self.user_pool.name_get(cr, uid, self.admin_uid, {'show_email': 1})
         self.assertEqual(name[0][1], "Company1, Admin 1 <a@b.org>")
 
-    def test_04_mail_message_get_default_from(self):
+    def test_05_mail_message_get_default_from(self):
         cr, uid = self.cr, self.uid
 
         user_uid = self.user_pool.create(cr, uid, {'name': 'Admin 2', 'login': 'user_002',
@@ -120,7 +231,7 @@ class TestUsers(SingleTransactionCase):
         self.config_pool.set_param(cr, uid, 'mail.catchall.domain', 'd.com')
         self.assertEqual(self.mail_pool._get_default_from(cr, user_uid), 'Admin 2 <c@d.com>')
 
-    def test_05_update_doctor_status(self):
+    def test_06_update_doctor_status(self):
         cr, uid = self.cr, self.uid
 
         dr_uid = self.user_pool.create(cr, uid, {'name': 'Dr 3', 'login': 'user_003', 'password': 'user_003',

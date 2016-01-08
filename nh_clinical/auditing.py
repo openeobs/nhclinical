@@ -1,9 +1,10 @@
-from datetime import datetime as dt
+"""
+``auditing.py`` defines some activity types to audit some specific
+operations that are not represented by any other objects in the system
+but still need to be audittable.
+"""
 import logging
-
 from openerp.osv import orm, fields, osv
-from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as dtf
-from openerp import SUPERUSER_ID
 
 _logger = logging.getLogger(__name__)
 
@@ -11,7 +12,8 @@ _logger = logging.getLogger(__name__)
 class nh_clinical_location_activate(orm.Model):
     """
     This Activity is meant to audit the activation of a Location.
-    location_id: Location that is going to be activated by the activity complete method.
+    ``location_id`` is the location that is going to be activated by the
+    activity complete method.
     """
     _name = 'nh.clinical.location.activate'
     _inherit = ['nh.activity.data']
@@ -25,6 +27,10 @@ class nh_clinical_location_activate(orm.Model):
     _order = 'id desc'
 
     def complete(self, cr, uid, activity_id, context=None):
+        """
+        Calls :meth:`complete<activity.nh_activity.complete>` and then
+        sets the activity `active` parameter as ``True``.
+        """
         activity_pool = self.pool['nh.activity']
         location_pool = self.pool['nh.clinical.location']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
@@ -38,8 +44,9 @@ class nh_clinical_location_activate(orm.Model):
 class nh_clinical_location_deactivate(orm.Model):
     """
     This Activity is meant to audit the deactivation of a Location.
-    location_id: Location that is going to be deactivated by the activity complete method.
-                * A Location cannot be deactivated if there is a patient using it.
+    ``location_id`` is the location that is going to be deactivated by
+    the activity complete method.
+    A Location cannot be deactivated if there is a patient using it.
     """
     _name = 'nh.clinical.location.deactivate'
     _inherit = ['nh.activity.data']
@@ -53,6 +60,10 @@ class nh_clinical_location_deactivate(orm.Model):
     _order = 'id desc'
 
     def complete(self, cr, uid, activity_id, context=None):
+        """
+        Calls :meth:`complete<activity.nh_activity.complete>` and then
+        sets the activity `active` parameter as ``False``.
+        """
         activity_pool = self.pool['nh.activity']
         location_pool = self.pool['nh.clinical.location']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
@@ -67,9 +78,8 @@ class nh_clinical_location_deactivate(orm.Model):
 
 class nh_clinical_user_responsibility_allocation(orm.Model):
     """
-    This activity is meant to audit the allocation of responsibility of users to locations.
-    responsible_user_id: User we are going to assign responsibility to.
-    location_ids: list of location ids we are assigning to the user.
+    This activity is meant to audit the allocation of responsibility of
+    users to locations.
     """
     _name = 'nh.clinical.user.responsibility.allocation'
     _inherit = ['nh.activity.data']
@@ -85,6 +95,19 @@ class nh_clinical_user_responsibility_allocation(orm.Model):
     _order = 'id desc'
 
     def complete(self, cr, uid, activity_id, context=None):
+        """
+        Calls :meth:`complete<activity.nh_activity.complete>` and then
+        sets updates the ``location_ids`` list for the user.
+
+        If the user is in the `HCA` or `Nurse` user groups the method
+        will automatically assign every location child of the ones
+        provided on top of them. If the user is not within those user
+        groups, that will also be done when the location is not of
+        `ward` usage.
+
+        :returns: ``True``
+        :rtype: bool
+        """
         activity_pool = self.pool['nh.activity']
         location_pool = self.pool['nh.clinical.location']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
@@ -95,7 +118,8 @@ class nh_clinical_user_responsibility_allocation(orm.Model):
         res = super(nh_clinical_user_responsibility_allocation, self).complete(cr, uid, activity_id, context=context)
 
         locations = []
-        if any([g.name == 'NH Clinical Ward Manager Group' for g in activity.data_ref.responsible_user_id.groups_id]):
+        if not any([g.name in ['NH Clinical HCA Group', 'NH Clinical Nurse Group']
+                    for g in activity.data_ref.responsible_user_id.groups_id]):
             for loc in activity.data_ref.location_ids:
                 if loc.usage == 'ward':
                     locations.append(loc.id)

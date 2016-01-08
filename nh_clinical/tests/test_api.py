@@ -220,7 +220,7 @@ class TestCoreAPI(SingleTransactionCase):
         activity = self.activity_pool.browse(cr, uid, activity_id[0])
         self.assertEqual(activity.state, 'completed')
 
-        # Scenario 3: Update admission of a patient that does not exist. Automatic register and admission
+        # Scenario 3: Update admission of a patient that does not exist.
         update_data = {
             'location': "WARD0",
             'patient_identifier': 'TESTNHS005',
@@ -231,15 +231,8 @@ class TestCoreAPI(SingleTransactionCase):
             'sex': 'F'
             }
 
-        self.api.admit_update(cr, self.adt_uid, 'TESTP0005', update_data)
-
-        patient_id = self.patient_pool.search(cr, uid, [('other_identifier', '=', 'TESTP0005')])
-        self.assertTrue(patient_id, msg="Patient was not created")
-        activity_id = self.activity_pool.search(cr, uid, [
-            ['data_model', '=', 'nh.clinical.adt.spell.update'], ['patient_id', '=', patient_id[0]]])
-        self.assertTrue(activity_id, msg="Admit Activity not generated")
-        activity = self.activity_pool.browse(cr, uid, activity_id[0])
-        self.assertEqual(activity.state, 'completed')
+        with self.assertRaises(except_orm):
+            self.api.admit_update(cr, self.adt_uid, 'TESTP0005', update_data)
 
     def test_05_cancel_admit(self):
         cr, uid = self.cr, self.uid
@@ -314,6 +307,11 @@ class TestCoreAPI(SingleTransactionCase):
         with self.assertRaises(except_orm):
             self.api.cancel_discharge(cr, self.adt_uid, '')
 
+        # Set up Later test
+        admit_data = {'location': "WARD1", 'patient_identifier': 'TESTNHS001'}
+
+        self.api.admit(cr, self.adt_uid, '', admit_data)
+
     def test_08_merge(self):
         cr, uid = self.cr, self.uid
 
@@ -354,18 +352,18 @@ class TestCoreAPI(SingleTransactionCase):
         self.assertEqual(activity.state, 'completed')
 
         # Scenario 2: Update admission using NHS Number
-        transfer_data = {'location': "WARD1", 'patient_identifier': 'TESTNHS005'}
+        transfer_data = {'location': "WARD2", 'patient_identifier': 'TESTNHS001'}
 
         self.api.transfer(cr, self.adt_uid, '', transfer_data)
 
-        patient_id = self.patient_pool.search(cr, uid, [('patient_identifier', '=', 'TESTNHS005')])[0]
+        patient_id = self.patient_pool.search(cr, uid, [('patient_identifier', '=', 'TESTNHS001')])[0]
         activity_id = self.activity_pool.search(cr, uid, [
             ['data_model', '=', 'nh.clinical.adt.patient.transfer'], ['patient_id', '=', patient_id]])
         self.assertTrue(activity_id, msg="Transfer Activity not generated")
         activity = self.activity_pool.browse(cr, uid, activity_id[0])
         self.assertEqual(activity.state, 'completed')
 
-        # Scenario 3: Update admission of a patient that does not exist. Automatic register and admission
+        # Scenario 3: Transfer a patient that does not exist. Automatic register and admission
         transfer_data = {
             'original_location': 'WARD0',
             'location': "WARD2",

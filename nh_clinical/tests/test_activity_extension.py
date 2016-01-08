@@ -96,7 +96,7 @@ class TestActivityExtension(common.SingleTransactionCase):
         self.activity_pool.write(cr, uid, activity_id, {'user_ids': [[6, 0, [self.nu_id]]]})
 
         # Scenario 1: Update users with empty user_ids parameter - does nothing
-        self.assertTrue(self.activity_pool.update_users(cr, uid))
+        self.assertTrue(self.activity_pool.update_users(cr, uid, []))
 
         # Scenario 2: Update user nu_id
         self.assertTrue(self.activity_pool.update_users(cr, uid, [self.nu_id]))
