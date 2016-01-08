@@ -1,0 +1,135 @@
+<openerp>
+    <data noupdate="1">
+        <!--Patient 0 Spell-->
+        <record id="nhc_activity_demo_spell_0" model="nh.activity">
+            <field name="state">started</field>
+            <field name="patient_id" ref="nhc_demo_patient_0"/>
+            <field name="data_model">nh.clinical.spell</field>
+            <field name="date_started">2015-10-10 00:00:00</field>
+            <field name="location_id" ref="nhc_def_conf_location_wa_b1"/>
+        </record>
+
+        <record id="nhc_demo_spell_0" model="nh.clinical.spell">
+            <field name="activity_id" ref="nhc_activity_demo_spell_0"/>
+            <field name="patient_id" ref="nhc_demo_patient_0"/>
+            <field name="location_id" ref="nhc_def_conf_location_wa_b1"/>
+            <field name="pos_id" ref="nhc_def_conf_pos_hospital"/>
+            <field name="code">DEMO0001</field>
+            <field name="start_date">2015-10-10 00:00:00</field>
+        </record>
+
+        <record id="nhc_activity_demo_spell_0" model="nh.activity">
+            <field name="data_ref" eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_0'))"/>
+        </record>
+
+        <!--Patient 2 Spell-->
+        <record id="nhc_activity_demo_spell_2" model="nh.activity">
+            <field name="state">started</field>
+            <field name="patient_id" ref="nhc_demo_patient_2"/>
+            <field name="data_model">nh.clinical.spell</field>
+            <field name="date_started">2015-10-10 00:00:00</field>
+            <field name="location_id" ref="nhc_def_conf_location_wa_b2"/>
+        </record>
+
+        <record id="nhc_demo_spell_2" model="nh.clinical.spell">
+            <field name="activity_id" ref="nhc_activity_demo_spell_2"/>
+            <field name="patient_id" ref="nhc_demo_patient_2"/>
+            <field name="location_id" ref="nhc_def_conf_location_wa_b2"/>
+            <field name="pos_id" ref="nhc_def_conf_pos_hospital"/>
+            <field name="code">DEMO2222</field>
+            <field name="start_date">2015-10-10 00:00:00</field>
+        </record>
+
+        <record id="nhc_activity_demo_spell_2" model="nh.activity">
+            <field name="data_ref" eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_2'))"/>
+        </record>
+
+        <!--Patient 3 Spell-->
+        <record id="nhc_activity_demo_spell_3" model="nh.activity">
+            <field name="state">started</field>
+            <field name="patient_id" ref="nhc_demo_patient_3"/>
+            <field name="data_model">nh.clinical.spell</field>
+            <field name="date_started">2015-10-10 00:00:00</field>
+            <field name="location_id" ref="nhc_def_conf_location_wb_b1"/>
+        </record>
+
+        <record id="nhc_demo_spell_3" model="nh.clinical.spell">
+            <field name="activity_id" ref="nhc_activity_demo_spell_3"/>
+            <field name="patient_id" ref="nhc_demo_patient_3"/>
+            <field name="location_id" ref="nhc_def_conf_location_wb_b1"/>
+            <field name="pos_id" ref="nhc_def_conf_pos_hospital"/>
+            <field name="code">DEMO3333</field>
+            <field name="start_date">2015-10-10 00:00:00</field>
+        </record>
+
+        <record id="nhc_activity_demo_spell_3" model="nh.activity">
+            <field name="data_ref" eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_3'))"/>
+        </record>
+
+        <!--Patient 4 Spell-->
+        <record id="nhc_activity_demo_spell_4" model="nh.activity">
+            <field name="state">started</field>
+            <field name="patient_id" ref="nhc_demo_patient_4"/>
+            <field name="data_model">nh.clinical.spell</field>
+            <field name="date_started">2015-10-10 00:00:00</field>
+            <field name="location_id" ref="nhc_def_conf_location_wb_b2"/>
+        </record>
+
+        <record id="nhc_demo_spell_4" model="nh.clinical.spell">
+            <field name="activity_id" ref="nhc_activity_demo_spell_4"/>
+            <field name="patient_id" ref="nhc_demo_patient_4"/>
+            <field name="location_id" ref="nhc_def_conf_location_wb_b2"/>
+            <field name="pos_id" ref="nhc_def_conf_pos_hospital"/>
+            <field name="code">DEMO4444</field>
+            <field name="start_date">2015-10-10 00:00:00</field>
+        </record>
+
+        <record id="nhc_activity_demo_spell_4" model="nh.activity">
+            <field name="data_ref" eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_4'))"/>
+        </record>
+
+        <!--Patient 5 Spell-->
+        <record id="nhc_activity_demo_spell_5" model="nh.activity">
+            <field name="state">started</field>
+            <field name="patient_id" ref="nhc_demo_patient_5"/>
+            <field name="data_model">nh.clinical.spell</field>
+            <field name="date_started">2015-10-10 00:00:00</field>
+            <field name="location_id" ref="nhc_def_conf_location_wa"/>
+        </record>
+
+        <record id="nhc_demo_spell_5" model="nh.clinical.spell">
+            <field name="activity_id" ref="nhc_activity_demo_spell_5"/>
+            <field name="patient_id" ref="nhc_demo_patient_5"/>
+            <field name="location_id" ref="nhc_def_conf_location_wa"/>
+            <field name="pos_id" ref="nhc_def_conf_pos_hospital"/>
+            <field name="code">DEMO5555</field>
+            <field name="start_date">2015-10-10 00:00:00</field>
+        </record>
+
+        <record id="nhc_activity_demo_spell_5" model="nh.activity">
+            <field name="data_ref" eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_5'))"/>
+        </record>
+
+        <!--Patient 6 Spell-->
+        <record id="nhc_activity_demo_spell_6" model="nh.activity">
+            <field name="state">started</field>
+            <field name="patient_id" ref="nhc_demo_patient_6"/>
+            <field name="data_model">nh.clinical.spell</field>
+            <field name="date_started">2015-10-10 00:00:00</field>
+            <field name="location_id" ref="nhc_def_conf_location_wb"/>
+        </record>
+
+        <record id="nhc_demo_spell_6" model="nh.clinical.spell">
+            <field name="activity_id" ref="nhc_activity_demo_spell_6"/>
+            <field name="patient_id" ref="nhc_demo_patient_6"/>
+            <field name="location_id" ref="nhc_def_conf_location_wb"/>
+            <field name="pos_id" ref="nhc_def_conf_pos_hospital"/>
+            <field name="code">DEMO6666</field>
+            <field name="start_date">2015-10-10 00:00:00</field>
+        </record>
+
+        <record id="nhc_activity_demo_spell_6" model="nh.activity">
+            <field name="data_ref" eval="'nh.clinical.spell,' + str(ref('nhc_demo_spell_6'))"/>
+        </record>
+    </data>
+</openerp>
