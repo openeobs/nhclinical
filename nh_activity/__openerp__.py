@@ -6,7 +6,7 @@
     'category': 'General',
     'license': 'AGPL-3',
     'summary': '',
-    'description': """ Activity Base for NH Activity System """,
+    'description': """ Activity Base for NH Activity System  """,
     'author': 'Neova Health',
     'website': 'http://www.neovahealth.co.uk/',
     'depends': ['nh_odoo_fixes'],

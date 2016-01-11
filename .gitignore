@@ -1,2 +1,8 @@
-nh_activity/docs/build
-nh_clinical/docs/build
+build/
+__pycache__/
+*.py[cod]
+dist/
+venv/
+.idea/
+*.egg-info/
+*.egg
