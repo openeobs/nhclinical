@@ -6,4 +6,3 @@ from . import fix_read_group_fill_results
 from . import fix_odoo8_fields_many2many_set
 from . import cookie_fix
 from . import nh_logging
-
