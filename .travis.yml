@@ -64,5 +64,6 @@ after_script:
 - echo "</testsuites>" >> test_report.xml
 - echo -e "\nsonar.python.coverage.reportPath=coverage.xml" >> sonar-project.properties
 - echo -e "\nsonar.python.xunit.reportPath=test_report.xml" >> sonar-project.properties
+- echo -e "\nsonar.branch=$TRAVIS_BRANCH" >> sonar-project.properties
 - ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST -L 2000:localhost:2000 -L 6432:localhost:5432 -fN
 - if [ "$SONAR" == "1" ] ; then "${HOME}/sonar-runner-2.4/bin/sonar-runner" ; fi
