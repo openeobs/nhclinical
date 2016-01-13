@@ -146,7 +146,7 @@
                     </header>
                     <sheet>
                         <group>
-                            <field name="ward_id" no_open="1" readonly="1"
+                            <field name="ward_id" options="{'no_open': True}" readonly="1"
                                    attrs="{'invisible': [['stage','!=','users']]}"/>
                             <field name="user_ids" no_open="1" colspan="2" widget="many2many_tags" options="{'no_create': True}"
                                     attrs="{'invisible': [['stage','!=','users']]}" string="Nursing Staff on shift:">
