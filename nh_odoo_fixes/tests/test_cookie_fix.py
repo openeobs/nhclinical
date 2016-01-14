@@ -1,10 +1,11 @@
 # Part of NHClinical. See LICENSE file for full copyright and licensing details
 # -*- coding: utf-8 -*-
-__author__ = 'colinwren'
+import logging
 import mock
 import openerp
 import psycopg2
 import werkzeug
+
 from openerp.http import Root, Response
 from openerp.modules.registry import RegistryManager
 from openerp.tests import DB as DB_NAME
@@ -12,7 +13,7 @@ from openerp.tests.common import SingleTransactionCase
 from werkzeug.test import EnvironBuilder
 from werkzeug.wrappers import Request
 
-import logging
+
 _logger = logging.getLogger(__name__)
 
 

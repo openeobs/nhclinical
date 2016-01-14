@@ -2,13 +2,13 @@
 # -*- coding: utf-8 -*-
 import logging
 
+from faker import Faker
 from openerp.tests.common import SingleTransactionCase
 from openerp.tools import config
 
 
 _logger = logging.getLogger(__name__)
 
-from faker import Faker
 fake = Faker()
 seed = fake.random_int(min=0, max=9999999)
 

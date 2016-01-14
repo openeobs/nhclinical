@@ -2,12 +2,13 @@
 # -*- coding: utf-8 -*-
 import logging
 
+from faker import Faker
 from openerp.osv import orm, osv
 from openerp import SUPERUSER_ID
 
+
 _logger = logging.getLogger(__name__)
 
-from faker import Faker
 fake = Faker()
 
 

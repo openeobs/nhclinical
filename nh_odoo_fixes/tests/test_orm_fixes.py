@@ -1,10 +1,9 @@
 # Part of NHClinical. See LICENSE file for full copyright and licensing details
 # -*- coding: utf-8 -*-
-__author__ = 'wearp'
-from datetime import datetime
 import re
-from mock import patch
 
+from datetime import datetime
+from mock import patch
 from openerp.osv import fields
 from openerp.tests.common import TransactionCase
 

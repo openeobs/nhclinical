@@ -1,13 +1,14 @@
 # Part of NHClinical. See LICENSE file for full copyright and licensing details
 # -*- coding: utf-8 -*-
+import logging
+
+from faker import Faker
 from openerp.tests import common
 from openerp.osv.orm import except_orm
 
-import logging
 
 _logger = logging.getLogger(__name__)
 
-from faker import Faker
 fake = Faker()
 
 
