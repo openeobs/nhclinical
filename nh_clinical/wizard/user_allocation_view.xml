@@ -96,6 +96,11 @@
                                 attrs="{'invisible': [['stage','!=','allocation']]}"/>
                     </header>
                     <sheet>
+                        <group>
+                            <field name="ward_id" options="{'no_create': True, 'no_open': True}" colspan="2" widget="nh_many2one"
+                                   attrs="{'readonly': [['stage','!=','wards']]}" required="1"
+                                   string="Ward:"/>
+                        </group>
                         <group string="Previous Shift" attrs="{'invisible': [['stage','!=','review']]}">
                             <field name="location_ids" no_open="1" readonly="1" nolabel="1" attrs="{'invisible': [['stage','!=','review']]}">
                                 <tree>
@@ -107,9 +112,6 @@
                             </field>
                         </group>
                         <group>
-                            <field name="ward_id" options="{'no_create': True}" colspan="2" widget="nh_many2one"
-                                   attrs="{'invisible': [['stage','!=','wards']]}" required="1"
-                                   string="Nurse in Charge for Ward:"/>
                             <field name="user_ids" options="{'no_create': True}" colspan="2" widget="many2many_tags"
                                    attrs="{'invisible': [['stage','!=','users']]}"
                                    string="Nursing Staff for new shift:"/>
@@ -146,8 +148,9 @@
                     </header>
                     <sheet>
                         <group>
-                            <field name="ward_id" no_open="1" readonly="1"
-                                   attrs="{'invisible': [['stage','!=','users']]}"/>
+                            <field name="ward_id" options="{'no_open': True}" readonly="1"/>
+                        </group>
+                        <group>
                             <field name="user_ids" no_open="1" colspan="2" widget="many2many_tags" options="{'no_create': True}"
                                     attrs="{'invisible': [['stage','!=','users']]}" string="Nursing Staff on shift:">
                                 <!--<tree>-->
@@ -190,8 +193,10 @@
                     </header>
                     <sheet>
                         <group>
-                            <field name="ward_id" options="{'no_create': True}" colspan="2" widget="nh_many2one"
-                                   invisible="1"/>
+                            <field name="ward_id" options="{'no_create': True, 'no_open': True}" colspan="2" widget="nh_many2one"
+                                   invisible="0" readonly="1"/>
+                        </group>
+                        <group>
                             <field name="doctor_ids" no_open="1" readonly="1" nolabel="1" attrs="{'invisible': [['stage','!=','review']]}">
                                 <tree>
                                     <field name="partner_id" string="Medical Staff"/>
