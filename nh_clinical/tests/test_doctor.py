@@ -1,7 +1,8 @@
+# Part of NHClinical. See LICENSE file for full copyright and licensing details
+# -*- coding: utf-8 -*-
 import logging
 
 from openerp.tests import common
-from openerp.osv.orm import except_orm
 
 _logger = logging.getLogger(__name__)
 
@@ -16,7 +17,8 @@ class TestClinicalDoctor(common.SingleTransactionCase):
         cls.partner_pool = cls.registry('res.partner')
         cls.user_pool = cls.registry('res.users')
 
-        cls.doctors = [cls.doctor_pool.create(cr, uid, {'name': 'doct'+str(i), 'code': '000'}) for i in range(2)]
+        cls.doctors = [cls.doctor_pool.create(
+            cr, uid, {'name': 'doct'+str(i), 'code': '000'}) for i in range(2)]
 
     def test_01_evaluate_doctors_dict(self):
         cr, uid = self.cr, self.uid
@@ -56,7 +58,8 @@ class TestClinicalDoctor(common.SingleTransactionCase):
         self.assertFalse(self.doctor_pool.evaluate_doctors_dict(cr, uid, {}))
 
         # Scenario 4: Evaluate unevaluable data
-        self.assertFalse(self.doctor_pool.evaluate_doctors_dict(cr, uid, {'doctors': "[(//yy3)]"}))
+        self.assertFalse(self.doctor_pool.evaluate_doctors_dict(
+            cr, uid, {'doctors': "[(//yy3)]"}))
 
         # Scenario 5: Use non unique code
         doctors = """[{
@@ -69,10 +72,14 @@ class TestClinicalDoctor(common.SingleTransactionCase):
     def test_02_create(self):
         cr, uid = self.cr, self.uid
 
-        user_id = self.user_pool.create(cr, uid, {'name': 'User01', 'login': 'u01', 'password': 'u01'})
-        self.assertTrue(self.doctor_pool.create(cr, uid, {'name': 'User01', 'user_id': user_id}))
+        user_id = self.user_pool.create(cr, uid, {'name': 'User01',
+                                                  'login': 'u01',
+                                                  'password': 'u01'})
+        self.assertTrue(self.doctor_pool.create(cr, uid, {'name': 'User01',
+                                                          'user_id': user_id}))
 
     def test_03_write(self):
         cr, uid = self.cr, self.uid
 
-        self.assertTrue(self.doctor_pool.write(cr, uid, self.doctors[1], {'code': '001'}))
+        self.assertTrue(self.doctor_pool.write(cr, uid, self.doctors[1],
+                                               {'code': '001'}))

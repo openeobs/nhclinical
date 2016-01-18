@@ -1,3 +1,5 @@
+# Part of NHClinical. See LICENSE file for full copyright and licensing details
+# -*- coding: utf-8 -*-
 from openerp.osv import osv, fields
 
 
@@ -7,7 +9,9 @@ class responsibility_allocation_wizard(osv.TransientModel):
     _columns = {
         'user_id': fields.many2one('res.users', 'User'),
         'location_ids': fields.many2many('nh.clinical.location',
-                                         'allocation_location_rel', 'allocation_id', 'location_id', string='Locations'),
+                                         'allocation_location_rel',
+                                         'allocation_id', 'location_id',
+                                         string='Locations'),
         'clear_locations': fields.boolean('Clear All Locations')
     }
 
@@ -28,7 +32,9 @@ class responsibility_allocation_wizard(osv.TransientModel):
         return {'value': value}
 
     def get_location_list(self, cr, uid, location_id, context=None):
-        location = self.pool['nh.clinical.location'].browse(cr, uid, location_id, context=context)
+        location = self.pool['nh.clinical.location'].browse(cr, uid,
+                                                            location_id,
+                                                            context=context)
         res = [location.id]
         for child in location.child_ids:
             res += self.get_location_list(cr, uid, child.id, context=context)
@@ -36,7 +42,9 @@ class responsibility_allocation_wizard(osv.TransientModel):
 
     def submit(self, cr, uid, ids, context=None):
         data = self.browse(cr, uid, ids[0], context=context)
-        allocation_pool = self.pool['nh.clinical.user.responsibility.allocation']
+        allocation_pool = self.pool[
+            'nh.clinical.user.responsibility.allocation'
+        ]
         activity_pool = self.pool['nh.activity']
 
         locations = [loc.id for loc in data.location_ids]

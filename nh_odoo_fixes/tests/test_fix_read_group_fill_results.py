@@ -1,6 +1,6 @@
-__author__ = 'Will'
+# Part of NHClinical. See LICENSE file for full copyright and licensing details
+# -*- coding: utf-8 -*-
 from mock import MagicMock
-
 from openerp.tests.common import TransactionCase
 
 
@@ -19,8 +19,8 @@ class TestReadGroupFillResults(TransactionCase):
 
     def test_02_append_left_with_grouped_value_known_value(self):
         result, known_values = self.base_model._append_left(
-            {'name': ['test']}, 'name', {'test': {'name': ['test']}}, [], 'name'
-
+            {'name': ['test']}, 'name',
+            {'test': {'name': ['test']}}, [], 'name'
         )
         self.assertEquals(result, [])
         self.assertEquals(known_values, {'test': {'name': ['test']}})
@@ -89,7 +89,8 @@ class TestReadGroupFillResults(TransactionCase):
         result_template = None
         domain = None
         count_field = 'count_key'
-        self.base_model._append_right = MagicMock(return_value=([], {'name': 'test'}))
+        self.base_model._append_right = MagicMock(
+            return_value=([], {'name': 'test'}))
 
         result = self.base_model._append_all(
             cr, uid, read_group_result, all_groups, all_group_tuples, groupby,
@@ -122,7 +123,7 @@ class TestReadGroupFillResults(TransactionCase):
         self.assertEquals(result, [])
         del self.base_model._append_left
 
-    def test_09_append_all_when_left_and_right_calls_append_right_then_left(self):
+    def test_append_all_when_left_and_right_calls_append_right_then_left(self):
         cr, uid = self.cr, self.uid
         read_group_result = [{'name': ['value']}]
         all_groups = [['name']]
@@ -143,7 +144,7 @@ class TestReadGroupFillResults(TransactionCase):
         self.assertEquals(result, [{'name': ['value']}])
         del self.base_model._append_right
 
-    def test_10_append_all_when_groupby_is_not_in_right_side_then_append_right(self):
+    def test_append_all_when_groupby_not_in_right_side_then_append_right(self):
         cr, uid = self.cr, self.uid
         read_group_result = [{'name': 'value'}]
         all_groups = [['name']]
@@ -164,7 +165,7 @@ class TestReadGroupFillResults(TransactionCase):
         )
         del self.base_model._append_right
 
-    def test_11_append_all_when_groupby_is_not_left_side_then_append_left(self):
+    def test_append_all_when_groupby_is_not_left_side_then_append_left(self):
         cr, uid = self.cr, self.uid
         read_group_result = [{'name': False}]
         all_groups = [['other']]
@@ -188,18 +189,3 @@ class TestReadGroupFillResults(TransactionCase):
         )
         self.assertEquals(result, [])
         del self.base_model._append_left, self.base_model._append_right
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

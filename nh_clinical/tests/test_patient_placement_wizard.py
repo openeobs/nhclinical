@@ -1,6 +1,6 @@
-__author__ = 'Will'
-from mock import MagicMock, patch
-
+# Part of NHClinical. See LICENSE file for full copyright and licensing details
+# -*- coding: utf-8 -*-
+from mock import MagicMock
 from openerp.tests.common import TransactionCase
 
 
@@ -9,7 +9,8 @@ class TestPatientPlacementWizard(TransactionCase):
     def setUp(self):
         super(TestPatientPlacementWizard, self).setUp()
 
-        self.wizard_pool = self.registry('nh.clinical.patient.placement.wizard')
+        self.wizard_pool = self.registry(
+            'nh.clinical.patient.placement.wizard')
         self.placement_pool = self.registry('nh.clinical.patient.placement')
         self.activity_pool = self.registry('nh.activity')
 
@@ -65,7 +66,8 @@ class TestPatientPlacementWizard(TransactionCase):
         )
         self.activity_pool.complete(cr, uid, activity_id, None)
         self.assertEquals(result, None)
-        del self.activity_pool.start, self.activity_pool.submit, self.activity_pool.complete
+        del self.activity_pool.start, self.activity_pool.submit
+        del self.activity_pool.complete
 
     def test_06_get_placements(self):
         cr, uid = self.cr, self.uid
@@ -88,7 +90,8 @@ class TestPatientPlacementWizard(TransactionCase):
         self.wizard_pool.write = MagicMock()
         self.wizard_pool._get_place_patients = MagicMock()
         self.wizard_pool._get_placement_ids = MagicMock(return_value=[1, 2])
-        self.wizard_pool._get_recent_placement_ids = MagicMock(return_value=[2])
+        self.wizard_pool._get_recent_placement_ids = MagicMock(
+            return_value=[2])
 
         result = self.wizard_pool.apply(cr, uid, [1, 2])
         self.wizard_pool._get_place_patients.assert_called_with(
@@ -111,7 +114,8 @@ class TestPatientPlacementWizard(TransactionCase):
         cr, uid = self.cr, self.uid
         placement_mock = MagicMock(spec=self.placement_pool.__class__.__name__)
         return_value = [
-            placement_mock._get_child_mock(), placement_mock._get_child_mock(location_id=None)
+            placement_mock._get_child_mock(),
+            placement_mock._get_child_mock(location_id=None)
         ]
         self.wizard_pool._get_placements = MagicMock(return_value=return_value)
         self.wizard_pool._place_patients = MagicMock()
@@ -119,5 +123,5 @@ class TestPatientPlacementWizard(TransactionCase):
         self.wizard_pool._get_place_patients(cr, uid, [1, 2])
         self.assertEquals(1, self.wizard_pool._place_patients.call_count)
         self.assertTrue(self.wizard_pool._get_placements.called)
-        del placement_mock, self.wizard_pool._get_placements, \
-            self.wizard_pool._place_patients
+        del placement_mock, self.wizard_pool._get_placements
+        del self.wizard_pool._place_patients

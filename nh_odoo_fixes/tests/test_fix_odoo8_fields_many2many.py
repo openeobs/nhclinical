@@ -1,5 +1,5 @@
-__author__ = 'Will'
-
+# Part of NHClinical. See LICENSE file for full copyright and licensing details
+# -*- coding: utf-8 -*-
 from openerp.tests.common import TransactionCase
 
 
@@ -27,5 +27,3 @@ class TestNewSet(TransactionCase):
                    "WHERE test_model_b_id = %i" % self.b_id)
         num_records = cr.fetchall()
         self.assertEquals(len(num_records), 1)
-
-

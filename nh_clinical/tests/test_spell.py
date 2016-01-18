@@ -1,3 +1,5 @@
+# Part of NHClinical. See LICENSE file for full copyright and licensing details
+# -*- coding: utf-8 -*-
 import logging
 from mock import MagicMock
 
@@ -22,25 +24,34 @@ class TestClinicalSpell(common.SingleTransactionCase):
         cls.user_pool = cls.registry('res.users')
         cls.api_pool = cls.registry('nh.clinical.api')
 
-        cls.hospital_id = cls.location_pool.create(cr, uid, {'name': 'Test Hospital', 'code': 'TESTHOSP',
-                                                             'usage': 'hospital'})
-        cls.pos_id = cls.pos_pool.create(cr, uid, {'name': 'Test POS', 'location_id': cls.hospital_id})
-        group_ids = cls.group_pool.search(cr, uid, [['name', '=', 'NH Clinical Admin Group']])
-        cls.userpos_id = cls.user_pool.create(cr, uid, {'name': 'Test User', 'login': 'user_001',
-                                                        'password': 'user_001', 'groups_id': [[4, group_ids[0]]],
-                                                        'pos_id': cls.pos_id})
-        cls.ward_id = cls.location_pool.create(cr, uid, {'name': 'Test Ward', 'code': 'TESTWARD', 'usage': 'ward',
-                                                         'parent_id': cls.hospital_id, 'type': 'poc'})
-        cls.patient_id = cls.patient_pool.create(cr, uid, {'other_identifier': 'TESTHN01'})
-        cls.patient2_id = cls.patient_pool.create(cr, uid, {'other_identifier': 'TESTHN02'})
+        cls.hospital_id = cls.location_pool.create(
+            cr, uid, {'name': 'Test Hospital', 'code': 'TESTHOSP',
+                      'usage': 'hospital'})
+        cls.pos_id = cls.pos_pool.create(
+            cr, uid, {'name': 'Test POS', 'location_id': cls.hospital_id})
+        group_ids = cls.group_pool.search(
+            cr, uid, [['name', '=', 'NH Clinical Admin Group']])
+        cls.userpos_id = cls.user_pool.create(
+            cr, uid, {'name': 'Test User', 'login': 'user_001',
+                      'password': 'user_001', 'groups_id': [[4, group_ids[0]]],
+                      'pos_id': cls.pos_id})
+        cls.ward_id = cls.location_pool.create(
+            cr, uid, {'name': 'Test Ward', 'code': 'TESTWARD', 'usage': 'ward',
+                      'parent_id': cls.hospital_id, 'type': 'poc'})
+        cls.patient_id = cls.patient_pool.create(
+            cr, uid, {'other_identifier': 'TESTHN01'})
+        cls.patient2_id = cls.patient_pool.create(
+            cr, uid, {'other_identifier': 'TESTHN02'})
 
         cls.spell_id_1 = 1
 
         cls.spell_id_2 = 2
         cls.spell_ids = [cls.spell_id_1, cls.spell_id_2]
         cls.return_value = [
-            {'activity_id': 1, 'spell_id': cls.spell_id_1, 'user_ids': (3, 4, 5)},
-            {'activity_id': 2, 'spell_id': cls.spell_id_2, 'user_ids': (2, 2, 5)}
+            {'activity_id': 1, 'spell_id': cls.spell_id_1,
+             'user_ids': (3, 4, 5)},
+            {'activity_id': 2, 'spell_id': cls.spell_id_2,
+             'user_ids': (2, 2, 5)}
         ]
 
     def test_01_get_by_patient_id(self):
@@ -57,24 +68,29 @@ class TestClinicalSpell(common.SingleTransactionCase):
         activity = self.activity_pool.browse(cr, uid, activity_id)
 
         # Scenario 1: Spell exists
-        self.assertEqual(self.spell_pool.get_by_patient_id(cr, uid, self.patient_id), activity.data_ref.id)
+        self.assertEqual(self.spell_pool.get_by_patient_id(
+            cr, uid, self.patient_id), activity.data_ref.id)
 
         # Scenario 2: Spell does not exist
-        self.assertFalse(self.spell_pool.get_by_patient_id(cr, uid, self.patient2_id))
+        self.assertFalse(self.spell_pool.get_by_patient_id(cr, uid,
+                                                           self.patient2_id))
 
         # Scenario 3: Exception 'True', Spell exists
         with self.assertRaises(except_orm):
-            self.spell_pool.get_by_patient_id(cr, uid, self.patient_id, exception='True')
+            self.spell_pool.get_by_patient_id(cr, uid, self.patient_id,
+                                              exception='True')
 
         # Scenario 4: Exception 'False', Spell does not exist
         with self.assertRaises(except_orm):
-            self.spell_pool.get_by_patient_id(cr, uid, self.patient2_id, exception='False')
+            self.spell_pool.get_by_patient_id(cr, uid, self.patient2_id,
+                                              exception='False')
 
     def test_02_get_transferred_user_ids(self):
         cr, uid = self.cr, self.uid
         cr.dictfetchall = MagicMock(return_value=self.return_value)
 
-        result = self.spell_pool._get_transferred_user_ids(cr, uid, self.spell_ids, 'transferred_user_ids', None)
+        result = self.spell_pool._get_transferred_user_ids(
+            cr, uid, self.spell_ids, 'transferred_user_ids', None)
         self.assertEquals(result, {1: [3, 4, 5], 2: [2, 5]})
         del cr.dictfetchall
 
@@ -82,9 +98,11 @@ class TestClinicalSpell(common.SingleTransactionCase):
         cr, uid = self.cr, self.uid
         args = [('user_id', 'in', [3, 4, 5])]
         return_value = {1: [3, 4, 5], 2: [2, 5], 3: [6, 7]}
-        self.spell_pool._get_transferred_user_ids = MagicMock(return_value=return_value)
+        self.spell_pool._get_transferred_user_ids = MagicMock(
+            return_value=return_value)
 
-        result = self.spell_pool._transferred_user_ids_search(cr, uid, None, None, args)
+        result = self.spell_pool._transferred_user_ids_search(cr, uid, None,
+                                                              None, args)
         self.assertEquals([('id', 'in', [1, 2])], result)
         del self.spell_pool._get_transferred_user_ids
 
@@ -108,7 +126,8 @@ class TestClinicalSpell(common.SingleTransactionCase):
     def test_06_test_get_activity_user_ids_when_activity_id_and_user_ids(self):
         cr, uid = self.cr, self.uid
         cr.fetchone = MagicMock(return_value=(1, 2))
-        cr.dictfetchone = MagicMock(return_value={'activity_id': 1, 'user_ids': [2, 3, 4]})
+        cr.dictfetchone = MagicMock(
+            return_value={'activity_id': 1, 'user_ids': [2, 3, 4]})
 
         result = self.spell_pool.get_activity_user_ids(cr, uid, 2)
         self.assertEquals(result, [2, 3, 4])
@@ -117,10 +136,9 @@ class TestClinicalSpell(common.SingleTransactionCase):
     def test_07_test_get_activity_user_ids_when_no_user_ids(self):
         cr, uid = self.cr, self.uid
         cr.fetchone = MagicMock(return_value=(1, 2))
-        cr.dictfetchone = MagicMock(return_value={'activity_id': 1, 'user_ids': []})
+        cr.dictfetchone = MagicMock(
+            return_value={'activity_id': 1, 'user_ids': []})
 
         result = self.spell_pool.get_activity_user_ids(cr, uid, 2)
         self.assertEquals(result, [])
         del cr.fetchone, cr.dictfetchone
-
-

@@ -1,3 +1,5 @@
+# Part of NHClinical. See LICENSE file for full copyright and licensing details
+# -*- coding: utf-8 -*-
 from openerp.osv import orm, fields
 
 
@@ -9,11 +11,6 @@ class test_activity_data_model(orm.Model):
     _columns = {
         'field1': fields.text('Field1')
     }
-
-    def __init__(self, pool, cr):
-        activity_model = pool['nh.activity']
-
-        super(test_activity_data_model, self).__init__(pool, cr)
 
 
 class test_activity_data_model2(orm.Model):

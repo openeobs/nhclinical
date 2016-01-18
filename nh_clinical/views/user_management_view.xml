@@ -35,7 +35,7 @@
                     <field name="user_id" string="Name"/>
                     <field name="login"/>
                     <field name="category_id" widget="many2many_tags" string="Roles"/>
-                    <field name="location_ids" string="Responsible for locations..."/>
+                    <field name="location_ids" string="Responsible for Locations"/>
                 </tree>
             </field>
         </record>

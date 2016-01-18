@@ -1,8 +1,9 @@
-__author__ = 'wearp'
-from datetime import datetime
+# Part of NHClinical. See LICENSE file for full copyright and licensing details
+# -*- coding: utf-8 -*-
 import re
-from mock import patch
 
+from datetime import datetime
+from mock import patch
 from openerp.osv import fields
 from openerp.tests.common import TransactionCase
 
@@ -11,7 +12,7 @@ class TestORMFixes(TransactionCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.pattern = re.compile('\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}')
+        cls.pattern = re.compile(r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}')
         cls.date = datetime.now()
         cls.context = {'tz': 'GB'}
 
@@ -35,6 +36,7 @@ class TestORMFixes(TransactionCase):
     def test_03_utc_timestamp_with_tz_in_context_excepts_pytz_exceptions(self):
         cr, uid = self.cr, self.uid
 
-        timestamp = fields.datetime.utc_timestamp(cr, uid, self.date, context={'tz': '??'})
+        timestamp = fields.datetime.utc_timestamp(cr, uid, self.date,
+                                                  context={'tz': '??'})
         result = re.match(self.pattern, timestamp)
         self.assertEquals(result.string, timestamp)

@@ -1,4 +1,5 @@
-# -*- encoding: utf-8 -*-
+# Part of NHClinical. See LICENSE file for full copyright and licensing details
+# -*- coding: utf-8 -*-
 {
     'name': 'NH Clinical Core',
     'version': '0.1',
@@ -9,7 +10,7 @@
     'author': 'Neova Health',
     'website': 'http://www.neovahealth.co.uk/',
     'depends': ['nh_activity', 'hr'],
-    'data': ['data/data.xml', 
+    'data': ['data/data.xml',
              'views/pos_view.xml',
              'views/location_view.xml',
              'views/patient_view.xml',

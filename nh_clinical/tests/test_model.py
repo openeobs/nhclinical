@@ -1,9 +1,12 @@
+# Part of NHClinical. See LICENSE file for full copyright and licensing details
+# -*- coding: utf-8 -*-
 from openerp.osv import orm, fields
 
 
 class test_activity_data_model0(orm.Model):
     """
-    Test Activity Data Model: TEST purposes only. Will be used to make sure activity+data_model structure works.
+    Test Activity Data Model: TEST purposes only.
+    Will be used to make sure the activity + data_model structure works.
     """
     _name = 'test.activity.data.model0'
     _inherit = ['nh.activity.data']
@@ -28,7 +31,10 @@ class test_activity_data_model0(orm.Model):
             'domains': [
                 {
                     'object': 'nh.activity',
-                    'domain': [['data_model', '=', 'test.activity.data.model0'], ['state', '=', 'completed']]
+                    'domain': [
+                        ['data_model', '=', 'test.activity.data.model0'],
+                        ['state', '=', 'completed']
+                    ]
                 }
             ],
             'case': 2,
@@ -63,7 +69,8 @@ class test_activity_data_model0(orm.Model):
 
 class test_activity_data_model1(orm.Model):
     """
-    Test Activity Data Model: TEST purposes only. Will be used to make sure activity+data_model structure works.
+    Test Activity Data Model: TEST purposes only.
+    Will be used to make sure activity + data_model structure works.
     """
     _name = 'test.activity.data.model1'
     _inherit = ['nh.activity.data']
@@ -78,7 +85,8 @@ class test_activity_data_model1(orm.Model):
 
 class test_activity_data_model3(orm.Model):
     """
-    Test Activity Data Model: TEST purposes only. Will be used to make sure activity+data_model structure works.
+    Test Activity Data Model: TEST purposes only.
+    Will be used to make sure activity + data_model structure works.
     """
     _name = 'test.activity.data.model3'
     _inherit = ['nh.activity.data']
@@ -94,7 +102,8 @@ class test_activity_data_model3(orm.Model):
 
 class test_activity_data_model4(orm.Model):
     """
-    Test Activity Data Model: TEST purposes only. Will be used to make sure activity+data_model structure works.
+    Test Activity Data Model: TEST purposes only.
+    Will be used to make sure activity + data_model structure works.
     """
     _name = 'test.activity.data.model4'
     _inherit = ['nh.activity.data']

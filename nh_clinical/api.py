@@ -1,3 +1,4 @@
+# Part of NHClinical. See LICENSE file for full copyright and licensing details
 # -*- coding: utf-8 -*-
 """
 ``api.py`` defines the core methods to interface with the
@@ -6,7 +7,7 @@
 
 import logging
 
-from openerp.osv import orm, osv
+from openerp.osv import orm
 _logger = logging.getLogger(__name__)
 
 
@@ -32,21 +33,27 @@ class nh_clinical_api(orm.AbstractModel):
         activity_pool = self.pool['nh.activity']
         patient_pool = self.pool['nh.clinical.patient']
         update_pool = self.pool['nh.clinical.adt.patient.update']
-        if not patient_pool.check_hospital_number(cr, uid, hospital_number, context=context):
+        if not patient_pool.check_hospital_number(cr, uid, hospital_number,
+                                                  context=context):
             nhs_data = data.copy()
             nhs_data['other_identifier'] = hospital_number
-            if not patient_pool.check_nhs_number(cr, uid, data.get('patient_identifier'), context=context):
-                _logger.warn("Patient registered from an update call - data available:%s" % data)
+            if not patient_pool.check_nhs_number(
+                    cr, uid, data.get('patient_identifier'), context=context):
+                _logger.warn("Patient registered from an update call - "
+                             "data available:%s", data)
                 self.register(cr, uid, hospital_number, data, context=context)
             else:
-                patient_pool.update(cr, uid, data.get('patient_identifier'), nhs_data, selection='patient_identifier',
+                patient_pool.update(cr, uid, data.get('patient_identifier'),
+                                    nhs_data, selection='patient_identifier',
                                     context=context)
         if hospital_number:
             data.update({'other_identifier': hospital_number})
-        update_activity = update_pool.create_activity(cr, uid, {}, {}, context=context)
-        res = activity_pool.submit(cr, uid, update_activity, data, context=context)
+        update_activity = update_pool.create_activity(cr, uid, {}, {},
+                                                      context=context)
+        res = activity_pool.submit(cr, uid, update_activity, data,
+                                   context=context)
         activity_pool.complete(cr, uid, update_activity, context=context)
-        _logger.debug("Patient updated\n data: %s" % data)
+        _logger.debug("Patient updated\n data: %s", data)
         return res
 
     def register(self, cr, uid, hospital_number, data, context=None):
@@ -64,12 +71,14 @@ class nh_clinical_api(orm.AbstractModel):
 
         activity_pool = self.pool['nh.activity']
         register_pool = self.pool['nh.clinical.adt.patient.register']
-        register_activity = register_pool.create_activity(cr, uid, {}, {}, context=context)
+        register_activity = register_pool.create_activity(cr, uid, {}, {},
+                                                          context=context)
         if hospital_number:
             data.update({'other_identifier': hospital_number})
         activity_pool.submit(cr, uid, register_activity, data, context=context)
-        res = activity_pool.complete(cr, uid, register_activity, context=context)
-        _logger.debug("Patient registered\n data: %s" % data)
+        res = activity_pool.complete(cr, uid, register_activity,
+                                     context=context)
+        _logger.debug("Patient registered\n data: %s", data)
         return res
 
     def admit(self, cr, uid, hospital_number, data, context=None):
@@ -90,20 +99,24 @@ class nh_clinical_api(orm.AbstractModel):
         activity_pool = self.pool['nh.activity']
         patient_pool = self.pool['nh.clinical.patient']
         admit_pool = self.pool['nh.clinical.adt.patient.admit']
-        if not patient_pool.check_hospital_number(cr, uid, hospital_number, context=context):
+        if not patient_pool.check_hospital_number(cr, uid, hospital_number,
+                                                  context=context):
             nhs_data = data.copy()
             nhs_data['other_identifier'] = hospital_number
-            if patient_pool.check_nhs_number(cr, uid, data.get('patient_identifier'), context=context):
-                patient_pool.update(cr, uid, data.get('patient_identifier'), nhs_data, selection='patient_identifier',
+            if patient_pool.check_nhs_number(
+                    cr, uid, data.get('patient_identifier'), context=context):
+                patient_pool.update(cr, uid, data.get('patient_identifier'),
+                                    nhs_data, selection='patient_identifier',
                                     context=context)
             else:
                 self.register(cr, uid, hospital_number, data, context=context)
         if hospital_number:
             data.update({'other_identifier': hospital_number})
-        admit_activity = admit_pool.create_activity(cr, uid, {}, {}, context=context)
+        admit_activity = admit_pool.create_activity(cr, uid, {}, {},
+                                                    context=context)
         activity_pool.submit(cr, uid, admit_activity, data, context=context)
         activity_pool.complete(cr, uid, admit_activity, context=context)
-        _logger.debug("Patient admitted\n data: %s" % data)
+        _logger.debug("Patient admitted\n data: %s", data)
         return True
 
     def admit_update(self, cr, uid, hospital_number, data, context=None):
@@ -122,20 +135,24 @@ class nh_clinical_api(orm.AbstractModel):
         activity_pool = self.pool['nh.activity']
         update_pool = self.pool['nh.clinical.adt.spell.update']
         patient_pool = self.pool['nh.clinical.patient']
-        if not patient_pool.check_hospital_number(cr, uid, hospital_number, context=context):
+        if not patient_pool.check_hospital_number(cr, uid, hospital_number,
+                                                  context=context):
             nhs_data = data.copy()
             nhs_data['other_identifier'] = hospital_number
-            if patient_pool.check_nhs_number(cr, uid, data.get('patient_identifier'), context=context):
-                patient_pool.update(cr, uid, data.get('patient_identifier'), nhs_data, selection='patient_identifier',
+            if patient_pool.check_nhs_number(
+                    cr, uid, data.get('patient_identifier'), context=context):
+                patient_pool.update(cr, uid, data.get('patient_identifier'),
+                                    nhs_data, selection='patient_identifier',
                                     context=context)
             else:
                 self.register(cr, uid, hospital_number, data, context=context)
         if hospital_number:
             data.update({'other_identifier': hospital_number})
-        update_activity = update_pool.create_activity(cr, uid, {}, {}, context=context)
+        update_activity = update_pool.create_activity(cr, uid, {}, {},
+                                                      context=context)
         activity_pool.submit(cr, uid, update_activity, data, context=context)
         activity_pool.complete(cr, uid, update_activity, context=context)
-        _logger.debug("Admission updated\n data: %s" % data)
+        _logger.debug("Admission updated\n data: %s", data)
         return True
 
     def cancel_admit(self, cr, uid, hospital_number, context=None):
@@ -151,12 +168,14 @@ class nh_clinical_api(orm.AbstractModel):
         activity_pool = self.pool['nh.activity']
         cancel_pool = self.pool['nh.clinical.adt.patient.cancel_admit']
         patient_pool = self.pool['nh.clinical.patient']
-        patient_pool.check_hospital_number(cr, uid, hospital_number, exception='False', context=context)
+        patient_pool.check_hospital_number(cr, uid, hospital_number,
+                                           exception='False', context=context)
         data = {'other_identifier': hospital_number}
-        cancel_activity = cancel_pool.create_activity(cr, uid, {}, {}, context=context)
+        cancel_activity = cancel_pool.create_activity(cr, uid, {}, {},
+                                                      context=context)
         activity_pool.submit(cr, uid, cancel_activity, data, context=context)
         activity_pool.complete(cr, uid, cancel_activity, context=context)
-        _logger.debug("Admission cancelled\n data: %s" % data)
+        _logger.debug("Admission cancelled\n data: %s", data)
         return True
 
     def discharge(self, cr, uid, hospital_number, data, context=None):
@@ -174,20 +193,25 @@ class nh_clinical_api(orm.AbstractModel):
         activity_pool = self.pool['nh.activity']
         discharge_pool = self.pool['nh.clinical.adt.patient.discharge']
         patient_pool = self.pool['nh.clinical.patient']
-        if not patient_pool.check_hospital_number(cr, uid, hospital_number, context=context):
+        if not patient_pool.check_hospital_number(cr, uid, hospital_number,
+                                                  context=context):
             nhs_data = data.copy()
             nhs_data['other_identifier'] = hospital_number
-            if patient_pool.check_nhs_number(cr, uid, data.get('patient_identifier'), context=context):
-                patient_pool.update(cr, uid, data.get('patient_identifier'), nhs_data, selection='patient_identifier',
+            if patient_pool.check_nhs_number(
+                    cr, uid, data.get('patient_identifier'), context=context):
+                patient_pool.update(cr, uid, data.get('patient_identifier'),
+                                    nhs_data, selection='patient_identifier',
                                     context=context)
             else:
                 self.register(cr, uid, hospital_number, data, context=context)
         if hospital_number:
             data.update({'other_identifier': hospital_number})
-        discharge_activity = discharge_pool.create_activity(cr, uid, {}, {}, context=context)
-        activity_pool.submit(cr, uid, discharge_activity, data, context=context)
+        discharge_activity = discharge_pool.create_activity(cr, uid, {}, {},
+                                                            context=context)
+        activity_pool.submit(cr, uid, discharge_activity, data,
+                             context=context)
         activity_pool.complete(cr, uid, discharge_activity, context=context)
-        _logger.debug("Patient discharged: %s" % hospital_number)
+        _logger.debug("Patient discharged: %s", hospital_number)
         return True
 
     def cancel_discharge(self, cr, uid, hospital_number, context=None):
@@ -201,13 +225,18 @@ class nh_clinical_api(orm.AbstractModel):
         """
 
         patient_pool = self.pool['nh.clinical.patient']
-        patient_pool.check_hospital_number(cr, uid, hospital_number, exception='False', context=context)
+        patient_pool.check_hospital_number(cr, uid, hospital_number,
+                                           exception='False', context=context)
         activity_pool = self.pool['nh.activity']
         cancel_pool = self.pool['nh.clinical.adt.patient.cancel_discharge']
-        cancel_discharge_activity = cancel_pool.create_activity(cr, uid, {}, {}, context=context)
-        activity_pool.submit(cr, uid, cancel_discharge_activity, {'other_identifier': hospital_number}, context=context)
-        activity_pool.complete(cr, uid, cancel_discharge_activity, context=context)
-        _logger.debug("Discharge cancelled for patient: %s" % hospital_number)
+        cancel_discharge_activity = cancel_pool.create_activity(
+            cr, uid, {}, {}, context=context)
+        activity_pool.submit(cr, uid, cancel_discharge_activity,
+                             {'other_identifier': hospital_number},
+                             context=context)
+        activity_pool.complete(cr, uid, cancel_discharge_activity,
+                               context=context)
+        _logger.debug("Discharge cancelled for patient: %s", hospital_number)
         return True
 
     def merge(self, cr, uid, hospital_number, data, context=None):
@@ -225,14 +254,16 @@ class nh_clinical_api(orm.AbstractModel):
         """
 
         patient_pool = self.pool['nh.clinical.patient']
-        patient_pool.check_hospital_number(cr, uid, hospital_number, exception='False', context=context)
+        patient_pool.check_hospital_number(cr, uid, hospital_number,
+                                           exception='False', context=context)
         activity_pool = self.pool['nh.activity']
         merge_pool = self.pool['nh.clinical.adt.patient.merge']
         data.update({'into_identifier': hospital_number})
-        merge_activity = merge_pool.create_activity(cr, uid, {}, {}, context=context)
+        merge_activity = merge_pool.create_activity(cr, uid, {}, {},
+                                                    context=context)
         activity_pool.submit(cr, uid, merge_activity, data, context=context)
         activity_pool.complete(cr, uid, merge_activity, context=context)
-        _logger.debug("Patient merged\n data: %s" % data)
+        _logger.debug("Patient merged\n data: %s", data)
         return True
 
     def transfer(self, cr, uid, hospital_number, data, context=None):
@@ -251,20 +282,24 @@ class nh_clinical_api(orm.AbstractModel):
         activity_pool = self.pool['nh.activity']
         patient_pool = self.pool['nh.clinical.patient']
         transfer_pool = self.pool['nh.clinical.adt.patient.transfer']
-        if not patient_pool.check_hospital_number(cr, uid, hospital_number, context=context):
+        if not patient_pool.check_hospital_number(cr, uid, hospital_number,
+                                                  context=context):
             nhs_data = data.copy()
             nhs_data['other_identifier'] = hospital_number
-            if patient_pool.check_nhs_number(cr, uid, data.get('patient_identifier'), context=context):
-                patient_pool.update(cr, uid, data.get('patient_identifier'), nhs_data, selection='patient_identifier',
+            if patient_pool.check_nhs_number(
+                    cr, uid, data.get('patient_identifier'), context=context):
+                patient_pool.update(cr, uid, data.get('patient_identifier'),
+                                    nhs_data, selection='patient_identifier',
                                     context=context)
             else:
                 self.register(cr, uid, hospital_number, data, context=context)
         if hospital_number:
             data.update({'other_identifier': hospital_number})
-        transfer_activity = transfer_pool.create_activity(cr, uid, {}, {}, context=context)
+        transfer_activity = transfer_pool.create_activity(cr, uid, {}, {},
+                                                          context=context)
         activity_pool.submit(cr, uid, transfer_activity, data, context=context)
         activity_pool.complete(cr, uid, transfer_activity, context=context)
-        _logger.debug("Patient transferred\n data: %s" % data)
+        _logger.debug("Patient transferred\n data: %s", data)
         return True
 
     def cancel_transfer(self, cr, uid, hospital_number, context=None):
@@ -278,11 +313,16 @@ class nh_clinical_api(orm.AbstractModel):
         """
 
         patient_pool = self.pool['nh.clinical.patient']
-        patient_pool.check_hospital_number(cr, uid, hospital_number, exception='False', context=context)
+        patient_pool.check_hospital_number(cr, uid, hospital_number,
+                                           exception='False', context=context)
         activity_pool = self.pool['nh.activity']
         cancel_pool = self.pool['nh.clinical.adt.patient.cancel_transfer']
-        cancel_transfer_activity = cancel_pool.create_activity(cr, uid, {}, {}, context=context)
-        activity_pool.submit(cr, uid, cancel_transfer_activity, {'other_identifier': hospital_number}, context=context)
-        activity_pool.complete(cr, uid, cancel_transfer_activity, context=context)
-        _logger.debug("Transfer cancelled for patient: %s" % hospital_number)
+        cancel_transfer_activity = cancel_pool.create_activity(
+            cr, uid, {}, {}, context=context)
+        activity_pool.submit(
+            cr, uid, cancel_transfer_activity,
+            {'other_identifier': hospital_number}, context=context)
+        activity_pool.complete(cr, uid, cancel_transfer_activity,
+                               context=context)
+        _logger.debug("Transfer cancelled for patient: %s", hospital_number)
         return True
