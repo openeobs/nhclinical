@@ -20,3 +20,4 @@ from . import test_users
 from . import test_patient_register
 from . import test_patient_update
 from . import test_patient_admit
+from . import test_data_formatter
