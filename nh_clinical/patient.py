@@ -196,7 +196,7 @@ class nh_clinical_patient(osv.Model):
         'ethnicity': 'Z'
     }
 
-    def format_identifiers(self, vals):
+    def format_data(self, vals):
         non_alphanumeric = re.compile(r'[\W_]+')
         if vals.get('other_identifier'):
             vals['other_identifier'] = non_alphanumeric.sub(
