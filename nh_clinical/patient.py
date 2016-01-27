@@ -1,6 +1,7 @@
 # Part of NHClinical. See LICENSE file for full copyright and licensing details
 # -*- coding: utf-8 -*-
 from openerp.osv import fields, osv
+import re
 import logging
 
 
@@ -195,6 +196,15 @@ class nh_clinical_patient(osv.Model):
         'ethnicity': 'Z'
     }
 
+    def format_identifiers(self, vals):
+        non_alphanumeric = re.compile(r'[\W_]+')
+        if vals.get('other_identifier'):
+            vals['other_identifier'] = non_alphanumeric.sub(
+                '', vals.get('other_identifier'))
+        if vals.get('patient_identifier'):
+            vals['patient_identifier'] = non_alphanumeric.sub(
+                '', vals.get('patient_identifier'))
+
     def create(self, cr, uid, vals, context=None):
         """
         Extends Odoo's :meth:`create()<openerp.models.Model.create>`
@@ -204,9 +214,9 @@ class nh_clinical_patient(osv.Model):
         :returns: ``True`` if created
         :rtype: bool
         """
-
         if not vals.get('name'):
             vals.update({'name': self._get_fullname(vals)})
+        self.format_identifiers(vals)
         if vals.get('other_identifier'):
             self.check_hospital_number(cr, uid, vals.get('other_identifier'),
                                        exception='True', context=context)
@@ -224,7 +234,7 @@ class nh_clinical_patient(osv.Model):
         :returns: ``True`` if created
         :rtype: bool
         """
-
+        self.format_identifiers(vals)
         title_pool = self.pool['res.partner.title']
         if 'title' in vals.keys():
             if not isinstance(vals.get('title'), int):
