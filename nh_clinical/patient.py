@@ -216,7 +216,7 @@ class nh_clinical_patient(osv.Model):
         """
         if not vals.get('name'):
             vals.update({'name': self._get_fullname(vals)})
-        self.format_identifiers(vals)
+        self.format_data(vals)
         if vals.get('other_identifier'):
             self.check_hospital_number(cr, uid, vals.get('other_identifier'),
                                        exception='True', context=context)
@@ -234,7 +234,7 @@ class nh_clinical_patient(osv.Model):
         :returns: ``True`` if created
         :rtype: bool
         """
-        self.format_identifiers(vals)
+        self.format_data(vals)
         title_pool = self.pool['res.partner.title']
         if 'title' in vals.keys():
             if not isinstance(vals.get('title'), int):
