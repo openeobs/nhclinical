@@ -68,6 +68,28 @@ class nh_activity(orm.Model):
             'res.users', 'Ward Manager of the ward on Complete/Cancel')
     }
 
+    def create(self, cr, uid, vals, context=None):
+        """
+        Extends Odoo's `create()` method.
+
+        Writes ``user_ids`` for responsible users of the activities`
+        location.
+
+        :param vals: values to create record
+        :type vals: doct
+        :returns: :class:`nh_activity<activity.nh_activity>` id
+        :rtype: int
+        """
+        res = super(nh_activity, self).create(cr, uid, vals, context=context)
+        if vals.get('location_id'):
+            user_ids = self.pool['nh.activity.data'].get_activity_user_ids(
+                cr, uid, res, context=context)
+            if vals.get('data_model') == 'nh.clinical.spell':
+                self.update_users(cr, uid, user_ids)
+            else:
+                self.write(cr, uid, res, {'user_ids': [[6, False, user_ids]]})
+        return res
+
     def write(self, cr, uid, ids, values, context=None):
         """
         Extends Odoo's `write()` method.
