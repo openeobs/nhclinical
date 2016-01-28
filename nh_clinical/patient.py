@@ -213,9 +213,17 @@ class nh_clinical_patient(osv.Model):
                     lst[index] = non_alphanumeric.sub('', lst[index])
                     data[i] = tuple(lst)
             if field == 'dob':
+                if context.get('dateformat'):
+                    yfirst = context['dateformat'] == 'YMD'
+                    dfirst = context['dateformat'] == 'DMY'
+                else:
+                    yfirst = False
+                    dfirst = False
                 for i, d in enumerate(data):
                     lst = list(d)
-                    lst[index] = parse(lst[index]).strftime(DTF)
+                    lst[index] = parse(
+                        lst[index], yearfirst=yfirst, dayfirst=dfirst
+                    ).strftime(DTF)
                     data[i] = tuple(lst)
 
     def create(self, cr, uid, vals, context=None):
