@@ -205,6 +205,8 @@ class nh_clinical_patient(osv.Model):
             cr, uid, fields, data, context=context)
 
     def format_data(self, fields, data, context=None):
+        if not context:
+            context = dict()
         for index, field in enumerate(fields):
             if field == 'other_identifier' or field == 'patient_identifier':
                 non_alphanumeric = re.compile(r'[\W_]+')
