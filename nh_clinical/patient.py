@@ -1,11 +1,11 @@
 # Part of NHClinical. See LICENSE file for full copyright and licensing details
 # -*- coding: utf-8 -*-
-from openerp.osv import fields, osv
-from dateutil.parser import parse
-from datetime import datetime as dt
-from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
-import re
 import logging
+import re
+
+from dateutil.parser import parse
+from openerp.osv import fields, osv
+from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
 
 
 _logger = logging.getLogger(__name__)
