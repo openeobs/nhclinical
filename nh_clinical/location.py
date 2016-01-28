@@ -371,9 +371,15 @@ class nh_clinical_location(orm.Model):
                                         string='Related Clinical Contexts')
     }
 
+    def _get_default_context_ids(self, cr, uid, default='eobs', context=None):
+        context_pool = self.pool['nh.clinical.context']
+        context_ids = context_pool.search(cr, uid, [('name', '=', 'eobs')])
+        return {'context_ids': [(6, 0, context_ids)]}
+
     _defaults = {
         'active': True,
-        'patient_capacity': 1
+        'patient_capacity': 1,
+        'context_ids': _get_default_context_ids,
     }
 
     _sql_constraints = [
@@ -391,7 +397,7 @@ class nh_clinical_location(orm.Model):
             available locations
         :type usage: list
         :returns: location ids of available locations (default usage is
-            ``bed``)
+            ``bed``)i
         :rtype: list
         """
 
