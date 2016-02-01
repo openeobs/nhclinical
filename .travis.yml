@@ -31,7 +31,7 @@ env:
   matrix:
   - LINT_CHECK="1"
   - ODOO_REPO="valdecdev/odoo" TESTS="1" INCLUDE="nh_odoo_fixes,nh_activity,nh_clinical"
-    VERSION="openeobs-8-12" SERVER_EXPECTED_ERRORS="1" SONAR="1"
+    VERSION="openeobs-8-12" SONAR="1"
 virtualenv:
   system_site_packages: true
 before_install:

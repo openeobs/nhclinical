@@ -45,7 +45,7 @@
                                 <field name="given_name" />
                                 <field name="middle_names" />
                                 <field name="family_name" />
-                                <field name="dob" />
+                                <field name="dob" widget="date"/>
                                 <field name="sex" />
                                 <field name="gender" />
                                 <field name="ethnicity" />
