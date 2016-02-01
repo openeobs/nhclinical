@@ -388,6 +388,49 @@ class nh_clinical_location(orm.Model):
          'The code for a location must be unique!')
     ]
 
+    def onchange_usage(self, cr, uid, ids, usage, context=None):
+        """
+        Hospital locations don't have parent locations and they are always
+        Point of Service type.
+        """
+        if usage != 'hospital':
+            return {}
+        return {
+            'value': {'parent_id': False, 'type': 'pos'}
+        }
+
+    def onchange_type(self, cr, uid, ids, usage, type, context=None):
+        """
+        Hospital locations can only be Point of Service type
+        """
+        if usage != 'hospital' or type == 'pos':
+            return {}
+        return {
+            'warning': {
+                'title': 'Warning',
+                'message': 'Hospital locations can only be Point of Service'
+            },
+            'value': {
+                'type': 'pos'
+            }
+        }
+
+    def onchange_parent_id(self, cr, uid, ids, usage, parent_id, context=None):
+        """
+        Hospital locations can not have a parent location
+        """
+        if usage != 'hospital' or not parent_id:
+            return {}
+        return {
+            'warning': {
+                'title': 'Warning',
+                'message': 'Hospital locations can not have a parent location'
+            },
+            'value': {
+                'parent_id': False
+            }
+        }
+
     def get_available_location_ids(self, cr, uid, usages=None, context=None):
         """
         Gets a list of available locations, only returning beds unless
