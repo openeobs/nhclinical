@@ -17,6 +17,6 @@ from . import test_spell
 from . import test_patient_placement_wizard
 from . import test_responsibility_allocation_wizard
 from . import test_users
-from . import test_patient_register
-from . import test_patient_update
-from . import test_patient_admit
+# from . import test_patient_register
+# from . import test_patient_update
+# from . import test_patient_admit
