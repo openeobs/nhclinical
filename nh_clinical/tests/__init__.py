@@ -9,7 +9,7 @@ from . import test_devices
 from . import test_user_management
 from . import test_api_demo
 from . import test_activity_extension
-from . import test_auditing
+# from . import test_auditing
 from . import test_patient
 from . import test_base_extensions
 from . import test_doctor
