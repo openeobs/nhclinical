@@ -179,6 +179,13 @@
             <field name="type">pos</field>
             <field name="usage">hospital</field>
         </record>
+        <!--Virtual Discharge Location-->
+        <record id="nhc_location_default_discharge" model="nh.clinical.location">
+            <field name="name">Discharge Location</field>
+            <field name="code">GDL0987654321</field>
+            <field name="type">virtual</field>
+            <field name="usage">room</field>
+        </record>
         <!--Default Point of Service-->
         <record id="nhc_location_default_pos" model="nh.clinical.pos">
             <field name="name">Your Hospital</field>
