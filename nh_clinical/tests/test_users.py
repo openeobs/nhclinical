@@ -64,7 +64,7 @@ class TestUsers(SingleTransactionCase):
                       'password': 'user_000',
                       'groups_id': [[4, cls.admin_group_id[0]]],
                       'category_id': [[4, cls.admin_role_id]],
-                      'pos_id': cls.pos_id})
+                      'pos_ids': [[6, 0, [cls.pos_id]]]})
 
         cls.admin_uid = cls.user_pool.create(
             cr, uid, {'name': 'Admin 1', 'login': 'user_001',

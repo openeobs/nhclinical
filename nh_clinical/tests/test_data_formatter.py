@@ -78,7 +78,7 @@ class TestPatientDataFormatter(common.TransactionCase):
             'patient_identifier',
         ]
         data = [
-            ('^N_H+S-N=U"!M|~B*0/4£7\&',)
+            (r'^N_H+S-N=U"!M|~B*0/4£7\&',)
         ]
         self.patient.format_data(fields, data)
         self.assertIn('patient_identifier', fields)
