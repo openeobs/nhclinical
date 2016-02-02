@@ -201,7 +201,7 @@
           <field name="tz">Europe/London</field>
           <field eval="[(4, ref('nh_clinical.group_nhc_admin'))]" name="groups_id" />
           <field eval="[(4, ref('nh_clinical.role_nhc_admin'))]" name="category_id" />
-          <field name="pos_id" ref="nhc_location_default_pos" />
+          <field eval="[(4, ref('nhc_location_default_pos'))]" name="pos_ids" />
         </record>
 
         <!--Cancellation Reasons-->

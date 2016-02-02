@@ -24,6 +24,9 @@ class res_users(orm.Model):
     _inherit = 'res.users'
     _columns = {
         'pos_id': fields.many2one('nh.clinical.pos', 'POS'),
+        'pos_ids': fields.many2many(
+            'nh.clinical.pos', 'user_pos_rel', 'user_id', 'pos_id',
+            'Points of Service'),
         'location_ids': fields.many2many('nh.clinical.location',
                                          'user_location_rel',
                                          'user_id',
@@ -54,7 +57,7 @@ class res_users(orm.Model):
         """
 
         user = self.browse(cr, uid, user_id, context=context)
-        result = bool(user.pos_id)
+        result = bool(user.pos_ids)
         if not exception:
             return result
         else:

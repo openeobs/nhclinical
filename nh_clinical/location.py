@@ -540,8 +540,8 @@ class nh_clinical_location(orm.Model):
                     'name': code,
                     'code': code,
                     'pos_id': user.pos_id.id if user.pos_id else False,
-                    'parent_id': user.pos_id.location_id.id
-                    if user.pos_id.location_id else False,
+                    'parent_id': user.pos_ids[0].location_id.id
+                    if user.pos_ids[0].location_id else False,
                     'type': 'poc',
                     'usage': 'ward'
                 }, context=context)
