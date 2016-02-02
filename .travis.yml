@@ -19,7 +19,7 @@ addons:
 env:
   global:
   - VERSION="8.0" TESTS="0" LINT_CHECK="0" TRANSIFEX="0" OPTIONS="--test-report-directory=${HOME}/tests"
-    EXCLUDE="xml_test_output" SONAR="0"
+    EXCLUDE="xml_test_output"
   matrix:
   - LINT_CHECK="1"
   - ODOO_REPO="valdecdev/odoo" TESTS="1" INCLUDE="nh_odoo_fixes,nh_activity,nh_clinical"
