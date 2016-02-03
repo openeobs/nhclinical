@@ -201,7 +201,9 @@ class res_users(orm.Model):
         :returns: id of created record
         :rtype: int
         """
-
+        creator = self.browse(cr, user, user, context=context)
+        if creator.pos_ids and not vals.get('pos_ids'):
+            vals['pos_ids'] = [[6, 0, [p.id for p in creator.pos_ids]]]
         self.update_group_vals(cr, user, False, vals, context=context)
         res = super(res_users, self).create(
             cr, user, vals,
