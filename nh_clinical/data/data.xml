@@ -35,7 +35,6 @@
         <record id="group_nhc_admin" model="res.groups">
             <field name="name">NH Clinical Admin Group</field>
             <field name="category_id" ref="module_category_nhc"/>
-            <field name="users" eval="[(4, ref('base.user_root'))]"/>
             <field name="implied_ids" eval="[(4, ref('group_nhc_base'))]"/>            
         </record>
         <record id="group_nhc_dev" model="res.groups">
@@ -147,8 +146,8 @@
  <!-- Users -->    
         <record model="res.users" id="base.user_root">
             <field name="groups_id" eval="[ (4, ref('group_nhc_dev')),
-             (4, ref('group_nhc_admin')),
               (4, ref('base.group_no_one'))]"/>
+            <field name="pos_ids" eval="[[6,0,[]]]"/>
         </record>
                 
 <!-- Partner title -->

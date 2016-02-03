@@ -564,8 +564,17 @@ class nh_clinical_location(orm.Model):
         if vals.get('context_ids'):
             self.check_context_ids(cr, uid, vals.get('context_ids'),
                                    context=context)
-        return super(nh_clinical_location, self).create(cr, uid, vals,
-                                                        context=context)
+        res = super(nh_clinical_location, self).create(
+            cr, uid, vals, context=context)
+        if vals.get('type') == 'pos' and vals.get('usage') == 'hospital':
+            user_pool = self.pool['res.users']
+            user = user_pool.browse(cr, uid, uid, context=context)
+            if 'NH Clinical Admin Group' in [g.name for g in user.groups_id]:
+                pos_pool = self.pool['nh.clinical.pos']
+                pos_id = pos_pool.create(cr, uid, {
+                    'name': vals.get('name'), 'location_id': res})
+                user_pool.write(cr, uid, user.id, {'pos_ids': [[4, pos_id]]})
+        return res
 
     def write(self, cr, uid, ids, vals, context=None):
         """
