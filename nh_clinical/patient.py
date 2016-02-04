@@ -166,6 +166,37 @@ class nh_clinical_patient(osv.Model):
                                  context=context)
         return self.write(cr, uid, patient_id, data, context=context)
 
+    def _not_admitted(self, cr, uid, ids, fields, args, context=None):
+        """Returns the patient_ids of not admitted patients."""
+        patient_ids_no_spell = self.get_not_admitted_patient_ids(
+            cr, uid, context)
+        result = {}
+        for i in ids:
+            result[i] = i in patient_ids_no_spell
+        return result
+
+    def _not_admitted_search(self, cr, uid, obj, name, args, domain=None,
+                             context=None):
+        patient_ids = []
+        for condition in args:
+            admitted_value = bool(condition[2])
+            if condition[1] not in ['=', '!=']:
+                continue
+
+            all_patient_ids = self.search(cr, uid, [], context=context)
+            patient_dict = self._not_admitted(
+                cr, uid, all_patient_ids, 'not_admitted', None,
+                context=context)
+
+            if condition[1] == '=':
+                patient_ids += [k for k, v in patient_dict.items()
+                                if v == admitted_value]
+            else:
+                patient_ids += [k for k, v in patient_dict.items()
+                                if v != admitted_value]
+
+        return [('id', 'in', patient_ids)]
+
     _columns = {
         'current_location_id': fields.many2one('nh.clinical.location',
                                                'Current Location'),
@@ -189,7 +220,10 @@ class nh_clinical_patient(osv.Model):
                                          'user_patient_rel',
                                          'patient_id',
                                          'user_id',
-                                         'Followers')
+                                         'Followers'),
+        'not_admitted': fields.function(_not_admitted, type='boolean',
+                                        string='Not  Admitted?',
+                                        fnct_search=_not_admitted_search)
     }
 
     _defaults = {
@@ -361,3 +395,15 @@ class nh_clinical_patient(osv.Model):
                                                              data['title'],
                                                              context=context)
         return True
+
+    def get_not_admitted_patient_ids(self, cr, uid, context=None):
+        """Returns all patients with no open spell."""
+        spell_pool = self.pool['nh.clinical.spell']
+        spell_ids = spell_pool.search(
+            cr, uid, [('state', '=', 'started')])
+        spells = spell_pool.read(cr, uid, spell_ids, ['patient_id'])
+        spell_patient_ids = set(spell['patient_id'][0] for spell in spells)
+        all_patient_ids = set(self.search(cr, uid, []))
+        all_patient_ids.difference_update(spell_patient_ids)
+        return list(all_patient_ids)
+
