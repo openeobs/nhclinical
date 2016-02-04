@@ -167,7 +167,6 @@ class nh_clinical_patient(osv.Model):
         return self.write(cr, uid, patient_id, data, context=context)
 
     def _not_admitted(self, cr, uid, ids, fields, args, context=None):
-        """Returns the patient_ids of not admitted patients."""
         patient_ids_no_spell = self.get_not_admitted_patient_ids(
             cr, uid, context)
         result = {}
@@ -177,6 +176,7 @@ class nh_clinical_patient(osv.Model):
 
     def _not_admitted_search(self, cr, uid, obj, name, args, domain=None,
                              context=None):
+        """Function field method used by 'not_admitted' field."""
         patient_ids = []
         for condition in args:
             admitted_value = bool(condition[2])
@@ -397,7 +397,7 @@ class nh_clinical_patient(osv.Model):
         return True
 
     def get_not_admitted_patient_ids(self, cr, uid, context=None):
-        """Returns all patients with no open spell."""
+        """Returns patients ids for patients with no open spell."""
         spell_pool = self.pool['nh.clinical.spell']
         spell_ids = spell_pool.search(
             cr, uid, [('state', '=', 'started')])
