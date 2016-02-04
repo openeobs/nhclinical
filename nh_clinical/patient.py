@@ -222,7 +222,7 @@ class nh_clinical_patient(osv.Model):
                                          'user_id',
                                          'Followers'),
         'not_admitted': fields.function(_not_admitted, type='boolean',
-                                        string='Not  Admitted?',
+                                        string='Not Admitted?',
                                         fnct_search=_not_admitted_search)
     }
 
