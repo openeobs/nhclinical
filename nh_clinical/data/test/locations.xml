@@ -1,0 +1,25 @@
+<openerp>
+    <data>
+        <record id="nhc_test_location_w0" model="nh.clinical.location">
+            <field name="name">Ward 0</field>
+            <field name="code">0</field>
+            <field name="type">poc</field>
+            <field name="usage">ward</field>
+            <field name="parent_id" ref="nhc_location_default_hospital" />
+        </record>
+        <record id="nhc_def_conf_location_wa_b1" model="nh.clinical.location">
+            <field name="name">Bed 1</field>
+            <field name="code">01</field>
+            <field name="type">poc</field>
+            <field name="usage">bed</field>
+            <field name="parent_id" ref="nhc_def_conf_location_w0" />
+        </record>
+        <record id="nhc_def_conf_location_wa_b2" model="nh.clinical.location">
+            <field name="name">Bed 2</field>
+            <field name="code">02</field>
+            <field name="type">poc</field>
+            <field name="usage">bed</field>
+            <field name="parent_id" ref="nhc_def_conf_location_w0" />
+        </record>
+    </data>
+</openerp>
