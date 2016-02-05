@@ -8,7 +8,7 @@
             <field eval="[(4, ref('group_nhc_doctor'))]" name="groups_id" />
             <field eval="[(4, ref('role_nhc_doctor'))]" name="category_id" />
             <field eval="[[6, False, [ref('nhc_test_location_w0')]]]" name="location_ids" />
-            <field name="pos_id" ref="nhc_test_pos" />
+            <field name="pos_ids" eval="[[6,0,[ref('nhc_location_default_pos')]]]"/>
         </record>
         <record id="nhc_test_admin_user" model="res.users">
             <field name="name">Admin Test</field>
@@ -18,7 +18,7 @@
             <field eval="[(4, ref('group_nhc_admin'))]" name="groups_id" />
             <field eval="[(4, ref('role_nhc_admin'))]" name="category_id" />
             <field eval="[[6, False, [ref('nhc_test_location_w0')]]]" name="location_ids" />
-            <field name="pos_id" ref="nhc_test_pos" />
+            <field name="pos_ids" eval="[[6,0,[ref('nhc_location_default_pos')]]]"/>
         </record>
         <record id="nhc_test_ward_manager0_user" model="res.users">
             <field name="name">WM0 Test</field>
@@ -28,7 +28,7 @@
             <field eval="[(4, ref('group_nhc_ward_manager'))]" name="groups_id" />
             <field eval="[(4, ref('role_nhc_ward_manager'))]" name="category_id" />
             <field eval="[[6, False, [ref('nhc_test_location_w0')]]]" name="location_ids" />
-            <field name="pos_id" ref="nhc_test_pos" />
+            <field name="pos_ids" eval="[[6,0,[ref('nhc_location_default_pos')]]]"/>
         </record>
         <record id="nhc_test_ward_manager1_user" model="res.users">
             <field name="name">WM1 Test</field>
@@ -38,7 +38,7 @@
             <field eval="[(4, ref('group_nhc_ward_manager'))]" name="groups_id" />
             <field eval="[(4, ref('role_nhc_ward_manager'))]" name="category_id" />
             <field eval="[[6, False, [ref('nhc_test_location_w1')]]]" name="location_ids" />
-            <field name="pos_id" ref="nhc_test_pos" />
+            <field name="pos_ids" eval="[[6,0,[ref('nhc_location_default_pos')]]]"/>
         </record>
         <record id="nhc_test_nurse0_user" model="res.users">
             <field name="name">Nurse0 Test</field>
@@ -48,7 +48,7 @@
             <field eval="[(4, ref('group_nhc_nurse'))]" name="groups_id" />
             <field eval="[(4, ref('role_nhc_nurse'))]" name="category_id" />
             <field eval="[[6, False, [ref('nhc_test_location_w0_b0'),ref('nhc_test_location_w1_b0')]]]" name="location_ids" />
-            <field name="pos_id" ref="nhc_test_pos" />
+            <field name="pos_ids" eval="[[6,0,[ref('nhc_location_default_pos')]]]"/>
         </record>
         <record id="nhc_test_nurse1_user" model="res.users">
             <field name="name">Nurse1 Test</field>
@@ -58,7 +58,7 @@
             <field eval="[(4, ref('group_nhc_nurse'))]" name="groups_id" />
             <field eval="[(4, ref('role_nhc_nurse'))]" name="category_id" />
             <field eval="[[6, False, [ref('nhc_test_location_w1_b0'),ref('nhc_test_location_w1_b1')]]]" name="location_ids" />
-            <field name="pos_id" ref="nhc_test_pos" />
+            <field name="pos_ids" eval="[[6,0,[ref('nhc_location_default_pos')]]]"/>
         </record>
         <record id="nhc_test_hca0_user" model="res.users">
             <field name="name">Hca0 Test</field>
@@ -68,7 +68,7 @@
             <field eval="[(4, ref('group_nhc_hca'))]" name="groups_id" />
             <field eval="[(4, ref('role_nhc_hca'))]" name="category_id" />
             <field eval="[[6, False, [ref('nhc_test_location_w0_b0'),ref('nhc_test_location_w0_b1')]]]" name="location_ids" />
-            <field name="pos_id" ref="nhc_test_pos" />
+            <field name="pos_ids" eval="[[6,0,[ref('nhc_location_default_pos')]]]"/>
         </record>
         <record id="nhc_test_hca1_user" model="res.users">
             <field name="name">Hca1 Test</field>
@@ -78,7 +78,7 @@
             <field eval="[(4, ref('group_nhc_hca'))]" name="groups_id" />
             <field eval="[(4, ref('role_nhc_hca'))]" name="category_id" />
             <field eval="[[6, False, [ref('nhc_test_location_w1_b0'),ref('nhc_test_location_w1_b1')]]]" name="location_ids" />
-            <field name="pos_id" ref="nhc_test_pos" />
+            <field name="pos_ids" eval="[[6,0,[ref('nhc_location_default_pos')]]]"/>
         </record>
     </data>
 </openerp>
