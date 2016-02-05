@@ -64,7 +64,7 @@ class TestUserManagement(common.SingleTransactionCase):
             cr, uid, {'name': 'Bed0', 'code': 'B0', 'usage': 'bed',
                       'parent_id': cls.ward_id, 'type': 'poc'})
         cls.hca_uid = cls.user_pool.create(
-            cr, uid, {'name': 'HCA0', 'login': 'hca0', 'password': 'hca0',
+            cr, uid, {'name': 'HCA0', 'login': 'thca0', 'password': 'hca0',
                       'groups_id': [[4, cls.hca_group_id]],
                       'location_ids': [[5]]})
         cls.nurse_uid = cls.user_pool.create(
