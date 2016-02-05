@@ -270,4 +270,3 @@ class TestClinicalPatient(common.SingleTransactionCase):
 
         self.assertEqual(type(domain), list)
         self.assertTrue(patient_id in domain[0][2])
-

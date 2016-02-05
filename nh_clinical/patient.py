@@ -406,4 +406,3 @@ class nh_clinical_patient(osv.Model):
         all_patient_ids = set(self.search(cr, uid, []))
         all_patient_ids.difference_update(spell_patient_ids)
         return list(all_patient_ids)
-
