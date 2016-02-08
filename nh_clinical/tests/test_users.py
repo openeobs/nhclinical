@@ -70,6 +70,9 @@ class TestUsers(SingleTransactionCase):
             cr, uid, {'name': 'Admin 1', 'login': 'user_001',
                       'password': 'user_001',
                       'groups_id': [[4, cls.admin_group_id[0]]]})
+        cls.wm_uid = cls.user_pool.search(
+            cr, uid, [['name', '=', 'WM0 Test']]
+        )[0]
 
         cls.doctor_id = cls.doctor_pool.create(
             cr, uid, {'name': 'Doctor01', 'gender': 'M', 'code': 'DOCT01'})
@@ -277,3 +280,10 @@ class TestUsers(SingleTransactionCase):
 
         self.assertTrue(self.user_pool.update_doctor_status(
             cr, uid, [dr_uid, user_uid]))
+
+    def test_07_get_groups_string(self):
+        cr = self.cr
+        admin = self.user_pool.get_groups_string(cr, self.adt_uid)
+        ward_manager = self.user_pool.get_groups_string(cr, self.wm_uid)
+        self.assertListEqual(admin, ['Admin'])
+        self.assertListEqual(ward_manager, ['Ward Manager'])

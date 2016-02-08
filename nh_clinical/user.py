@@ -7,6 +7,7 @@ import logging
 
 from openerp.osv import orm, fields, osv
 from openerp import SUPERUSER_ID
+import re
 
 
 _logger = logging.getLogger(__name__)
@@ -306,6 +307,16 @@ class res_users(orm.Model):
                     cr, uid, record.partner_id.id, {'doctor': False},
                     context=context)
         return True
+
+    def get_groups_string(self, cr, uid, context=None):
+        """
+        :returns: list of NH Clinical user groups for UID in string format
+        """
+        user = self.browse(cr, uid, uid, context=context)
+        return [re.sub(
+            r' Group', '', re.sub(r'NH Clinical ', '', g.name)
+        ) for g in user.groups_id if 'NH Clinical' in g.name and g.name !=
+                'NH Clinical Base Group']
 
 
 class nh_change_password_wizard(osv.TransientModel):
