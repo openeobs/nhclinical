@@ -316,7 +316,7 @@ class res_users(orm.Model):
         return [re.sub(
             r' Group', '', re.sub(r'NH Clinical ', '', g.name)
         ) for g in user.groups_id if 'NH Clinical' in g.name and g.name !=
-                'NH Clinical Base Group']
+            'NH Clinical Base Group']
 
 
 class nh_change_password_wizard(osv.TransientModel):
