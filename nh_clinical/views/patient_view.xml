@@ -39,7 +39,7 @@
                 <field name="name">patient Form View</field>
                 <field name="model">nh.clinical.patient</field>
                 <field name="arch" type="xml">
-                    <form string="patient Form View">
+                    <form string="patient Form View" delete="0">
                         <sheet>
                             <group>
                                 <field name="given_name" />

@@ -376,9 +376,15 @@ class nh_clinical_location(orm.Model):
         context_ids = context_pool.search(cr, uid, [('name', '=', 'eobs')])
         return [(6, 0, context_ids)]
 
+    def _get_default_pos_id(self, cr, uid, context=None):
+        pos_pool = self.pool['nh.clinical.pos']
+        pos_ids = pos_pool.search(cr, uid, [])
+        return pos_ids[0]
+
     _defaults = {
         'active': True,
         'patient_capacity': 1,
+        'pos_ids': _get_default_pos_id,
         'context_ids': _get_default_context_ids
     }
 
