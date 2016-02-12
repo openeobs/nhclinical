@@ -64,7 +64,7 @@ class TestUsers(SingleTransactionCase):
                       'password': 'user_000',
                       'groups_id': [[4, cls.admin_group_id[0]]],
                       'category_id': [[4, cls.admin_role_id]],
-                      'pos_id': cls.pos_id})
+                      'pos_ids': [[6, 0, [cls.pos_id]]]})
 
         cls.admin_uid = cls.user_pool.create(
             cr, uid, {'name': 'Admin 1', 'login': 'user_001',
@@ -287,3 +287,32 @@ class TestUsers(SingleTransactionCase):
         ward_manager = self.user_pool.get_groups_string(cr, self.wm_uid)
         self.assertListEqual(admin, ['Admin'])
         self.assertListEqual(ward_manager, ['Ward Manager'])
+
+    def test_08_create_without_pos_ids_value_automatically_adds_pos_ids(self):
+        """
+        Tests new user created by a user related to pos_ids, automatically
+        adds the created user to those pos_ids.
+        """
+        cr, uid = self.cr, self.uid
+
+        user_id = self.user_pool.create(
+            cr, self.adt_uid, {'name': 'U1', 'login': 'U1', 'password': 'U1'})
+        user = self.user_pool.browse(cr, uid, user_id)
+        self.assertListEqual([self.pos_id], [p.id for p in user.pos_ids])
+
+    def test_09_create_with_pos_ids_value_doesnt_add_pos_from_creator(self):
+        """
+        Tests new user created by a user related to pos_ids, does not
+        automatically add the created user to those pos_ids if a pos_ids
+        value is provided on creation.
+        """
+        cr, uid = self.cr, self.uid
+
+        pos_id = self.pos_pool.create(
+            cr, uid, {'name': 'POS', 'location_id': self.hospital_id})
+        user_id = self.user_pool.create(
+            cr, self.adt_uid,
+            {'name': 'U2', 'login': 'U2', 'password': 'U2',
+             'pos_ids': [[6, 0, [pos_id]]]})
+        user = self.user_pool.browse(cr, uid, user_id)
+        self.assertListEqual([pos_id], [p.id for p in user.pos_ids])

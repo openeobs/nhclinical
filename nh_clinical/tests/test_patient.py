@@ -235,3 +235,38 @@ class TestClinicalPatient(common.SingleTransactionCase):
         self.assertTrue(self.patient_pool.check_data(cr, uid, data,
                                                      create=False))
         self.assertTrue(data.get('patient_id'))
+
+    def test_get_not_admitted_patient_ids_gets_patients_no_started_spell(self):
+        cr, uid = self.cr, self.uid
+        spell_pool = self.registry('nh.clinical.spell')
+        patient_id = self.patient_pool.create(
+            cr, uid, {'other_identifier': 'TESTHN010'})
+
+        patient_ids = self.patient_pool.get_not_admitted_patient_ids(cr, uid)
+
+        self.assertTrue(patient_id in patient_ids)
+        spell_ids = spell_pool.search(
+            cr, uid, [('patient_id', '=', patient_id)])
+        self.assertEqual(len(spell_ids), 0)
+
+    def test_not_admitted_dict_with_key_patient_id_and_value_True(self):
+        cr, uid = self.cr, self.uid
+        patient_id = self.patient_pool.create(
+            cr, uid, {'other_identifier': 'TESTHN011'})
+
+        res = self.patient_pool._not_admitted(
+            cr, uid, [patient_id], None, None)
+
+        self.assertEqual(res, {patient_id: True})
+
+    def test_not_admitted_search_return_domain_patients_not_admitted(self):
+        cr, uid = self.cr, self.uid
+        patient_id = self.patient_pool.create(
+            cr, uid, {'other_identifier': 'TESTHN012'})
+        args = [('not_admitted', '=', True)]
+
+        domain = self.patient_pool._not_admitted_search(
+            cr, uid, None, None, args)
+
+        self.assertEqual(type(domain), list)
+        self.assertTrue(patient_id in domain[0][2])

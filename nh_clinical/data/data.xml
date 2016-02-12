@@ -35,7 +35,6 @@
         <record id="group_nhc_admin" model="res.groups">
             <field name="name">NH Clinical Admin Group</field>
             <field name="category_id" ref="module_category_nhc"/>
-            <field name="users" eval="[(4, ref('base.user_root'))]"/>
             <field name="implied_ids" eval="[(4, ref('group_nhc_base'))]"/>            
         </record>
         <record id="group_nhc_dev" model="res.groups">
@@ -145,10 +144,10 @@
         </record>
         
  <!-- Users -->    
-         <record model="res.users" id="base.user_root">
+        <record model="res.users" id="base.user_root">
             <field name="groups_id" eval="[ (4, ref('group_nhc_dev')),
-             (4, ref('group_nhc_admin')),
               (4, ref('base.group_no_one'))]"/>
+            <field name="pos_ids" eval="[[6,0,[]]]"/>
         </record>
                 
 <!-- Partner title -->
@@ -170,6 +169,38 @@
         </record>
         <record id="employee_category_nhc_ward_manager" model="hr.employee.category">
             <field name="name">Ward Manager</field>
+        </record>
+
+        <!--Default Hospital-->
+        <record id="nhc_location_default_hospital" model="nh.clinical.location">
+            <field name="name">Your Hospital</field>
+            <field name="code">YH01</field>
+            <field name="type">pos</field>
+            <field name="usage">hospital</field>
+        </record>
+        <!--Virtual Discharge Location-->
+        <record id="nhc_location_default_discharge" model="nh.clinical.location">
+            <field name="name">Discharge Location</field>
+            <field name="code">GDL0987654321</field>
+            <field name="type">virtual</field>
+            <field name="usage">room</field>
+        </record>
+        <!--Default Point of Service-->
+        <record id="nhc_location_default_pos" model="nh.clinical.pos">
+            <field name="name">Your Hospital</field>
+            <field name="location_id" ref="nhc_location_default_hospital"/>
+            <field name="company_id" ref="base.main_company"/>
+        </record>
+        <!--Default Admin User-->
+        <!--PASSWORD SHOULD BE CHANGED-->
+        <record id="nhc_default_admin_user" model="res.users">
+          <field name="name">Default Admin</field>
+          <field name="login">openeobs</field>
+          <field name="password">openeobs</field>
+          <field name="tz">Europe/London</field>
+          <field eval="[(4, ref('nh_clinical.group_nhc_admin'))]" name="groups_id" />
+          <field eval="[(4, ref('nh_clinical.role_nhc_admin'))]" name="category_id" />
+          <field eval="[(4, ref('nhc_location_default_pos'))]" name="pos_ids" />
         </record>
 
         <!--Cancellation Reasons-->

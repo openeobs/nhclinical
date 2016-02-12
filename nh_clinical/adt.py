@@ -240,7 +240,7 @@ class nh_clinical_adt_patient_admit(orm.Model):
         :rtype: bool
         """
         user = self.pool['res.users'].browse(cr, uid, uid, context=context)
-        if not user.pos_id or not user.pos_id.location_id:
+        if not user.pos_ids:
             raise osv.except_osv('POS Missing Error!',
                                  "POS location is not set for user.login = %s!"
                                  % user.login)
@@ -254,6 +254,7 @@ class nh_clinical_adt_patient_admit(orm.Model):
         location_pool = self.pool['nh.clinical.location']
         location_id = location_pool.get_by_code(
             cr, uid, vals['location'], auto_create=True, context=context)
+        location = location_pool.browse(cr, uid, location_id, context=context)
         patient_pool = self.pool['nh.clinical.patient']
         if vals.get('other_identifier'):
             patient_pool.check_hospital_number(
@@ -271,7 +272,7 @@ class nh_clinical_adt_patient_admit(orm.Model):
                 context=context)[0]
         data = vals.copy()
         data.update({'location_id': location_id, 'patient_id': patient_id,
-                     'pos_id': user.pos_id.id})
+                     'pos_id': location.pos_id.id})
         return super(nh_clinical_adt_patient_admit, self).submit(
             cr, uid, activity_id, data, context=context)
 
@@ -418,7 +419,7 @@ class nh_clinical_adt_patient_discharge(orm.Model):
         :rtype: bool
         """
         user = self.pool['res.users'].browse(cr, uid, uid, context=context)
-        if not user.pos_id or not user.pos_id.location_id:
+        if not user.pos_ids:
             raise osv.except_osv('POS Missing Error!',
                                  "POS location is not set for user.login = %s!"
                                  % user.login)
@@ -470,10 +471,12 @@ class nh_clinical_adt_patient_discharge(orm.Model):
             location_pool = self.pool['nh.clinical.location']
             location_id = location_pool.get_by_code(
                 cr, uid, vals['location'], auto_create=True, context=context)
+            location = location_pool.browse(
+                cr, uid, location_id, context=context)
             data.update({'location_id': location_id})
             admission_pool = self.pool['nh.clinical.patient.admission']
             admission_data = {
-                'pos_id': user.pos_id.id,
+                'pos_id': location.pos_id.id,
                 'patient_id': patient_id,
                 'location_id': location_id,
             }
@@ -621,7 +624,7 @@ class nh_clinical_adt_patient_transfer(orm.Model):
         :rtype: bool
         """
         user = self.pool['res.users'].browse(cr, uid, uid, context=context)
-        if not user.pos_id or not user.pos_id.location_id:
+        if not user.pos_ids:
             raise osv.except_osv('POS Missing Error!',
                                  "POS location is not set for user.login = %s!"
                                  % user.login)
@@ -821,7 +824,7 @@ class nh_clinical_adt_spell_update(orm.Model):
         :rtype: bool
         """
         user = self.pool['res.users'].browse(cr, uid, uid, context=context)
-        if not user.pos_id or not user.pos_id.location_id:
+        if not user.pos_ids:
             raise osv.except_osv('POS Missing Error!',
                                  "POS location is not set for user.login = %s!"
                                  % user.login)
@@ -835,6 +838,7 @@ class nh_clinical_adt_spell_update(orm.Model):
         location_pool = self.pool['nh.clinical.location']
         location_id = location_pool.get_by_code(
             cr, uid, vals['location'], auto_create=True, context=context)
+        location = location_pool.browse(cr, uid, location_id, context=context)
         patient_pool = self.pool['nh.clinical.patient']
         if vals.get('other_identifier'):
             patient_pool.check_hospital_number(
@@ -866,7 +870,7 @@ class nh_clinical_adt_spell_update(orm.Model):
         data.update({
             'location_id': location_id,
             'patient_id': patient_id,
-            'pos_id': user.pos_id.id
+            'pos_id': location.pos_id.id
         })
         return super(nh_clinical_adt_spell_update, self).submit(
             cr, uid, activity_id, data, context=context)

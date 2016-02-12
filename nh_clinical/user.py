@@ -25,6 +25,9 @@ class res_users(orm.Model):
     _inherit = 'res.users'
     _columns = {
         'pos_id': fields.many2one('nh.clinical.pos', 'POS'),
+        'pos_ids': fields.many2many(
+            'nh.clinical.pos', 'user_pos_rel', 'user_id', 'pos_id',
+            'Points of Service'),
         'location_ids': fields.many2many('nh.clinical.location',
                                          'user_location_rel',
                                          'user_id',
@@ -55,7 +58,7 @@ class res_users(orm.Model):
         """
 
         user = self.browse(cr, uid, user_id, context=context)
-        result = bool(user.pos_id)
+        result = bool(user.pos_ids)
         if not exception:
             return result
         else:
@@ -199,7 +202,9 @@ class res_users(orm.Model):
         :returns: id of created record
         :rtype: int
         """
-
+        creator = self.browse(cr, user, user, context=context)
+        if creator.pos_ids and not vals.get('pos_ids'):
+            vals['pos_ids'] = [[6, 0, [p.id for p in creator.pos_ids]]]
         self.update_group_vals(cr, user, False, vals, context=context)
         res = super(res_users, self).create(
             cr, user, vals,

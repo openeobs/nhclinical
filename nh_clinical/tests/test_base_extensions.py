@@ -69,7 +69,7 @@ class TestBaseExtension(common.SingleTransactionCase):
             cr, uid, {'name': 'Test POS', 'location_id': location_id})
         user_id = self.user_pool.create(
             cr, uid, {'name': 'Test User', 'login': 'testuser',
-                      'pos_id': pos_id})
+                      'pos_ids': [[6, 0, [pos_id]]]})
 
         # Scenario 2: Check user has Point of Service
         self.assertTrue(self.user_pool.check_pos(cr, uid, user_id))

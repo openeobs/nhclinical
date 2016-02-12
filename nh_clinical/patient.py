@@ -1,7 +1,11 @@
 # Part of NHClinical. See LICENSE file for full copyright and licensing details
 # -*- coding: utf-8 -*-
-from openerp.osv import fields, osv
 import logging
+import re
+
+from dateutil.parser import parse
+from openerp.osv import fields, osv
+from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
 
 
 _logger = logging.getLogger(__name__)
@@ -162,6 +166,37 @@ class nh_clinical_patient(osv.Model):
                                  context=context)
         return self.write(cr, uid, patient_id, data, context=context)
 
+    def _not_admitted(self, cr, uid, ids, fields, args, context=None):
+        patient_ids_no_spell = self.get_not_admitted_patient_ids(
+            cr, uid, context)
+        result = {}
+        for i in ids:
+            result[i] = i in patient_ids_no_spell
+        return result
+
+    def _not_admitted_search(self, cr, uid, obj, name, args, domain=None,
+                             context=None):
+        """Function field method used by 'not_admitted' field."""
+        patient_ids = []
+        for condition in args:
+            admitted_value = bool(condition[2])
+            if condition[1] not in ['=', '!=']:
+                continue
+
+            all_patient_ids = self.search(cr, uid, [], context=context)
+            patient_dict = self._not_admitted(
+                cr, uid, all_patient_ids, 'not_admitted', None,
+                context=context)
+
+            if condition[1] == '=':
+                patient_ids += [k for k, v in patient_dict.items()
+                                if v == admitted_value]
+            else:
+                patient_ids += [k for k, v in patient_dict.items()
+                                if v != admitted_value]
+
+        return [('id', 'in', patient_ids)]
+
     _columns = {
         'current_location_id': fields.many2one('nh.clinical.location',
                                                'Current Location'),
@@ -172,9 +207,9 @@ class nh_clinical_patient(osv.Model):
         'sex': fields.selection(_gender, 'Sex'),
         'gender': fields.selection(_gender, 'Gender'),
         'ethnicity': fields.selection(_ethnicity, 'Ethnicity'),
-        'patient_identifier': fields.char('Patient Identifier', size=100,
+        'patient_identifier': fields.char('NHS Number', size=100,
                                           select=True, help="NHS Number"),
-        'other_identifier': fields.char('Other Identifier', size=100,
+        'other_identifier': fields.char('Hospital Number', size=100,
                                         select=True, help="Hospital Number"),
         'given_name': fields.char('Given Name', size=200),
         'middle_names': fields.char('Middle Name(s)', size=200),
@@ -185,7 +220,10 @@ class nh_clinical_patient(osv.Model):
                                          'user_patient_rel',
                                          'patient_id',
                                          'user_id',
-                                         'Followers')
+                                         'Followers'),
+        'not_admitted': fields.function(_not_admitted, type='boolean',
+                                        string='Not Admitted?',
+                                        fnct_search=_not_admitted_search)
     }
 
     _defaults = {
@@ -194,6 +232,35 @@ class nh_clinical_patient(osv.Model):
         'gender': 'NSP',
         'ethnicity': 'Z'
     }
+
+    def load(self, cr, uid, fields, data, context=None):
+        self.format_data(fields, data, context=context)
+        return super(nh_clinical_patient, self).load(
+            cr, uid, fields, data, context=context)
+
+    def format_data(self, fields, data, context=None):
+        if not context:
+            context = dict()
+        for index, field in enumerate(fields):
+            if field == 'other_identifier' or field == 'patient_identifier':
+                non_alphanumeric = re.compile(r'[\W_]+')
+                for i, d in enumerate(data):
+                    lst = list(d)
+                    lst[index] = non_alphanumeric.sub('', lst[index])
+                    data[i] = tuple(lst)
+            if field == 'dob':
+                if context.get('dateformat'):
+                    yfirst = context['dateformat'] == 'YMD'
+                    dfirst = context['dateformat'] == 'DMY'
+                else:
+                    yfirst = False
+                    dfirst = False
+                for i, d in enumerate(data):
+                    lst = list(d)
+                    lst[index] = parse(
+                        lst[index], yearfirst=yfirst, dayfirst=dfirst
+                    ).strftime(DTF)
+                    data[i] = tuple(lst)
 
     def create(self, cr, uid, vals, context=None):
         """
@@ -204,7 +271,6 @@ class nh_clinical_patient(osv.Model):
         :returns: ``True`` if created
         :rtype: bool
         """
-
         if not vals.get('name'):
             vals.update({'name': self._get_fullname(vals)})
         if vals.get('other_identifier'):
@@ -224,7 +290,6 @@ class nh_clinical_patient(osv.Model):
         :returns: ``True`` if created
         :rtype: bool
         """
-
         title_pool = self.pool['res.partner.title']
         if 'title' in vals.keys():
             if not isinstance(vals.get('title'), int):
@@ -330,3 +395,14 @@ class nh_clinical_patient(osv.Model):
                                                              data['title'],
                                                              context=context)
         return True
+
+    def get_not_admitted_patient_ids(self, cr, uid, context=None):
+        """Returns patients ids for patients with no open spell."""
+        spell_pool = self.pool['nh.clinical.spell']
+        spell_ids = spell_pool.search(
+            cr, uid, [('state', '=', 'started')])
+        spells = spell_pool.read(cr, uid, spell_ids, ['patient_id'])
+        spell_patient_ids = set(spell['patient_id'][0] for spell in spells)
+        all_patient_ids = set(self.search(cr, uid, []))
+        all_patient_ids.difference_update(spell_patient_ids)
+        return list(all_patient_ids)
