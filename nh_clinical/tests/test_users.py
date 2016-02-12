@@ -70,6 +70,9 @@ class TestUsers(SingleTransactionCase):
             cr, uid, {'name': 'Admin 1', 'login': 'user_001',
                       'password': 'user_001',
                       'groups_id': [[4, cls.admin_group_id[0]]]})
+        cls.wm_uid = cls.user_pool.search(
+            cr, uid, [['name', '=', 'WM0 Test']]
+        )[0]
 
         cls.doctor_id = cls.doctor_pool.create(
             cr, uid, {'name': 'Doctor01', 'gender': 'M', 'code': 'DOCT01'})
@@ -278,7 +281,14 @@ class TestUsers(SingleTransactionCase):
         self.assertTrue(self.user_pool.update_doctor_status(
             cr, uid, [dr_uid, user_uid]))
 
-    def test_07_create_without_pos_ids_value_automatically_adds_pos_ids(self):
+    def test_07_get_groups_string(self):
+        cr = self.cr
+        admin = self.user_pool.get_groups_string(cr, self.adt_uid)
+        ward_manager = self.user_pool.get_groups_string(cr, self.wm_uid)
+        self.assertListEqual(admin, ['Admin'])
+        self.assertListEqual(ward_manager, ['Ward Manager'])
+
+    def test_08_create_without_pos_ids_value_automatically_adds_pos_ids(self):
         """
         Tests new user created by a user related to pos_ids, automatically
         adds the created user to those pos_ids.
@@ -290,7 +300,7 @@ class TestUsers(SingleTransactionCase):
         user = self.user_pool.browse(cr, uid, user_id)
         self.assertListEqual([self.pos_id], [p.id for p in user.pos_ids])
 
-    def test_08_create_with_pos_ids_value_doesnt_add_pos_from_creator(self):
+    def test_09_create_with_pos_ids_value_doesnt_add_pos_from_creator(self):
         """
         Tests new user created by a user related to pos_ids, does not
         automatically add the created user to those pos_ids if a pos_ids
