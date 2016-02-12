@@ -1,22 +1,11 @@
 <openerp>
     <data>
-         <record id="nhc_test_location_hospital" model="nh.clinical.location">
-            <field name="name">Test Hospital</field>
-            <field name="code">H01</field>
-            <field name="type">pos</field>
-            <field name="usage">hospital</field>
-        </record>
-        <record id="nhc_test_pos" model="nh.clinical.pos">
-            <field name="name">Test Hospital</field>
-            <field name="location_id" ref="nhc_test_location_hospital"/>
-            <field name="company_id" ref="base.main_company"/>
-        </record>
         <record id="nhc_test_location_w0" model="nh.clinical.location">
             <field name="name">Ward 0</field>
             <field name="code">0</field>
             <field name="type">poc</field>
             <field name="usage">ward</field>
-            <field name="parent_id" ref="nhc_test_location_hospital" />
+            <field name="parent_id" ref="nhc_location_default_hospital" />
         </record>
         <record id="nhc_test_location_w0_b0" model="nh.clinical.location">
             <field name="name">Bed 1</field>
@@ -37,7 +26,7 @@
             <field name="code">1</field>
             <field name="type">poc</field>
             <field name="usage">ward</field>
-            <field name="parent_id" ref="nhc_test_location_hospital" />
+            <field name="parent_id" ref="nhc_location_default_hospital" />
         </record>
         <record id="nhc_test_location_w1_b0" model="nh.clinical.location">
             <field name="name">Bed 1</field>

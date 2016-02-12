@@ -422,12 +422,15 @@ class nh_clinical_patient_discharge(orm.Model):
         res = super(nh_clinical_patient_discharge, self).complete(
             cr, uid, activity_id, context=context)
         activity_pool = self.pool['nh.activity']
+        location_pool = self.pool['nh.clinical.location']
         activity = activity_pool.browse(cr, SUPERUSER_ID, activity_id,
                                         context=context)
 
         move_pool = self.pool['nh.clinical.patient.move']
-        if activity.parent_id.data_ref.pos_id.lot_discharge_id:
-            loc_id = activity.parent_id.data_ref.pos_id.lot_discharge_id.id
+        discharge_location_id = location_pool.search(
+            cr, uid, [['code', '=', 'GDL0987654321']])
+        if discharge_location_id:
+            loc_id = discharge_location_id[0]
         else:
             loc_id = activity.parent_id.data_ref.pos_id.location_id.id
         move_activity_id = move_pool.create_activity(

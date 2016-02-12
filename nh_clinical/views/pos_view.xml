@@ -21,8 +21,6 @@
                        <field name="code" />
                        <field name="location_id" />
                        <field name="company_id" />
-                       <field name="lot_admission_id" />
-                       <field name="lot_discharge_id" />
                     </tree>
                 </field>
             </record>    
@@ -35,8 +33,6 @@
                        <field name="code" />
                        <field name="location_id" />
                        <field name="company_id" />
-                       <field name="lot_admission_id" />
-                       <field name="lot_discharge_id" />                     
                     </form>
                 </field>
             </record>

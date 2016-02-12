@@ -27,6 +27,7 @@ class TestLocation(common.SingleTransactionCase):
         cls.user_pool = cls.registry('res.users')
         cls.group_pool = cls.registry('res.groups')
         cls.context_pool = cls.registry('nh.clinical.context')
+        cls.category_pool = cls.registry('res.partner.category')
 
         cls.contexts = []
         cls.contexts.append(cls.context_pool.create(
@@ -37,16 +38,19 @@ class TestLocation(common.SingleTransactionCase):
             cr, uid, {'name': 'Test Hospital', 'code': 'TESTHOSP'})
         cls.pos_id = cls.pos_pool.create(
             cr, uid, {'name': 'Test POS', 'location_id': cls.hospital_id})
+        cls.admin_role_id = cls.category_pool.search(
+            cr, uid, [['name', '=', 'System Administrator']])[0]
         group_ids = cls.group_pool.search(
-            cr, uid, [['name', '=', 'NH Clinical ADT Group']])
+            cr, uid, [['name', '=', 'NH Clinical Admin Group']])
         cls.hca_group_id = cls.group_pool.search(
             cr, uid, [['name', '=', 'NH Clinical HCA Group']])[0]
         cls.nurse_group_id = cls.group_pool.search(
             cr, uid, [['name', '=', 'NH Clinical Nurse Group']])[0]
-        cls.userpos_id = cls.user_pool.create(
+        cls.admin_id = cls.user_pool.create(
             cr, uid, {'name': 'Test User', 'login': 'user_001',
                       'password': 'user_001', 'groups_id': [[4, group_ids[0]]],
-                      'pos_id': cls.pos_id})
+                      'category_id': [[4, cls.admin_role_id]],
+                      'pos_ids': [[6, 0, [cls.pos_id]]]})
         cls.hca_uid = cls.user_pool.create(
             cr, uid, {'name': 'HCA01', 'login': 'hca01', 'password': 'hca01',
                       'groups_id': [[4, cls.hca_group_id]]})
@@ -639,7 +643,7 @@ class TestLocation(common.SingleTransactionCase):
                          msg="Wrong return value when location is not found")
 
         # Scenario 3: Test a new ward is created when auto_create is True.
-        location_id = self.location_pool.get_by_code(cr, self.userpos_id,
+        location_id = self.location_pool.get_by_code(cr, self.admin_id,
                                                      'TESTLOC99',
                                                      auto_create=True)
         self.assertTrue(location_id,
@@ -808,3 +812,23 @@ class TestLocation(common.SingleTransactionCase):
         # Scenario 4: Use List
         self.assertTrue(self.location_pool.check_context_ids(
             cr, uid, [self.contexts[1]]))
+
+    def test_18_create_hospital_as_nhc_admin_generates_pos(self):
+        cr, uid = self.cr, self.uid
+        self.location_pool.create(cr, self.admin_id, {
+            'name': 'Hospital 0', 'code': 'H0',
+            'type': 'pos', 'usage': 'hospital'
+        })
+        pos_id = self.pos_pool.search(cr, uid, [['name', '=', 'Hospital 0']])
+        self.assertTrue(pos_id)
+        admin = self.user_pool.browse(cr, uid, self.admin_id)
+        self.assertIn(pos_id[0], [p.id for p in admin.pos_ids])
+
+    def test_19_create_hospital_as_non_nhc_admin_doesnt_generate_pos(self):
+        cr, uid = self.cr, self.uid
+        self.location_pool.create(cr, uid, {
+            'name': 'Hospital 1', 'code': 'H1',
+            'type': 'pos', 'usage': 'hospital'
+        })
+        pos_id = self.pos_pool.search(cr, uid, [['name', '=', 'Hospital 1']])
+        self.assertFalse(pos_id)

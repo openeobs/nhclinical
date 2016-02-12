@@ -371,9 +371,15 @@ class nh_clinical_location(orm.Model):
                                         string='Related Clinical Contexts')
     }
 
+    def _get_default_context_ids(self, cr, uid, context=None):
+        context_pool = self.pool['nh.clinical.context']
+        context_ids = context_pool.search(cr, uid, [('name', '=', 'eobs')])
+        return [(6, 0, context_ids)]
+
     _defaults = {
         'active': True,
-        'patient_capacity': 1
+        'patient_capacity': 1,
+        'context_ids': _get_default_context_ids
     }
 
     _sql_constraints = [
@@ -381,6 +387,49 @@ class nh_clinical_location(orm.Model):
          'unique(code)',
          'The code for a location must be unique!')
     ]
+
+    def onchange_usage(self, cr, uid, ids, usage, context=None):
+        """
+        Hospital locations don't have parent locations and they are always
+        Point of Service type.
+        """
+        if usage != 'hospital':
+            return {}
+        return {
+            'value': {'parent_id': False, 'type': 'pos'}
+        }
+
+    def onchange_type(self, cr, uid, ids, usage, type, context=None):
+        """
+        Hospital locations can only be Point of Service type
+        """
+        if usage != 'hospital' or type == 'pos':
+            return {}
+        return {
+            'warning': {
+                'title': 'Warning',
+                'message': 'Hospital locations can only be Point of Service'
+            },
+            'value': {
+                'type': 'pos'
+            }
+        }
+
+    def onchange_parent_id(self, cr, uid, ids, usage, parent_id, context=None):
+        """
+        Hospital locations can not have a parent location
+        """
+        if usage != 'hospital' or not parent_id:
+            return {}
+        return {
+            'warning': {
+                'title': 'Warning',
+                'message': 'Hospital locations can not have a parent location'
+            },
+            'value': {
+                'parent_id': False
+            }
+        }
 
     def get_available_location_ids(self, cr, uid, usages=None, context=None):
         """
@@ -391,7 +440,7 @@ class nh_clinical_location(orm.Model):
             available locations
         :type usage: list
         :returns: location ids of available locations (default usage is
-            ``bed``)
+            ``bed``)i
         :rtype: list
         """
 
@@ -491,8 +540,8 @@ class nh_clinical_location(orm.Model):
                     'name': code,
                     'code': code,
                     'pos_id': user.pos_id.id if user.pos_id else False,
-                    'parent_id': user.pos_id.location_id.id
-                    if user.pos_id.location_id else False,
+                    'parent_id': user.pos_ids[0].location_id.id
+                    if user.pos_ids[0].location_id else False,
                     'type': 'poc',
                     'usage': 'ward'
                 }, context=context)
@@ -515,8 +564,17 @@ class nh_clinical_location(orm.Model):
         if vals.get('context_ids'):
             self.check_context_ids(cr, uid, vals.get('context_ids'),
                                    context=context)
-        return super(nh_clinical_location, self).create(cr, uid, vals,
-                                                        context=context)
+        res = super(nh_clinical_location, self).create(
+            cr, uid, vals, context=context)
+        if vals.get('type') == 'pos' and vals.get('usage') == 'hospital':
+            user_pool = self.pool['res.users']
+            user = user_pool.browse(cr, uid, uid, context=context)
+            if 'NH Clinical Admin Group' in [g.name for g in user.groups_id]:
+                pos_pool = self.pool['nh.clinical.pos']
+                pos_id = pos_pool.create(cr, uid, {
+                    'name': vals.get('name'), 'location_id': res})
+                user_pool.write(cr, uid, user.id, {'pos_ids': [[4, pos_id]]})
+        return res
 
     def write(self, cr, uid, ids, vals, context=None):
         """
