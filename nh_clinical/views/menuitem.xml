@@ -19,7 +19,7 @@
           	id="menu_left_sub_location" 
           	parent="menu_left_base" 
           	action="action_location" 
-          	groups="group_nhc_admin"/>
+          	groups="group_nhc_base,base.user_root"/>
           	   
           <menuitem name="Points of Service" 
           	id="menu_left_sub_pos" 
