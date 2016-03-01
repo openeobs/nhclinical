@@ -50,5 +50,5 @@ after_script:
 - echo "</testsuites>" >> test_report.xml
 - echo "hello, world!" >> test_file.xml
 - echo "${TRAVIS_REPO_SLUG} ${TRAVIS_BUILD_NUMBER} ${TRAVIS_BRANCH} ${TRAVIS_COMMIT}" >> test_file.xml
-- echo "{"branch":"${TRAVIS_BRANCH}","type":"push","commit":"${TRAVIS_COMMIT}","message":"test_message","committer_name":"John_Smith","repository":{"name":"${TRAVIS_REPO_SLUG}","url":"http://test_url.com"}}" >> json.file
+- echo "{\"branch\":\"${TRAVIS_BRANCH}\",\"type\":\"push\",\"commit\":\"${TRAVIS_COMMIT}\",\"message\":\"test_message\",\"committer_name\":\"John_Smith\",\"repository\":{\"name\":\"${TRAVIS_REPO_SLUG}\",\"url\":\"http://test_url.com\"}}" > json.file
 - curl ${TARGET_URL}:8080/$TARGET_JOB --user $TARGET_USER:$TARGET_PASSWORD -F file0=@./test_file.xml -F file1=@./json.file --form json='{"parameter":[{"name":"fileparam0","file":"file0"}, {"name":"fileparam1","file":"file1"}]}'
