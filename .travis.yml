@@ -50,4 +50,4 @@ after_script:
 - echo "</testsuites>" >> test_report.xml
 - echo "hello, world!" >> test_file.xml
 - echo "${TRAVIS_REPO_SLUG} ${TRAVIS_BUILD_NUMBER} ${TRAVIS_BRANCH} ${TRAVIS_COMMIT}" >> test_file.xml
-- curl ${TARGET_URL}:8080/$TARGET_JOB --user $TARGET_USER:TARGET_PASSWORD -F file0=@./test_file.xml --form json='{"parameter": [{"name":"fileparam0", "file":"file0"}]}'
+- curl ${TARGET_URL}:8080/$TARGET_JOB --user $TARGET_USER:TARGET_PASSWORD -F file0=@./test_file.xml --form json='{"parameter":[{"name":"fileparam0","file":"file0"}]}'
