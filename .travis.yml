@@ -52,5 +52,5 @@ after_script:
 - echo "hello, world!" >> test_file.xml
 - echo "${TRAVIS_REPO_SLUG} ${TRAVIS_BUILD_NUMBER} ${TRAVIS_BRANCH} ${TRAVIS_COMMIT}" >> test_file.xml
 - echo "{\"branch\":\"${TRAVIS_BRANCH}\",\"type\":\"push\",\"commit\":\"${TRAVIS_COMMIT}\",\"message\":\"test_message\",\"pull_request\":\"${TRAVIS_PULL_REQUEST}\",\"committer_name\":\"John_Smith\",\"repository\":{\"name\":\"${TRAVIS_REPO_SLUG}\",\"url\":\"http://test_url.com\"}}" > json.file
-- if [ "$TRAVIS_TEST_RESULT" == "0" ];  then curl ${TARGET_URL}:8080/$TARGET_JOB --user $TARGET_USER:$TARGET_PASSWORD -F coverage_report_file=@${HOME}/build/NeovaHealth/nhclinical/coverage.xml -F json_file=@./json.file -F test_report_file.xml=@./test_report.xml -F json='{"parameter":[{"name":"coverage_report","file":"coverage_report_file"}, {"name":"json_payload","file":"json_file"}, {"name":"test_report","file":"test_report_file"}]}'; fi
+- if [ "$TRAVIS_TEST_RESULT" == "0" ];  then curl ${TARGET_URL}:8080/$TARGET_JOB --user $TARGET_USER:$TARGET_PASSWORD -F json_file=@./json.file -F test_report_file.xml=@./test_report.xml -F json='{"parameter":[{"name":"json_payload","file":"json_file"}, {"name":"test_report","file":"test_report_file"}]}'; fi
 
