@@ -43,6 +43,7 @@ script:
 - travis_run_tests
 after_script:
 - coverage xml -o ${HOME}/build/NeovaHealth/nhclinical/coverage.xml
+- ls ${HOME}/build/NeovaHealth/nhclinical
 - cd ${HOME}/build/NeovaHealth/nhclinical
 - echo "<?xml version=\"1.0\" encoding=\"utf-8\"?><testsuites>" > test_report.xml
 - for rep in ${HOME}/tests/*.xml; do cat "$rep" | grep -v "<?xml " >> test_report.xml;
@@ -54,5 +55,8 @@ after_script:
 - echo "Pipeline status is ${RUN_PIPELINE}"
 - echo "${TRAVIS_REPO_SLUG} ${TRAVIS_BUILD_NUMBER} ${TRAVIS_BRANCH} ${TRAVIS_COMMIT}" >> test_file.xml
 - echo "{\"branch\":\"${TRAVIS_BRANCH}\",\"type\":\"push\",\"commit\":\"${TRAVIS_COMMIT}\",\"message\":\"test_message\",\"pull_request\":\"${TRAVIS_PULL_REQUEST}\",\"committer_name\":\"John_Smith\",\"repository\":{\"name\":\"${TRAVIS_REPO_SLUG}\",\"url\":\"http://test_url.com\"}}" > json.file
+- pwd
+- ls ./
+- ls ${HOME}/build/NeovaHealth/nhclinical
 - if [ "$TRAVIS_TEST_RESULT" == "0" -a "$RUN_PIPELINE" == "1" ]; then curl -v ${TARGET_URL}:8080/$TARGET_JOB --user $TARGET_USER:$TARGET_PASSWORD -F json_file=@./json.file -F coverage_file=@${HOME}/build/NeovaHealth/nhclinical/coverage.xml -F test_report_file=@./test_report.xml -F json='{"parameter":[{"name":"json_payload","file":"json_file"}, {"name":"coverage_report","file","coverage_file"}, {"name":"test_report","file":"test_report_file"}]}'; fi
 
