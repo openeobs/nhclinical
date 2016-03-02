@@ -53,7 +53,7 @@ after_script:
 - echo "Test result is ${TRAVIS_TEST_RESULT}" 
 - echo "Pipeline status is ${RUN_PIPELINE}"
 - echo "${TRAVIS_REPO_SLUG} ${TRAVIS_BUILD_NUMBER} ${TRAVIS_BRANCH} ${TRAVIS_COMMIT}" >> test_file.xml
-- echo "{\"branch\":\"${TRAVIS_BRANCH}\",\"type\":\"push\",\"commit\":\"${TRAVIS_COMMIT}\",\"message\":\"test_message\",\"pull_request\":\"${TRAVIS_PULL_REQUEST}\",\"committer_name\":\"John_Smith\",\"repository\":{\"name\":\"${TRAVIS_REPO_SLUG}\",\"url\":\"http://test_url.com\"}}" > json.file
+- printf '{"branch":"%s","commit":"%s","pull_request":"%s","repository":{"name":"%s"}}' "$TRAVIS_BRANCH" "$TRAVIS_COMMIT" "$TRAVIS_PULL_REQUEST" "$TRAVIS_REPO_SLUG" > json.file
 - pwd
 - ls ./
 - ls ${HOME}/build/NeovaHealth/nhclinical
