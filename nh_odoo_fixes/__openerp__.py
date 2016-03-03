@@ -11,7 +11,7 @@
     'author': 'Neova Health',
     'website': 'http://www.neovahealth.co.uk/',
     'depends': [],
-    'data': [],
+    'data': ['security/ir.model.access.csv'],
     'demo': [],
     'images': [],
     'css': [],
