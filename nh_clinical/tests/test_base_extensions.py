@@ -23,8 +23,9 @@ class TestBaseExtension(common.SingleTransactionCase):
 
         cls.wm_role_id = cls.category_pool.search(
             cr, uid, [['name', '=', 'Ward Manager']])[0]
-        cls.nurse_role_id = cls.category_pool.search(
-            cr, uid, [['name', '=', 'Nurse']])[0]
+        cls.nurse_roles = cls.category_pool.search(
+            cr, uid, [['name', '=', 'Nurse']])
+        cls.nurse_role_id = cls.nurse_roles[0]
         cls.hca_role_id = cls.category_pool.search(
             cr, uid, [['name', '=', 'HCA']])[0]
 
@@ -88,17 +89,24 @@ class TestBaseExtension(common.SingleTransactionCase):
                                           {'tz': 'Europe/London'})
         self.assertListEqual(res, [(self.hca_role_id, 'HCA')])
 
-    def test_04_category_get_child_of_ids(self):
+    def test_04_category_get_hca_children(self):
         cr, uid = self.cr, self.uid
 
         child_ids = self.category_pool.get_child_of_ids(cr, uid,
                                                         self.hca_role_id)
-        self.assertListEqual(child_ids, [self.hca_role_id])
+        self.assertIn(self.hca_role_id, child_ids)
+
+    def test_05_category_get_nurse_children(self):
+        cr, uid = self.cr, self.uid
         child_ids = self.category_pool.get_child_of_ids(cr, uid,
                                                         self.nurse_role_id)
-        self.assertListEqual(child_ids, [self.nurse_role_id,
-                                         self.hca_role_id])
+        self.assertIn(self.hca_role_id, child_ids)
+        self.assertIn(self.nurse_role_id, child_ids)
+
+    def test_06_category_get_wm_children(self):
+        cr, uid = self.cr, self.uid
         child_ids = self.category_pool.get_child_of_ids(cr, uid,
                                                         self.wm_role_id)
-        self.assertListEqual(child_ids, [self.wm_role_id, self.nurse_role_id,
-                                         self.hca_role_id])
+        self.assertIn(self.wm_role_id, child_ids)
+        self.assertIn(self.nurse_role_id, child_ids)
+        self.assertIn(self.hca_role_id, child_ids)

@@ -23,6 +23,7 @@
              'wizard/responsibility_allocation_wizard.xml',
              'wizard/user_allocation_view.xml',
              'views/menuitem.xml',
+             'views/static_resources.xml',
              'security/ir.model.access.csv',
              'security/adt/ir.model.access.csv',
              'security/operations/ir.model.access.csv'],

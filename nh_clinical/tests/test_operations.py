@@ -80,6 +80,9 @@ class TestOperations(common.SingleTransactionCase):
             cls.patient_pool.create(
                 cr, uid,
                 {'other_identifier': 'TESTP000'+str(i),
+                 'given_name': 'John',
+                 'family_name': 'Smith',
+                 'middle_names': 'Clarke '+str(i),
                  'patient_identifier': 'TESTNHS0'+str(i)}) for i in range(7)
         ]
 

@@ -20,7 +20,7 @@ class TestUserAllocation(common.SingleTransactionCase):
         cls.user_pool = cls.registry('res.users')
         cls.api_pool = cls.registry('nh.clinical.api')
         cls.allocating_pool = cls.registry('nh.clinical.allocating')
-        cls.allocation_pool = cls.registry('nh.clinical.user.allocation')
+        cls.allocation_pool = cls.registry('nh.clinical.staff.allocation')
         cls.resp_pool = cls.registry(
             'nh.clinical.user.responsibility.allocation')
 
@@ -53,23 +53,23 @@ class TestUserAllocation(common.SingleTransactionCase):
             cr, uid, {'name': 'Bed0', 'code': 'B0', 'usage': 'bed',
                       'parent_id': cls.ward_id, 'type': 'poc'})
         cls.hca_uid = cls.user_pool.create(
-            cr, uid, {'name': 'HCA0', 'login': 'hca0', 'password': 'hca0',
+            cr, uid, {'name': 'HCA0', 'login': 'allo_hca0', 'password': 'hca0',
                       'groups_id': [[4, cls.hca_group_id]],
                       'location_ids': [[5]]})
         cls.nurse_uid = cls.user_pool.create(
-            cr, uid, {'name': 'NURSE0', 'login': 'n0', 'password': 'n0',
+            cr, uid, {'name': 'NURSE0', 'login': 'allo_n0', 'password': 'n0',
                       'groups_id': [[4, cls.nurse_group_id]],
                       'location_ids': [[5]]})
         cls.wm_uid = cls.user_pool.create(
-            cr, uid, {'name': 'WM0', 'login': 'wm0', 'password': 'wm0',
+            cr, uid, {'name': 'WM0', 'login': 'allo_wm0', 'password': 'wm0',
                       'groups_id': [[4, cls.wm_group_id]],
                       'location_ids': [[5]]})
         cls.sm_uid = cls.user_pool.create(
-            cr, uid, {'name': 'SM0', 'login': 'sm0', 'password': 'sm0',
+            cr, uid, {'name': 'SM0', 'login': 'allo_sm0', 'password': 'sm0',
                       'groups_id': [[4, cls.sm_group_id]],
                       'location_ids': [[5]]})
         cls.dr_uid = cls.user_pool.create(
-            cr, uid, {'name': 'DR0', 'login': 'dr0', 'password': 'dr0',
+            cr, uid, {'name': 'DR0', 'login': 'allo_dr0', 'password': 'dr0',
                       'groups_id': [[4, cls.dr_group_id]],
                       'location_ids': [[5]]})
 

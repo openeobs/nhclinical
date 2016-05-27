@@ -69,7 +69,10 @@ class TestLocation(common.SingleTransactionCase):
         cls.patients = [
             cls.patient_pool.create(
                 cr, uid,
-                {'other_identifier': 'TESTHN00'+str(i)}) for i in range(4)
+                {
+                    'family_name': 'Testersen',
+                    'given_name': 'Test'+str(i),
+                    'other_identifier': 'TESTHN00'+str(i)}) for i in range(4)
         ]
 
     def test_01_create(self):

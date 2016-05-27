@@ -49,14 +49,29 @@ class TestClinicalPatient(common.SingleTransactionCase):
         name = dict(family_name='', given_name='', middle_names='')
         self.assertEquals(',', self.patient_pool._get_fullname(name))
         # None as argument
-        name = dict(family_name=None, given_name=None, middle_names=None)
-        self.assertEquals(',', self.patient_pool._get_fullname(name))
+        with self.assertRaises(except_orm):
+            name = dict(family_name=None, given_name=None, middle_names=None)
+            self.patient_pool._get_fullname(name)
         # False as argument
-        name = dict(family_name=False, given_name='', middle_names='')
-        self.assertEquals(',', self.patient_pool._get_fullname(name))
+        with self.assertRaises(except_orm):
+            name = dict(family_name=False, given_name='', middle_names='')
+            self.assertEquals(',', self.patient_pool._get_fullname(name))
         # an empty dictionary creates name ','
-        name = dict()
-        self.assertEquals(',', self.patient_pool._get_fullname(name))
+        with self.assertRaises(except_orm):
+            name = dict()
+            self.assertEquals(',', self.patient_pool._get_fullname(name))
+
+    def test_none_middle_name_not_none(self):
+        name = dict(family_name='Smith', given_name='John',
+                    middle_names=None)
+        self.assertEquals('Smith, John',
+                          self.patient_pool._get_fullname(name))
+
+    def test_false_middle_name_not_false(self):
+        name = dict(family_name='Smith', given_name='John',
+                    middle_names=False)
+        self.assertEquals('Smith, John',
+                          self.patient_pool._get_fullname(name))
 
     def test_02_get_name(self):
         cr, uid = self.cr, self.uid
@@ -69,19 +84,21 @@ class TestClinicalPatient(common.SingleTransactionCase):
                                              args=None)
         self.assertEquals('Smith, John Clarke', result[patient_id])
 
-        # Scenario 2: Only one name field is present in record.
-        patient_id_1 = self.patient_pool.create(cr, uid, {
-            'other_identifier': 'TESTHN002', 'given_name': 'John'})
-        result = self.patient_pool._get_name(cr, uid, [patient_id_1], fn=None,
-                                             args=None)
-        self.assertEquals(', John', result[patient_id_1])
+    def test_02_get_name_with_firstname(self):
+        cr, uid = self.cr, self.uid
+        with self.assertRaises(except_orm):
+            patient_id_1 = self.patient_pool.create(cr, uid, {
+                'other_identifier': 'TESTHN002', 'given_name': 'John'})
+            self.patient_pool._get_name(
+                cr, uid, [patient_id_1], fn=None, args=None)
 
-        # Scenario 3: No names are present in patient record.
-        patient_id_2 = self.patient_pool.create(
-            cr, uid, {'other_identifier': 'TESTHN003'})
-        result = self.patient_pool._get_name(cr, uid, [patient_id_2], fn=None,
-                                             args=None)
-        self.assertEquals(',', result[patient_id_2])
+    def test_02_get_name_with_no_name(self):
+        cr, uid = self.cr, self.uid
+        with self.assertRaises(except_orm):
+            patient_id_2 = self.patient_pool.create(
+                cr, uid, {'other_identifier': 'TESTHN003'})
+            self.patient_pool._get_name(
+                cr, uid, [patient_id_2], fn=None, args=None)
 
     def test_03_check_hospital_number(self):
         cr, uid = self.cr, self.uid
@@ -106,7 +123,11 @@ class TestClinicalPatient(common.SingleTransactionCase):
 
     def test_04_check_nhs_number(self):
         cr, uid = self.cr, self.uid
-        self.patient_pool.create(cr, uid, {'patient_identifier': 'TESTPI001'})
+        self.patient_pool.create(cr, uid, {
+            'patient_identifier': 'TESTPI001',
+            'given_name': 'John',
+            'family_name': 'Smith',
+            'middle_names': 'Clarke'})
 
         # Scenario 1: if exception is False and nhs_number is correct.
         result = self.patient_pool.check_nhs_number(cr, uid, 'TESTPI001')
@@ -130,13 +151,11 @@ class TestClinicalPatient(common.SingleTransactionCase):
         cr, uid = self.cr, self.uid
 
         patient_id = self.patient_pool.create(
-            cr, uid, {'other_identifier': 'TESTHN004'})
+            cr, uid, {'other_identifier': 'TESTHN004', 'given_name': 'John',
+                      'family_name': 'Smith', 'middle_names': 'Clarke'})
         patient = self.patient_pool.browse(cr, uid, [patient_id])
         self.assertEquals(patient_id, patient.id)
         self.assertEquals('TESTHN004', patient.other_identifier)
-
-        # test for when 'name' is not in vals
-        self.assertEquals(',', patient.name)
 
         # test for that a partner is created in res_partner.
         self.assertEquals(patient_id,
@@ -162,7 +181,8 @@ class TestClinicalPatient(common.SingleTransactionCase):
         cr, uid = self.cr, self.uid
 
         patient_id = self.patient_pool.create(
-            cr, uid, {'other_identifier': 'TEST_UNLINK'})
+            cr, uid, {'other_identifier': 'TEST_UNLINK', 'given_name': 'John',
+                      'family_name': 'Smith', 'middle_names': 'Clarke'})
         self.patient_pool.unlink(cr, uid, [patient_id])
         # unlink sets the field 'active' to False, making it invisible to users
         self.assertFalse(
@@ -240,7 +260,8 @@ class TestClinicalPatient(common.SingleTransactionCase):
         cr, uid = self.cr, self.uid
         spell_pool = self.registry('nh.clinical.spell')
         patient_id = self.patient_pool.create(
-            cr, uid, {'other_identifier': 'TESTHN010'})
+            cr, uid, {'other_identifier': 'TESTHN010', 'given_name': 'John',
+                      'family_name': 'Smith', 'middle_names': 'Clarke'})
 
         patient_ids = self.patient_pool.get_not_admitted_patient_ids(cr, uid)
 
@@ -252,7 +273,8 @@ class TestClinicalPatient(common.SingleTransactionCase):
     def test_not_admitted_dict_with_key_patient_id_and_value_True(self):
         cr, uid = self.cr, self.uid
         patient_id = self.patient_pool.create(
-            cr, uid, {'other_identifier': 'TESTHN011'})
+            cr, uid, {'other_identifier': 'TESTHN011', 'given_name': 'John',
+                      'family_name': 'Smith', 'middle_names': 'Clarke'})
 
         res = self.patient_pool._not_admitted(
             cr, uid, [patient_id], None, None)
@@ -262,7 +284,8 @@ class TestClinicalPatient(common.SingleTransactionCase):
     def test_not_admitted_search_return_domain_patients_not_admitted(self):
         cr, uid = self.cr, self.uid
         patient_id = self.patient_pool.create(
-            cr, uid, {'other_identifier': 'TESTHN012'})
+            cr, uid, {'other_identifier': 'TESTHN012', 'given_name': 'John',
+                      'family_name': 'Smith', 'middle_names': 'Clarke'})
         args = [('not_admitted', '=', True)]
 
         domain = self.patient_pool._not_admitted_search(

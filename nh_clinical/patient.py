@@ -49,13 +49,21 @@ class nh_clinical_patient(osv.Model):
         :rtype: string
         """
 
-        for k in ['family_name', 'given_name', 'middle_names']:
+        # for k in ['family_name', 'given_name', 'middle_names']:
+        #     if k not in vals or vals[k] in [None, False]:
+        #         vals.update({k: ''})
+        for k in ['family_name', 'given_name']:
             if k not in vals or vals[k] in [None, False]:
-                vals.update({k: ''})
+                raise osv.except_osv(
+                    'Integrity Error!',
+                    'Patient must have a full name!')
+        middle_names = vals.get('middle_names')
+        if not middle_names:
+            middle_names = ''
 
         return ' '.join(fmt.format(fn=vals.get('family_name'),
                                    gn=vals.get('given_name'),
-                                   mn=vals.get('middle_names')).split())
+                                   mn=middle_names).split())
 
     def _get_name(self, cr, uid, ids, fn, args, context=None):
         """
@@ -271,6 +279,12 @@ class nh_clinical_patient(osv.Model):
         :returns: ``True`` if created
         :rtype: bool
         """
+        if isinstance(vals, dict) and not vals.get('other_identifier') \
+                and not vals.get('patient_identifier'):
+            raise osv.except_osv(
+                'Patient Data Error!',
+                'Either the Hospital Number or the NHS Number is required '
+                'to register/update a patient.')
         if not vals.get('name'):
             vals.update({'name': self._get_fullname(vals)})
         if vals.get('other_identifier'):

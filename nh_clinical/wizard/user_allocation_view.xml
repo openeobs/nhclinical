@@ -64,7 +64,7 @@
                 <form string="Allocating" version="7.0">
                     <group>
                         <field name="patient_ids" widget="many2many_tags" readonly="1"/>
-                        <field name="nurse_id" widget="nh_many2one"/>
+                        <field name="nurse_id" widget="nh_many2one" options="{'no_create': True}"/>
                         <field name="hca_ids" widget="many2many_tags" options="{'no_create': True}"/>
                     </group>
                 </form>
@@ -86,7 +86,7 @@
                 <form string="Staff Allocation Wizard" version="7.0">
                     <header>
                         <field name="stage" readonly="1" widget="statusbar" clickable="False" options="{'fold_field': 'fold'}"/>
-                        <button string="Start" type="object" name="submit_wards" class="oe_highlight"
+                        <button string="Start" type="object" name="submit_ward" class="oe_highlight"
                                 attrs="{'invisible': [['stage','!=','wards']]}"/>
                         <button string="Deallocate Previous Shift" type="object" name="deallocate" class="oe_highlight"
                                 attrs="{'invisible': [['stage','!=','review']]}"/>

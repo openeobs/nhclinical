@@ -193,8 +193,11 @@ class TestUserManagement(common.SingleTransactionCase):
         # Scenario 2: fields_view_get form view
         res = self.uman_pool.fields_view_get(cr, self.wm_uid, context={})
         self.assertTrue(res)
-        self.assertListEqual(
-            res['fields']['category_id']['domain'],
-            [['id', 'in',
-              [self.wm_role_id, self.nurse_role_id, self.hca_role_id]]]
-        )
+        domain = res['fields']['category_id']['domain']
+        self.assertEqual(len(domain), 1)
+        self.assertEqual(domain[0][0], 'id')
+        self.assertEqual(domain[0][1], 'in')
+        ids = domain[0][2]
+        self.assertIn(self.wm_role_id, ids)
+        self.assertIn(self.nurse_role_id, ids)
+        self.assertIn(self.hca_role_id, ids)
