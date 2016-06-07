@@ -14,8 +14,14 @@ from . import test_staff_allocation_submit_wards
 from . import test_staff_allocation_deallocate
 from . import test_staff_allocation_submit_users
 from . import test_staff_allocation_complete
-from . import test_staff_allocation_unfollow
-from . import test_staff_allocation_responsibility_allocation
+from . import test_allocation_unfollow
+from . import test_allocation_responsibility_allocation
+from . import test_staff_reallocation_default_ward
+from . import test_staff_reallocation_default_locations
+from . import test_staff_reallocation_default_users
+from . import test_staff_reallocation_default_allocatings
+from . import test_staff_reallocation_reallocate
+from . import test_staff_reallocation_complete
 # from . import test_doctor
 # from . import test_spell
 # from . import test_auditing

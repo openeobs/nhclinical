@@ -13,18 +13,93 @@ def list_intersect(a, b):
     return [aa for aa in a if aa in b]
 
 
-class staff_allocation_wizard(osv.TransientModel):
+class AllocationWizards(osv.AbstractModel):
+
+    _name = 'nh.clinical.allocation'
+
+    _columns = {
+        'create_uid': fields.many2one(
+            'res.users',
+            'User Executing the Wizard'),
+        'create_date': fields.datetime('Create Date')
+    }
+
+    def responsibility_allocation_activity(self, cr, uid, user_id,
+                                           location_ids, context=None):
+        """
+        Create and complete a responsibility allocation activity for location
+        :param location_ids: Ward ID
+        :param context: A context
+        :return: True
+        """
+        activity_pool = self.pool['nh.activity']
+        respallocation_pool = self.pool[
+            'nh.clinical.user.responsibility.allocation'
+        ]
+        activity_id = respallocation_pool.create_activity(
+            cr, uid, {}, {
+                'responsible_user_id': user_id,
+                'location_ids': [[6, 0, location_ids]]
+            }, context=context)
+        activity_pool.complete(cr, uid, activity_id, context=context)
+        return True
+
+    def unfollow_patients_in_locations(self, cr, uid, location_ids,
+                                       context=None):
+        """
+        Unfollow any patients in the locations currently being reallocated
+        :param location_ids: List of location ids
+        :param context: context for odoo
+        :return: True
+        """
+        activity_pool = self.pool['nh.activity']
+        patient_pool = self.pool['nh.clinical.patient']
+        unfollow_pool = self.pool['nh.clinical.patient.unfollow']
+        patient_ids = patient_pool.search(
+            cr, uid, [['current_location_id', 'in', location_ids]],
+            context=context)
+        if patient_ids:
+            unfollow_activity_id = unfollow_pool.create_activity(cr, uid, {}, {
+                'patient_ids': [[6, 0, patient_ids]]}, context=context)
+            activity_pool.complete(cr, uid, unfollow_activity_id,
+                                   context=context)
+        return True
+
+    def complete(self, cr, uid, ids, context=None):
+        if isinstance(ids, list):
+            ids = ids[0]
+        if not isinstance(ids, int):
+            raise ValueError('Invalid ID passed to complete')
+        allocating_pool = self.pool['nh.clinical.allocating']
+        wizard = self.browse(cr, uid, ids, context=context)
+        allocation = {u.id: [l.id for l in u.location_ids] for u in
+                      wizard.user_ids}
+        for allocating in allocating_pool.browse(
+                cr, uid, [a.id for a in wizard.allocating_ids],
+                context=context):
+            if allocating.nurse_id:
+                allocation[allocating.nurse_id.id].append(
+                    allocating.location_id.id)
+                if allocating.nurse_id.id == uid:
+                    allocation[allocating.nurse_id.id].append(
+                        wizard.ward_id.id)
+            for hca in allocating.hca_ids:
+                allocation[hca.id].append(allocating.location_id.id)
+        for key, value in allocation.iteritems():
+            self.responsibility_allocation_activity(cr, uid, key, value,
+                                                    context=context)
+        return {'type': 'ir.actions.act_window_close'}
+
+
+class StaffAllocationWizard(osv.TransientModel):
     _name = 'nh.clinical.staff.allocation'
+    _inherit = 'nh.clinical.allocation'
     _rec_name = 'create_uid'
 
     _stages = [['wards', 'My Ward'], ['review', 'De-allocate'],
                ['users', 'Roll Call'], ['allocation', 'Allocation']]
 
     _columns = {
-        'create_uid': fields.many2one(
-            'res.users',
-            'User Executing the Wizard'),
-        'create_date': fields.datetime('Create Date'),
         'stage': fields.selection(_stages, string='Stage'),
         'ward_id': fields.many2one('nh.clinical.location',
                                    string='Ward',
@@ -134,75 +209,10 @@ class staff_allocation_wizard(osv.TransientModel):
             'target': 'new',
         }
 
-    def complete(self, cr, uid, ids, context=None):
-        if isinstance(ids, list):
-            ids = ids[0]
-        if not isinstance(ids, int):
-            raise ValueError('Invalid ID passed to complete')
-        allocating_pool = self.pool['nh.clinical.allocating']
-        wizard = self.browse(cr, uid, ids, context=context)
-        allocation = {u.id: [l.id for l in u.location_ids] for u in
-                      wizard.user_ids}
-        for allocating in allocating_pool.browse(
-                cr, uid, [a.id for a in wizard.allocating_ids],
-                context=context):
-            if allocating.nurse_id:
-                allocation[allocating.nurse_id.id].append(
-                    allocating.location_id.id)
-                if allocating.nurse_id.id == uid:
-                    allocation[allocating.nurse_id.id].append(
-                        wizard.ward_id.id)
-            for hca in allocating.hca_ids:
-                allocation[hca.id].append(allocating.location_id.id)
-        for key, value in allocation.iteritems():
-            self.responsibility_allocation_activity(cr, uid, key, value,
-                                                    context=context)
-        return {'type': 'ir.actions.act_window_close'}
 
-    def responsibility_allocation_activity(self, cr, uid, user_id,
-                                           location_ids, context=None):
-        """
-        Create and complete a responsibility allocation activity for location
-        :param location_ids: Ward ID
-        :param context: A context
-        :return: True
-        """
-        activity_pool = self.pool['nh.activity']
-        respallocation_pool = self.pool[
-            'nh.clinical.user.responsibility.allocation'
-        ]
-        activity_id = respallocation_pool.create_activity(
-            cr, uid, {}, {
-                'responsible_user_id': user_id,
-                'location_ids': [[6, 0, location_ids]]
-            }, context=context)
-        activity_pool.complete(cr, uid, activity_id, context=context)
-        return True
-
-    def unfollow_patients_in_locations(self, cr, uid, location_ids,
-                                       context=None):
-        """
-        Unfollow any patients in the locations currently being reallocated
-        :param location_ids: List of location ids
-        :param context: context for odoo
-        :return: True
-        """
-        activity_pool = self.pool['nh.activity']
-        patient_pool = self.pool['nh.clinical.patient']
-        unfollow_pool = self.pool['nh.clinical.patient.unfollow']
-        patient_ids = patient_pool.search(
-            cr, uid, [['current_location_id', 'in', location_ids]],
-            context=context)
-        if patient_ids:
-            unfollow_activity_id = unfollow_pool.create_activity(cr, uid, {}, {
-                'patient_ids': [[6, 0, patient_ids]]}, context=context)
-            activity_pool.complete(cr, uid, unfollow_activity_id,
-                                   context=context)
-        return True
-
-
-class staff_reallocation_wizard(osv.TransientModel):
+class StaffReallocationWizard(osv.TransientModel):
     _name = 'nh.clinical.staff.reallocation'
+    _inherit = 'nh.clinical.allocation'
     _rec_name = 'create_uid'
 
     _nursing_groups = ['NH Clinical Nurse Group', 'NH Clinical HCA Group']
@@ -219,51 +229,29 @@ class staff_reallocation_wizard(osv.TransientModel):
                 'You must be in charge of a ward to do this task!')
         return ward_ids[0]
 
-    def _get_default_users(self, cr, uid, context=None):
-        location_pool = self.pool['nh.clinical.location']
+    def get_users_for_locations(self, cr, uid, location_ids, context=None):
         user_pool = self.pool['res.users']
-        ward_ids = location_pool.search(cr, uid, [['usage', '=', 'ward'],
-                                                  ['user_ids', 'in', [uid]]],
-                                        context=context)
-        if not ward_ids:
-            raise osv.except_osv(
-                'Shift Management Error!',
-                'You must be in charge of a ward to do this task!')
-        location_ids = location_pool.search(cr, uid,
-                                            [['id', 'child_of', ward_ids[0]]],
-                                            context=context)
-        user_ids = user_pool.search(
+        return user_pool.search(
             cr, uid, [['groups_id.name', 'in', self._nursing_groups],
                       ['location_ids', 'in', location_ids]], context=context)
-        return user_ids
+
+    def _get_default_users(self, cr, uid, context=None):
+        location_ids = self._get_default_locations(cr, uid, context=context)
+        return self.get_users_for_locations(cr, uid, location_ids,
+                                            context=context)
 
     def _get_default_locations(self, cr, uid, context=None):
         location_pool = self.pool['nh.clinical.location']
-        ward_ids = location_pool.search(
-            cr, uid, [['usage', '=', 'ward'], ['user_ids', 'in', [uid]]],
-            context=context)
-        if not ward_ids:
-            raise osv.except_osv(
-                'Shift Management Error!',
-                'You must be in charge of a ward to do this task!')
+        ward_id = self._get_default_ward(cr, uid, context=context)
         location_ids = location_pool.search(cr, uid,
-                                            [['id', 'child_of', ward_ids[0]]],
+                                            [['id', 'child_of', ward_id]],
                                             context=context)
         return location_ids
 
     def _get_default_allocatings(self, cr, uid, context=None):
         location_pool = self.pool['nh.clinical.location']
         allocating_pool = self.pool['nh.clinical.allocating']
-        ward_ids = location_pool.search(cr, uid, [['usage', '=', 'ward'],
-                                                  ['user_ids', 'in', [uid]]],
-                                        context=context)
-        if not ward_ids:
-            raise osv.except_osv(
-                'Shift Management Error!',
-                'You must be in charge of a ward to do this task!')
-        location_ids = location_pool.search(cr, uid,
-                                            [['id', 'child_of', ward_ids[0]]],
-                                            context=context)
+        location_ids = self._get_default_locations(cr, uid, context=context)
         locations = location_pool.browse(cr, uid, location_ids,
                                          context=context)
         allocating_ids = []
@@ -274,10 +262,13 @@ class staff_reallocation_wizard(osv.TransientModel):
             hca_ids = []
             for u in l.user_ids:
                 groups = [g.name for g in u.groups_id]
-                if 'NH Clinical Nurse Group' in groups:
+                if 'NH Clinical Nurse Group' in groups and \
+                        'NH Clinical Ward Manager Group' not in groups:
                     nurse_id = u.id
                 if 'NH Clinical HCA Group' in groups:
                     hca_ids.append(u.id)
+                if 'NH Clinical Ward Manager Group' in groups and not nurse_id:
+                    nurse_id = u.id
             allocating_ids.append(allocating_pool.create(cr, uid, {
                 'location_id': l.id,
                 'nurse_id': nurse_id,
@@ -286,22 +277,22 @@ class staff_reallocation_wizard(osv.TransientModel):
         return allocating_ids
 
     _columns = {
-        'create_uid': fields.many2one(
-            'res.users', 'User Executing the Wizard'),
-        'create_date': fields.datetime('Create Date'),
         'stage': fields.selection(_stages, string='Stage'),
-        'ward_id': fields.many2one('nh.clinical.location', string='Ward',
+        'ward_id': fields.many2one('nh.clinical.location',
+                                   string='Ward',
                                    domain=[['usage', '=', 'ward']]),
-        'user_ids': fields.many2many(
-            'res.users', 'realloc_user_rel', 'allocation_id', 'user_id',
-            string='Users',
-            domain=[
-                ['groups_id.name', 'in',
-                 ['NH Clinical HCA Group', 'NH Clinical Nurse Group']]
-            ]),
         'location_ids': fields.many2many('nh.clinical.location',
                                          'realloc_loc_rel', 'reallocation_id',
-                                         'location_id', string='Locations'),
+                                         'location_id',
+                                         string='Locations'),
+        'user_ids': fields.many2many('res.users', 'realloc_user_rel',
+                                     'allocation_id', 'user_id',
+                                     string='Users',
+                                     domain=[
+                                         ['groups_id.name', 'in',
+                                          ['NH Clinical HCA Group',
+                                           'NH Clinical Nurse Group']]
+                                     ]),
         'allocating_ids': fields.many2many('nh.clinical.allocating',
                                            'real_allocating_rel',
                                            'reallocation_id',
@@ -317,46 +308,31 @@ class staff_reallocation_wizard(osv.TransientModel):
     }
 
     def reallocate(self, cr, uid, ids, context=None):
-        if not isinstance(ids, list):
-            ids = [ids]
+        if isinstance(ids, list):
+            ids = ids[0]
+        if not isinstance(ids, int):
+            raise ValueError('reallocate expected integer')
         user_pool = self.pool['res.users']
-        patient_pool = self.pool['nh.clinical.patient']
-        unfollow_pool = self.pool['nh.clinical.patient.unfollow']
-        respallocation_pool = self.pool[
-            'nh.clinical.user.responsibility.allocation'
-        ]
-        activity_pool = self.pool['nh.activity']
-        wiz = self.browse(cr, uid, ids[0], context=context)
-        location_ids = [l.id for l in wiz.location_ids]
-        loc_user_ids = user_pool.search(
-            cr, uid, [['groups_id.name', 'in', self._nursing_groups],
-                      ['location_ids', 'in', location_ids]], context=context)
-        user_ids = [u.id for u in wiz.user_ids]
+        wiz = self.read(
+            cr, uid, ids, ['location_ids', 'user_ids'], context=context)
+        location_ids = wiz.get('location_ids')
+        loc_user_ids = self.get_users_for_locations(
+            cr, uid, location_ids, context=context)
+        user_ids = wiz.get('user_ids')
         recompute = False
         for u_id in loc_user_ids:
-            if u_id not in user_ids:
+            if u_id not in user_ids and u_id != uid:
                 recompute = True
-                user = user_pool.browse(cr, uid, u_id, context=context)
-                uloc_ids = [l.id for l in user.location_ids]
+                user = user_pool.read(
+                    cr, uid, u_id, ['location_ids'], context=context)
+                uloc_ids = user.get('location_ids')
                 loc_ids = list_diff(uloc_ids, location_ids)
-                activity_id = respallocation_pool.create_activity(
-                    cr, uid, {}, {
-                        'responsible_user_id': u_id,
-                        'location_ids': [[6, 0, loc_ids]]
-                    }, context=context)
-                activity_pool.complete(cr, uid, activity_id, context=context)
+                self.responsibility_allocation_activity(
+                    cr, uid, u_id, loc_ids, context=context)
                 # Remove patient followers
                 loc_ids = list_intersect(uloc_ids, location_ids)
-                patient_ids = patient_pool.search(
-                    cr, uid, [['current_location_id', 'in', loc_ids]],
-                    context=context)
-                if patient_ids:
-                    unfollow_activity_id = unfollow_pool.create_activity(
-                        cr, uid, {}, {
-                            'patient_ids': [[6, 0, patient_ids]]
-                        }, context=context)
-                    activity_pool.complete(cr, uid, unfollow_activity_id,
-                                           context=context)
+                self.unfollow_patients_in_locations(
+                    cr, uid, loc_ids, context=context)
         self.write(cr, uid, ids, {'stage': 'allocation'}, context=context)
         if recompute:
             allocating_ids = self._get_default_allocatings(cr, uid,
@@ -368,36 +344,39 @@ class staff_reallocation_wizard(osv.TransientModel):
             'type': 'ir.actions.act_window',
             'name': 'Nursing Re-Allocation',
             'res_model': 'nh.clinical.staff.reallocation',
-            'res_id': ids[0],
+            'res_id': ids,
             'view_mode': 'form',
             'target': 'new',
         }
 
     def complete(self, cr, uid, ids, context=None):
-        if not isinstance(ids, list):
-            ids = [ids]
+        if isinstance(ids, list):
+            ids = ids[0]
+        if not isinstance(ids, int):
+            raise ValueError('Invalid ID passed to complete')
         allocating_pool = self.pool['nh.clinical.allocating']
-        respallocation_pool = self.pool[
-            'nh.clinical.user.responsibility.allocation'
-        ]
-        activity_pool = self.pool['nh.activity']
-        wizard = self.browse(cr, uid, ids[0], context=context)
-        allocation = {u.id: [] for u in wizard.user_ids}
+        wizard = self.browse(cr, uid, ids, context=context)
+        allocation = {
+            u.id: [l.id for l in u.location_ids if l.id not
+                   in wizard.location_ids.ids] for u in wizard.user_ids}
         for allocating in allocating_pool.browse(
                 cr, uid, [a.id for a in wizard.allocating_ids],
                 context=context):
             if allocating.nurse_id:
                 allocation[allocating.nurse_id.id].append(
                     allocating.location_id.id)
+                if allocating.nurse_id.id == uid:
+                    allocation[allocating.nurse_id.id].append(
+                        wizard.ward_id.id)
             for hca in allocating.hca_ids:
                 allocation[hca.id].append(allocating.location_id.id)
-        for key in allocation.keys():
-            activity_id = respallocation_pool.create_activity(
-                cr, uid, {}, {
-                    'responsible_user_id': key,
-                    'location_ids': [[6, 0, allocation[key]]]
-                }, context=context)
-            activity_pool.complete(cr, uid, activity_id, context=context)
+            if uid not in allocation:
+                allocation[uid] = [wizard.ward_id.id]
+            elif wizard.ward_id.id not in allocation.get(uid):
+                allocation[uid].append(wizard.ward_id.id)
+        for key, value in allocation.iteritems():
+            self.responsibility_allocation_activity(cr, uid, key, value,
+                                                    context=context)
         return {'type': 'ir.actions.act_window_close'}
 
 
