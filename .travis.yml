@@ -22,7 +22,7 @@ env:
     EXCLUDE="xml_test_output"
   matrix:
   - LINT_CHECK="1"
-  - ODOO_REPO="valdecdev/odoo" RUN_PIPELINE="1" TESTS="1" INCLUDE="nh_odoo_fixes,nh_activity,nh_clinical"
+  - ODOO_REPO="valdecdev/odoo" RUN_PIPELINE="1" TESTS="1" INCLUDE="nh_odoo_fixes,nh_activity,nh_clinical,nh_clinical_ldap"
     VERSION="openeobs-8-12"
 virtualenv:
   system_site_packages: true
