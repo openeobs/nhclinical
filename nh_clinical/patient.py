@@ -84,6 +84,20 @@ class nh_clinical_patient(osv.Model):
             result[r['id']] = self._get_fullname(r)
         return result
 
+    def name_get(self, cr, uid, ids, context=None):
+        """
+        Override name_get method so we return the patient's fullname 
+        instead of the default name field
+        """
+        if isinstance(ids, list):
+            ids = ids[0]
+        names = self.read(cr, uid, ids, [
+            'family_name',
+            'given_name',
+            'middle_names'
+        ], context=context)
+        return [(ids, self._get_fullname(names))]
+
     def check_hospital_number(self, cr, uid, hospital_number, exception=False,
                               context=None):
         """
@@ -231,7 +245,9 @@ class nh_clinical_patient(osv.Model):
                                          'Followers'),
         'not_admitted': fields.function(_not_admitted, type='boolean',
                                         string='Not Admitted?',
-                                        fnct_search=_not_admitted_search)
+                                        fnct_search=_not_admitted_search),
+        'display_name':  fields.function(_get_name, type='text',
+                                         string="Display Name")
     }
 
     _defaults = {
@@ -305,7 +321,8 @@ class nh_clinical_patient(osv.Model):
         :rtype: bool
         """
         title_pool = self.pool['res.partner.title']
-        if 'title' in vals.keys():
+        keys = vals.keys()
+        if 'title' in keys:
             if not isinstance(vals.get('title'), int):
                 vals['title'] = title_pool.get_title_by_name(cr, uid,
                                                              vals['title'],
