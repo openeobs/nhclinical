@@ -22,6 +22,7 @@ from . import test_staff_reallocation_default_users
 from . import test_staff_reallocation_default_allocatings
 from . import test_staff_reallocation_reallocate
 from . import test_staff_reallocation_complete
+from . import test_get_allocation_locations
 # from . import test_doctor
 # from . import test_spell
 # from . import test_auditing
