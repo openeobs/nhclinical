@@ -83,6 +83,8 @@ class TestGetAllocationLocations(SingleTransactionCase):
             'groups_id': doctor_group
         })
 
+    def setUp(self):
+
         def mock_location_search(*args, **kwargs):
             """
             Mock out the location search used by get_allocation_locations to
@@ -94,12 +96,11 @@ class TestGetAllocationLocations(SingleTransactionCase):
             """
             return ['bed_search']
 
-        cls.location_pool._patch_method('search', mock_location_search)
+        self.location_pool._patch_method('search', mock_location_search)
 
-    @classmethod
-    def tearDownClass(cls):
-        cls.location_pool._revert_method('search')
-        super(TestGetAllocationLocations, cls).tearDownClass()
+    def tearDown(self):
+        self.location_pool._revert_method('search')
+        super(TestGetAllocationLocations, self).tearDown()
 
     def get_locations(self, user, locations):
         """
