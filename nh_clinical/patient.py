@@ -86,7 +86,7 @@ class nh_clinical_patient(osv.Model):
 
     def name_get(self, cr, uid, ids, context=None):
         """
-        Override name_get method so we return the patient's fullname 
+        Override name_get method so we return the patient's fullname
         instead of the default name field
         """
         if not ids:
