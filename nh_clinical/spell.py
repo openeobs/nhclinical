@@ -223,7 +223,14 @@ class nh_clinical_spell(orm.Model):
                           context=None):
         """
         Checks if there is a started spell for the provided
-        :mod:`patient<base.nh_clinical_patient>`.
+        :mod:`patient<base.nh_clinical_patient>`. Returns false if there are no
+        spells found.
+
+        If the patient has had a previous spell that has now
+        ended, no spells will be found by this method and it will return False.
+        This is because activity ``state == completed`` when a spell has ended
+        and so is not picked up by the search used in this method which
+        contains ``state == started``.
 
         :param patient_id: :mod:`patient<base.nh_clinical_patient>` id
         :type patient_id: int
@@ -248,3 +255,8 @@ class nh_clinical_spell(orm.Model):
                     'There is no started spell for patient with id %s'
                     % patient_id)
         return spell_id[0] if spell_id else False
+
+    def get_spell_start_date(self, cr, uid, patient_id, context=None):
+        spell_id = self.get_by_patient_id(cr, uid, patient_id, context=context)
+        spell_started = self.read(cr, uid, spell_id, ['date_started'])
+        return dt.strptime(spell_started.get('date_started'), DTF)
