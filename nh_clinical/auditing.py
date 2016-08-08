@@ -126,7 +126,6 @@ class nh_clinical_user_responsibility_allocation(orm.Model):
         """
 
         activity_pool = self.pool['nh.activity']
-        location_pool = self.pool['nh.clinical.location']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
         if not activity.data_ref:
             raise osv.except_osv(
@@ -139,21 +138,8 @@ class nh_clinical_user_responsibility_allocation(orm.Model):
         res = super(nh_clinical_user_responsibility_allocation, self).complete(
             cr, uid, activity_id, context=context)
 
-        locations = []
-        if not any(
-                [g.name in ['NH Clinical HCA Group', 'NH Clinical Nurse Group']
-                 for g in activity.data_ref.responsible_user_id.groups_id]
-        ):
-            for loc in activity.data_ref.location_ids:
-                if loc.usage == 'ward':
-                    locations.append(loc.id)
-                else:
-                    locations += location_pool.search(
-                        cr, uid, [['id', 'child_of', loc.id]], context=context)
-        else:
-            for loc in activity.data_ref.location_ids:
-                locations += location_pool.search(
-                    cr, uid, [['id', 'child_of', loc.id]], context=context)
+        locations = self.get_allocation_locations(cr, uid, activity.data_ref,
+                                                  context=context)
         values = {'location_ids': [[6, False, list(set(locations))]]}
 
         user_pool = self.pool['res.users']
@@ -161,3 +147,31 @@ class nh_clinical_user_responsibility_allocation(orm.Model):
             cr, uid, activity.data_ref.responsible_user_id.id, values,
             context=context)
         return res
+
+    def get_allocation_locations(self, cr, uid, allocation_obj, context=None):
+        """
+        Get a list locations to allocate the user to
+        :param cr: Cursor
+        :param uid: User ID to perform operation with
+        :param allocation_obj: The activity data ref from a user responsibility
+        allocation
+        :param context: Odoo context
+        :return: list of location ids
+        """
+        location_pool = self.pool.get('nh.clinical.location')
+        locations = []
+        if not any(
+                [g.name in ['NH Clinical HCA Group', 'NH Clinical Nurse Group']
+                 for g in allocation_obj.responsible_user_id.groups_id]
+        ):
+            for loc in allocation_obj.location_ids:
+                if loc.usage == 'ward':
+                    locations.append(loc.id)
+                else:
+                    locations += location_pool.search(
+                        cr, uid, [['id', 'child_of', loc.id]], context=context)
+        else:
+            for loc in allocation_obj.location_ids:
+                locations += location_pool.search(
+                    cr, uid, [['id', 'child_of', loc.id]], context=context)
+        return locations
