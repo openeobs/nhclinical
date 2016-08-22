@@ -20,23 +20,25 @@
             <field eval="[[6, False, [ref('nhc_test_location_w0')]]]" name="location_ids" />
             <field name="pos_ids" eval="[[6,0,[ref('nhc_location_default_pos')]]]"/>
         </record>
-        <record id="nhc_test_ward_manager0_user" model="res.users">
+        <!--delete id="nhc_test_ward_manager0_user" model="res.users"/-->
+        <record id="nhc_test_shift_coordinator0_user" model="res.users">
             <field name="name">WM0 Test</field>
-            <field name="login">wardmanager0</field>
-            <field name="password">wardmanager0</field>
+            <field name="login">shiftcoordinator0</field>
+            <field name="password">shiftcoordinator0</field>
             <field name="tz">Europe/London</field>
-            <field eval="[(4, ref('group_nhc_ward_manager'))]" name="groups_id" />
-            <field eval="[(4, ref('role_nhc_ward_manager'))]" name="category_id" />
+            <field eval="[(4, ref('group_nhc_shift_coordinator'))]" name="groups_id" />
+            <field eval="[(4, ref('role_nhc_shift_coordinator'))]" name="category_id" />
             <field eval="[[6, False, [ref('nhc_test_location_w0')]]]" name="location_ids" />
             <field name="pos_ids" eval="[[6,0,[ref('nhc_location_default_pos')]]]"/>
         </record>
-        <record id="nhc_test_ward_manager1_user" model="res.users">
+        <!--delete id="nhc_test_ward_manager1_user" model="res.users"/-->
+        <record id="nhc_test_shift_coordinator1_user" model="res.users">
             <field name="name">WM1 Test</field>
-            <field name="login">wardmanager1</field>
-            <field name="password">wardmanager1</field>
+            <field name="login">shiftcoordinator1</field>
+            <field name="password">shiftcoordinator1</field>
             <field name="tz">Europe/London</field>
-            <field eval="[(4, ref('group_nhc_ward_manager'))]" name="groups_id" />
-            <field eval="[(4, ref('role_nhc_ward_manager'))]" name="category_id" />
+            <field eval="[(4, ref('group_nhc_shift_coordinator'))]" name="groups_id" />
+            <field eval="[(4, ref('role_nhc_shift_coordinator'))]" name="category_id" />
             <field eval="[[6, False, [ref('nhc_test_location_w1')]]]" name="location_ids" />
             <field name="pos_ids" eval="[[6,0,[ref('nhc_location_default_pos')]]]"/>
         </record>

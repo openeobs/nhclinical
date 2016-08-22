@@ -33,7 +33,7 @@ class test_base_nhdemo(SingleTransactionCase):
         api_demo.create(cr, uid, 'res.users')
         api_demo.create(cr, uid, 'res.users', 'user_hca')
         api_demo.create(cr, uid, 'res.users', 'user_nurse')
-        api_demo.create(cr, uid, 'res.users', 'user_ward_manager')
+        api_demo.create(cr, uid, 'res.users', 'user_shift_coordinator')
         api_demo.create(cr, uid, 'res.users', 'user_doctor')
         api_demo.create(cr, uid, 'res.users', 'user_adt')
 

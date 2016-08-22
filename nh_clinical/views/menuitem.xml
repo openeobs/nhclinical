@@ -74,7 +74,7 @@
           	id="menu_nhc_patient_placement_activity"
           	parent="menu_left_nhc_operation"
           	action="action_nhc_placement_activity"
-          	groups="group_nhc_ward_manager"/>
+          	groups="group_nhc_shift_coordinator"/>
 
     </data>
 </openerp>

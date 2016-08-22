@@ -22,7 +22,7 @@ class TestBaseExtension(common.SingleTransactionCase):
         cls.group_pool = cls.registry('res.groups')
 
         cls.wm_role_id = cls.category_pool.search(
-            cr, uid, [['name', '=', 'Ward Manager']])[0]
+            cr, uid, [['name', '=', 'Shift Coordinator']])[0]
         cls.nurse_roles = cls.category_pool.search(
             cr, uid, [['name', '=', 'Nurse']])
         cls.nurse_role_id = cls.nurse_roles[0]
@@ -84,7 +84,7 @@ class TestBaseExtension(common.SingleTransactionCase):
         cr, uid = self.cr, self.uid
 
         res = self.category_pool.name_get(cr, uid, [self.wm_role_id])
-        self.assertListEqual(res, [(self.wm_role_id, 'Ward Manager')])
+        self.assertListEqual(res, [(self.wm_role_id, 'Shift Coordinator')])
         res = self.category_pool.name_get(cr, uid, [self.hca_role_id],
                                           {'tz': 'Europe/London'})
         self.assertListEqual(res, [(self.hca_role_id, 'HCA')])

@@ -137,7 +137,7 @@ class nh_clinical_api_demo(orm.AbstractModel):
         group_pool = self.pool['res.groups']
         groups = [] if not groups else groups
         if 'NH Clinical Admin Group' in groups or\
-                'NH Clinical Ward Manager Group' in groups:
+                'NH Clinical Shift Coordinator Group' in groups:
             groups.append('Contact Creation')
         location_ids = [[6, False, []]] if not location_ids\
             else [[6, False, location_ids]]
@@ -247,7 +247,7 @@ class nh_clinical_api_demo(orm.AbstractModel):
 
         users parameter expects a dictionary with the following format:
             {
-                'ward_managers': {
+                'shift_coordinators': {
                     'name': ['login', 'ward_code']
                 },
                 'nurses': {
@@ -292,19 +292,19 @@ class nh_clinical_api_demo(orm.AbstractModel):
 
         # USERS
         if not users:
-            users = {'ward_managers': {}, 'nurses': {}}
+            users = {'shift_coordinators': {}, 'nurses': {}}
             for w in wards:
-                users['ward_managers']['WM'+w] = ['WM'+w, w]
+                users['shift_coordinators']['WM'+w] = ['WM'+w, w]
                 users['nurses']['N'+w] = ['N'+w, bed_codes[w]]
 
-        if users.get('ward_managers'):
+        if users.get('shift_coordinators'):
             wm_ids = {}
-            for wm in users['ward_managers'].keys():
+            for wm in users['shift_coordinators'].keys():
                 wid = location_pool.search(
-                    cr, uid, [('code', '=', users['ward_managers'][wm][1])])
+                    cr, uid, [('code', '=', users['shift_coordinators'][wm][1])])
                 wm_ids[wm] = self.create(
-                    cr, uid, 'res.users', 'user_ward_manager',
-                    {'name': wm, 'login': users['ward_managers'][wm][0],
+                    cr, uid, 'res.users', 'user_shift_coordinator',
+                    {'name': wm, 'login': users['shift_coordinators'][wm][0],
                      'location_ids': [[6, False, wid]]})
 
         if users.get('nurses'):
@@ -677,12 +677,12 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         v.update(values)
         return v
 
-    def user_ward_manager(self, cr, uid, values=None):
+    def user_shift_coordinator(self, cr, uid, values=None):
         if values is None:
             values = {}
         imd_pool = self.pool['ir.model.data']
         group = imd_pool.get_object(cr, uid, "nh_clinical",
-                                    "group_nhc_ward_manager")
+                                    "group_nhc_shift_coordinator")
         v = self._user_base(cr, uid)
         v.update({'groups_id': [(4, group.id)]})
         v.update(values)

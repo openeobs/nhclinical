@@ -13,7 +13,7 @@
                                 groups="nh_clinical.group_nhc_admin,nh_clinical.group_nhc_dev"/>
                         <filter name="filter_hca" string="HCAs" domain="[['category_id.name','in',['HCA']]]"/>
                         <filter name="filter_nurse" string="Nurses" domain="[['category_id.name','in',['Nurse']]]"/>
-                        <filter name="filter_ward_manager" string="Ward Managers" domain="[['category_id.name','in',['Ward Manager']]]"/>
+                        <filter name="filter_shift_coordinator" string="Shift Coordinators" domain="[['category_id.name','in',['Shift Coordinator']]]"/>
                         <filter name="filter_senior_manager" string="Senior Managers" domain="[['category_id.name','in',['Senior Manager']]]"
                                 groups="nh_clinical.group_nhc_admin,nh_clinical.group_nhc_dev"/>
                         <filter name="filter_doctor" string="Doctors" domain="[['category_id.name','in',['Doctor']]]"
@@ -46,7 +46,7 @@
             res_model="change.password.wizard"
             view_type="form" view_mode="form"
             key2="client_action_multi" target="new"
-            groups="nh_clinical.group_nhc_ward_manager,nh_clinical.group_nhc_admin,nh_clinical.group_nhc_dev"/>
+            groups="nh_clinical.group_nhc_shift_coordinator,nh_clinical.group_nhc_admin,nh_clinical.group_nhc_dev"/>
 
         <record id="view_nhc_user_management_form" model="ir.ui.view">
             <field name="name">nhc.user.management.form.view</field>
@@ -85,7 +85,7 @@
             <field name="name">Account Administration</field>
             <field name="res_model">nh.clinical.user.management</field>
             <field name="view_mode">tree,form</field>
-            <field name="domain">[['category_ids.name','in',['HCA','Nurse','Ward Manager']]]</field>
+            <field name="domain">[['category_ids.name','in',['HCA','Nurse','Shift Coordinator']]]</field>
             <field name="search_view_id" ref="view_nhc_user_management_search"/>
             <field name="context">{'partner_category_display': 'short'}</field>
         </record>
@@ -94,7 +94,7 @@
             <field name="res_model">nh.clinical.user.management</field>
             <field name="view_mode">tree,form</field>
             <field name="domain">[['category_ids.name','in',
-                ['HCA','Nurse','Ward Manager','Doctor','Senior Manager','Kiosk','System Administrator','Senior Doctor',
+                ['HCA','Nurse','Shift Coordinator','Doctor','Senior Manager','Kiosk','System Administrator','Senior Doctor',
                 'Junior Doctor','Registrar','Consultant','Receptionist']],['login','not in',['adt','admin']]]</field>
             <field name="search_view_id" ref="view_nhc_user_management_search"/>
             <field name="context">{'partner_category_display': 'short'}</field>

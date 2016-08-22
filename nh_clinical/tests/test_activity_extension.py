@@ -81,12 +81,12 @@ class TestActivityExtension(common.SingleTransactionCase):
         cls.location_pool.write(cr, uid, cls.wu_id,
                                 {'context_ids': [[6, 0, [cls.context_id]]]})
 
-    def test_01_audit_ward_manager(self):
+    def test_01_audit_shift_coordinator(self):
         cr, uid = self.cr, self.uid
 
-        self.assertFalse(self.spell_pool._audit_ward_manager(
+        self.assertFalse(self.spell_pool._audit_shift_coordinator(
             cr, uid, self.spell_id),
-            msg="Audit Ward Manager should return False "
+            msg="Audit Shift Coordinator should return False "
                 "when the activity has no location")
         # try to write without data
         self.assertTrue(self.activity_pool.write(
@@ -94,17 +94,17 @@ class TestActivityExtension(common.SingleTransactionCase):
         # include location_id in data
         self.assertTrue(self.activity_pool.write(cr, uid, self.spell_id,
                                                  {'location_id': self.wu_id}))
-        self.assertTrue(self.spell_pool._audit_ward_manager(
-            cr, uid, [self.spell_id]), msg="Audit Ward Manager failed")
+        self.assertTrue(self.spell_pool._audit_shift_coordinator(
+            cr, uid, [self.spell_id]), msg="Audit Shift Coordinator failed")
         spell = self.activity_pool.browse(cr, uid, self.spell_id)
-        self.assertEqual(spell.ward_manager_id.id, self.wmu_id,
-                         msg="Audit Ward Manager recorded the wrong user id")
+        self.assertEqual(spell.shift_coordinator_id.id, self.wmu_id,
+                         msg="Audit Shift Coordinator recorded the wrong user id")
         self.activity_pool.write(cr, uid, self.spell_id,
                                  {'location_id': self.wt_id})
         self.activity_pool.complete(cr, uid, self.spell_id)
         spell = self.activity_pool.browse(cr, uid, self.spell_id)
-        self.assertEqual(spell.ward_manager_id.id, self.wmt_id,
-                         msg="Audit Ward Manager failed or "
+        self.assertEqual(spell.shift_coordinator_id.id, self.wmt_id,
+                         msg="Audit Shift Coordinator failed or "
                              "recorded the wrong user id on Complete")
 
     def test_02_cancel_open_activities(self):

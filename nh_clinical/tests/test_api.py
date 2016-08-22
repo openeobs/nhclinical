@@ -21,7 +21,7 @@ class TestCoreAPI(SingleTransactionCase):
         cls.api = cls.registry('nh.clinical.api')
 
         cls.wm_group_id = cls.groups_pool.search(
-            cr, uid, [['name', '=', 'NH Clinical Ward Manager Group']])
+            cr, uid, [['name', '=', 'NH Clinical Shift Coordinator Group']])
         cls.nurse_group_id = cls.groups_pool.search(
             cr, uid, [['name', '=', 'NH Clinical Nurse Group']])
         cls.hca_group_id = cls.groups_pool.search(

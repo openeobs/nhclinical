@@ -34,7 +34,7 @@ class TestUsers(SingleTransactionCase):
         cls.dr_group_id = cls.groups_pool.search(
             cr, uid, [['name', '=', 'NH Clinical Doctor Group']])[0]
         cls.wm_group_id = cls.groups_pool.search(
-            cr, uid, [['name', '=', 'NH Clinical Ward Manager Group']])[0]
+            cr, uid, [['name', '=', 'NH Clinical Shift Coordinator Group']])[0]
         cls.nurse_group_id = cls.groups_pool.search(
             cr, uid, [['name', '=', 'NH Clinical Nurse Group']])[0]
         cls.hca_group_id = cls.groups_pool.search(
@@ -47,7 +47,7 @@ class TestUsers(SingleTransactionCase):
         cls.admin_role_id = cls.category_pool.search(
             cr, uid, [['name', '=', 'System Administrator']])[0]
         cls.wm_role_id = cls.category_pool.search(
-            cr, uid, [['name', '=', 'Ward Manager']])[0]
+            cr, uid, [['name', '=', 'Shift Coordinator']])[0]
         cls.nurse_role_id = cls.category_pool.search(
             cr, uid, [['name', '=', 'Nurse']])[0]
         cls.hca_role_id = cls.category_pool.search(cr, uid,
@@ -284,9 +284,9 @@ class TestUsers(SingleTransactionCase):
     def test_07_get_groups_string(self):
         cr = self.cr
         admin = self.user_pool.get_groups_string(cr, self.adt_uid)
-        ward_manager = self.user_pool.get_groups_string(cr, self.wm_uid)
+        shift_coordinator = self.user_pool.get_groups_string(cr, self.wm_uid)
         self.assertListEqual(admin, ['Admin'])
-        self.assertListEqual(ward_manager, ['Ward Manager'])
+        self.assertListEqual(shift_coordinator, ['Shift Coordinator'])
 
     def test_08_create_without_pos_ids_value_automatically_adds_pos_ids(self):
         """

@@ -32,7 +32,7 @@ class TestDevices(SingleTransactionCase):
         cls.disconnect_pool = cls.registry('nh.clinical.device.disconnect')
 
         cls.wm_group_id = cls.groups_pool.search(
-            cr, uid, [['name', '=', 'NH Clinical Ward Manager Group']])[0]
+            cr, uid, [['name', '=', 'NH Clinical Shift Coordinator Group']])[0]
         cls.admin_group_id = cls.groups_pool.search(
             cr, uid, [['name', '=', 'NH Clinical Admin Group']])
 
