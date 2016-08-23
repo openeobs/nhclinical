@@ -111,9 +111,7 @@ class res_partner_category_extension(orm.Model):
     def get_user_roles(self, cr, uid):
         partner_category_model = self.pool['res.partner.category']
         all_partner_category_ids = partner_category_model.search(cr, uid, [])
-        partner_category_names = partner_category_model.read(
-                cr, uid, all_partner_category_ids)
-        partner_category_names
+        partner_category_model.read(cr, uid, all_partner_category_ids)
 
 
 class res_partner_title_extension(orm.Model):
