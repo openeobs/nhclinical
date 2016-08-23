@@ -97,8 +97,11 @@ class TestActivityExtension(common.SingleTransactionCase):
         self.assertTrue(self.spell_pool._audit_shift_coordinator(
             cr, uid, [self.spell_id]), msg="Audit Shift Coordinator failed")
         spell = self.activity_pool.browse(cr, uid, self.spell_id)
-        self.assertEqual(spell.shift_coordinator_id.id, self.wmu_id,
-                msg="Audit Shift Coordinator recorded the wrong user id")
+        self.assertEqual(
+            spell.shift_coordinator_id.id,
+            self.wmu_id,
+            msg="Audit Shift Coordinator recorded the wrong user id"
+        )
         self.activity_pool.write(cr, uid, self.spell_id,
                                  {'location_id': self.wt_id})
         self.activity_pool.complete(cr, uid, self.spell_id)

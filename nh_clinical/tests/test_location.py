@@ -473,8 +473,10 @@ class TestLocation(common.SingleTransactionCase):
                                                 args={})
         self.assertTrue(wm_user_id in result[location_id],
                         msg="Shift Coordinator not found in result")
-        self.assertFalse(wm_user2_id in result[location_id],
-                msg="Shift Coordinator assigned to bed found in result")
+        self.assertFalse(
+            wm_user2_id in result[location_id],
+            msg="Shift Coordinator assigned to bed found in result"
+        )
         result = self.location_pool._get_wm_ids(cr, uid, room_id,
                                                 field='assigned_wm_ids',
                                                 args={})

@@ -346,8 +346,11 @@ class nh_clinical_location(orm.Model):
                                               type='many2many',
                                               relation='res.users',
                                               string="Assigned Nurses"),
-        'assigned_wm_ids': fields.function(_get_wm_ids, type='many2many',
-                relation='res.users', string="Assigned Shift Coordinator"),
+        'assigned_wm_ids': fields.function(
+            _get_wm_ids,
+            type='many2many',
+            relation='res.users', string="Assigned Shift Coordinator"
+        ),
         'assigned_doctor_ids': fields.function(_get_doctor_ids,
                                                type='many2many',
                                                relation='res.users',
