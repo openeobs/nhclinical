@@ -64,8 +64,8 @@ class nh_activity(orm.Model):
             'nh.activity', 'Spell Activity', readonly=True),
         'cancel_reason_id': fields.many2one(
             'nh.cancel.reason', 'Cancellation Reason'),
-        'shift_coordinator_id': fields.many2one(
-            'res.users', 'Shift Coordinator of the ward on Complete/Cancel')
+        'ward_manager_id': fields.many2one(
+            'res.users', 'Ward Manager of the ward on Complete/Cancel')
     }
 
     def create(self, cr, uid, vals, context=None):
@@ -296,12 +296,10 @@ class nh_activity_data(orm.AbstractModel):
             else:
                 ward = activity.location_id
             if ward.assigned_wm_ids:
-                shift_coordinator_id = ward.assigned_wm_ids[0].id
-                activity_pool.write(
-                    cr, uid, activity_id,
-                    {'shift_coordinator_id': shift_coordinator_id},
-                    context=context
-                )
+                ward_manager_id = ward.assigned_wm_ids[0].id
+                activity_pool.write(cr, uid, activity_id,
+                                    {'ward_manager_id': ward_manager_id},
+                                    context=context)
                 return True
         return False
 
