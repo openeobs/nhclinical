@@ -682,7 +682,7 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
             values = {}
         imd_pool = self.pool['ir.model.data']
         group = imd_pool.get_object(cr, uid, "nh_clinical",
-                                    "group_nhc_shift_coordinator")
+                                    "group_nhc_ward_manager")
         v = self._user_base(cr, uid)
         v.update({'groups_id': [(4, group.id)]})
         v.update(values)
