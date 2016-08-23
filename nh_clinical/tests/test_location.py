@@ -480,8 +480,10 @@ class TestLocation(common.SingleTransactionCase):
         result = self.location_pool._get_wm_ids(cr, uid, room_id,
                                                 field='assigned_wm_ids',
                                                 args={})
-        self.assertTrue(wm_user2_id in result[room_id],
-                msg="Shift Coordinator assigned to bed not found in result")
+        self.assertTrue(
+            wm_user2_id in result[room_id],
+            msg="Shift Coordinator assigned to bed not found in result"
+        )
 
         # Scenario 7: Test _get_doctor_ids method.
         # Returns any users in the doctor groups for the location (recursively)
