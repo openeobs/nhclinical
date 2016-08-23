@@ -300,8 +300,8 @@ class nh_clinical_api_demo(orm.AbstractModel):
         if users.get('shift_coordinators'):
             wm_ids = {}
             for wm in users['shift_coordinators'].keys():
-                wid = location_pool.search(
-                    cr, uid, [('code', '=', users['shift_coordinators'][wm][1])])
+                wid = location_pool.search(cr, uid,
+                        [('code', '=', users['shift_coordinators'][wm][1])])
                 wm_ids[wm] = self.create(
                     cr, uid, 'res.users', 'user_shift_coordinator',
                     {'name': wm, 'login': users['shift_coordinators'][wm][0],

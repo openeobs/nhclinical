@@ -298,8 +298,8 @@ class nh_activity_data(orm.AbstractModel):
             if ward.assigned_wm_ids:
                 shift_coordinator_id = ward.assigned_wm_ids[0].id
                 activity_pool.write(cr, uid, activity_id,
-                                    {'shift_coordinator_id': shift_coordinator_id},
-                                    context=context)
+                        {'shift_coordinator_id': shift_coordinator_id},
+                        context=context)
                 return True
         return False
 

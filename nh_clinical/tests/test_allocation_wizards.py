@@ -61,7 +61,8 @@ class TestAllocationWizards(SingleTransactionCase):
                           'code': 'BED'+str(i)+str(j), 'usage': 'bed',
                           'parent_id': wid, 'type': 'poc'}) for j in range(10)]
             cls.users['wm'].append(cls.users_pool.create(
-                cr, uid, {'name': 'Shift Coordinator '+str(i), 'login': 'WM'+str(i),
+                cr, uid, {'name': 'Shift Coordinator '+str(i),
+                          'login': 'WM'+str(i),
                           'password': 'WM'+str(i),
                           'groups_id': [[4, cls.wm_group_id[0]]],
                           'pos_id': cls.pos_id}))

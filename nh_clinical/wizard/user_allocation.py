@@ -267,8 +267,9 @@ class StaffReallocationWizard(osv.TransientModel):
                     nurse_id = u.id
                 if 'NH Clinical HCA Group' in groups:
                     hca_ids.append(u.id)
-                if 'NH Clinical Shift Coordinator Group' in groups and not nurse_id:
-                    nurse_id = u.id
+                if 'NH Clinical Shift Coordinator Group' in groups \
+                        and not nurse_id:
+                            nurse_id = u.id
             allocating_ids.append(allocating_pool.create(cr, uid, {
                 'location_id': l.id,
                 'nurse_id': nurse_id,
