@@ -32,7 +32,7 @@
                                 groups="nh_clinical.group_nhc_admin,nh_clinical.group_nhc_dev"/>
                         <filter name="filter_hca" string="HCAs" domain="[['category_id.name','in',['HCA']]]"/>
                         <filter name="filter_nurse" string="Nurses" domain="[['category_id.name','in',['Nurse']]]"/>
-                        <filter name="filter_ward_manager" string="Shift Coordinators" domain="[['category_id.name','in',['Shift Coordinator']]]"/>
+                        <filter name="filter_shift_coordinator" string="Shift Coordinators" domain="[['category_id.name','in',['Shift Coordinator']]]"/>
                         <filter name="filter_senior_manager" string="Senior Managers" domain="[['category_id.name','in',['Senior Manager']]]"
                                 groups="nh_clinical.group_nhc_admin,nh_clinical.group_nhc_dev"/>
                         <filter name="filter_doctor" string="Doctors" domain="[['category_id.name','in',['Doctor']]]"
