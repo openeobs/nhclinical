@@ -269,16 +269,16 @@ class nh_activity_data(orm.AbstractModel):
     }
     _POLICY = {'activities': []}
 
-    def _audit_ward_manager(self, cr, uid, activity_id, context=None):
+    def _audit_shift_coordinator(self, cr, uid, activity_id, context=None):
         """
-        Writes ward_manager_id for ward manager responsible for the
+        Writes shift_coordinator_id for ward manager responsible for the
         activity's location. If location doesn't exist or it's not
         within the ward or there's no ward assigned, then no audit
         happens.
 
         :param activity_id: activity id
         :type activity_id: int
-        :return: ``True`` if the ward_manager_id is stored. Otherwise
+        :return: ``True`` if the shift_coordinator_id is stored. Otherwise
             ``False``
         :rtype: bool
         """
@@ -317,7 +317,7 @@ class nh_activity_data(orm.AbstractModel):
 
         res = super(nh_activity_data, self).complete(
             cr, uid, activity_id, context=context)
-        self._audit_ward_manager(cr, uid, activity_id, context=context)
+        self._audit_shift_coordinator(cr, uid, activity_id, context=context)
         return res
 
     def cancel(self, cr, uid, activity_id, context=None):
@@ -334,7 +334,7 @@ class nh_activity_data(orm.AbstractModel):
 
         res = super(nh_activity_data, self).cancel(cr, uid, activity_id,
                                                    context=context)
-        self._audit_ward_manager(cr, uid, activity_id, context=context)
+        self._audit_shift_coordinator(cr, uid, activity_id, context=context)
         return res
 
     def update_activity(self, cr, uid, activity_id, context=None):

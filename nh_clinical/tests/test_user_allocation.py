@@ -36,7 +36,7 @@ class TestUserAllocation(common.SingleTransactionCase):
         cls.nurse_group_id = cls.group_pool.search(
             cr, uid, [['name', '=', 'NH Clinical Nurse Group']])[0]
         cls.wm_group_id = cls.group_pool.search(
-            cr, uid, [['name', '=', 'NH Clinical Ward Manager Group']])[0]
+            cr, uid, [['name', '=', 'NH Clinical Shift Coordinator Group']])[0]
         cls.sm_group_id = cls.group_pool.search(
             cr, uid, [['name', '=', 'NH Clinical Senior Manager Group']])[0]
         cls.dr_group_id = cls.group_pool.search(
@@ -132,7 +132,7 @@ class TestUserAllocation(common.SingleTransactionCase):
             elif allocating_user.user_id.id == self.nurse_uid:
                 self.assertEqual(res[allocating_user.id], 'Nurse ')
             elif allocating_user.user_id.id == self.wm_uid:
-                self.assertEqual(res[allocating_user.id], 'Ward Manager ')
+                self.assertEqual(res[allocating_user.id], 'Shift Coordinator ')
             elif allocating_user.user_id.id == self.sm_uid:
                 self.assertEqual(res[allocating_user.id], 'Senior Manager ')
             elif allocating_user.user_id.id == self.dr_uid:

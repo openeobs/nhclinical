@@ -137,7 +137,7 @@ class nh_clinical_api_demo(orm.AbstractModel):
         group_pool = self.pool['res.groups']
         groups = [] if not groups else groups
         if 'NH Clinical Admin Group' in groups or\
-                'NH Clinical Ward Manager Group' in groups:
+                'NH Clinical Shift Coordinator Group' in groups:
             groups.append('Contact Creation')
         location_ids = [[6, False, []]] if not location_ids\
             else [[6, False, location_ids]]
@@ -247,7 +247,7 @@ class nh_clinical_api_demo(orm.AbstractModel):
 
         users parameter expects a dictionary with the following format:
             {
-                'ward_managers': {
+                'shift_coordinators': {
                     'name': ['login', 'ward_code']
                 },
                 'nurses': {
