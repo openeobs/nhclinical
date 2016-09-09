@@ -54,13 +54,13 @@ class TestGetAllocationLocations(SingleTransactionCase):
             'groups_id': nurse_group
         })
 
-        ward_manager_group = groups_pool.new(cr, uid, {
-            'name': 'NH Clinical Ward Manager Group'
+        shift_coordinator_group = groups_pool.new(cr, uid, {
+            'name': 'NH Clinical Shift Coordinator Group'
         })
-        cls.ward_manager = user_pool.new(cr, uid, {
-            'name': 'Ward Manager',
-            'login': 'ward_manager',
-            'groups_id': ward_manager_group
+        cls.shift_coordinator = user_pool.new(cr, uid, {
+            'name': 'Shift Coordinator',
+            'login': 'shift_coordinator',
+            'groups_id': shift_coordinator_group
         })
 
         senior_manager_group = groups_pool.new(cr, uid, {
@@ -145,18 +145,18 @@ class TestGetAllocationLocations(SingleTransactionCase):
         locations = self.get_locations(self.nurse, self.bed)
         self.assertEqual(locations, ['bed_search'])
 
-    def test_ward_manager_group_ward(self):
+    def test_shift_coordinator_group_ward(self):
         """
         If a ward manager is assigned to a ward function should return ward
         """
-        locations = self.get_locations(self.ward_manager, self.ward)
+        locations = self.get_locations(self.shift_coordinator, self.ward)
         self.assertEqual(locations, [self.ward_id])
 
-    def test_ward_manager_group_bed(self):
+    def test_shift_coordinator_group_bed(self):
         """
         If a ward manager is assigned to a bed function should return bed
         """
-        locations = self.get_locations(self.ward_manager, self.bed)
+        locations = self.get_locations(self.shift_coordinator, self.bed)
         self.assertEqual(locations, ['bed_search'])
 
     def test_senior_manager_group_ward(self):

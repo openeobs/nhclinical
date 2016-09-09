@@ -29,7 +29,7 @@ class TestOperations(common.SingleTransactionCase):
         cls.transfer_pool = cls.registry('nh.clinical.patient.transfer')
 
         cls.wm_group_id = cls.groups_pool.search(
-            cr, uid, [['name', '=', 'NH Clinical Ward Manager Group']])
+            cr, uid, [['name', '=', 'NH Clinical Shift Coordinator Group']])
         cls.nurse_group_id = cls.groups_pool.search(
             cr, uid, [['name', '=', 'NH Clinical Nurse Group']])
         cls.admin_group_id = cls.groups_pool.search(

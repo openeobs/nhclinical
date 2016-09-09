@@ -52,11 +52,11 @@
                        <field name="type" />
                        <field name="usage" />
                        <field name="active" />
-                       <field name="pos_id" />                     
+                       <field name="pos_id" />
                     </form>
                 </field>
             </record>
-            <record model="ir.actions.act_window" id="action_location" >
+            <record model="ir.actions.act_window" id="action_location">
                 <field name="name">nh.clinical.location</field>
                 <field name="res_model">nh.clinical.location</field>
                 <field name="view_type">form</field>

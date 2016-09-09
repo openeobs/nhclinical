@@ -46,7 +46,7 @@ class TestDemoAPI(common.SingleTransactionCase):
         cr, uid = self.cr, self.uid
         result = self.apidemo.create_user(
             cr, uid, 'Test User Name', 'testlogin', 'testpassword',
-            ['NH Clinical Ward Manager Group'], [self.pos_location_id])
+            ['NH Clinical Shift Coordinator Group'], [self.pos_location_id])
         user = self.user_pool.browse(cr, uid, result)
         self.assertTrue(result, msg="User was not created")
         self.assertTrue(user.name == 'Test User Name',
@@ -60,7 +60,7 @@ class TestDemoAPI(common.SingleTransactionCase):
         self.assertTrue(
             all(
                 [group.name in ['NH Clinical Base Group',
-                                'NH Clinical Ward Manager Group',
+                                'NH Clinical Shift Coordinator Group',
                                 'Contact Creation'] for group in user.groups_id
                  ]), msg="User groups not correct")
 

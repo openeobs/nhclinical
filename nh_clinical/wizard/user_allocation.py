@@ -162,7 +162,7 @@ class StaffAllocationWizard(osv.TransientModel):
              [
                  'NH Clinical HCA Group',
                  'NH Clinical Nurse Group',
-                 'NH Clinical Ward Manager Group'
+                 'NH Clinical Shift Coordinator Group'
              ]],
             ['location_ids', 'in', location_ids]
         ], context=context)
@@ -263,12 +263,13 @@ class StaffReallocationWizard(osv.TransientModel):
             for u in l.user_ids:
                 groups = [g.name for g in u.groups_id]
                 if 'NH Clinical Nurse Group' in groups and \
-                        'NH Clinical Ward Manager Group' not in groups:
+                        'NH Clinical Shift Coordinator Group' not in groups:
                     nurse_id = u.id
                 if 'NH Clinical HCA Group' in groups:
                     hca_ids.append(u.id)
-                if 'NH Clinical Ward Manager Group' in groups and not nurse_id:
-                    nurse_id = u.id
+                if 'NH Clinical Shift Coordinator Group' in groups \
+                        and not nurse_id:
+                            nurse_id = u.id
             allocating_ids.append(allocating_pool.create(cr, uid, {
                 'location_id': l.id,
                 'nurse_id': nurse_id,

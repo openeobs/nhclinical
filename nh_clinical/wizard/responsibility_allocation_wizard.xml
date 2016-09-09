@@ -6,7 +6,7 @@
             <field name="arch" type="xml">
                 <form string="Responsibility Allocation Wizard" class="oe_form_configuration" version="7.0">
                     <group>
-                        <field name="user_id" widget="nh_many2one" required="1" on_change="onchange_user_id(user_id)" domain="[['groups_id.name','in',['NH Clinical Nurse Group','NH Clinical HCA Group','NH Clinical Doctor Group','NH Clinical Ward Manager Group']]]"/>
+                        <field name="user_id" widget="nh_many2one" required="1" on_change="onchange_user_id(user_id)" domain="[['groups_id.name','in',['NH Clinical Nurse Group','NH Clinical HCA Group','NH Clinical Doctor Group','NH Clinical Shift Coordinator Group']]]"/>
                     </group>
                     <group>
                         <field name="clear_locations" on_change="onchange_clear(clear_locations)"/>
