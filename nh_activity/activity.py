@@ -355,7 +355,7 @@ class nh_activity(orm.Model):
 
     @classmethod
     def get_possible_states(cls):
-        return [[state for state, _ in cls._states]]
+        return [state for state, _ in cls._states]
 
 
 class nh_activity_data(orm.AbstractModel):
