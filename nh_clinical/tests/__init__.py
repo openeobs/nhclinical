@@ -2,14 +2,14 @@
 # -*- coding: utf-8 -*-
 
 # Base level tests
+from . import test_activity_extension
+from . import test_api_demo
+from . import test_base_extensions
 from . import test_location
 from . import test_operations
-from . import test_user_management
-from . import test_api_demo
-from . import test_activity_extension
-from . import test_base_extensions
 from . import test_patient_placement_wizard
 from . import test_responsibility_allocation_wizard
+from . import test_user_management
 from . import test_users
 
 # Test Patient
@@ -17,10 +17,7 @@ from . import test_patient
 from . import test_patient_name_get
 
 # Test Staff Allocation
-from . import test_staff_allocation_submit_wards
-from . import test_staff_allocation_deallocate
-from . import test_staff_allocation_submit_users
-from . import test_staff_allocation_complete
+from .user_allocation import test_staff_allocation_deallocate
 from . import test_allocation_unfollow
 from . import test_allocation_responsibility_allocation
 
