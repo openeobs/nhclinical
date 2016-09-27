@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-def create_test_data(cls, cr ,uid, iterations=3):
+def create_test_data(cls, cr, uid, iterations=3):
     cls.users_pool = cls.registry('res.users')
     cls.groups_pool = cls.registry('res.groups')
     cls.activity_pool = cls.registry('nh.activity')
