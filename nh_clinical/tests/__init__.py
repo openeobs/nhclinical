@@ -21,8 +21,6 @@ from .user_allocation import test_staff_allocation_deallocate
 from .user_allocation import test_doctor_allocation_deallocate
 from . import test_allocation_unfollow
 from . import test_allocation_responsibility_allocation
-from nhclinical.nh_clinical.tests.user_allocation import \
-    test_allocation_wizards
 
 # Test Staff Reallocation
 from . import test_staff_reallocation_default_ward
