@@ -17,10 +17,7 @@ from . import test_patient
 from . import test_patient_name_get
 
 # Test Staff Allocation
-from .user_allocation import test_staff_allocation_deallocate
-from .user_allocation import test_doctor_allocation_deallocate
-from . import test_allocation_unfollow
-from . import test_allocation_responsibility_allocation
+from .user_allocation import *
 
 # Test Staff Reallocation
 from . import test_staff_reallocation_default_ward

@@ -1,4 +1,5 @@
-from . import test_allocation_wizards
+# -*- coding: utf-8 -*-
+# from . import test_allocation_wizards
 from . import test_doctor_allocation_deallocate
 from . import test_staff_allocation_complete
 from . import test_staff_allocation_deallocate
