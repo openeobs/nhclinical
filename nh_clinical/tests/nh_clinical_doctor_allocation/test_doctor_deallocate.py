@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from openerp.tests.common import TransactionCase
 
-from . import helpers
+from openerp.addons.nh_clinical.tests.common import helpers
 
 
 class TestDoctorAllocationDeallocate(TransactionCase):

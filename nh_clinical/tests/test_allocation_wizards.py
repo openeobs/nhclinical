@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from openerp.tests.common import SingleTransactionCase
 
-from . import helpers
+from openerp.addons.nh_clinical.tests.common import helpers
 
 
 class TestAllocationWizards(SingleTransactionCase):
