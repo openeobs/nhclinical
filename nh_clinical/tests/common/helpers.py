@@ -91,4 +91,3 @@ def create_test_data(cls, cr, uid, iterations=3):
     cls.patients = [cls.patient_pool.create(
         cr, uid, {'given_name': 'p' + str(k), 'family_name': 'f' + str(k),
                   'other_identifier': 'hn' + str(k)}) for k in range(5)]
-
