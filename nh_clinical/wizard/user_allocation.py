@@ -472,8 +472,7 @@ class doctor_allocation_wizard(osv.TransientModel):
                 cr, uid, doctor_id, fields=['location_ids']
             )['location_ids']
             doctor_new_location_ids = \
-                [location_id for location_id in doctor_current_location_ids
-                 if location_id not in deallocate_location_ids]
+                set(doctor_current_location_ids) - set(deallocate_location_ids)
             user_pool.write(
                 cr, uid, doctor_id,
                 {'location_ids': [(6, 0, doctor_new_location_ids)]},
