@@ -122,7 +122,22 @@ class nh_activity(orm.Model):
                            context=context)
         return res
 
-    def cancel_open_activities(self, cr, uid, parent_id, model, context=None):
+    def cancel_with_reason(self, cr, uid, activity_id, cancel_reason_id):
+        """
+        Cancel the activity that references this patient monitoring exception
+        record and add a cancel reason to it.
+
+        :param activity_id:
+        :param cancel_reason_id:
+        :return: No return, just side effects.
+        """
+        self.cancel(cr, uid, activity_id)
+        return self.write(cr, uid, activity_id, {
+            'cancel_reason_id': cancel_reason_id
+        })
+
+    def cancel_open_activities(self, cr, uid, parent_id, model,
+                               cancel_reason_id=None, context=None):
         """
         Cancels all open activities of parent activity.
 
@@ -139,6 +154,10 @@ class nh_activity(orm.Model):
                   ('data_model', '=', model),
                   ('state', 'not in', ['completed', 'cancelled'])]
         open_activity_ids = self.search(cr, uid, domain, context=context)
+        if cancel_reason_id:
+            return all([self.cancel_with_reason(
+                cr, uid, a, cancel_reason_id
+            ) for a in open_activity_ids])
         return all(
             [self.cancel(cr, uid, a, context=context)
              for a in open_activity_ids]
@@ -577,8 +596,17 @@ class nh_activity_data(orm.AbstractModel):
                 if break_trigger:
                     continue
             if trigger_activity.get('cancel_others'):
+                cancel_reason_id = None
+                if self._name == 'nh.clinical.patient.placement':
+                    model_data = self.pool['ir.model.data']
+                    cancel_reason_id = \
+                        model_data.get_object(
+                            cr, uid, 'nh_eobs', 'cancel_reason_placement'
+                        ).id
                 activity_pool.cancel_open_activities(
-                    cr, uid, spell_activity_id, pool._name, context=context)
+                    cr, uid, spell_activity_id, pool._name,
+                    cancel_reason_id=cancel_reason_id, context=context
+                )
             data = {
                 'patient_id': activity.data_ref.patient_id.id
             }
