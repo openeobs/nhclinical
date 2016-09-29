@@ -601,7 +601,7 @@ class nh_activity_data(orm.AbstractModel):
                     model_data = self.pool['ir.model.data']
                     cancel_reason_id = \
                         model_data.get_object(
-                            cr, uid, 'nh_eobs', 'cancel_reason_placement'
+                            cr, uid, 'nh_clinical', 'cancel_reason_placement'
                         ).id
                 activity_pool.cancel_open_activities(
                     cr, uid, spell_activity_id, pool._name,

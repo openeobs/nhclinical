@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+        <record model="nh.cancel.reason" id="cancel_reason_placement">
+            <field name="name">Placement</field>
+            <field name="system" eval="True"/>
+        </record>
+    </data>
+</openerp>
