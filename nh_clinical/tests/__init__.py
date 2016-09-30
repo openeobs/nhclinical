@@ -6,7 +6,7 @@ from . import test_location
 from . import test_operations
 from . import test_user_management
 from . import test_api_demo
-from . import test_activity_extension
+from .nh_activity import *
 from . import test_base_extensions
 from . import test_patient_placement_wizard
 from . import test_responsibility_allocation_wizard

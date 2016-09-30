@@ -124,12 +124,12 @@ class nh_activity(orm.Model):
 
     def cancel_with_reason(self, cr, uid, activity_id, cancel_reason_id):
         """
-        Cancel the activity that references this patient monitoring exception
-        record and add a cancel reason to it.
+        Cancel the activity add a cancel reason to it.
 
         :param activity_id:
         :param cancel_reason_id:
-        :return: No return, just side effects.
+        :return: ``True``
+        :rtype: bool
         """
         self.cancel(cr, uid, activity_id)
         return self.write(cr, uid, activity_id, {
