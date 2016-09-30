@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Base level tests
-from . import test_activity_extension
+from .nh_activity import *
 from . import test_api_demo
 # from . import test_allocation_wizards
 from . import test_base_extensions
