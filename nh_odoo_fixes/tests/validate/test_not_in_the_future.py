@@ -8,7 +8,9 @@ from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
 from openerp.addons.nh_odoo_fixes import validate
 
 class TestNotInTheFuture(TransactionCase):
-
+    """
+    Tests the :method:`validate.not_in_the_future` method.
+    """
     def test_now_does_not_raise_exception_with_datetime(self):
         validate.not_in_the_future(datetime.now())
 
