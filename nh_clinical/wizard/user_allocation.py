@@ -458,14 +458,27 @@ class doctor_allocation_wizard(osv.TransientModel):
         if not isinstance(ids, list):
             ids = [ids]
         wiz = self.browse(cr, uid, ids[0], context=context)
+        deallocate_location_ids = \
+            [location.id for location in wiz.location_ids]
+
         user_pool = self.pool['res.users']
-        location_ids = [location.id for location in wiz.location_ids]
-        user_ids = user_pool.search(
+        all_doctor_ids = user_pool.search(
             cr, uid, [['groups_id.name', 'in', self._doctor_groups]],
-            context=context)
-        user_pool.write(cr, uid, user_ids,
-                        {'location_ids': [[5, location_ids]]},
-                        context=context)
+            context=context
+        )
+
+        for doctor_id in all_doctor_ids:
+            doctor_current_location_ids = user_pool.read(
+                cr, uid, doctor_id, fields=['location_ids']
+            )['location_ids']
+            doctor_new_location_ids = \
+                set(doctor_current_location_ids) - set(deallocate_location_ids)
+            user_pool.write(
+                cr, uid, doctor_id,
+                {'location_ids': [(6, 0, doctor_new_location_ids)]},
+                context=context
+            )
+
         self.write(cr, uid, ids, {'stage': 'users'}, context=context)
         return {
             'type': 'ir.actions.act_window',
