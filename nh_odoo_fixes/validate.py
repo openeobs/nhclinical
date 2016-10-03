@@ -15,7 +15,9 @@ def not_in_the_future(date_time):
     elif isinstance(date_time, datetime):
         pass
     else:
-        raise ValueError("Method only accepts str or datetime objects.")
+        raise TypeError("This function only accepts str or datetime objects. "
+                        "{invalid_type} is not a valid type."
+                        .format(invalid_type=type(date_time)))
 
     now = datetime.now()
     if date_time > now:
