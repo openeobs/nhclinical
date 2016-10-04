@@ -14,6 +14,7 @@ def not_in_the_future(*args):
     for arg in args:
         not_in_the_future(arg)
 
+
 def not_in_the_future(date_time):
     date_time = _convert_string_to_datetime(date_time)
 

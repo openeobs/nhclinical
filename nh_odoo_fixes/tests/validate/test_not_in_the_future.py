@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime, timedelta
 
+from openerp.addons.nh_odoo_fixes import validate
 from openerp.exceptions import ValidationError
 from openerp.tests.common import TransactionCase
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
 
-from openerp.addons.nh_odoo_fixes import validate
+
 
 
 class TestNotInTheFuture(TransactionCase):
