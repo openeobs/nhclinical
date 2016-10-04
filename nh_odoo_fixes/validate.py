@@ -16,6 +16,7 @@ def not_in_the_future_multiple_args(*args):
         if arg:
             not_in_the_future(arg)
 
+
 def not_in_the_future(date_time):
     date_time = _convert_string_to_datetime(date_time)
 
@@ -23,12 +24,14 @@ def not_in_the_future(date_time):
     if date_time > now:
         raise ValidationError("Date cannot be in the future.")
 
+
 def start_datetime_not_after_end_datetime(start_datetime, end_datetime):
     start_datetime = _convert_string_to_datetime(start_datetime)
     end_datetime = _convert_string_to_datetime(end_datetime)
 
     if start_datetime > end_datetime:
         raise ValidationError("The start date cannot be after the end date.")
+
 
 def _convert_string_to_datetime(date_time):
     if isinstance(date_time, basestring):
