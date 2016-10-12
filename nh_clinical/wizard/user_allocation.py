@@ -162,7 +162,7 @@ class StaffAllocationWizard(osv.TransientModel):
              [
                  'NH Clinical HCA Group',
                  'NH Clinical Nurse Group',
-                 'NH Clinical Ward Manager Group'
+                 'NH Clinical Shift Coordinator Group'
              ]],
             ['location_ids', 'in', location_ids]
         ], context=context)
@@ -263,12 +263,13 @@ class StaffReallocationWizard(osv.TransientModel):
             for u in l.user_ids:
                 groups = [g.name for g in u.groups_id]
                 if 'NH Clinical Nurse Group' in groups and \
-                        'NH Clinical Ward Manager Group' not in groups:
+                        'NH Clinical Shift Coordinator Group' not in groups:
                     nurse_id = u.id
                 if 'NH Clinical HCA Group' in groups:
                     hca_ids.append(u.id)
-                if 'NH Clinical Ward Manager Group' in groups and not nurse_id:
-                    nurse_id = u.id
+                if 'NH Clinical Shift Coordinator Group' in groups \
+                        and not nurse_id:
+                            nurse_id = u.id
             allocating_ids.append(allocating_pool.create(cr, uid, {
                 'location_id': l.id,
                 'nurse_id': nurse_id,
@@ -457,14 +458,27 @@ class doctor_allocation_wizard(osv.TransientModel):
         if not isinstance(ids, list):
             ids = [ids]
         wiz = self.browse(cr, uid, ids[0], context=context)
+        deallocate_location_ids = \
+            [location.id for location in wiz.location_ids]
+
         user_pool = self.pool['res.users']
-        location_ids = [location.id for location in wiz.location_ids]
-        user_ids = user_pool.search(
+        all_doctor_ids = user_pool.search(
             cr, uid, [['groups_id.name', 'in', self._doctor_groups]],
-            context=context)
-        user_pool.write(cr, uid, user_ids,
-                        {'location_ids': [[5, location_ids]]},
-                        context=context)
+            context=context
+        )
+
+        for doctor_id in all_doctor_ids:
+            doctor_current_location_ids = user_pool.read(
+                cr, uid, doctor_id, fields=['location_ids']
+            )['location_ids']
+            doctor_new_location_ids = \
+                set(doctor_current_location_ids) - set(deallocate_location_ids)
+            user_pool.write(
+                cr, uid, doctor_id,
+                {'location_ids': [(6, 0, doctor_new_location_ids)]},
+                context=context
+            )
+
         self.write(cr, uid, ids, {'stage': 'users'}, context=context)
         return {
             'type': 'ir.actions.act_window',

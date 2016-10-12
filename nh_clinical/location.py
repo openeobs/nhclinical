@@ -135,13 +135,13 @@ class nh_clinical_location(orm.Model):
             if loc.usage == 'ward':
                 res[loc.id] = self._get_user_ids(
                     cr, uid, loc.id,
-                    group_names=['NH Clinical Ward Manager Group'],
+                    group_names=['NH Clinical Shift Coordinator Group'],
                     recursive=False, context=context
                 )
             else:
                 res[loc.id] = self._get_user_ids(
                     cr, uid, loc.id,
-                    group_names=['NH Clinical Ward Manager Group'],
+                    group_names=['NH Clinical Shift Coordinator Group'],
                     context=context
                 )
         return res
@@ -346,9 +346,11 @@ class nh_clinical_location(orm.Model):
                                               type='many2many',
                                               relation='res.users',
                                               string="Assigned Nurses"),
-        'assigned_wm_ids': fields.function(_get_wm_ids, type='many2many',
-                                           relation='res.users',
-                                           string="Assigned Ward Managers"),
+        'assigned_wm_ids': fields.function(
+            _get_wm_ids,
+            type='many2many',
+            relation='res.users', string="Assigned Shift Coordinator"
+        ),
         'assigned_doctor_ids': fields.function(_get_doctor_ids,
                                                type='many2many',
                                                relation='res.users',

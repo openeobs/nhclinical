@@ -122,7 +122,22 @@ class nh_activity(orm.Model):
                            context=context)
         return res
 
-    def cancel_open_activities(self, cr, uid, parent_id, model, context=None):
+    def cancel_with_reason(self, cr, uid, activity_id, cancel_reason_id):
+        """
+        Cancel the activity add a cancel reason to it.
+
+        :param activity_id:
+        :param cancel_reason_id:
+        :return: ``True``
+        :rtype: bool
+        """
+        self.cancel(cr, uid, activity_id)
+        return self.write(cr, uid, activity_id, {
+            'cancel_reason_id': cancel_reason_id
+        })
+
+    def cancel_open_activities(self, cr, uid, parent_id, model,
+                               cancel_reason_id=None, context=None):
         """
         Cancels all open activities of parent activity.
 
@@ -139,6 +154,10 @@ class nh_activity(orm.Model):
                   ('data_model', '=', model),
                   ('state', 'not in', ['completed', 'cancelled'])]
         open_activity_ids = self.search(cr, uid, domain, context=context)
+        if cancel_reason_id:
+            return all([self.cancel_with_reason(
+                cr, uid, a, cancel_reason_id
+            ) for a in open_activity_ids])
         return all(
             [self.cancel(cr, uid, a, context=context)
              for a in open_activity_ids]
@@ -269,16 +288,16 @@ class nh_activity_data(orm.AbstractModel):
     }
     _POLICY = {'activities': []}
 
-    def _audit_ward_manager(self, cr, uid, activity_id, context=None):
+    def _audit_shift_coordinator(self, cr, uid, activity_id, context=None):
         """
-        Writes ward_manager_id for ward manager responsible for the
+        Writes shift_coordinator_id for ward manager responsible for the
         activity's location. If location doesn't exist or it's not
         within the ward or there's no ward assigned, then no audit
         happens.
 
         :param activity_id: activity id
         :type activity_id: int
-        :return: ``True`` if the ward_manager_id is stored. Otherwise
+        :return: ``True`` if the shift_coordinator_id is stored. Otherwise
             ``False``
         :rtype: bool
         """
@@ -317,7 +336,7 @@ class nh_activity_data(orm.AbstractModel):
 
         res = super(nh_activity_data, self).complete(
             cr, uid, activity_id, context=context)
-        self._audit_ward_manager(cr, uid, activity_id, context=context)
+        self._audit_shift_coordinator(cr, uid, activity_id, context=context)
         return res
 
     def cancel(self, cr, uid, activity_id, context=None):
@@ -334,7 +353,7 @@ class nh_activity_data(orm.AbstractModel):
 
         res = super(nh_activity_data, self).cancel(cr, uid, activity_id,
                                                    context=context)
-        self._audit_ward_manager(cr, uid, activity_id, context=context)
+        self._audit_shift_coordinator(cr, uid, activity_id, context=context)
         return res
 
     def update_activity(self, cr, uid, activity_id, context=None):
@@ -577,8 +596,17 @@ class nh_activity_data(orm.AbstractModel):
                 if break_trigger:
                     continue
             if trigger_activity.get('cancel_others'):
+                cancel_reason_id = None
+                if self._name == 'nh.clinical.patient.placement':
+                    model_data = self.pool['ir.model.data']
+                    cancel_reason_id = \
+                        model_data.get_object(
+                            cr, uid, 'nh_clinical', 'cancel_reason_placement'
+                        ).id
                 activity_pool.cancel_open_activities(
-                    cr, uid, spell_activity_id, pool._name, context=context)
+                    cr, uid, spell_activity_id, pool._name,
+                    cancel_reason_id=cancel_reason_id, context=context
+                )
             data = {
                 'patient_id': activity.data_ref.patient_id.id
             }

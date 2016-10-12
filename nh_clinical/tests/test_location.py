@@ -354,13 +354,13 @@ class TestLocation(common.SingleTransactionCase):
 
         # Creating Ward Manager users
         wm_group_id = self.group_pool.search(
-            cr, uid, [['name', '=', 'NH Clinical Ward Manager Group']])
+            cr, uid, [['name', '=', 'NH Clinical Shift Coordinator Group']])
         wm_user_id = self.user_pool.create(
-            cr, uid, {'name': 'Test Ward Manager', 'login': 'testwm',
+            cr, uid, {'name': 'Test Shift Coordinator', 'login': 'testwm',
                       'groups_id': [[6, 0, wm_group_id]],
                       'location_ids': [[6, 0, [location_id]]]})
         wm_user2_id = self.user_pool.create(
-            cr, uid, {'name': 'Test Ward Manager 2', 'login': 'testwm2',
+            cr, uid, {'name': 'Test Shift Coordinator 2', 'login': 'testwm2',
                       'groups_id': [[6, 0, wm_group_id]],
                       'location_ids': [[6, 0, [bed_id]]]})
 
@@ -472,14 +472,18 @@ class TestLocation(common.SingleTransactionCase):
                                                 field='assigned_wm_ids',
                                                 args={})
         self.assertTrue(wm_user_id in result[location_id],
-                        msg="Ward Manager not found in result")
-        self.assertFalse(wm_user2_id in result[location_id],
-                         msg="Ward Manager assigned to bed found in result")
+                        msg="Shift Coordinator not found in result")
+        self.assertFalse(
+            wm_user2_id in result[location_id],
+            msg="Shift Coordinator assigned to bed found in result"
+        )
         result = self.location_pool._get_wm_ids(cr, uid, room_id,
                                                 field='assigned_wm_ids',
                                                 args={})
-        self.assertTrue(wm_user2_id in result[room_id],
-                        msg="Ward Manager assigned to bed not found in result")
+        self.assertTrue(
+            wm_user2_id in result[room_id],
+            msg="Shift Coordinator assigned to bed not found in result"
+        )
 
         # Scenario 7: Test _get_doctor_ids method.
         # Returns any users in the doctor groups for the location (recursively)
