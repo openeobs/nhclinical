@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from unittest2 import TestCase
 
-# Need to extend TestCase to make use of it's assertion methods.
-class DatetimeTestUtils(TestCase):
 
+class DatetimeTestUtils(TestCase):
+    # Need to extend TestCase to make use of it's assertion methods.
     def runTest(self):
-        pass # To keep TestCase.__init__() happy.
+        pass  # To keep TestCase.__init__() happy.
 
     @classmethod
     def zero_datetime_seconds(cls, date_time):
