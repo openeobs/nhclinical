@@ -27,7 +27,13 @@ def data_model_event(callback=None):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            self, cr, uid, activity_id = args[:4]
+            v8_api = False
+            if isinstance(args[1], int):
+                self = args[0]
+                activity_id = args[1]
+                v8_api = True
+            else:
+                self, cr, uid, activity_id = args[:4]
             if isinstance(activity_id, list) and len(activity_id) == 1:
                 activity_id = activity_id[0]
             if not isinstance(activity_id, (int, long)):
@@ -39,11 +45,21 @@ def data_model_event(callback=None):
                 raise osv.except_osv(
                     'ID Error!',
                     "activity_id must be > 0, found to be %s" % activity_id)
-            activity = self.browse(cr, uid, activity_id)
+            if v8_api:
+                activity = self.browse(activity_id)
+            else:
+                activity = self.browse(cr, uid, activity_id)
             data_model = self.pool[activity.data_model]
-            func(*args, **kwargs)
+            if v8_api:
+                func(self, self._cr, self._uid, *args[1:], **kwargs)
+            else:
+                func(*args, **kwargs)
             data_model_function = getattr(data_model, func.__name__)
-            res = data_model_function(*args[1:], **kwargs)
+            if v8_api:
+                res = data_model_function(
+                    self._cr, self._uid, *args[1:], **kwargs)
+            else:
+                res = data_model_function(*args[1:], **kwargs)
             return res
         return wrapper
     return decorator
