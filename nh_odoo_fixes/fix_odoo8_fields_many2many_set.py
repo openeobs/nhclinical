@@ -63,4 +63,5 @@ def new_set(self, cr, model, id, name, values, user=None, context=None):
                     (id, act_nbr)
                 )
 
+
 many2many.set = new_set

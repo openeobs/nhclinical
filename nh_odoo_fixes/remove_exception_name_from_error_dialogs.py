@@ -14,4 +14,5 @@ def new_init(self, name, value):
     # in `undefined` and `null` respectively being displayed client side.
     self.args = (value, '')
 
+
 except_orm.__init__ = new_init
