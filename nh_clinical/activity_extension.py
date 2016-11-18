@@ -5,11 +5,11 @@ Extends module :mod:`nh_activity<activity>`, introducing patients,
 spells, users and locations. See also :mod:`base` module for more
 information on their representative classes.
 """
-from datetime import datetime as dt, timedelta as td
 import logging
+from datetime import datetime as dt, timedelta as td
 
-from openerp.osv import orm, fields
 from openerp import SUPERUSER_ID
+from openerp.osv import orm, fields
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
 
 _logger = logging.getLogger(__name__)
@@ -538,6 +538,7 @@ class nh_activity_data(orm.AbstractModel):
         user_ids += follower_ids
         return list(set(user_ids))
 
+    # TODO EOBS-703: Trigger policy method is too large
     def trigger_policy(self, cr, uid, activity_id, location_id=None,
                        case=False, context=None):
         """

@@ -7,8 +7,8 @@ discharge, etc.
 """
 import logging
 
+from openerp import SUPERUSER_ID, api
 from openerp.osv import orm, fields, osv
-from openerp import SUPERUSER_ID
 
 _logger = logging.getLogger(__name__)
 
@@ -361,6 +361,15 @@ class nh_clinical_patient_placement(orm.Model):
                     "Location id=%s is not available" % vals['location_id'])
         return super(nh_clinical_patient_placement, self).submit(
             cr, uid, activity_id, vals, context)
+
+    @api.model
+    def get_placement_activities_for_spell(self, spell_activity_id):
+        activity_model = self.env['nh.activity']
+        domain = [
+            ('spell_activity_id', '=', spell_activity_id),
+            ('data_model', '=', self._name)
+        ]
+        return activity_model.search(domain)
 
 
 class nh_clinical_patient_discharge(orm.Model):

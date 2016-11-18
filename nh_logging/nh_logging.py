@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 import logging
 import threading
-import os
 
+import os
 from openerp.netsvc import DBFormatter
 
 
@@ -15,5 +15,6 @@ def new_format(self, record):
     record.pid = current_pid
     record.dbname = '{0} on {1}'.format(current_uid, current_db)
     return logging.Formatter.format(self, record)
+
 
 DBFormatter.format = new_format
