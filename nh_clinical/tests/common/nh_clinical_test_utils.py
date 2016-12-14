@@ -12,7 +12,8 @@ class NhClinicalTestUtils(AbstractModel):
     # Setup methods
     def create_patient_and_spell(self):
         """
-        Create patient and spell. Assigns various objects to instance variables.
+        Create patient and spell.
+        Assigns various objects to instance variables.
 
         :param self:
         :return:
