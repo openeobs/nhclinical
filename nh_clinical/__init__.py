@@ -17,3 +17,4 @@ from . import wizard
 from . import auditing
 from .tests import test_model
 from .tests import api_demo
+from .tests.common import nh_clinical_test_utils
