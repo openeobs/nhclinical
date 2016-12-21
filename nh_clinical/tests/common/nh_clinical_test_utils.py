@@ -6,7 +6,7 @@ class NhClinicalTestUtils(AbstractModel):
 
     _name = 'nh.clinical.test_utils'
 
-    # Setup methods
+    # Setup methods.
     def create_patient_and_spell(self):
         """
         Create patient and spell.
