@@ -122,3 +122,18 @@ class NhClinicalTestUtils(AbstractModel):
             'category_id': [[4, self.nurse_role.id]],
             'location_ids': [[4, self.bed.id]]
         })
+
+    def create_doctor(self):
+        self.category_model = self.env['res.partner.category']
+        self.user_model = self.env['res.users']
+
+        self.doctor_role = \
+            self.category_model.search([('name', '=', 'Doctor')])[0]
+        # Create doctor and associate them with bed location and doctor role.
+        self.doctor = self.user_model.create({
+            'name': 'Doctor Acula',
+            'login': 'doctor',
+            'password': 'doctor',
+            'category_id': [[4, self.doctor_role.id]],
+            'location_ids': [[6, 0, [self.ward.id, self.bed.id]]]
+        })
