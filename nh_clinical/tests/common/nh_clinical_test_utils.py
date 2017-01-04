@@ -132,8 +132,8 @@ class NhClinicalTestUtils(AbstractModel):
         # Create doctor and associate them with bed location and doctor role.
         self.doctor = self.user_model.create({
             'name': 'Doctor Acula',
-            'login': 'doctor',
-            'password': 'doctor',
+            'login': 'Dr_Acula',
+            'password': 'Dr_Acula',
             'category_id': [[4, self.doctor_role.id]],
             'location_ids': [[6, 0, [self.ward.id, self.bed.id]]]
         })
