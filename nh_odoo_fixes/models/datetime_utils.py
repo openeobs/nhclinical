@@ -29,7 +29,7 @@ class DatetimeUtils(models.AbstractModel):
     @classmethod
     def reformat_server_datetime_for_frontend(cls, date_time):
         date_time = cls.zero_microseconds(date_time)
-        first_refusal_date = datetime.strptime(date_time, DTF)
+        date_time = datetime.strptime(date_time, DTF)
         datetime_format = '%d/%m/%Y %H:%M'
-        first_refusal_date = first_refusal_date.strftime(datetime_format)
-        return first_refusal_date
+        date_time = date_time.strftime(datetime_format)
+        return date_time
