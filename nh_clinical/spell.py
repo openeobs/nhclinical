@@ -3,9 +3,10 @@
 """
 Defines the Spell class.
 """
-from datetime import datetime as dt
 import logging
+from datetime import datetime as dt
 
+from openerp import api
 from openerp.osv import orm, fields, osv
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
 
@@ -255,6 +256,24 @@ class nh_clinical_spell(orm.Model):
                     'There is no started spell for patient with id %s'
                     % patient_id)
         return spell_id[0] if spell_id else False
+
+    @api.model
+    def get_spell_activity_by_patient(self, patient):
+        """
+        Get the `nh.clinical.spell` record for the given patient.
+
+        :param patient:
+        :type patient: 'nh.clinical.patient' record
+        :return: spell if it exists, otherwise None
+        :rtype: 'nh.clinical.spell' record
+        """
+        domain = [
+            ('data_model', '=', 'nh.clinical.spell'),
+            ('patient_id', '=', patient.id)
+        ]
+        activity_model = self.env['nh.activity']
+        activities = activity_model.search(domain)
+        return activities[0] if len(activities) else None
 
     def get_spell_start_date(self, cr, uid, patient_id, context=None):
         spell_id = self.get_by_patient_id(cr, uid, patient_id, context=context)
