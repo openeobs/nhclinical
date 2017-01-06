@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
-from unittest2 import TestCase
+from openerp import models
 
 
-class DatetimeTestUtils(TestCase):
+class DatetimeTestUtils(models.AbstractModel):
     """
     Contains useful methods for tests involving datetimes.
-    Extends TestCase to make use of it's assertion methods.
     """
-    def runTest(self):
-        pass  # To keep TestCase.__init__() happy.
+    _name = 'datetime_test_utils'
 
     def assert_datetimes_equal_disregarding_seconds(self, expected, actual):
         """
@@ -21,4 +19,4 @@ class DatetimeTestUtils(TestCase):
         datetime_utils = self.env['datetime_utils']
         expected = datetime_utils.zero_datetime_seconds(expected)
         actual = datetime_utils.zero_datetime_seconds(actual)
-        self.assertEqual(expected, actual)
+        assert expected == actual
