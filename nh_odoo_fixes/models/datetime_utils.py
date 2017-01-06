@@ -19,7 +19,7 @@ class DatetimeUtils(models.AbstractModel):
                     "the expected format. Method will not work successfully "
                     "for other formats in its current state."
                 )
-            return date_time_split[0] # Omit microseconds after period.
+            return date_time_split[0]  # Omit microseconds after period.
         return date_time.replace(microsecond=0)
 
     @classmethod
