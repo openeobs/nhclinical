@@ -123,6 +123,20 @@ class NhClinicalTestUtils(AbstractModel):
             'location_ids': [[4, self.bed.id]]
         })
 
+    def create_doctor(self):
+        self.category_model = self.env['res.partner.category']
+        self.user_model = self.env['res.users']
+        self.doctor_role = \
+            self.category_model.search([('name', '=', 'Doctor')])[0]
+        # Create doctor and associate them with bed location and doctor role.
+        self.doctor = self.user_model.create({
+            'name': 'Doctor Acula',
+            'login': 'Dr_Acula',
+            'password': 'Dr_Acula',
+            'category_id': [[4, self.doctor_role.id]],
+            'location_ids': [[6, 0, [self.ward.id, self.bed.id]]]
+        })
+
     # Methods for getting references to objects needed for test cases.
     def copy_instance_variables(self, caller):
         """
