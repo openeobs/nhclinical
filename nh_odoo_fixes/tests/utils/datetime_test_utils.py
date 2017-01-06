@@ -17,6 +17,6 @@ class DatetimeTestUtils(models.AbstractModel):
         :return:
         """
         datetime_utils = self.env['datetime_utils']
-        expected = datetime_utils.zero_datetime_seconds(expected)
-        actual = datetime_utils.zero_datetime_seconds(actual)
+        expected = datetime_utils.zero_seconds(expected)
+        actual = datetime_utils.zero_seconds(actual)
         assert expected == actual
