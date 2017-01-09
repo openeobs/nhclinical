@@ -20,15 +20,9 @@ class DatetimeUtils(models.AbstractModel):
         :return:
         """
         if isinstance(date_time, str):
-            date_time_split = date_time.split('.')
-            if len(date_time_split) > 2:
-                raise ValueError(
-                    "Datetime contains more than one period and so is not in "
-                    "the expected format. Method will not work successfully "
-                    "for other formats in its current state."
-                )
-            return date_time_split[0]  # Omit microseconds after period.
-        return date_time.replace(microsecond=0)
+            date_time = datetime.strptime(date_time, DTF)
+        date_time = date_time.replace(microsecond=0)
+        return date_time.strftime(DTF)
 
     @classmethod
     def zero_seconds(cls, date_time):
@@ -39,6 +33,9 @@ class DatetimeUtils(models.AbstractModel):
         :type date_time: datetime
         :return:
         """
+        if not isinstance(date_time, datetime):
+            raise TypeError("Datetime object required but {} was passed."
+                            .format(type(date_time)))
         return date_time.replace(second=0, microsecond=0)
 
     @classmethod
@@ -62,8 +59,8 @@ class DatetimeUtils(models.AbstractModel):
         date = '%d/%m/%Y'
         time = '%H:%M'
         if date_first:
-            datetime_format = date + ' ' + time
+            datetime_format = '{} {}'.format(date, time)
         else:
-            datetime_format = time + ' ' + date
+            datetime_format = '{} {}'.format(time, date)
         date_time = date_time.strftime(datetime_format)
         return date_time
