@@ -58,9 +58,10 @@ class DatetimeUtils(models.AbstractModel):
         date_time = datetime.strptime(date_time, DTF)
         date = '%d/%m/%Y'
         time = '%H:%M'
+        format_string = '{} {}'
         if date_first:
-            datetime_format = '{} {}'.format(date, time)
+            datetime_format = format_string.format(date, time)
         else:
-            datetime_format = '{} {}'.format(time, date)
+            datetime_format = format_string.format(time, date)
         date_time = date_time.strftime(datetime_format)
         return date_time
