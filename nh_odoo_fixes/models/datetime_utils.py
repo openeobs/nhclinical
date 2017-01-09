@@ -27,9 +27,15 @@ class DatetimeUtils(models.AbstractModel):
         return date_time.replace(second=0, microsecond=0)
 
     @classmethod
-    def reformat_server_datetime_for_frontend(cls, date_time):
+    def reformat_server_datetime_for_frontend(cls, date_time,
+                                              date_first=False):
         date_time = cls.zero_microseconds(date_time)
         date_time = datetime.strptime(date_time, DTF)
-        datetime_format = '%d/%m/%Y %H:%M'
+        date = '%d/%m/%Y'
+        time = '%H:%M'
+        if date_first:
+            datetime_format = date + ' ' + time
+        else:
+            datetime_format = time + ' ' + date
         date_time = date_time.strftime(datetime_format)
         return date_time
