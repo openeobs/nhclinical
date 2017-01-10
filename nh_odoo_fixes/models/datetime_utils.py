@@ -10,6 +10,10 @@ class DatetimeUtils(models.AbstractModel):
 
     _name = 'datetime_utils'
 
+    date_format = '%d/%m/%Y'
+    time_format = '%H:%M'
+    format_string = '{} {}'
+
     @classmethod
     def zero_microseconds(cls, date_time):
         """
@@ -19,8 +23,9 @@ class DatetimeUtils(models.AbstractModel):
         :type date_time: datetime or str
         :return:
         """
+        datetime_format = DTF + '.%f'
         if isinstance(date_time, str):
-            date_time = datetime.strptime(date_time, DTF)
+            date_time = datetime.strptime(date_time, datetime_format)
         date_time = date_time.replace(microsecond=0)
         return date_time.strftime(DTF)
 
@@ -56,12 +61,11 @@ class DatetimeUtils(models.AbstractModel):
         """
         date_time = cls.zero_microseconds(date_time)
         date_time = datetime.strptime(date_time, DTF)
-        date = '%d/%m/%Y'
-        time = '%H:%M'
-        format_string = '{} {}'
         if date_first:
-            datetime_format = format_string.format(date, time)
+            datetime_format = cls.format_string.format(cls.date_format,
+                                                       cls.time_format)
         else:
-            datetime_format = format_string.format(time, date)
+            datetime_format = cls.format_string.format(cls.time_format,
+                                                       cls.date_format)
         date_time = date_time.strftime(datetime_format)
         return date_time
