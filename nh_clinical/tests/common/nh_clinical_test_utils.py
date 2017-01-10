@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from openerp.models import AbstractModel
+import uuid
 
 
 class NhClinicalTestUtils(AbstractModel):
@@ -76,7 +77,7 @@ class NhClinicalTestUtils(AbstractModel):
                 'type': 'poc'
             }
         )
-        self.location_model.create(
+        self.other_ward = self.location_model.create(
             {
                 'name': 'Ward B',
                 'code': 'WB',
@@ -90,8 +91,21 @@ class NhClinicalTestUtils(AbstractModel):
         )[0]
         self.bed = self.location_model.create(
             {
-                'name': 'a bed', 'code': 'a bed', 'usage': 'bed',
-                'parent_id': self.ward.id, 'type': 'poc',
+                'name': 'a bed',
+                'code': 'a bed',
+                'usage': 'bed',
+                'parent_id': self.ward.id,
+                'type': 'poc',
+                'context_ids': [[4, self.eobs_context.id]]
+            }
+        )
+        self.other_bed = self.location_model.create(
+            {
+                'name': 'b bed',
+                'code': 'b_bed',
+                'usage': 'bed',
+                'parent_id': self.other_ward.id,
+                'type': 'poc',
                 'context_ids': [[4, self.eobs_context.id]]
             }
         )
@@ -108,20 +122,37 @@ class NhClinicalTestUtils(AbstractModel):
             }
         )
 
-    def create_nurse(self):
+    def create_nurse(self, location_id=None):
+        if not location_id:
+            location_id = self.bed.id
         self.category_model = self.env['res.partner.category']
         self.user_model = self.env['res.users']
 
         self.nurse_role = \
             self.category_model.search([('name', '=', 'Nurse')])[0]
         # Create nurse and associate them with bed location and nurse role.
-        self.nurse = self.user_model.create({
-            'name': 'Jon',
-            'login': 'iknownothing',
-            'password': 'atall',
+        return self.user_model.create({
+            'name': 'Nurse',
+            'login': uuid.uuid4(),
+            'password': 'nurse',
             'category_id': [[4, self.nurse_role.id]],
-            'location_ids': [[4, self.bed.id]]
+            'location_ids': [[4, location_id]]
         })
+
+    def create_hca(self, location_id=None):
+        if not location_id:
+            location_id = self.bed.id
+        self.category_model = self.env['res.partner.category']
+        self.user_model = self.env['res.users']
+        self.hca_role = self.category_model.search([('name', '=', 'HCA')])[0]
+        hca = self.user_model.create({
+            'name': 'HCA',
+            'login': uuid.uuid4(),
+            'password': 'hca',
+            'category_id': [[4, self.hca_role.id]],
+            'location_ids': [[4, location_id]]
+        })
+        return hca
 
     # Methods for getting references to objects needed for test cases.
     def copy_instance_variables(self, caller):
@@ -166,3 +197,23 @@ class NhClinicalTestUtils(AbstractModel):
         instance_variable_value = getattr(self, variable_name, None)
         if instance_variable_value:
             setattr(caller, variable_name, instance_variable_value)
+
+    def get_open_activities_for_patient(self, data_model=None, user_id=None):
+        """
+        Get activity(s) for patient. If a data model is supplied then return
+        those only in that data model otherwise just all open activities
+
+        :param data_model: A data model to filter on
+        :param user_id: User we want to get activities for
+        :return: list of activities
+        """
+        if not user_id:
+            user_id = self.nurse.id
+        domain = [
+            ['state', 'not in', ['completed', 'cancelled']],
+            ['user_ids', 'in', [user_id]],
+            ['parent_id', '=', self.spell_activity_id]
+        ]
+        if data_model:
+            domain.append(['data_model', '=', data_model])
+        return self.env['nh.activity'].search(domain)
