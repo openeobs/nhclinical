@@ -237,7 +237,7 @@ class NhClinicalTestUtils(AbstractModel):
         """
         if not user_id:
             user_id = self.nurse.id
-        activities = self.test_utils.get_open_activities_for_patient(
+        activities = self.get_open_activities_for_patient(
             data_model=self.data_model,
             user_id=user_id
         )
