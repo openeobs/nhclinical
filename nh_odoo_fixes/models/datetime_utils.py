@@ -23,6 +23,10 @@ class DatetimeUtils(models.AbstractModel):
         :type date_time: datetime or str
         :return:
         """
+        if not (isinstance(date_time, datetime) or isinstance(date_time, str)):
+            raise TypeError("Datetime or str required but {} was passed."
+                            .format(type(date_time)))
+
         datetime_format = DTF + '.%f'
         if isinstance(date_time, str):
             date_time = datetime.strptime(date_time, datetime_format)
@@ -35,12 +39,16 @@ class DatetimeUtils(models.AbstractModel):
         Return the passed date_time with any seconds and microseconds set to 0.
 
         :param date_time:
-        :type date_time: datetime
+        :type date_time: datetime or str
         :return:
         """
-        if not isinstance(date_time, datetime):
-            raise TypeError("Datetime object required but {} was passed."
+        if not (isinstance(date_time, datetime) or isinstance(date_time, str)):
+            raise TypeError("Datetime or str required but {} was passed."
                             .format(type(date_time)))
+
+        if isinstance(date_time, str):
+            date_time = datetime.strptime(date_time, DTF)
+            return date_time.strftime(DTF)
         return date_time.replace(second=0, microsecond=0)
 
     @classmethod
@@ -59,7 +67,7 @@ class DatetimeUtils(models.AbstractModel):
         :return:
         :rtype: str
         """
-        date_time = cls.zero_microseconds(date_time)
+        date_time = cls.zero_seconds(date_time)
         date_time = datetime.strptime(date_time, DTF)
         if date_first:
             datetime_format = cls.format_string.format(cls.date_format,
