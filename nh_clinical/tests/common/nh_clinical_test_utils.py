@@ -227,18 +227,3 @@ class NhClinicalTestUtils(AbstractModel):
     def assert_task_open(self, task_type, user_id):
         open_tasks = self.get_open_tasks(task_type, user_id)
         assert len(open_tasks) > 1
-
-    def check_number_of_activities(self, expected_number, user_id=None):
-        """
-        Helper function to get list of activities and ensure correct number
-
-        :param expected_number: Number of open activities we expect
-        :param user_id: User to check for activities with
-        """
-        if not user_id:
-            user_id = self.nurse.id
-        activities = self.get_open_activities_for_patient(
-            data_model=self.data_model,
-            user_id=user_id
-        )
-        self.assertEqual(len(activities.ids), expected_number)
