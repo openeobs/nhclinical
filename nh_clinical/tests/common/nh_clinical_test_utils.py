@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-from openerp.models import AbstractModel
 import uuid
+
+from openerp.models import AbstractModel
 
 
 class NhClinicalTestUtils(AbstractModel):
@@ -198,6 +199,7 @@ class NhClinicalTestUtils(AbstractModel):
         if instance_variable_value:
             setattr(caller, variable_name, instance_variable_value)
 
+    # TODO EOBS-753: Move to patient model? Is just a generally useful method.
     def get_open_activities_for_patient(self, data_model=None, user_id=None):
         """
         Get activity(s) for patient. If a data model is supplied then return
@@ -217,3 +219,26 @@ class NhClinicalTestUtils(AbstractModel):
         if data_model:
             domain.append(['data_model', '=', data_model])
         return self.env['nh.activity'].search(domain)
+
+    def get_open_tasks(self, task_type, user_id):
+        data_model = 'nh.clinical.notification.{}'.format(task_type)
+        return self.get_open_activities_for_patient(data_model, user_id)
+
+    def assert_task_open(self, task_type, user_id):
+        open_tasks = self.get_open_tasks(task_type, user_id)
+        assert len(open_tasks) > 1
+
+    def check_number_of_activities(self, expected_number, user_id=None):
+        """
+        Helper function to get list of activities and ensure correct number
+
+        :param expected_number: Number of open activities we expect
+        :param user_id: User to check for activities with
+        """
+        if not user_id:
+            user_id = self.nurse.id
+        activities = self.test_utils.get_open_activities_for_patient(
+            data_model=self.data_model,
+            user_id=user_id
+        )
+        self.assertEqual(len(activities.ids), expected_number)
