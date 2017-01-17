@@ -220,10 +220,10 @@ class NhClinicalTestUtils(AbstractModel):
             domain.append(['data_model', '=', data_model])
         return self.env['nh.activity'].search(domain)
 
-    def get_open_tasks(self, task_type, user_id=None):
+    def get_open_tasks(self, task_type, user_id):
         data_model = 'nh.clinical.notification.{}'.format(task_type)
         return self.get_open_activities_for_patient(data_model, user_id)
 
-    def assert_task_open(self, task_type, user_id=None):
+    def assert_task_open(self, task_type, user_id):
         open_tasks = self.get_open_tasks(task_type, user_id)
         assert len(open_tasks) > 1
