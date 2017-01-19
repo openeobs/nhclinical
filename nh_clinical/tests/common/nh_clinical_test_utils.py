@@ -234,10 +234,56 @@ class NhClinicalTestUtils(AbstractModel):
             domain.append(['data_model', '=', data_model])
         return self.env['nh.activity'].search(domain)
 
-    def get_open_tasks(self, task_type, user_id):
+    def get_open_tasks(self, task_type, user_id=None):
+        """
+        Get all open tasks of a particular type.
+
+        :param task_type:
+        :type task_type: str
+        :param user_id:
+        :return:
+        """
         data_model = 'nh.clinical.notification.{}'.format(task_type)
         return self.get_open_activities_for_patient(data_model, user_id)
 
-    def assert_task_open(self, task_type, user_id):
+    def get_latest_open_task(self, user_id=None):
+        """
+        Get the most recently created, currently open task
+        (activity of a notification).
+
+        :param user_id:
+        :return:
+        """
+        if not user_id:
+            user_id = self.nurse.id
+        domain = [
+            ('state', 'not in', ['completed', 'cancelled']),
+            ('data_model', 'like', 'nh.clinical.notification'),
+            ('parent_id', '=', self.spell_activity_id),
+            ('user_ids', 'in', [user_id])
+        ]
+        return self.env['nh.activity'].search(
+            domain, order='create_date desc, id desc'
+        )[0]
+
+    def get_open_task_triggered_by(self, triggering_activity_id):
+        """
+        Returns any task triggered by the passed activity.
+
+        :param triggering_activity_id:
+        :type triggering_activity_id: int
+        :return: nh.activity or None
+        """
+        domain = [
+            ('creator_id', '=', triggering_activity_id),
+            ('data_model', 'like', 'nh.clinical.notification'),
+            ('parent_id', '=', self.spell_activity_id)
+        ]
+        tasks = self.env['nh.activity'].search(
+            domain, order='create_date desc, id desc'
+        )
+        return tasks if tasks else None
+
+    def assert_task_open(self, task_type, user_id=None):
         open_tasks = self.get_open_tasks(task_type, user_id)
         assert len(open_tasks) > 1
