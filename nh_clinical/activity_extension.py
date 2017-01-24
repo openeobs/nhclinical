@@ -61,7 +61,7 @@ class nh_activity(orm.Model):
             string='Location Name'),
         'pos_id': fields.many2one('nh.clinical.pos', 'POS', readonly=True),
         'spell_activity_id': fields.many2one(
-            'nh.activity', 'Spell Activity', readonly=True),
+            'nh.activity', 'Spell Activity', readonly=True, select=True),
         'cancel_reason_id': fields.many2one(
             'nh.cancel.reason', 'Cancellation Reason'),
         'ward_manager_id': fields.many2one(

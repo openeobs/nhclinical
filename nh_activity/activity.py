@@ -5,11 +5,11 @@
 event driven system to be built on top of it.
 """
 import logging
-
 from datetime import datetime
 from functools import wraps
-from openerp.osv import orm, fields, osv
+
 from openerp import SUPERUSER_ID
+from openerp.osv import orm, fields, osv
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
 
 _logger = logging.getLogger(__name__)
@@ -100,12 +100,14 @@ class nh_activity(orm.Model):
                                      'Child Activities', readonly=True),
         'creator_id': fields.many2one('nh.activity', 'Creator activity',
                                       readonly=True,
-                                      help="Evolution hierarchy"),
+                                      help="Evolution hierarchy",
+                                      select=True),
         'created_ids': fields.one2many('nh.activity', 'creator_id',
                                        'Created Activities', readonly=True),
         # state
         'notes': fields.text('Notes'),
-        'state': fields.selection(_states, 'State', readonly=True),
+        'state': fields.selection(_states, 'State', readonly=True,
+                                  select=True),
         # identification
         'user_id': fields.many2one('res.users', 'Assignee', readonly=True),
         # system data
@@ -128,7 +130,7 @@ class nh_activity(orm.Model):
         'date_deadline': fields.datetime('Deadline Time', readonly=True),
         'date_expiry': fields.datetime('Expiry Time', readonly=True),
         # activity type and related model/resource
-        'data_model': fields.text("Data Model", required=True),
+        'data_model': fields.text("Data Model", required=True, select=True),
         'data_ref': fields.reference('Data Reference',
                                      _get_data_type_selection, size=256,
                                      readonly=True),

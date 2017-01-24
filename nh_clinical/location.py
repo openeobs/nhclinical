@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from openerp.osv import orm, fields
 from openerp import SUPERUSER_ID
+from openerp.osv import orm, fields
 
 
 _logger = logging.getLogger(__name__)
@@ -302,12 +302,12 @@ class nh_clinical_location(orm.Model):
         'full_name': fields.function(_get_name, type='char', size=150,
                                      string='Full Name'),
         'code': fields.char('Code', size=256),
-        'parent_id': fields.many2one('nh.clinical.location',
-                                     'Parent Location'),
+        'parent_id': fields.many2one('nh.clinical.location', 'Parent Location',
+                                     select=True),
         'child_ids': fields.one2many('nh.clinical.location', 'parent_id',
                                      'Child Locations'),
         'type': fields.selection(_types, 'Location Type'),
-        'usage': fields.selection(_usages, 'Location Usage'),
+        'usage': fields.selection(_usages, 'Location Usage', select=True),
         'active': fields.boolean('Active'),
         'pos_id': fields.function(
             _get_pos_id, type='many2one', relation='nh.clinical.pos',
