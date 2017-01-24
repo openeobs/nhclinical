@@ -722,7 +722,7 @@ class nh_clinical_patient_transfer(orm.Model):
     _inherit = ['nh.activity.data']
     _columns = {
         'patient_id': fields.many2one('nh.clinical.patient', 'Patient',
-                                      required=True),
+                                      required=True, select=True),
         'origin_loc_id': fields.many2one('nh.clinical.location',
                                          'Origin Location'),
         'location_id': fields.many2one('nh.clinical.location',

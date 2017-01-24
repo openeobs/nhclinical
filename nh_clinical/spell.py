@@ -110,7 +110,8 @@ class nh_clinical_spell(orm.Model):
 
     _columns = {
         'patient_id': fields.many2one('nh.clinical.patient', 'Patient',
-                                      required=True, ondelete='cascade'),
+                                      required=True, ondelete='cascade',
+                                      select=True),
         'location_id': fields.many2one('nh.clinical.location',
                                        'Placement Location'),
         'pos_id': fields.many2one('nh.clinical.pos', 'Placement Location',

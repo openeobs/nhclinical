@@ -52,10 +52,10 @@ class nh_activity(orm.Model):
         'user_ids': fields.many2many(
             'res.users', 'activity_user_rel', 'activity_id', 'user_id',
             'Users', readonly=True),
-        'patient_id': fields.many2one(
-            'nh.clinical.patient', 'Patient', readonly=True),
-        'location_id': fields.many2one(
-            'nh.clinical.location', 'Location', readonly=True),
+        'patient_id': fields.many2one('nh.clinical.patient', 'Patient',
+                                      readonly=True, select=True),
+        'location_id': fields.many2one('nh.clinical.location', 'Location',
+                                       readonly=True, select=True),
         'location_name': fields.related(
             'location_id', 'full_name', type='char', size=150,
             string='Location Name'),

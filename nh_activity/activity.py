@@ -109,7 +109,8 @@ class nh_activity(orm.Model):
         'state': fields.selection(_states, 'State', readonly=True,
                                   select=True),
         # identification
-        'user_id': fields.many2one('res.users', 'Assignee', readonly=True),
+        'user_id': fields.many2one('res.users', 'Assignee', readonly=True,
+                                   select=True),
         # system data
         'create_date': fields.datetime('Create Date', readonly=True),
         'write_date': fields.datetime('Write Date', readonly=True),
