@@ -1,12 +1,11 @@
 # Part of NHClinical. See LICENSE file for full copyright and licensing details
 # -*- coding: utf-8 -*-
 import logging
-import re
 
+import re
 from dateutil.parser import parse
 from openerp.osv import fields, osv
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
-
 
 _logger = logging.getLogger(__name__)
 
@@ -115,7 +114,6 @@ class nh_clinical_patient(osv.Model):
             ``exception`` is ``True`` and  if the patient exists or if
             the patient does not
         """
-
         if not hospital_number:
             result = False
         else:
