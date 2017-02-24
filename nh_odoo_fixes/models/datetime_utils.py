@@ -52,8 +52,9 @@ class DatetimeUtils(models.AbstractModel):
         return date_time.replace(second=0, microsecond=0)
 
     @classmethod
-    def reformat_server_datetime_for_frontend(cls, date_time,
-                                              date_first=False):
+    def reformat_server_datetime_for_frontend(
+            cls, date_time, date_first=False, two_character_year=False
+    ):
         """
         Reformat a datetime in Odoo's 'default server datetime format'
         (see imports) to one more appropriate for the front end.
@@ -64,17 +65,25 @@ class DatetimeUtils(models.AbstractModel):
         :type date_time: str
         :param date_first:
         :type date_first: bool
+        :param two_character_year:
+        :type two_character_year: bool
         :return:
         :rtype: str
         """
         date_time = cls.zero_seconds(date_time)
         date_time = datetime.strptime(date_time, DTF)
+
+        time_format = cls.time_format
+        date_format = cls.date_format
+        if two_character_year:
+            date_format = date_format.replace('%Y', '%y')
+
         if date_first:
-            datetime_format = cls.format_string.format(cls.date_format,
-                                                       cls.time_format)
+            datetime_format = cls.format_string.format(date_format,
+                                                       time_format)
         else:
-            datetime_format = cls.format_string.format(cls.time_format,
-                                                       cls.date_format)
+            datetime_format = cls.format_string.format(time_format,
+                                                       date_format)
         date_time = date_time.strftime(datetime_format)
         return date_time
 
