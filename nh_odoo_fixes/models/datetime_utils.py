@@ -77,3 +77,13 @@ class DatetimeUtils(models.AbstractModel):
                                                        cls.date_format)
         date_time = date_time.strftime(datetime_format)
         return date_time
+
+    def validate_and_convert(self, date_time):
+        if not isinstance(date_time, str) \
+                and not isinstance(date_time, datetime):
+            raise TypeError(
+                "Passed datetime must either be a string or datetime object."
+            )
+        if isinstance(date_time, str):
+            date_time = datetime.strptime(date_time, DTF)
+        return date_time
