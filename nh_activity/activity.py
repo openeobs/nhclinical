@@ -5,11 +5,11 @@
 event driven system to be built on top of it.
 """
 import logging
-
 from datetime import datetime
 from functools import wraps
+
+from openerp import SUPERUSER_ID, api
 from openerp.osv import orm, fields, osv
-from openerp import SUPERUSER_ID
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
 
 _logger = logging.getLogger(__name__)
@@ -700,3 +700,16 @@ class nh_activity_data(orm.AbstractModel):
                 "activity '%s', activity.id=%s data completed via UI",
                 activity.data_model, activity.id)
         return {'type': 'ir.actions.act_window_close'}
+
+    @api.multi
+    def convert_record_to_data_ref(self):
+        """
+        Useful for getting the value for domains so you can search on
+        `data_ref`.
+
+        :return:
+        :rtype: str
+        """
+        data_ref = '{model_name},{record_id}'.format(model_name=self._name,
+                                                     record_id=self.id)
+        return data_ref
