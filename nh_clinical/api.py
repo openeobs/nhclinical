@@ -1,13 +1,14 @@
-# Part of NHClinical. See LICENSE file for full copyright and licensing details
 # -*- coding: utf-8 -*-
+# Part of NHClinical. See LICENSE file for full copyright and licensing details
 """
 ``api.py`` defines the core methods to interface with the
 :mod:`adt` module.
 """
-
 import logging
 
 from openerp.osv import orm
+
+
 _logger = logging.getLogger(__name__)
 
 

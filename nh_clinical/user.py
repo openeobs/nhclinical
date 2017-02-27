@@ -4,10 +4,10 @@
 Extends Odoo's res_users.
 """
 import logging
-
-from openerp.osv import orm, fields, osv
-from openerp import SUPERUSER_ID
 import re
+
+from openerp import SUPERUSER_ID, api
+from openerp.osv import orm, fields, osv
 
 
 _logger = logging.getLogger(__name__)
@@ -284,6 +284,10 @@ class res_users(orm.Model):
                 name = "%s <%s>" % (name, record.email)
             res.append((record.id, name))
         return res
+
+    @api.model
+    def get_name(self, uid):
+        return self.browse(uid).name
 
     def update_doctor_status(self, cr, uid, ids, context=None):
         """
