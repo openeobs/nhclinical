@@ -10,9 +10,23 @@ class DatetimeUtils(models.AbstractModel):
 
     _name = 'datetime_utils'
 
-    date_format = '%d/%m/%Y'
-    time_format = '%H:%M'
+    time_format_front_end = '%H:%M'
+    date_format_front_end = '%d/%m/%Y'
+    date_format_front_end_two_character_year = \
+        date_format_front_end.replace('%Y', '%y')
     format_string = '{} {}'
+
+    datetime_format_front_end = format_string.format(time_format_front_end,
+                                                     date_format_front_end)
+    datetime_format_front_end_two_character_year = format_string.format(
+        time_format_front_end, date_format_front_end_two_character_year
+    )
+
+    known_formats = [
+        DTF,
+        datetime_format_front_end,
+        datetime_format_front_end_two_character_year
+    ]
 
     @classmethod
     def zero_microseconds(cls, date_time):
@@ -73,10 +87,10 @@ class DatetimeUtils(models.AbstractModel):
         date_time = cls.zero_seconds(date_time)
         date_time = datetime.strptime(date_time, DTF)
 
-        time_format = cls.time_format
-        date_format = cls.date_format
+        time_format = cls.time_format_front_end
+        date_format = cls.date_format_front_end
         if two_character_year:
-            date_format = date_format.replace('%Y', '%y')
+            date_format = cls.date_format_front_end_two_character_year
 
         if date_first:
             datetime_format = cls.format_string.format(date_format,
@@ -94,5 +108,19 @@ class DatetimeUtils(models.AbstractModel):
                 "Passed datetime must either be a string or datetime object."
             )
         if isinstance(date_time, str):
-            date_time = datetime.strptime(date_time, DTF)
+            date_time = self.convert_datetime_str_from_known_format(date_time)
         return date_time
+
+    @classmethod
+    def convert_datetime_str_from_known_format(cls, date_time):
+        for datetime_format in cls.known_formats:
+            try:
+                date_time = datetime.strptime(date_time, datetime_format)
+                return date_time
+            except ValueError:
+                pass
+        raise ValueError(
+            "Passed datetime string {} does not match any format known to be "
+            "used within the system.".format(date_time)
+        )
+
