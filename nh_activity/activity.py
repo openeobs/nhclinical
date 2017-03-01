@@ -713,3 +713,23 @@ class nh_activity_data(orm.AbstractModel):
         data_ref = '{model_name},{record_id}'.format(model_name=self._name,
                                                      record_id=self.id)
         return data_ref
+
+    @staticmethod
+    def format_many_2_many_fields(obs_list, field_names):
+        for obs in obs_list:
+            for field_name in field_names:
+                comma_separated = ', '
+                obs[field_name] = \
+                    comma_separated.join(obs[field_name])
+
+    @classmethod
+    def _get_id_from_tuple(cls, tuple):
+        """
+        Extracts the id from one of the tuples commonly seen as the value of
+        relational fields on models.
+
+        :param tuple:
+        :return:
+        :rtype: int
+        """
+        return int(tuple[0])
