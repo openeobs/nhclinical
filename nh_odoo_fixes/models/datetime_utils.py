@@ -108,11 +108,11 @@ class DatetimeUtils(models.AbstractModel):
                 "Passed datetime must either be a string or datetime object."
             )
         if isinstance(date_time, str):
-            date_time = self.convert_datetime_str_from_known_format(date_time)
+            date_time = self.parse_datetime_str_from_known_format(date_time)
         return date_time
 
     @classmethod
-    def convert_datetime_str_from_known_format(cls, date_time):
+    def parse_datetime_str_from_known_format(cls, date_time):
         for datetime_format in cls.known_formats:
             try:
                 date_time = datetime.strptime(date_time, datetime_format)
@@ -124,3 +124,13 @@ class DatetimeUtils(models.AbstractModel):
             "used within the system.".format(date_time)
         )
 
+    @classmethod
+    def convert_datetime_str_to_known_format(cls, datetime_str, datetime_format):
+        if datetime_format not in cls.known_formats:
+            raise ValueError(
+                "Passed datetime format {} does not match any format known to "
+                "be used within the system.".format(datetime_format)
+            )
+        date_time = cls.parse_datetime_str_from_known_format(datetime_str)
+        datetime_str = date_time.strftime(datetime_format)
+        return datetime_str
