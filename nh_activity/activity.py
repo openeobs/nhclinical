@@ -723,13 +723,13 @@ class nh_activity_data(orm.AbstractModel):
                     comma_separated.join(obs[field_name])
 
     @classmethod
-    def _get_id_from_tuple(cls, tuple):
+    def _get_id_from_tuple(cls, a_tuple):
         """
         Extracts the id from one of the tuples commonly seen as the value of
         relational fields on models.
 
-        :param tuple:
+        :param a_tuple:
         :return:
         :rtype: int
         """
-        return int(tuple[0])
+        return int(a_tuple[0])
