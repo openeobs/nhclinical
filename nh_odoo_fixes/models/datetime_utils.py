@@ -125,7 +125,8 @@ class DatetimeUtils(models.AbstractModel):
         )
 
     @classmethod
-    def convert_datetime_str_to_known_format(cls, datetime_str, datetime_format):
+    def convert_datetime_str_to_known_format(cls, datetime_str,
+                                             datetime_format):
         if datetime_format not in cls.known_formats:
             raise ValueError(
                 "Passed datetime format {} does not match any format known to "
