@@ -84,9 +84,8 @@ class nh_activity(orm.Model):
                ('cancelled', 'Cancelled')]
     _handlers = []
 
-    @classmethod
-    def get_description(cls):
-        return cls._description
+    def get_description(self):
+        return self._description
 
     def _get_data_type_selection(self, cr, uid, context=None):
         res = []
@@ -395,9 +394,8 @@ class nh_activity_data(orm.AbstractModel):
     # Label for the observation suitable for display.
     _description = 'Undefined Activity'
 
-    @classmethod
-    def get_description(cls):
-        return cls._description
+    def get_description(self):
+        return self._description
 
     _start_view_xmlid = None
     _schedule_view_xmlid = None
