@@ -88,7 +88,8 @@ class nh_activity(orm.Model):
         res = []
         for model_name, model in self.pool.models.items():
             if hasattr(model, '_description'):
-                res.append((model_name, model._description))
+                res.append((model_name, model.get_description(
+                    append_observation=False)))
         return res
 
     _columns = {
@@ -167,7 +168,8 @@ class nh_activity(orm.Model):
                 "data_model does not exist in the model pool!"
             )
         if 'summary' not in vals:
-            vals.update({'summary': data_model_pool._description})
+            summary = data_model_pool.get_description()
+            vals.update({'summary': summary})
 
         activity_id = super(nh_activity, self).create(cr, uid, vals, context)
         _logger.debug("activity '%s' created, activity.id=%s",
@@ -385,6 +387,8 @@ class nh_activity_data(orm.AbstractModel):
         'completed': ['cancel'],
         'cancelled': []
     }
+
+    # Label for the observation suitable for display.
     _description = 'Undefined Activity'
     _start_view_xmlid = None
     _schedule_view_xmlid = None
@@ -392,6 +396,10 @@ class nh_activity_data(orm.AbstractModel):
     _complete_view_xmlid = None
     _cancel_view_xmlid = None
     _form_description = None
+
+    @classmethod
+    def get_description(cls):
+        return cls._description
 
     def is_action_allowed(self, state, action):
         """
