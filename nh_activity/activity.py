@@ -5,11 +5,11 @@
 event driven system to be built on top of it.
 """
 import logging
-
 from datetime import datetime
 from functools import wraps
+
+from openerp import SUPERUSER_ID, api
 from openerp.osv import orm, fields, osv
-from openerp import SUPERUSER_ID
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
 
 _logger = logging.getLogger(__name__)
@@ -167,7 +167,8 @@ class nh_activity(orm.Model):
                 "data_model does not exist in the model pool!"
             )
         if 'summary' not in vals:
-            vals.update({'summary': data_model_pool._description})
+            summary = data_model_pool.get_description()
+            vals.update({'summary': summary})
 
         activity_id = super(nh_activity, self).create(cr, uid, vals, context)
         _logger.debug("activity '%s' created, activity.id=%s",
@@ -385,7 +386,14 @@ class nh_activity_data(orm.AbstractModel):
         'completed': ['cancel'],
         'cancelled': []
     }
+
+    # Label for the observation suitable for display.
     _description = 'Undefined Activity'
+
+    @classmethod
+    def get_description(cls):
+        return cls._description
+
     _start_view_xmlid = None
     _schedule_view_xmlid = None
     _submit_view_xmlid = None
@@ -700,3 +708,36 @@ class nh_activity_data(orm.AbstractModel):
                 "activity '%s', activity.id=%s data completed via UI",
                 activity.data_model, activity.id)
         return {'type': 'ir.actions.act_window_close'}
+
+    @api.multi
+    def convert_record_to_data_ref(self):
+        """
+        Useful for getting the value for domains so you can search on
+        `data_ref`.
+
+        :return:
+        :rtype: str
+        """
+        data_ref = '{model_name},{record_id}'.format(model_name=self._name,
+                                                     record_id=self.id)
+        return data_ref
+
+    @staticmethod
+    def format_many_2_many_fields(obs_list, field_names):
+        for obs in obs_list:
+            for field_name in field_names:
+                comma_separated = ', '
+                obs[field_name] = \
+                    comma_separated.join(obs[field_name])
+
+    @classmethod
+    def _get_id_from_tuple(cls, a_tuple):
+        """
+        Extracts the id from one of the tuples commonly seen as the value of
+        relational fields on models.
+
+        :param a_tuple:
+        :return:
+        :rtype: int
+        """
+        return int(a_tuple[0])
