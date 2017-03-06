@@ -21,7 +21,6 @@ class NhClinicalTestUtils(AbstractModel):
         self.spell_model = self.env['nh.clinical.spell']
         self.activity_model = self.env['nh.activity']
         self.activity_pool = self.pool['nh.activity']
-        self.ews_model = self.env['nh.clinical.patient.observation.ews']
         # nh.eobs.api not available to this module
         self.api_model = self.env['nh.clinical.api']
 
