@@ -609,7 +609,6 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         'nh.clinical.adt.patient.discharge': 'adt_discharge',
 
         'nh.clinical.patient.observation.ews': 'observation_ews',
-        'nh.clinical.patient.observation.weight': 'observation_weight',
         'nh.clinical.patient.observation.height': 'observation_height',
         'nh.clinical.patient.observation.blood_sugar':
             'observation_blood_sugar',
@@ -1062,16 +1061,6 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
             })
 #         if not d['patient_id']:
 #             _logger.warn("No patients available for ews!")
-        v.update(values)
-        return v
-
-    def observation_weight(self, cr, uid, values=None):
-        if values is None:
-            values = {}
-        fake = self.next_seed_fake()
-        v = {}
-        assert 'patient_id' in values, "'patient_id' is not in values!"
-        v.update({'weight': float(fake.random_int(min=40, max=200))})
         v.update(values)
         return v
 
