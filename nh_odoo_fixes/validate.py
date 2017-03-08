@@ -43,3 +43,7 @@ def _convert_string_to_datetime(date_time):
                         "{invalid_type} is not a valid type."
                         .format(invalid_type=type(date_time)))
     return date_time
+
+def in_min_max_range(min, max, value):
+    if not min <= value <= max:
+        raise ValidationError("")
