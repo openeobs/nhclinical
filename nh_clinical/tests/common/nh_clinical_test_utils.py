@@ -27,8 +27,8 @@ class NhClinicalTestUtils(AbstractModel):
         self.patient = self.patient_model.create({
             'given_name': 'Jon',
             'family_name': 'Snow',
-            'patient_identifier': 'a_patient_identifier',
-            'other_identifier': 'another_identifier'
+            'patient_identifier': uuid.uuid4(),
+            'other_identifier': uuid.uuid4()
         })
 
         self.spell_activity_id = self.spell_model.create_activity(

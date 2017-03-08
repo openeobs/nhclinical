@@ -258,7 +258,7 @@ class nh_clinical_spell(orm.Model):
         return spell_id[0] if spell_id else False
 
     @api.model
-    def get_spell_activity_by_patient(self, patient):
+    def get_spell_activity_by_patient(self, patient_id):
         """
         Get the `nh.clinical.spell` record for the given patient.
 
@@ -269,11 +269,12 @@ class nh_clinical_spell(orm.Model):
         """
         domain = [
             ('data_model', '=', 'nh.clinical.spell'),
-            ('patient_id', '=', patient.id)
+            ('patient_id', '=', patient_id)
         ]
         activity_model = self.env['nh.activity']
-        activities = activity_model.search(domain)
-        return activities[0] if len(activities) else None
+        spell_activity = activity_model.search(domain)
+        spell_activity.ensure_one()
+        return spell_activity
 
     def get_spell_start_date(self, cr, uid, patient_id, context=None):
         spell_id = self.get_by_patient_id(cr, uid, patient_id, context=context)
