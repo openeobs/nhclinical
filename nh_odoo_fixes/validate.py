@@ -45,14 +45,14 @@ def _convert_string_to_datetime(date_time):
     return date_time
 
 
-def in_min_max_range(min, max, value):
-    if value < min:
+def in_min_max_range(min_value, max_value, value):
+    if value < min_value:
         raise ValidationError(
             "Value '{}' is less than the minimum valid value '{}'.".format(
-                value, min)
+                value, min_value)
         )
-    if value > max:
+    if value > max_value:
         raise ValidationError(
             "Value '{}' is greater than the maximum valid value '{}'.".format(
-                value, max)
+                value, max_value)
         )
