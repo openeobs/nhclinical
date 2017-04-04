@@ -709,6 +709,17 @@ class nh_activity_data(orm.AbstractModel):
                 activity.data_model, activity.id)
         return {'type': 'ir.actions.act_window_close'}
 
+    def get_activity(self):
+        data_ref = self.convert_record_to_data_ref()
+        domain = [
+            ('data_model', '=', self._name),
+            ('data_ref', '=', data_ref)
+        ]
+        activity_model = self.env['nh.activity']
+        activity = activity_model.search(domain)
+        activity.ensure_one()
+        return activity
+
     @api.multi
     def convert_record_to_data_ref(self):
         """
@@ -741,3 +752,44 @@ class nh_activity_data(orm.AbstractModel):
         :rtype: int
         """
         return int(a_tuple[0])
+
+    @api.model
+    def get_open_activity(self, data_model, spell_activity_id):
+        """
+        Get the latest open activity for the given model. The method assumes
+        that only one open activity at a time is possible for the given model.
+        If more than one is found an exception is raised.
+
+        :param spell_activity_id:
+        :return:
+        """
+        domain = [
+            ('data_model', '=', data_model),
+            ('state', 'not in', ['completed', 'cancelled']),
+            ('parent_id', '=', spell_activity_id)
+        ]
+        activity_model = self.env['nh.activity']
+        record = activity_model.search(domain)
+        if record:
+            record.ensure_one()
+        return record
+
+    @api.model
+    def get_latest_activity(self, data_model, spell_activity_id):
+        """
+        Return the most recent activity for a given data model.
+
+        :param data_model:
+        :param spell_activity_id:
+        :return:
+        """
+        domain = [
+            ('data_model', '=', data_model),
+            ('state', 'not in', ['completed', 'cancelled']),
+            ('parent_id', '=', spell_activity_id)
+        ]
+        activity_model = self.env['nh.activity']
+        recordset = activity_model.search(domain)
+        if recordset:
+            return recordset[-1]
+        return recordset

@@ -67,8 +67,7 @@ class DatetimeUtils(models.AbstractModel):
 
     @classmethod
     def reformat_server_datetime_for_frontend(
-            cls, date_time, date_first=False, two_character_year=False
-    ):
+            cls, date_time, date_first=False, two_character_year=False):
         """
         Reformat a datetime in Odoo's 'default server datetime format'
         (see imports) to one more appropriate for the front end.

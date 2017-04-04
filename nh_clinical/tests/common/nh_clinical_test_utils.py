@@ -286,3 +286,21 @@ class NhClinicalTestUtils(AbstractModel):
     def assert_task_open(self, task_type, user_id=None):
         open_tasks = self.get_open_tasks(task_type, user_id)
         assert len(open_tasks) > 1
+
+    def browse_ref(self, xid):
+        """
+        Returns a record object for the provided :term:`external identifier`.
+
+        Copied from :class:`~openerp.tests.common.BaseCase`.
+
+        :param xid: fully-qualified :term:`external identifier`, in the form
+                    :samp:`{module}.{identifier}`
+        :raise: ValueError if not found
+        :returns: :class:`~openerp.models.BaseModel`
+        """
+        if '.' not in xid:
+            message = "this method requires a fully qualified parameter, " \
+                      "in the following form: 'module.identifier'"
+            raise ValueError(message)
+        module, xid = xid.split('.')
+        return self.env['ir.model.data'].get_object(module, xid)
