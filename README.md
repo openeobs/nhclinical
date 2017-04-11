@@ -1,2 +1,2 @@
-# NH Clinical ...
-
+# NH Clinical
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/40c8b82dfcc74bba88c4e02770323039)](https://www.codacy.com/app/BJSS/nhclinical?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=NeovaHealth/nhclinical&amp;utm_campaign=Badge_Grade)
