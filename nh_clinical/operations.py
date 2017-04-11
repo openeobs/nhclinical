@@ -7,8 +7,8 @@ discharge, etc.
 """
 import logging
 
+from openerp import SUPERUSER_ID, api
 from openerp.osv import orm, fields, osv
-from openerp import SUPERUSER_ID
 
 _logger = logging.getLogger(__name__)
 
@@ -361,6 +361,15 @@ class nh_clinical_patient_placement(orm.Model):
                     "Location id=%s is not available" % vals['location_id'])
         return super(nh_clinical_patient_placement, self).submit(
             cr, uid, activity_id, vals, context)
+
+    @api.model
+    def get_placement_activities_for_spell(self, spell_activity_id):
+        activity_model = self.env['nh.activity']
+        domain = [
+            ('spell_activity_id', '=', spell_activity_id),
+            ('data_model', '=', self._name)
+        ]
+        return activity_model.search(domain)
 
 
 class nh_clinical_patient_discharge(orm.Model):
@@ -882,6 +891,26 @@ class nh_clinical_patient_transfer(orm.Model):
                     'Transfer Not Found!',
                     'There is no transfer for patient with id %s' % patient_id)
         return transfer_ids[0] if transfer_ids else False
+
+    @api.model
+    def patient_was_transferred_after_date(self, patient_id, date):
+        """
+        Check if a patient transfer occurred some time after the given date.
+
+        :param patient_id:
+        :type patient_id: int
+        :param date:
+        :type date: str
+        :return:
+        :rtype: bool
+        """
+        last_transfer_activity_id = self.get_last(patient_id)
+        activity_model = self.env['nh.activity']
+        last_transfer = activity_model.browse(last_transfer_activity_id)
+        if not last_transfer:
+            return False
+        # `date_started` doesn't appear to be populated by so can't use it.
+        return last_transfer.date_terminated >= date
 
 
 class nh_clinical_patient_follow(orm.Model):

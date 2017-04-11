@@ -166,6 +166,7 @@ def _append_right(right_side, groupby, known_values, result, result_template,
 
     return result, known_values
 
+
 openerp.models.BaseModel._append_all = _append_all
 openerp.models.BaseModel._append_right = _append_right
 openerp.models.BaseModel._append_left = _append_left

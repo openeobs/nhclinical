@@ -22,8 +22,8 @@
                    <label for="patient_id" string="Patient"/>
                    <field name="patient_id" readonly="1"/>
                    <label for="location_id" string="Location"/>
-                   <field name="suggested_location_id" readonly="1"/>
-                   <field name="location_id" required="True" domain="[('is_available','=',True),('usage','=','bed'),('id','child_of',suggested_location_id)]" widget="nh_many2one"/>
+                   <field name="suggested_location_id" readonly="1" options="{'no_create': True}"/>
+                   <field name="location_id" required="True" domain="[('is_available','=',True),('usage','=','bed'),('id','child_of',suggested_location_id)]" widget="nh_many2one"  options="{'no_create': True}"/>
                    <button name="complete_ui" type="object" string="Confirm Placement"/>
                 </form>
             </field>
@@ -58,7 +58,7 @@
                 <form string="Patient Placement Form View">
                    <field name="name" />
                    <field name="patient_id" />
-                   <field name="location_id" domain="[('is_available','=',True)]"/>
+                   <field name="location_id" domain="[('is_available','=',True)]" options="{'no_quick_create': True}"/>
                    <field name="pos_id" />
                 </form>
             </field>

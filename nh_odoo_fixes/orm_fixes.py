@@ -1,16 +1,14 @@
 # Part of NHClinical. See LICENSE file for full copyright and licensing details
 # -*- coding: utf-8 -*-
-from datetime import datetime
 import logging
+from datetime import datetime
 
-from openerp.osv import fields
-import openerp.modules.registry as registry
 import openerp
-from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
-
+import openerp.modules.registry as registry
 import pytz
+from openerp.osv import fields
+from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
 from pytz.exceptions import UnknownTimeZoneError, NonExistentTimeError
-
 
 _logger = logging.getLogger(__name__)
 
@@ -37,5 +35,6 @@ def utc_timestamp(cr, uid, timestamp, context=None):
             return tz_timestamp.astimezone(utc).strftime(DTF)
 
     return timestamp.strftime(DTF)
+
 
 fields.datetime.utc_timestamp = utc_timestamp
