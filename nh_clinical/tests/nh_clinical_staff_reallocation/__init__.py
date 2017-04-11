@@ -6,3 +6,5 @@ from . import test_default_locations
 from . import test_default_users
 from . import test_default_ward
 from . import test_reallocate
+from . import test_staff_reallocation_integration
+from . import test_staff_reallocation_multi_ward

@@ -192,6 +192,18 @@ class res_users(orm.Model):
         vals['groups_id'] += add_groups_id
         return True
 
+    @api.one
+    @api.constrains('location_ids')
+    def _check_location_ids(self):
+        activity_model = self.env['nh.activity']
+        locked_activities = activity_model.search([
+            ['user_id', '=', self.id],
+            ['location_id', 'not in', self.location_ids.ids]
+        ])
+        if locked_activities:
+            locked_activities.write({'user_id': False})
+        return True
+
     def create(self, cr, user, vals, context=None):
         """
         Extends Odoo's :meth:`create()<openerp.models.Model.create>`

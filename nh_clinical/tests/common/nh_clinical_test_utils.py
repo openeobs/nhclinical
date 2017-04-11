@@ -8,6 +8,98 @@ class NhClinicalTestUtils(AbstractModel):
 
     _name = 'nh.clinical.test_utils'
 
+    # Setup methods
+    def admit_and_place_patient(self):
+        self.create_locations()
+        self.create_users()
+        self.create_patient()
+        self.spell = self.admit_patient()
+        self.spell_activity_id = self.spell.activity_id.id
+        # TODO: Rename variable as it is a spell not an activity.
+        self.spell_activity = self.spell.activity_id
+        self.placement = self.create_placement()
+        self.place_patient()
+
+    def create_users(self):
+        self.nurse = self.create_nurse()
+        self.hca = self.create_hca()
+        self.create_doctor()
+
+    def create_patient(self):
+        self.patient = self.create_and_register_patient()
+        self.patient_id = self.patient.id
+        self.hospital_number = self.patient.other_identifier
+
+    def admit_patient(
+            self, hospital_number=None, patient_id=None, location_code=None):
+        if not hospital_number:
+            hospital_number = self.hospital_number
+        if not patient_id:
+            patient_id = self.patient_id
+        if not location_code:
+            location_code = self.ward.code
+        self.spell_model = self.env['nh.clinical.spell']
+        self.api_model = self.env['nh.clinical.api']
+        self.api_model.admit(hospital_number, {'location': location_code})
+        return self.spell_model.search([('patient_id', '=', patient_id)])[0]
+
+    def create_placement(self, patient_id=None, location_id=None):
+        if not patient_id:
+            patient_id = self.patient_id
+        if not location_id:
+            location_id = self.ward.id
+        self.placement_model = self.env['nh.clinical.patient.placement']
+        return self.placement_model.create_activity({}, {
+            'suggested_location_id': location_id,
+            'patient_id': patient_id
+        })
+
+    def create_and_register_patient(self):
+        self.api_model = self.env['nh.clinical.api']
+        self.patient_model = self.env['nh.clinical.patient']
+
+        hospital_number = uuid.uuid4()
+        patient_id = self.api_model.sudo().register(
+            hospital_number,
+            {
+                'family_name': 'Testersen',
+                'given_name': 'Test'
+            }
+        )
+        return self.patient_model.browse(patient_id)
+
+    def place_patient(
+            self, location_id=None, placement_id=None):
+        if not location_id:
+            location_id = self.bed.id
+        if not placement_id:
+            placement_id = self.placement
+        self.activity_model = self.env['nh.activity']
+        self.activity_pool = self.pool['nh.activity']
+        self.activity_pool.submit(
+            self.env.cr, self.env.uid,
+            placement_id, {'location_id': location_id}
+        )
+        self.activity_pool.complete(
+            self.env.cr, self.env.uid, placement_id
+        )
+
+    def discharge_patient(self, hospital_number=None):
+        if not hospital_number:
+            hospital_number = self.hospital_number
+        api_model = self.env['nh.clinical.api']
+        api_model.discharge(hospital_number, {
+            'location': 'DISL'
+        })
+
+    def transfer_patient(self, location_code, hospital_number=None):
+        if not hospital_number:
+            hospital_number = self.hospital_number
+        api_model = self.env['nh.clinical.api']
+        api_model.transfer(hospital_number, {
+            'location': location_code
+        })
+
     # Setup methods.
     def create_patient_and_spell(self):
         """
@@ -65,50 +157,14 @@ class NhClinicalTestUtils(AbstractModel):
             raise ValueError('Could not find POS with location ID of hospital')
 
     def create_locations(self):
+        self.search_for_hospital_and_pos()
         self.location_model = self.env['nh.clinical.location']
-        self.context_pool = self.env['nh.clinical.context']
 
-        self.ward = self.location_model.create(
-            {
-                'name': 'Ward A',
-                'code': 'WA',
-                'usage': 'ward',
-                'parent_id': self.hospital.id,
-                'type': 'poc'
-            }
-        )
-        self.other_ward = self.location_model.create(
-            {
-                'name': 'Ward B',
-                'code': 'WB',
-                'usage': 'ward',
-                'parent_id': self.hospital.id,
-                'type': 'poc'
-            }
-        )
-        self.eobs_context = self.context_pool.search(
-            [['name', '=', 'eobs']]
-        )[0]
-        self.bed = self.location_model.create(
-            {
-                'name': 'a bed',
-                'code': 'a bed',
-                'usage': 'bed',
-                'parent_id': self.ward.id,
-                'type': 'poc',
-                'context_ids': [[4, self.eobs_context.id]]
-            }
-        )
-        self.other_bed = self.location_model.create(
-            {
-                'name': 'b bed',
-                'code': 'b_bed',
-                'usage': 'bed',
-                'parent_id': self.other_ward.id,
-                'type': 'poc',
-                'context_ids': [[4, self.eobs_context.id]]
-            }
-        )
+        self.ward = self.create_location('ward', self.hospital.id)
+        self.other_ward = self.create_location('ward', self.hospital.id)
+
+        self.bed = self.create_location('bed', self.ward.id)
+        self.other_bed = self.create_location('bed', self.other_ward.id)
         self.associate_admin_with_pos()
 
     def associate_admin_with_pos(self):
@@ -119,6 +175,19 @@ class NhClinicalTestUtils(AbstractModel):
             {
                 'pos_id': self.pos.id,
                 'pos_ids': [[4, self.pos.id]]
+            }
+        )
+
+    def create_location(self, usage='bed', parent=None):
+        if not parent:
+            parent = self.ward.id
+        return self.location_model.create(
+            {
+                'name': uuid.uuid4(),
+                'code': uuid.uuid4(),
+                'usage': usage,
+                'parent_id': parent,
+                'type': 'poc',
             }
         )
 
@@ -166,6 +235,35 @@ class NhClinicalTestUtils(AbstractModel):
             'password': 'Dr_Acula',
             'category_id': [[4, self.doctor_role.id]],
             'location_ids': [[6, 0, [self.ward.id, self.bed.id]]]
+        })
+
+    def create_shift_coordinator(self, location_id=None):
+        if not location_id:
+            location_id = self.ward.id
+        self.category_model = self.env['res.partner.category']
+        self.user_model = self.env['res.users']
+        self.shift_coordinator_role = \
+            self.category_model.search([('name', '=', 'Shift Coordinator')])[0]
+        shift_coordinator = self.user_model.create({
+            'name': 'Anita Co\'Ordon',
+            'login': uuid.uuid4(),
+            'password': 'coordon-anita',
+            'category_id': [[4, self.shift_coordinator_role.id]],
+            'location_ids': [[6, 0, [location_id]]]
+        })
+        return shift_coordinator
+
+    def create_senior_manager(self):
+        self.category_model = self.env['res.partner.category']
+        self.user_model = self.env['res.users']
+        self.senior_manager_role = \
+            self.category_model.search([('name', '=', 'Senior Manager')])[0]
+        self.senior_manager = self.user_model.create({
+            'name': 'Senor Manager',
+            'login': 'snr.manager',
+            'password': 'snr.manager',
+            'category_id': [[4, self.senior_manager_role.id]],
+            'location_ids': [[6, 0, [self.ward.id]]]
         })
 
     # Methods for getting references to objects needed for test cases.
