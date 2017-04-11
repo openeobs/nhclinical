@@ -285,4 +285,5 @@ class NhClinicalTestUtils(AbstractModel):
 
     def assert_task_open(self, task_type, user_id=None):
         open_tasks = self.get_open_tasks(task_type, user_id)
-        assert len(open_tasks) > 1
+        if not len(open_tasks) > 1:
+            raise AssertionError("No open tasks.")
