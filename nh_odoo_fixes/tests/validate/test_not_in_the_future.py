@@ -11,10 +11,12 @@ class TestNotInTheFuture(TransactionCase):
     """
     Tests the :method:`validate.not_in_the_future` method.
     """
-    def test_now_does_not_raise_exception_with_datetime(self):
+    @staticmethod
+    def test_now_does_not_raise_exception_with_datetime():
         validate.not_in_the_future(datetime.now())
 
-    def test_now_does_not_raise_exception_with_string(self):
+    @staticmethod
+    def test_now_does_not_raise_exception_with_string():
         validate.not_in_the_future(datetime.now().strftime(DTF))
 
     def test_one_second_in_the_future_does_raise_exception_with_datetime(self):
@@ -26,7 +28,8 @@ class TestNotInTheFuture(TransactionCase):
             date_time = (datetime.now() + timedelta(seconds=1)).strftime(DTF)
             validate.not_in_the_future(date_time)
 
-    def test_before_1900_with_datetime_does_not_raise_exception(self):
+    @staticmethod
+    def test_before_1900_with_datetime_does_not_raise_exception():
         validate.not_in_the_future(datetime(year=1899, month=6, day=6))
 
     def test_before_1900_with_string_raises_exception(self):
