@@ -1,5 +1,11 @@
 language: python
 sudo: false
+notifications:
+  slack:
+    rooms:
+      - secure: VYXNYJOU6DanVcFWQcG4oizrdeFGYdCWc8s/ZmTnBItlYnA3EOegIaY487LnD0FVSkxs6N93DMBvcAMCO4Lea9zVpRNPcWfTivZqj9Yo2VxuNSHxhYTl1HAlXBel+W31uRlvRcNxVvMReMy/+hzHa2gXFY6PnM4GuaveK0xk3TALQUOlNDzHZzNKOu2qR1gnKwyiSlfxbKpZDOOzMKgLbTPn+fvLFRcDWA5O7gwOGwa3jyi4FSh9isjhoZPd+vjrmrnl2mBDJGLQYgRb7qtPrQJFPXFLETeI3rIxhVzJ0KAMQHvPOOgYmuUPmEP/NySH0QvnwY+oZloor8WzESC+viaOjlB1lfNr7koCZwsw53L7cIVmLhUrP1oVUwWlG5kjEzSfMNt2D0P0CluN+3PEupV7gDWfz6mHZyID9AVCPbge/kBVbtNAniu8XT6hvq7zaLs+5NJfKD1maEea9IOYgJNJ9rl9iPM9YSWSeVI36eshbQJYcAxlSN4aNu6hAotg978j3J5q151uCTzoRayT0E7PswAzuMIULryVq/gZiecHTy2IfHuhEsY4+YLdGiRSCeVRrdhIGK659awWcqAM4ND4T1ZRm6LKZ+DNFc6qrNkRb+dxGO13GsnGJFmJRxvzDmAvY9yXW4MX7Mrk6Ky0fyQCUCp/5x/X0uHOaCcKk2c=
+  on_success: change
+  on_failure: always
 cache:
   apt: true
   directories:
@@ -38,7 +44,8 @@ install:
 - pip install -r requirements.txt
 # Install a pinned version of the Pillow so when OCA's requirements.txt is installed the dependency at this particular version is met
 - pip install Pillow==2.5.1
-- git clone --depth=1 https://github.com/NeovaHealth/maintainer-quality-tools.git ${HOME}/maintainer-quality-tools
+- git clone --depth=1 https://github.com/NeovaHealth/maintainer-quality-tools.git
+  ${HOME}/maintainer-quality-tools
 - pip install -r ${HOME}/maintainer-quality-tools/requirements.txt
 - export PATH=${HOME}/maintainer-quality-tools/travis:${PATH}
 - travis_install_nightly
@@ -54,11 +61,13 @@ after_script:
 - for rep in ${HOME}/tests/*.xml; do cat "$rep" | grep -v "<?xml " >> test_report.xml;
   done
 - echo "</testsuites>" >> test_report.xml
-
-- echo "Test result is ${TRAVIS_TEST_RESULT}" 
+- echo "Test result is ${TRAVIS_TEST_RESULT}"
 - echo "Pipeline status is ${RUN_PIPELINE}"
-- echo "${TRAVIS_REPO_SLUG} ${TRAVIS_BUILD_NUMBER} ${TRAVIS_BRANCH} ${TRAVIS_COMMIT}" >> test_file.xml
-- printf '{"branch":"%s","commit":"%s","pull_request":"%s","repository":{"name":"%s"}}' "$TRAVIS_BRANCH" "$TRAVIS_COMMIT" "$TRAVIS_PULL_REQUEST" "$TRAVIS_REPO_SLUG" > json.file
-
-- if [ "$TRAVIS_TEST_RESULT" == "0" -a "$RUN_PIPELINE" == "1" ]; then curl -v ${TARGET_URL} -F json_file=@./json.file -F coverage_file=@./coverage.xml -F test_report_file=@./test_report.xml -F json='{"parameter":[{"name":"json_payload","file":"json_file"}, {"name":"test_report","file":"test_report_file"}, {"name":"coverage_report","file":"coverage_file"}]}'; fi
-
+- echo "${TRAVIS_REPO_SLUG} ${TRAVIS_BUILD_NUMBER} ${TRAVIS_BRANCH} ${TRAVIS_COMMIT}"
+  >> test_file.xml
+- printf '{"branch":"%s","commit":"%s","pull_request":"%s","repository":{"name":"%s"}}'
+  "$TRAVIS_BRANCH" "$TRAVIS_COMMIT" "$TRAVIS_PULL_REQUEST" "$TRAVIS_REPO_SLUG" > json.file
+- if [ "$TRAVIS_TEST_RESULT" == "0" -a "$RUN_PIPELINE" == "1" ]; then curl -v ${TARGET_URL}
+  -F json_file=@./json.file -F coverage_file=@./coverage.xml -F test_report_file=@./test_report.xml
+  -F json='{"parameter":[{"name":"json_payload","file":"json_file"}, {"name":"test_report","file":"test_report_file"},
+  {"name":"coverage_report","file":"coverage_file"}]}'; fi
