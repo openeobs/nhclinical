@@ -279,7 +279,6 @@ class nh_clinical_api(orm.AbstractModel):
         :returns: ``True``
         :rtype: bool
         """
-
         activity_pool = self.pool['nh.activity']
         patient_pool = self.pool['nh.clinical.patient']
         transfer_pool = self.pool['nh.clinical.adt.patient.transfer']
