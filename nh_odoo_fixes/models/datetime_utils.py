@@ -2,7 +2,8 @@
 """Contains various useful methods for managing datetimes."""
 from datetime import datetime
 
-from openerp import models
+from openerp import models, api
+from openerp.osv import fields
 from openerp.fields import Datetime
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
 
@@ -144,3 +145,25 @@ class DatetimeUtils(models.AbstractModel):
         date_time = cls.parse_datetime_str_from_known_format(datetime_str)
         datetime_str = date_time.strftime(datetime_format)
         return datetime_str
+
+    @staticmethod
+    def get_current_time(as_string=False):
+        """
+        Get the current time. Making this a separate function makes it easier
+        to patch
+        :param as_string: Should return datetime as string
+        :return: datetime or string representation of datetime
+        """
+        current_datetime = datetime.now()
+        if as_string:
+            return datetime.strftime(current_datetime, DTF)
+        return current_datetime
+
+    @api.model
+    def get_localised_time(self):
+        """
+        Get the localised time for datetime.now()
+        """
+        current_time = self.get_current_time()
+        return fields.datetime.context_timestamp(
+            self._cr, self._uid, current_time)
