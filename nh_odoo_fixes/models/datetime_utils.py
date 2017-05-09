@@ -4,6 +4,7 @@ from datetime import datetime
 
 from openerp import models, api
 from openerp.osv import fields
+from openerp.fields import Datetime
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
 
 
@@ -68,12 +69,14 @@ class DatetimeUtils(models.AbstractModel):
 
     @classmethod
     def reformat_server_datetime_for_frontend(
-            cls, date_time, date_first=False, two_character_year=False):
+            cls, date_time, date_first=False, two_character_year=False,
+            context_with_timezone=None):
         """
         Reformat a datetime in Odoo's 'default server datetime format'
         (see imports) to one more appropriate for the front end.
 
-        Can choose whether the date or time comes first.
+        Can choose whether the date or time comes first and optionally convert
+        to client timezone.
 
         :param date_time:
         :type date_time: str
@@ -81,6 +84,9 @@ class DatetimeUtils(models.AbstractModel):
         :type date_first: bool
         :param two_character_year:
         :type two_character_year: bool
+        :param context_with_timezone: A record's context with a 'tz' key
+        specifying the timezone of the current client.
+        :type context_with_timezone: dict
         :return:
         :rtype: str
         """
@@ -98,6 +104,10 @@ class DatetimeUtils(models.AbstractModel):
         else:
             datetime_format = cls.format_string.format(time_format,
                                                        date_format)
+
+        if context_with_timezone:
+            cls._context = context_with_timezone
+            date_time = Datetime.context_timestamp(cls, date_time)
         date_time = date_time.strftime(datetime_format)
         return date_time
 
