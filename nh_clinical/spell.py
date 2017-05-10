@@ -258,12 +258,12 @@ class nh_clinical_spell(orm.Model):
         return spell_id[0] if spell_id else False
 
     @api.model
-    def get_spell_activity_by_patient(self, patient_id):
+    def get_spell_activity_by_patient_id(self, patient_id):
         """
         Get the `nh.clinical.spell` record for the given patient.
 
-        :param patient:
-        :type patient: 'nh.clinical.patient' record
+        :param patient_id:
+        :type patient_id: 'nh.clinical.patient' record
         :return: spell if it exists, otherwise None
         :rtype: 'nh.clinical.spell' record
         """
