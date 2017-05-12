@@ -310,7 +310,6 @@ class NhClinicalTestUtils(AbstractModel):
         if instance_variable_value:
             setattr(caller, variable_name, instance_variable_value)
 
-    # TODO EOBS-753: Move to patient model? Is just a generally useful method.
     def get_open_activities_for_patient(self, data_model=None, user_id=None):
         """
         Get activity(s) for patient. If a data model is supplied then return
