@@ -146,8 +146,8 @@ class DatetimeUtils(models.AbstractModel):
         datetime_str = date_time.strftime(datetime_format)
         return datetime_str
 
-    @staticmethod
-    def get_current_time(as_string=False):
+    @classmethod
+    def get_current_time(cls, as_string=False):
         """
         Get the current time. Making this a separate function makes it easier
         to patch

@@ -793,3 +793,18 @@ class nh_activity_data(orm.AbstractModel):
         if recordset:
             return recordset[-1]
         return recordset
+
+    @api.model
+    def get_open_activities(self, spell_activity_id=None):
+        """
+        Get open activity(s) for one spell or all spells.
+        :return: list of activities
+        :rtype: list
+        """
+        domain = [
+            ('state', 'not in', ['completed', 'cancelled']),
+            ('data_model', '=', self._name)
+        ]
+        if spell_activity_id:
+            domain.append(('spell_activity_id', '=', spell_activity_id))
+        return self.env['nh.activity'].search(domain)
