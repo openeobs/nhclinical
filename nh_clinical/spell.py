@@ -269,6 +269,7 @@ class nh_clinical_spell(orm.Model):
         """
         domain = [
             ('data_model', '=', 'nh.clinical.spell'),
+            ('state', 'not in', ['completed', 'cancelled']),
             ('patient_id', '=', patient_id)
         ]
         activity_model = self.env['nh.activity']
