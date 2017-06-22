@@ -49,6 +49,10 @@ class nh_activity(orm.Model):
     _inherit = 'nh.activity'
 
     _columns = {
+        # The IDS of the users who are allocated to the location associated
+        # with this activity. When a user is allocated to a location they are
+        # automatically allocated to any activities for that location which
+        # means they have the possibility of being assigned to one of them.
         'user_ids': fields.many2many(
             'res.users', 'activity_user_rel', 'activity_id', 'user_id',
             'Users', readonly=True),

@@ -106,7 +106,9 @@ class nh_activity(orm.Model):
         # state
         'notes': fields.text('Notes'),
         'state': fields.selection(_states, 'State', readonly=True),
-        # identification
+        # ID of user assigned to this activity. For 'task' type activities a
+        # value for the user ID will result in a lock so that no-one else can
+        # operate on the task.
         'user_id': fields.many2one('res.users', 'Assignee', readonly=True),
         # system data
         'create_date': fields.datetime('Create Date', readonly=True),
