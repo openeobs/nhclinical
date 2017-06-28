@@ -273,6 +273,7 @@ class NhClinicalPatient(osv.Model):
         return super(NhClinicalPatient, self).write(
             cr, uid, ids, vals, context=context)
 
+    @api.model
     def get_patient_id_for_identifiers(
             self, hospital_number=None, nhs_number=None):
         """
@@ -288,17 +289,18 @@ class NhClinicalPatient(osv.Model):
                 'Identifiers not provided',
                 'Patient\'s NHS or Hospital numbers must be provided'
             )
-        patient_id = self.search(
-            [
-                '|',
-                ['other_identifier', '=', hospital_number],
-                ['patient_identifier', '=', nhs_number]
-            ]
-        )
+        search_filter = []
+        if hospital_number:
+            search_filter.append(['other_identifier', '=', hospital_number])
+        if nhs_number:
+            search_filter.append(['patient_identifier', '=', nhs_number])
+        if len(search_filter) > 1:
+            search_filter.insert(0, '|')
+        patient_id = self.search(search_filter)
         if not patient_id:
             raise osv.except_osv(
                 'Patient Not Found!',
-                'There is no patient with in system with credentials provided')
+                'There is no patient in system with credentials provided')
         else:
             return patient_id[0]
 
@@ -314,9 +316,8 @@ class NhClinicalPatient(osv.Model):
         :rtype: bool
         """
 
-        return super(NhClinicalPatient, self).write(cr, uid, ids,
-                                                      {'active': False},
-                                                      context=context)
+        return super(NhClinicalPatient, self).write(
+            cr, uid, ids, {'active': False}, context=context)
 
     def get_not_admitted_patient_ids(self, cr, uid, context=None):
         """Returns patients ids for patients with no open spell."""

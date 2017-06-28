@@ -63,7 +63,8 @@ class NhClinicalTestUtils(AbstractModel):
             hospital_number,
             {
                 'family_name': 'Testersen',
-                'given_name': 'Test'
+                'given_name': 'Test',
+                'patient_identifier': uuid.uuid4()
             }
         )
         return self.patient_model.browse(patient_id)

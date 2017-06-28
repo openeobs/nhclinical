@@ -26,10 +26,14 @@ class nh_clinical_api(orm.AbstractModel):
         :param data: dict of data to update/register patient with
         :param context: Odoo context
         """
-        hospital_number = data.get('hospital_number')
+        hospital_number = data.get('other_identifier')
+        nhs_number = data.get('patient_identifier')
         patient_pool = self.pool['nh.clinical.patient']
-        patient_id = patient_pool.get_patient_with_identifier(
-            hospital_number=hospital_number
+        patient_id = patient_pool.get_patient_id_for_identifiers(
+            cr, uid,
+            hospital_number=hospital_number,
+            nhs_number=nhs_number,
+            context=context
         )
         if patient_id:
             patient_pool.update(
@@ -50,7 +54,6 @@ class nh_clinical_api(orm.AbstractModel):
             hospital_number=hospital_number)
         if not patient:
             raise ValueError('No patient found for supplied hospital number')
-
 
     def update(self, cr, uid, hospital_number, data, context=None):
         """

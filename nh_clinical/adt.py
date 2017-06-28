@@ -23,19 +23,32 @@ class nh_clinical_adt_patient_register(orm.Model):
     _inherit = ['nh.activity.data']
     _description = 'ADT Patient Register'
 
-    _gender = [['BOTH', 'Both'], ['F', 'Female'], ['I', 'Intermediate'],
-               ['M', 'Male'], ['NSP', 'Not Specified'], ['U', 'Unknown']]
+    _gender = [
+        ['BOTH', 'Both'],
+        ['F', 'Female'],
+        ['I', 'Intermediate'],
+        ['M', 'Male'],
+        ['NSP', 'Not Specified'],
+        ['U', 'Unknown']
+    ]
     _ethnicity = [
-        ['A', 'White - British'], ['B', 'White - Irish'],
+        ['A', 'White - British'],
+        ['B', 'White - Irish'],
         ['C', 'White - Other background'],
         ['D', 'Mixed - White and Black Caribbean'],
         ['E', 'Mixed - White and Black African'],
-        ['F', 'Mixed - White and Asian'], ['G', 'Mixed - Other background'],
-        ['H', 'Asian - Indian'], ['J', 'Asian - Pakistani'],
-        ['K', 'Asian - Bangladeshi'], ['L', 'Asian - Other background'],
-        ['M', 'Black - Caribbean'], ['N', 'Black - African'],
-        ['P', 'Black - Other background'], ['R', 'Chinese'],
-        ['S', 'Other ethnic group'], ['Z', 'Not stated']
+        ['F', 'Mixed - White and Asian'],
+        ['G', 'Mixed - Other background'],
+        ['H', 'Asian - Indian'],
+        ['J', 'Asian - Pakistani'],
+        ['K', 'Asian - Bangladeshi'],
+        ['L', 'Asian - Other background'],
+        ['M', 'Black - Caribbean'],
+        ['N', 'Black - African'],
+        ['P', 'Black - Other background'],
+        ['R', 'Chinese'],
+        ['S', 'Other ethnic group'],
+        ['Z', 'Not stated']
     ]
 
     _columns = {
@@ -96,19 +109,32 @@ class nh_clinical_adt_patient_update(orm.Model):
     _inherit = ['nh.activity.data']
     _description = 'ADT Patient Update'
 
-    _gender = [['BOTH', 'Both'], ['F', 'Female'], ['I', 'Intermediate'],
-               ['M', 'Male'], ['NSP', 'Not Specified'], ['U', 'Unknown']]
+    _gender = [
+        ['BOTH', 'Both'],
+        ['F', 'Female'],
+        ['I', 'Intermediate'],
+        ['M', 'Male'],
+        ['NSP', 'Not Specified'],
+        ['U', 'Unknown']
+    ]
     _ethnicity = [
-        ['A', 'White - British'], ['B', 'White - Irish'],
+        ['A', 'White - British'],
+        ['B', 'White - Irish'],
         ['C', 'White - Other background'],
         ['D', 'Mixed - White and Black Caribbean'],
         ['E', 'Mixed - White and Black African'],
-        ['F', 'Mixed - White and Asian'], ['G', 'Mixed - Other background'],
-        ['H', 'Asian - Indian'], ['J', 'Asian - Pakistani'],
-        ['K', 'Asian - Bangladeshi'], ['L', 'Asian - Other background'],
-        ['M', 'Black - Caribbean'], ['N', 'Black - African'],
-        ['P', 'Black - Other background'], ['R', 'Chinese'],
-        ['S', 'Other ethnic group'], ['Z', 'Not stated']
+        ['F', 'Mixed - White and Asian'],
+        ['G', 'Mixed - Other background'],
+        ['H', 'Asian - Indian'],
+        ['J', 'Asian - Pakistani'],
+        ['K', 'Asian - Bangladeshi'],
+        ['L', 'Asian - Other background'],
+        ['M', 'Black - Caribbean'],
+        ['N', 'Black - African'],
+        ['P', 'Black - Other background'],
+        ['R', 'Chinese'],
+        ['S', 'Other ethnic group'],
+        ['Z', 'Not stated']
     ]
 
     _columns = {
@@ -125,6 +151,27 @@ class nh_clinical_adt_patient_update(orm.Model):
         'ethnicity': fields.selection(_ethnicity, string='Ethnicity'),
         'title': fields.many2one('res.partner.title', 'Title')
     }
+
+    def submit(self, cr, uid, activity_id, vals, context=None):
+        """
+        Handle submission of update data and verify it
+
+        :param vals: Values to update patient record with
+        """
+        patient_model = self.pool['nh.clinical.patient']
+        title_pool = self.pool['res.partner.title']
+        patient = patient_model.get_patient_id_for_identifiers(
+            cr, uid,
+            hospital_number=vals.get('other_identifier'),
+            nhs_number=vals.get('patient_identifier'),
+            context=context
+        )
+        vals['patient_id'] = patient.id
+        if vals.get('title') and not isinstance(vals.get('title'), int):
+            vals['title'] = title_pool.get_title_by_name(
+                cr, uid, vals['title'], context=context)
+        return super(nh_clinical_adt_patient_update, self).submit(
+            cr, uid, activity_id, vals, context=context)
 
     def complete(self, cr, uid, activity_id, context=None):
         """
@@ -213,26 +260,31 @@ class nh_clinical_adt_patient_admit(orm.Model):
         """
         user = self.pool['res.users'].browse(cr, uid, uid, context=context)
         if not user.pos_ids:
-            raise osv.except_osv('POS Missing Error!',
-                                 "POS location is not set for user.login = %s!"
-                                 % user.login)
+            raise osv.except_osv(
+                'POS Missing Error!',
+                "POS location is not set for user.login = %s!" % user.login
+            )
         if not vals.get('location'):
-            raise osv.except_osv('Admission Error!',
-                                 'Location must be set for admission!')
+            raise osv.except_osv(
+                'Admission Error!',
+                'Location must be set for admission!'
+            )
         location_pool = self.pool['nh.clinical.location']
         location_id = location_pool.get_by_code(
             cr, uid, vals['location'], auto_create=True, context=context)
         location = location_pool.browse(cr, uid, location_id, context=context)
         patient_pool = self.pool['nh.clinical.patient']
         patient_id = patient_pool.get_patient_id_for_identifiers(
+            cr, uid,
             hospital_number=vals.get('other_identifier'),
-            nhs_number=vals.get('patient_identifier')
+            nhs_number=vals.get('patient_identifier'),
+            context=context
         )
         data = vals.copy()
         data.update(
             {
                 'location_id': location_id,
-                'patient_id': patient_id,
+                'patient_id': patient_id.id,
                 'pos_id': location.pos_id.id
             }
         )
@@ -306,27 +358,40 @@ class nh_clinical_adt_patient_cancel_admit(orm.Model):
         :rtype: bool
         """
         if not vals.get('other_identifier'):
-            raise osv.except_osv('Cancel Admit Error!', 'Patient must be set!')
+            raise osv.except_osv(
+                'Cancel Admit Error!',
+                'Patient\s Hospital Number must be supplied!'
+            )
         patient_pool = self.pool['nh.clinical.patient']
         patient_id = patient_pool.get_patient_id_for_identifiers(
+            cr, uid,
             hospital_number=vals.get('other_identifier'),
-            nhs_number=vals.get('patient_identifier')
+            nhs_number=vals.get('patient_identifier'),
+            context=context
         )
         spell_pool = self.pool['nh.clinical.spell']
         activity_pool = self.pool['nh.activity']
         spell_id = spell_pool.get_by_patient_id(
-            cr, uid, patient_id, exception='False', context=context)
+            cr, uid, patient_id.id, exception='False', context=context)
         spell = spell_pool.browse(cr, uid, spell_id, context=context)
-        activity_pool.write(cr, uid, activity_id,
-                            {'parent_id': spell.activity_id.id},
-                            context=context)
+        activity_pool.write(
+            cr, uid, activity_id,
+            {
+                'parent_id': spell.activity_id.id
+            },
+            context=context)
         admission_pool = self.pool['nh.clinical.patient.admission']
         admission_id = admission_pool.get_last(
-            cr, uid, patient_id, exception='False', context=context)
+            cr, uid, patient_id.id, exception='False', context=context)
         data = vals.copy()
-        data.update({'patient_id': patient_id, 'admission_id': admission_id})
-        return super(nh_clinical_adt_patient_cancel_admit, self).submit(
-            cr, uid, activity_id, data, context=context)
+        data.update(
+            {
+                'patient_id': patient_id.id,
+                'admission_id': admission_id
+            }
+        )
+        return super(nh_clinical_adt_patient_cancel_admit, self) \
+            .submit(cr, uid, activity_id, data, context=context)
 
     def complete(self, cr, uid, activity_id, context=None):
         """
@@ -388,8 +453,10 @@ class nh_clinical_adt_patient_discharge(orm.Model):
         data = vals.copy()
         patient_pool = self.pool['nh.clinical.patient']
         patient_id = patient_pool.get_patient_id_for_identifiers(
+            cr, uid,
             hospital_number=vals.get('other_identifier'),
-            nhs_number=vals.get('patient_identifier')
+            nhs_number=vals.get('patient_identifier'),
+            context=context
         )
         if vals.get('discharge_date'):
             discharge_date = vals.get('discharge_date')
@@ -398,22 +465,29 @@ class nh_clinical_adt_patient_discharge(orm.Model):
 
         spell_pool = self.pool['nh.clinical.spell']
         activity_pool = self.pool['nh.activity']
-        spell_id = spell_pool.get_by_patient_id(cr, uid, patient_id,
-                                                context=context)
+        spell_id = spell_pool.get_by_patient_id(
+            cr, uid, patient_id.id, context=context)
+        if not vals.get('location'):
+            raise osv.except_osv(
+                'Discharge Error!',
+                'Missing location!')
         if not spell_id:
-            if not vals.get('location'):
-                raise osv.except_osv(
-                    'Discharge Error!',
-                    'Missing location and patient is not admitted!')
             discharged = activity_pool.search(
-                cr, uid, [
+                cr, uid,
+                [
                     ['data_model', '=', 'nh.clinical.spell'],
-                    ['patient_id', '=', patient_id],
+                    ['patient_id', '=', patient_id.id],
                     ['state', '=', 'completed']
                 ], context=context)
             if discharged:
-                raise osv.except_osv('Discharge Error!',
-                                     'Patient is already discharged!')
+                raise osv.except_osv(
+                    'Discharge Error!',
+                    'Patient is already discharged!'
+                )
+            # else:
+            #     raise osv.except_osv(
+            #         'Discharge Error!',
+            #         'Patient is not admitted!')
             _logger.warn("Patient admitted from a discharge call!")
             location_pool = self.pool['nh.clinical.location']
             location_id = location_pool.get_by_code(
@@ -424,7 +498,7 @@ class nh_clinical_adt_patient_discharge(orm.Model):
             admission_pool = self.pool['nh.clinical.patient.admission']
             admission_data = {
                 'pos_id': location.pos_id.id,
-                'patient_id': patient_id,
+                'patient_id': patient_id.id,
                 'location_id': location_id,
             }
             admission_id = admission_pool.create_activity(
@@ -432,15 +506,22 @@ class nh_clinical_adt_patient_discharge(orm.Model):
                 context=context)
             activity_pool.complete(cr, uid, admission_id, context=context)
             spell_id = spell_pool.get_by_patient_id(
-                cr, uid, patient_id, exception='False', context=context)
+                cr, uid, patient_id.id, exception='False', context=context)
         spell = spell_pool.browse(cr, uid, spell_id, context=context)
-        data.update({'patient_id': patient_id,
-                     'discharge_date': discharge_date})
+        data.update(
+            {
+                'patient_id': patient_id.id,
+                'discharge_date': discharge_date
+            }
+        )
         activity_pool.write(
-            cr, uid, activity_id, {'parent_id': spell.activity_id.id},
+            cr, uid, activity_id,
+            {
+                'parent_id': spell.activity_id.id
+            },
             context=context)
-        return super(nh_clinical_adt_patient_discharge, self).submit(
-            cr, uid, activity_id, data, context=context)
+        return super(nh_clinical_adt_patient_discharge, self) \
+            .submit(cr, uid, activity_id, data, context=context)
 
     def complete(self, cr, uid, activity_id, context=None):
         """
@@ -496,16 +577,23 @@ class nh_clinical_adt_patient_cancel_discharge(orm.Model):
         """
         patient_pool = self.pool['nh.clinical.patient']
         patient_id = patient_pool.get_patient_id_for_identifiers(
+            cr, uid,
             hospital_number=vals.get('other_identifier'),
-            nhs_number=vals.get('patient_identifier')
+            nhs_number=vals.get('patient_identifier'),
+            context=context
         )
         discharge_pool = self.pool['nh.clinical.patient.discharge']
         discharge_id = discharge_pool.get_last(
-            cr, uid, patient_id, exception='False', context=context)
+            cr, uid, patient_id.id, exception='False', context=context)
         data = vals.copy()
-        data.update({'patient_id': patient_id, 'discharge_id': discharge_id})
-        return super(nh_clinical_adt_patient_cancel_discharge, self).submit(
-            cr, uid, activity_id, data, context=context)
+        data.update(
+            {
+                'patient_id': patient_id.id,
+                'discharge_id': discharge_id
+            }
+        )
+        return super(nh_clinical_adt_patient_cancel_discharge, self) \
+            .submit(cr, uid, activity_id, data, context=context)
 
     def complete(self, cr, uid, activity_id, context=None):
         """
@@ -517,15 +605,17 @@ class nh_clinical_adt_patient_cancel_discharge(orm.Model):
         :returns: ``True``
         :rtype: bool
         """
-        res = super(nh_clinical_adt_patient_cancel_discharge, self).complete(
-            cr, uid, activity_id, context=context)
+        res = super(nh_clinical_adt_patient_cancel_discharge, self) \
+            .complete(cr, uid, activity_id, context=context)
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
-        activity_pool.cancel(cr, uid, activity.data_ref.discharge_id.id,
-                             context=context)
+        activity_pool.cancel(
+            cr, uid, activity.data_ref.discharge_id.id, context=context)
         activity_pool.write(
             cr, uid, activity_id,
-            {'parent_id': activity.data_ref.discharge_id.parent_id.id},
+            {
+                'parent_id': activity.data_ref.discharge_id.parent_id.id
+            },
             context=context)
         return res
 
@@ -586,26 +676,31 @@ class nh_clinical_adt_patient_transfer(orm.Model):
             olocation_id = False
 
         patient_pool = self.pool['nh.clinical.patient']
-        patient_id = patient_pool.get_patient_id_for_identifiers(
+        patient = patient_pool.get_patient_id_for_identifiers(
+            cr, uid,
             hospital_number=vals.get('other_identifier'),
-            nhs_number=vals.get('patient_identifier')
+            nhs_number=vals.get('patient_identifier'),
+            context=context
         )
         spell_pool = self.pool['nh.clinical.spell']
         activity_pool = self.pool['nh.activity']
-        spell_id = spell_pool.get_by_patient_id(cr, uid, patient_id,
-                                                context=context)
+        spell_id = spell_pool.get_by_patient_id(
+            cr, uid, patient.id, context=context)
         if not spell_id:
             if olocation_id:
                 api = self.pool['nh.clinical.api']
-                api.admit(cr, uid, vals['other_identifier'],
-                          {'location': vals['original_location']},
-                          context=context)
-                spell_id = spell_pool.get_by_patient_id(cr, uid, patient_id,
-                                                        context=context)
+                api.admit(
+                    cr, uid,
+                    vals['other_identifier'],
+                    {
+                        'location': vals['original_location']
+                    },
+                    context=context)
+                spell_id = spell_pool.get_by_patient_id(
+                    cr, uid, patient.id, context=context)
             else:
                 raise osv.except_osv(
                     'Transfer Error!',
-                    'Patient does not have an open spell.'
                     'No origin location provided.')
         spell = spell_pool.browse(cr, uid, spell_id, context=context)
         activity_pool.write(
@@ -615,7 +710,7 @@ class nh_clinical_adt_patient_transfer(orm.Model):
         data.update({
             'location_id': location_id,
             'origin_location_id': olocation_id,
-            'patient_id': patient_id
+            'patient_id': patient.id
         })
         return super(nh_clinical_adt_patient_transfer, self).submit(
             cr, uid, activity_id, data, context=context)
@@ -674,15 +769,21 @@ class nh_clinical_adt_patient_cancel_transfer(orm.Model):
         :rtype: bool
         """
         patient_pool = self.pool['nh.clinical.patient']
-        patient_id = patient_pool.get_patient_id_for_identifiers(
+        patient = patient_pool.get_patient_id_for_identifiers(
+            cr, uid,
             hospital_number=vals.get('other_identifier'),
-            nhs_number=vals.get('patient_identifier')
+            nhs_number=vals.get('patient_identifier'),
+            context=context
         )
         transfer_pool = self.pool['nh.clinical.patient.transfer']
         transfer_id = transfer_pool.get_last(
-            cr, uid, patient_id, exception='False', context=context)
+            cr, uid, patient.id, exception='False', context=context)
         data = vals.copy()
-        data.update({'patient_id': patient_id, 'transfer_id': transfer_id})
+        data.update(
+            {'patient_id': patient.id,
+             'transfer_id': transfer_id
+             }
+        )
         return super(nh_clinical_adt_patient_cancel_transfer, self).submit(
             cr, uid, activity_id, data, context=context)
 
@@ -702,9 +803,12 @@ class nh_clinical_adt_patient_cancel_transfer(orm.Model):
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
         cancel = activity.data_ref
         activity_pool.cancel(cr, uid, cancel.transfer_id.id, context=context)
-        activity_pool.write(cr, uid, activity_id,
-                            {'parent_id': cancel.transfer_id.parent_id.id},
-                            context=context)
+        activity_pool.write(
+            cr, uid, activity_id,
+            {
+                'parent_id': cancel.transfer_id.parent_id.id
+            },
+            context=context)
         return res
 
 
@@ -760,29 +864,35 @@ class nh_clinical_adt_spell_update(orm.Model):
             cr, uid, vals['location'], auto_create=True, context=context)
         location = location_pool.browse(cr, uid, location_id, context=context)
         patient_pool = self.pool['nh.clinical.patient']
-        patient_id = patient_pool.get_patient_id_for_identifiers(
+        patient = patient_pool.get_patient_id_for_identifiers(
+            cr, uid,
             hospital_number=vals.get('other_identifier'),
-            nhs_number=vals.get('patient_identifier')
+            nhs_number=vals.get('patient_identifier'),
+            context=context
         )
         spell_pool = self.pool['nh.clinical.spell']
         activity_pool = self.pool['nh.activity']
-        spell_id = spell_pool.get_by_patient_id(cr, uid, patient_id,
-                                                context=context)
+        spell_id = spell_pool.get_by_patient_id(
+            cr, uid, patient.id, context=context)
         if not spell_id:
-            raise osv.except_osv('Update Error!',
-                                 'The patient does not have an open spell!')
+            raise osv.except_osv(
+                'Update Error!',
+                'The patient does not have an open spell!')
         spell = spell_pool.browse(cr, uid, spell_id, context=context)
-        activity_pool.write(cr, uid, activity_id,
-                            {'parent_id': spell.activity_id.id},
-                            context=context)
+        activity_pool.write(
+            cr, uid, activity_id,
+            {
+                'parent_id': spell.activity_id.id
+            },
+            context=context)
         data = vals.copy()
         data.update({
             'location_id': location_id,
-            'patient_id': patient_id,
+            'patient_id': patient.id,
             'pos_id': location.pos_id.id
         })
-        return super(nh_clinical_adt_spell_update, self).submit(
-            cr, uid, activity_id, data, context=context)
+        return super(nh_clinical_adt_spell_update, self) \
+            .submit(cr, uid, activity_id, data, context=context)
 
     def complete(self, cr, uid, activity_id, context=None):
         """
@@ -802,8 +912,8 @@ class nh_clinical_adt_spell_update(orm.Model):
         :returns: ``True``
         :rtype: bool
         """
-        res = super(nh_clinical_adt_spell_update, self).complete(
-            cr, uid, activity_id, context=context)
+        res = super(nh_clinical_adt_spell_update, self) \
+            .complete(cr, uid, activity_id, context=context)
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
         update = activity.data_ref
@@ -815,31 +925,42 @@ class nh_clinical_adt_spell_update(orm.Model):
         if update.doctors:
             doctor_pool = self.pool['nh.clinical.doctor']
             update_data.update({'doctors': update.doctors})
-            doctor_pool.evaluate_doctors_dict(cr, uid, update_data,
-                                              context=context)
+            doctor_pool.evaluate_doctors_dict(
+                cr, uid, update_data, context=context)
             del update_data['doctors']
         else:
             update_data.update(
-                {'con_doctor_ids': [[5]], 'ref_doctor_ids': [[5]]})
-        activity_pool.submit(cr, uid, activity.parent_id.id, update_data,
-                             context=context)
+                {
+                    'con_doctor_ids': [[5]],
+                    'ref_doctor_ids': [[5]]
+                }
+            )
+        activity_pool.submit(
+            cr, uid, activity.parent_id.id, update_data, context=context)
         location_pool = self.pool['nh.clinical.location']
         if not location_pool.is_child_of(
-                cr, uid, activity.parent_id.location_id.id, update.location,
+                cr, uid,
+                activity.parent_id.location_id.id,
+                update.location,
                 context=context):
             move_pool = self.pool['nh.clinical.patient.move']
-            move_activity_id = move_pool.create_activity(cr, SUPERUSER_ID, {
-                'parent_id': activity.parent_id.id,
-                'creator_id': activity_id
-            }, {
-                'patient_id': update.patient_id.id,
-                'location_id': update.location_id.id
-            }, context=context)
-            activity_pool.complete(cr, SUPERUSER_ID, move_activity_id,
-                                   context=context)
+            move_activity_id = move_pool.create_activity(
+                cr, SUPERUSER_ID,
+                {
+                    'parent_id': activity.parent_id.id,
+                    'creator_id': activity_id
+                },
+                {
+                    'patient_id': update.patient_id.id,
+                    'location_id': update.location_id.id
+                },
+                context=context)
+            activity_pool.complete(
+                cr, SUPERUSER_ID, move_activity_id, context=context)
             # trigger transfer policy activities
             self.trigger_policy(
-                cr, uid, activity_id, location_id=update.location_id.id,
+                cr, uid, activity_id,
+                location_id=update.location_id.id,
                 context=context)
         return res
 
@@ -874,17 +995,21 @@ class nh_clinical_adt_patient_merge(orm.Model):
         patient_pool = self.pool['nh.clinical.patient']
         data = vals.copy()
         if data.get('from_identifier'):
-            from_id = patient_pool.get_patient_id_for_identifiers(
-                hospital_number=data.get('other_identifier')
+            from_patient = patient_pool.get_patient_id_for_identifiers(
+                cr, uid,
+                hospital_number=data.get('from_identifier'),
+                context=context
             )
-            data.update({'source_patient_id': from_id})
+            data.update({'source_patient_id': from_patient.id})
         if data.get('into_identifier'):
-            into_id = patient_pool.get_patient_id_for_identifiers(
-                hospital_number=data.get('other_identifier')
+            into_patient = patient_pool.get_patient_id_for_identifiers(
+                cr, uid,
+                hospital_number=data.get('into_identifier'),
+                context=context
             )
-            data.update({'dest_patient_id': into_id})
-        return super(nh_clinical_adt_patient_merge, self).submit(
-            cr, uid, activity_id, data, context=context)
+            data.update({'dest_patient_id': into_patient.id})
+        return super(nh_clinical_adt_patient_merge, self) \
+            .submit(cr, uid, activity_id, data, context=context)
 
     def complete(self, cr, uid, activity_id, context=None):
         """

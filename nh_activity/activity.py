@@ -28,13 +28,14 @@ def data_model_event(callback=None):
         @wraps(func)
         def wrapper(*args, **kwargs):
             v8_api = False
-            if isinstance(args[1], int):
+            if hasattr(args[0], 'env'):
                 self = args[0]
-                activity_id = args[1]
+                activity_id = self._ids
                 v8_api = True
             else:
                 self, cr, uid, activity_id = args[:4]
-            if isinstance(activity_id, list) and len(activity_id) == 1:
+            if isinstance(activity_id, (list, tuple)) \
+                    and len(activity_id) == 1:
                 activity_id = activity_id[0]
             if not isinstance(activity_id, (int, long)):
                 raise osv.except_osv(
@@ -51,13 +52,14 @@ def data_model_event(callback=None):
                 activity = self.browse(cr, uid, activity_id)
             data_model = self.pool[activity.data_model]
             if v8_api:
-                func(self, self._cr, self._uid, *args[1:], **kwargs)
+                func(self, self._cr, self._uid,
+                     activity_id, *args[1:], **kwargs)
             else:
                 func(*args, **kwargs)
             data_model_function = getattr(data_model, func.__name__)
             if v8_api:
                 res = data_model_function(
-                    self._cr, self._uid, *args[1:], **kwargs)
+                    self._cr, self._uid, activity_id, *args[1:], **kwargs)
             else:
                 res = data_model_function(*args[1:], **kwargs)
             return res
@@ -516,12 +518,18 @@ class nh_activity_data(orm.AbstractModel):
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
         self.check_action(activity.state, 'complete')
-        activity_pool.write(cr, uid, activity.id,
-                            {'state': 'completed', 'terminate_uid': uid,
-                             'date_terminated': datetime.now().strftime(DTF)},
-                            context=context)
-        _logger.debug("activity '%s', activity.id=%s completed",
-                      activity.data_model, activity.id)
+        activity_pool.write(
+            cr, uid, activity.id,
+            {
+                'state': 'completed',
+                'terminate_uid': uid,
+                'date_terminated': datetime.now().strftime(DTF)
+            },
+            context=context)
+        _logger.debug(
+            "activity '%s', activity.id=%s completed",
+            activity.data_model, activity.id
+        )
         return True
 
     def assign(self, cr, uid, activity_id, user_id, context=None):
