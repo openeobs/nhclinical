@@ -31,7 +31,7 @@ class TestAdtPatientCancelAdmit(TransactionCase):
             activity.submit({})
         self.assertEqual(
             error.exception.value,
-            'Patient\s Hospital Number must be supplied!'
+            "Patient's Hospital Number must be supplied!"
         )
 
     def test_raises_error_on_unadmitted_patient(self):
@@ -82,5 +82,5 @@ class TestAdtPatientCancelAdmit(TransactionCase):
             self.cancel_model.create_activity({}, cancel_admit_data)
         self.assertEqual(
             error.exception.value,
-            'Patient\s Hospital Number must be supplied!'
+            "Patient's Hospital Number must be supplied!"
         )

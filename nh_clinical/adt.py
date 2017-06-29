@@ -360,7 +360,7 @@ class nh_clinical_adt_patient_cancel_admit(orm.Model):
         if not vals.get('other_identifier'):
             raise osv.except_osv(
                 'Cancel Admit Error!',
-                'Patient\s Hospital Number must be supplied!'
+                "Patient's Hospital Number must be supplied!"
             )
         patient_pool = self.pool['nh.clinical.patient']
         patient_id = patient_pool.get_patient_id_for_identifiers(
