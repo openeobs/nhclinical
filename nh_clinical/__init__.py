@@ -1,7 +1,6 @@
 # Part of NHClinical. See LICENSE file for full copyright and licensing details
 # -*- coding: utf-8 -*-
 from . import activity_extension
-from . import api
 from . import auditing
 from . import context
 from . import devices
