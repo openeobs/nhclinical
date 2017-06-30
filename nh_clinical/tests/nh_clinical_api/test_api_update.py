@@ -57,7 +57,7 @@ class TestApiUpdate(TransactionCase):
         self.assertTrue(activity.id, msg="Update Activity not generated")
         self.assertEqual(activity.state, 'completed')
 
-    def test_registers_no_existant_patient(self):
+    def test_registers_nonexistent_patient(self):
         """
         Test that on trying up update a patient that does not exist it instead
         registers that patient
