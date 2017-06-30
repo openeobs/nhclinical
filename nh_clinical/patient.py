@@ -49,14 +49,31 @@ class NhClinicalPatient(osv.Model):
         )
     ]
 
+    def _validate_indentifiers(self, vals):
+        """
+        Validate that the value dict has at least one of:
+        - NHS Number
+        - Hospital Number
+
+        :param vals: dictionary of patient values
+        :return: True
+        """
+        if not vals.get('patient_identifier') and not \
+                vals.get('other_identifier'):
+            raise ValidationError(
+                'Patient record must have NHS and/or Hospital number')
+        return True
+
     @api.constrains('patient_identifier', 'other_identifier')
     def _check_identifiers_defined(self):
         """
         Check that the record contains at least an NHS or Hospital number
         """
-        if not self.patient_identifier and not self.other_identifier:
-            raise ValidationError(
-                'Patient record must have NHS and/or Hospital number')
+        vals_dict = {
+            'patient_identifier': self.patient_identifier,
+            'other_identifier': self.other_identifier
+        }
+        self._validate_indentifiers(vals_dict)
 
     def _get_fullname(self, vals, fmt='{fn}, {gn} {mn}'):
         """
@@ -251,6 +268,7 @@ class NhClinicalPatient(osv.Model):
         :returns: ``True`` if created
         :rtype: bool
         """
+        self._validate_indentifiers(vals)
         if not vals.get('name'):
             vals.update({'name': self._get_fullname(vals)})
         return super(NhClinicalPatient, self).create(

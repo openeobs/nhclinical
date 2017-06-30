@@ -3,7 +3,6 @@
 import logging
 
 from openerp.tests import common
-from openerp.osv.orm import except_orm
 
 _logger = logging.getLogger(__name__)
 
@@ -55,74 +54,6 @@ class TestClinicalPatient(common.SingleTransactionCase):
         # unlink sets the field 'active' to False, making it invisible to users
         self.assertFalse(
             self.patient_pool.browse(cr, uid, [patient_id]).active)
-
-    def test_08_check_data(self):
-        cr, uid = self.cr, self.uid
-
-        data = {
-            'family_name': 'Family',
-            'given_name': 'Given',
-            'middle_names': 'Middle Names',
-            'dob': '2000-01-01 00:00:00',
-            'sex': 'U',
-            'gender': 'U',
-            'ethnicity': 'Z'
-        }
-
-        # Scenario 1: Data without Hospital number and NHS number
-        with self.assertRaises(except_orm):
-            self.patient_pool.check_data(cr, uid, data)
-
-        # Scenario 2: Data with an existing Hospital number
-        data.update({'other_identifier': 'TESTHN001'})
-        with self.assertRaises(except_orm):
-            self.patient_pool.check_data(cr, uid, data)
-
-        # Scenario 3: Data with an existing NHS number
-        data.update({'other_identifier': 'TESTHN009',
-                     'patient_identifier': 'TESTPI001'})
-        with self.assertRaises(except_orm):
-            self.patient_pool.check_data(cr, uid, data)
-
-        # Scenario 4: Correct create data with title
-        data.update({'patient_identifier': 'TESTNHS09', 'title': 'Mr.'})
-        self.assertTrue(self.patient_pool.check_data(cr, uid, data))
-        self.assertTrue(isinstance(data.get('title'), int))
-
-        # Scenario 5:
-        # Update data, no existing patient with Hospital Number or NHS Number.
-        data.update({'other_identifier': 'TESTHN008',
-                     'patient_identifier': 'TESTNHS08'})
-        with self.assertRaises(except_orm):
-            self.patient_pool.check_data(cr, uid, data, create=False)
-
-        # Scenario 6: Update data, no existing patient with Hospital Number
-        data.update({'other_identifier': 'TESTHN008'})
-        with self.assertRaises(except_orm):
-            self.patient_pool.check_data(cr, uid, data, create=False)
-        self.assertFalse(self.patient_pool.check_data(
-            cr, uid, data, create=False, exception=False))
-
-        # Scenario 7: Update data, no existing patient with NHS Number
-        data.update({'patient_identifier': 'TESTNHS08'})
-        with self.assertRaises(except_orm):
-            self.patient_pool.check_data(cr, uid, data, create=False)
-        self.assertFalse(self.patient_pool.check_data(
-            cr, uid, data, create=False, exception=False))
-
-        # Scenario 8: Update data, 2 identifiers for 2 different patients
-        data.update({'other_identifier': 'TESTHN001',
-                     'patient_identifier': 'TESTPI001'})
-        with self.assertRaises(except_orm):
-            self.patient_pool.check_data(cr, uid, data, create=False)
-        self.assertFalse(self.patient_pool.check_data(
-            cr, uid, data, create=False, exception=False))
-
-        # Scenario 9: Correct update data
-        data.update({'other_identifier': 'TESTHN009'})
-        self.assertTrue(self.patient_pool.check_data(cr, uid, data,
-                                                     create=False))
-        self.assertTrue(data.get('patient_id'))
 
     def test_get_not_admitted_patient_ids_gets_patients_no_started_spell(self):
         cr, uid = self.cr, self.uid

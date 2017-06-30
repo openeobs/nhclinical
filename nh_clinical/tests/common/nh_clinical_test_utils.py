@@ -58,13 +58,13 @@ class NhClinicalTestUtils(AbstractModel):
         self.api_model = self.env['nh.clinical.api']
         self.patient_model = self.env['nh.clinical.patient']
 
-        hospital_number = uuid.uuid4()
+        hospital_number = str(uuid.uuid4())
         patient_id = self.api_model.sudo().register(
             hospital_number,
             {
                 'family_name': 'Testersen',
                 'given_name': 'Test',
-                'patient_identifier': uuid.uuid4()
+                'patient_identifier': str(uuid.uuid4())
             }
         )
         return self.patient_model.browse(patient_id)
