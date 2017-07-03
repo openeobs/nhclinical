@@ -51,6 +51,8 @@ install:
 - pip install -r ${HOME}/maintainer-quality-tools/requirements.txt
 - export PATH=${HOME}/maintainer-quality-tools/travis:${PATH}
 - travis_install_nightly
+before_script:
+- npm install -g gulp-cli
 script:
 - travis_run_tests
 after_script:
