@@ -17,6 +17,8 @@ addons:
   apt:
     packages:
     - expect-dev
+    # TODO Investigate if this is needed. Stopped working in Travis so we
+    # added a pip install line for it, but may be used elsewhere in the stack.
     - python-lxml
     - python-simplejson
     - python-serial
@@ -29,8 +31,8 @@ env:
     EXCLUDE="xml_test_output" PYLINT_PR_CONFIG_FILE="travis_run_pylint.cfg"
   matrix:
   - LINT_CHECK="1"
-  - ODOO_REPO="valdecdev/odoo" RUN_PIPELINE="1" TESTS="1" INCLUDE="nh_odoo_fixes,nh_activity,nh_clinical,nh_clinical_ldap"
-    VERSION="openeobs-8-12"
+  - ODOO_REPO="bjss/odoo" RUN_PIPELINE="1" TESTS="1" INCLUDE="nh_odoo_fixes,nh_activity,nh_clinical,nh_clinical_ldap"
+    VERSION="liveobs_1.0"
 virtualenv:
   system_site_packages: true
 before_install:
@@ -45,11 +47,14 @@ install:
 - pip install -r requirements.txt
 # Install a pinned version of the Pillow so when OCA's requirements.txt is installed the dependency at this particular version is met
 - pip install Pillow==2.5.1
+- pip install lxml==3.8.0
 - git clone --depth=1 https://github.com/NeovaHealth/maintainer-quality-tools.git
   ${HOME}/maintainer-quality-tools
 - pip install -r ${HOME}/maintainer-quality-tools/requirements.txt
 - export PATH=${HOME}/maintainer-quality-tools/travis:${PATH}
 - travis_install_nightly
+before_script:
+- npm install -g gulp-cli
 script:
 - travis_run_tests
 after_script:
