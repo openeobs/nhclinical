@@ -1,5 +1,4 @@
 from openerp.tests.common import TransactionCase
-from openerp.osv.orm import except_orm
 
 
 class TestGetFullname(TransactionCase):
@@ -87,32 +86,6 @@ class TestGetFullname(TransactionCase):
             middle_names=''
         )
         self.assertEquals(',', self.patient_model._get_fullname(name))
-
-    def test_no_names_none(self):
-        """ Test get_fullname with None as names """
-        with self.assertRaises(except_orm):
-            name = dict(
-                family_name=None,
-                given_name=None,
-                middle_names=None
-            )
-            self.patient_model._get_fullname(name)
-
-    def test_no_names_false(self):
-        """ Test get_fullname with False as names """
-        with self.assertRaises(except_orm):
-            name = dict(
-                family_name=False,
-                given_name='',
-                middle_names=''
-            )
-            self.assertEquals(',', self.patient_model._get_fullname(name))
-
-    def test_no_names_dict(self):
-        """ Test get_fullname with {} as names """
-        with self.assertRaises(except_orm):
-            name = dict()
-            self.assertEquals(',', self.patient_model._get_fullname(name))
 
     def test_none_middle_name_not_none(self):
         """ Test get_fullname with middle name as None """

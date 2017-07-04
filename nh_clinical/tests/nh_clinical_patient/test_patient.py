@@ -30,7 +30,12 @@ class TestClinicalPatient(common.SingleTransactionCase):
 
         # test when 'name' is in vals
         patient_id = self.patient_pool.create(
-            cr, uid, {'other_identifier': 'TESTHN005', 'name': 'Smith, John'})
+            cr, uid, {
+                'other_identifier': 'TESTHN005',
+                'name': 'Smith, John',
+                'given_name': 'John',
+                'family_name': 'Smith'
+            })
         patient = self.patient_pool.browse(cr, uid, [patient_id])
         self.assertEquals('Smith, John', patient.name)
 

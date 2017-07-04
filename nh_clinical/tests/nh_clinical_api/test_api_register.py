@@ -42,10 +42,11 @@ class TestApiRegister(TransactionCase):
         self.assertTrue(activity, msg="Register Activity not generated")
         self.assertEqual(activity.state, 'completed')
 
-    def test_register_patient_with_nhs_num(self):
+    def test_register_patient_with_vals_dict(self):
         """ Test that we can register a patient with an NHS number """
         patient_data = {
             'patient_identifier': self.patient_identifier,
+            'other_identifier': self.patient_identifier,
             'family_name': "Fname2",
             'given_name': 'Gname2',
             'gender': 'F',

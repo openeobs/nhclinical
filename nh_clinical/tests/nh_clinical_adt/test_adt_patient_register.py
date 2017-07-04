@@ -69,6 +69,7 @@ class TestAdtPatientRegister(TransactionCase):
             'family_name': 'Family',
             'given_name': 'Given',
             'patient_identifier': 'TEST001',
+            'other_identifier': 'TEST0001',
             'dob': '1984-10-01 00:00:00',
             'gender': 'M',
             'sex': 'M'
@@ -118,7 +119,7 @@ class TestAdtPatientRegister(TransactionCase):
             register_activity.complete()
         self.assertEqual(
             error.exception.value,
-            'Patient must have a full name!'
+            'Patient record must have valid Given and Family Names'
         )
 
     @mute_logger('openerp.sql_db')
@@ -130,6 +131,7 @@ class TestAdtPatientRegister(TransactionCase):
             'family_name': 'Family',
             'given_name': 'Given',
             'patient_identifier': 'TEST001',
+            'other_identifier': 'TEST0001',
             'dob': '1984-10-01 00:00:00',
             'gender': 'M',
             'sex': 'M'

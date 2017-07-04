@@ -36,10 +36,11 @@ class TestApiUpdate(TransactionCase):
         self.assertTrue(activity, msg="Update Activity not generated")
         self.assertEqual(activity.state, 'completed')
 
-    def test_update_with_nhs_number(self):
+    def test_update_with_vals_dict(self):
         """ Test can update patient using NHS number """
         patient_data = {
             'patient_identifier': self.nhs_number,
+            'other_identifier': self.hospital_number,
             'family_name': "Fname20",
             'given_name': 'Gname20',
             'dob': '1988-08-14 18:00:00',

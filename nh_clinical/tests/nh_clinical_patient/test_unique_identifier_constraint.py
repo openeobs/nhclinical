@@ -71,7 +71,10 @@ class TestUniqueIdentifierConstraint(TransactionCase):
         vals = self.patient_data.copy()
         vals.update(
             {
-                'patient_identifier': self.existing_nhs_number
+                'patient_identifier': self.existing_nhs_number,
+                'other_identifier': 'test_hospital_number',
+                'given_name': 'Test',
+                'family_name': 'Patient'
             }
         )
         with self.assertRaises(IntegrityError) as error:
@@ -91,7 +94,9 @@ class TestUniqueIdentifierConstraint(TransactionCase):
         with self.assertRaises(IntegrityError) as error:
             second_patient.write(
                 {
-                    'other_identifier': self.existing_hospital_number
+                    'other_identifier': self.existing_hospital_number,
+                    'given_name': 'Test',
+                    'family_name': 'Patient'
                 }
             )
         self.assertTrue(
@@ -109,30 +114,14 @@ class TestUniqueIdentifierConstraint(TransactionCase):
         with self.assertRaises(IntegrityError) as error:
             second_patient.write(
                 {
-                    'patient_identifier': self.existing_nhs_number
+                    'patient_identifier': self.existing_nhs_number,
+                    'given_name': 'Test',
+                    'family_name': 'Patient'
                 }
             )
         self.assertTrue(
             'duplicate key value violates unique constraint' in
             error.exception.message
-        )
-
-    def test_raises_on_write_with_no_patient_identifiers(self):
-        """
-        Test that an exception is raise is a patient record is written to and
-        neither the NHS or Hospital number is passed
-        """
-        with self.assertRaises(except_orm) as error:
-            self.test_utils.patient.write(
-                {
-                    'given_name': 'Joe Bob',
-                    'patient_identifier': '',
-                    'other_identifier': None
-                }
-            )
-        self.assertEqual(
-            error.exception.value,
-            'Patient record must have NHS and/or Hospital number'
         )
 
     def test_create_new_patient(self):
@@ -142,7 +131,9 @@ class TestUniqueIdentifierConstraint(TransactionCase):
         vals = self.patient_data.copy()
         vals.update(
             {
-                'other_identifier': str(uuid4())
+                'other_identifier': str(uuid4()),
+                'given_name': 'Test',
+                'family_name': 'Patient'
             }
         )
         patient = self.patient_model.create(vals)
@@ -155,7 +146,7 @@ class TestUniqueIdentifierConstraint(TransactionCase):
         self.test_utils.patient.write(
             {
                 'given_name': 'Joe Bob',
-                'title': 'Mr'
+                'title': 'Mr',
             }
         )
         self.assertEqual(self.test_utils.patient.given_name, 'Joe Bob')

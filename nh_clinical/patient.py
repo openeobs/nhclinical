@@ -8,6 +8,7 @@ from openerp.osv import fields, osv
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
 from openerp import api
 from openerp.exceptions import ValidationError
+from openerp.addons.nh_odoo_fixes.validate import validate_non_empty_string
 
 _logger = logging.getLogger(__name__)
 
@@ -64,18 +65,47 @@ class NhClinicalPatient(osv.Model):
                 'Patient record must have NHS and/or Hospital number')
         return True
 
+    def _validate_name(self, vals):
+        """
+        Validate that the value dict has both:
+        - given_name
+        - family_name
+
+        :param vals: dictionary of patient values
+        :return: True
+        """
+        if not vals.get('given_name') or not vals.get('family_name'):
+            raise ValidationError(
+                'Patient record must have valid Given and Family Names'
+            )
+        return True
+
     @api.constrains('patient_identifier', 'other_identifier')
     def _check_identifiers_defined(self):
         """
         Check that the record contains at least an NHS or Hospital number
         """
         vals_dict = {
-            'patient_identifier': self.patient_identifier,
-            'other_identifier': self.other_identifier
+            'patient_identifier':
+                validate_non_empty_string(self.patient_identifier),
+            'other_identifier':
+                validate_non_empty_string(self.other_identifier)
         }
         self._validate_indentifiers(vals_dict)
 
-    def _get_fullname(self, vals, fmt='{fn}, {gn} {mn}'):
+    @api.constrains('given_name', 'family_name')
+    def _check_patient_names(self):
+        """
+        Check that the patient's name is actually set as Odoo's required flag
+        can be fooled by a string made of just spaces
+        """
+        vals = {
+            'given_name': validate_non_empty_string(self.given_name),
+            'family_name': validate_non_empty_string(self.family_name)
+        }
+        self._validate_name(vals)
+
+    def _get_fullname(self, vals, fmt=None):
         """
         Formats a fullname string from family, given and middle names.
 
@@ -88,22 +118,19 @@ class NhClinicalPatient(osv.Model):
         :returns: fullname
         :rtype: string
         """
-
-        # for k in ['family_name', 'given_name', 'middle_names']:
-        #     if k not in vals or vals[k] in [None, False]:
-        #         vals.update({k: ''})
-        for k in ['family_name', 'given_name']:
-            if k not in vals or vals[k] in [None, False]:
-                raise osv.except_osv(
-                    'Integrity Error!',
-                    'Patient must have a full name!')
-        middle_names = vals.get('middle_names')
-        if not middle_names:
-            middle_names = ''
-
-        return ' '.join(fmt.format(fn=vals.get('family_name'),
-                                   gn=vals.get('given_name'),
-                                   mn=middle_names).split())
+        if not fmt:
+            fmt = '{family_name}, {given_name} {middle_names}'
+        name = {
+            k: vals.get(k) for k in (
+                'family_name',
+                'given_name',
+                'middle_names'
+            )
+        }
+        for key, value in name.items():
+            if not validate_non_empty_string(value):
+                name[key] = ''
+        return ' '.join(fmt.format(**name).split())
 
     def _get_name(self, cr, uid, ids, fn, args, context=None):
         """
@@ -204,11 +231,14 @@ class NhClinicalPatient(osv.Model):
         'ethnicity': fields.selection(_ethnicity, 'Ethnicity'),
         'patient_identifier': fields.char('NHS Number', size=100,
                                           select=True, help="NHS Number"),
-        'other_identifier': fields.char('Hospital Number', size=100,
-                                        select=True, help="Hospital Number"),
-        'given_name': fields.char('Given Name', size=200),
+        'other_identifier': fields.char(
+            'Hospital Number', size=100, select=True,
+            help="Hospital Number", required=True),
+        'given_name': fields.char(
+            'Given Name', size=200, required=True),
         'middle_names': fields.char('Middle Name(s)', size=200),
-        'family_name': fields.char('Family Name', size=200, select=True),
+        'family_name': fields.char(
+            'Family Name', size=200, select=True, required=True),
         'full_name': fields.function(_get_name, type='text',
                                      string="Full Name"),
         'follower_ids': fields.many2many('res.users',
@@ -269,6 +299,7 @@ class NhClinicalPatient(osv.Model):
         :rtype: bool
         """
         self._validate_indentifiers(vals)
+        self._validate_name(vals)
         if not vals.get('name'):
             vals.update({'name': self._get_fullname(vals)})
         return super(NhClinicalPatient, self).create(
