@@ -42,3 +42,9 @@ class TestCleanIdentifiers(TransactionCase):
         self.assertEqual(clean_vals['patient_identifier'], '123')
         self.assertEqual(clean_vals['given_name'], 'Test')
         self.assertEqual(clean_vals['family_name'], 'McTestersen')
+
+    def test_no_identifiers_present(self):
+        """ Test doesn't blow up if there's no identifiers present in dict """
+        clean_vals = self.patient_model._clean_identifiers(self.test_vals)
+        self.assertEqual(clean_vals['given_name'], 'Test')
+        self.assertEqual(clean_vals['family_name'], 'McTestersen')
