@@ -52,7 +52,7 @@ class TestApiDischarge(TransactionCase):
         """
         Test that when discharging a non-existent patient we create them
         """
-        new_patient_id = str(uuid4())
+        new_patient_id = str(uuid4()).replace('-', '')
         discharge_data = {
             'location': self.test_utils.ward.code,
             'given_name': 'Test',

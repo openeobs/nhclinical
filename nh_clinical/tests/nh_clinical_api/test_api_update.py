@@ -63,7 +63,7 @@ class TestApiUpdate(TransactionCase):
         Test that on trying up update a patient that does not exist it instead
         registers that patient
         """
-        new_patient_id = str(uuid4())
+        new_patient_id = str(uuid4()).replace('-', '')
         patient_data = {
             'patient_identifier': new_patient_id,
             'family_name': "Fname30",

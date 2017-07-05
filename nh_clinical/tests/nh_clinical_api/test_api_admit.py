@@ -53,7 +53,7 @@ class TestApiAdmit(TransactionCase):
         """
         Test that admitting a non-existant patient registers them
         """
-        new_patient_id = str(uuid4())
+        new_patient_id = str(uuid4()).replace('-', '')
         admit_data = {
             'location': self.test_utils.ward.code,
             'patient_identifier': new_patient_id,

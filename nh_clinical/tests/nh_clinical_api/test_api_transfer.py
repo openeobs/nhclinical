@@ -50,7 +50,7 @@ class TestApiTransfer(TransactionCase):
 
     def test_transfer_non_existent_patient(self):
         """ Test we can transfer a non-existent patient """
-        new_patient_id = str(uuid4())
+        new_patient_id = str(uuid4()).replace('-', '')
         transfer_data = {
             'original_location': self.test_utils.ward.code,
             'location': self.test_utils.other_ward.code,
