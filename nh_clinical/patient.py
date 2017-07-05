@@ -50,7 +50,28 @@ class NhClinicalPatient(osv.Model):
         )
     ]
 
-    def _validate_indentifiers(self, vals):
+    @staticmethod
+    def _clean_identifiers(dirty_vals):
+        """
+        Clean up the patient identifiers by removing non-alpha numerical
+        characters
+
+        :param dirty_vals: Dictionary of values which contains identifiers
+            which need cleaning
+        :return: Dictionary of values with squeaky clean identifiers
+        """
+        vals = dirty_vals.copy()
+        hospital_number = vals.get('other_identifier')
+        nhs_number = vals.get('patient_identifier')
+        regex = '[^a-zA-Z0-9]'
+        if hospital_number:
+            vals['other_identifier'] = re.sub(regex, '', hospital_number)
+        if nhs_number:
+            vals['patient_identifier'] = re.sub(regex, '', nhs_number)
+        return vals
+
+    @staticmethod
+    def _validate_indentifiers(vals):
         """
         Validate that the value dict has at least one of:
         - NHS Number
@@ -65,7 +86,8 @@ class NhClinicalPatient(osv.Model):
                 'Patient record must have NHS and/or Hospital number')
         return True
 
-    def _validate_name(self, vals):
+    @staticmethod
+    def _validate_name(vals):
         """
         Validate that the value dict has both:
         - given_name
@@ -298,6 +320,7 @@ class NhClinicalPatient(osv.Model):
         :returns: ``True`` if created
         :rtype: bool
         """
+        vals = self._clean_identifiers(vals)
         self._validate_indentifiers(vals)
         self._validate_name(vals)
         if not vals.get('name'):
@@ -313,6 +336,7 @@ class NhClinicalPatient(osv.Model):
         :returns: ``True`` if created
         :rtype: bool
         """
+        vals = self._clean_identifiers(vals)
         title_pool = self.pool['res.partner.title']
         keys = vals.keys()
         if 'title' in keys:
