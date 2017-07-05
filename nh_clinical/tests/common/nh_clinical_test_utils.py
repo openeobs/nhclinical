@@ -120,8 +120,8 @@ class NhClinicalTestUtils(AbstractModel):
         self.patient = self.patient_model.create({
             'given_name': 'Jon',
             'family_name': 'Snow',
-            'patient_identifier': uuid.uuid4(),
-            'other_identifier': uuid.uuid4()
+            'patient_identifier': str(uuid.uuid4()),
+            'other_identifier': str(uuid.uuid4())
         })
 
         self.spell_activity_id = self.spell_model.create_activity(
@@ -184,8 +184,8 @@ class NhClinicalTestUtils(AbstractModel):
             parent = self.ward.id
         return self.location_model.create(
             {
-                'name': uuid.uuid4(),
-                'code': uuid.uuid4(),
+                'name': str(uuid.uuid4()),
+                'code': str(uuid.uuid4()),
                 'usage': usage,
                 'parent_id': parent,
                 'type': 'poc',
@@ -203,7 +203,7 @@ class NhClinicalTestUtils(AbstractModel):
         # Create nurse and associate them with bed location and nurse role.
         return self.user_model.create({
             'name': 'Nurse',
-            'login': uuid.uuid4(),
+            'login': str(uuid.uuid4()),
             'password': 'nurse',
             'category_id': [[4, self.nurse_role.id]],
             'location_ids': [[4, location_id]]
@@ -217,7 +217,7 @@ class NhClinicalTestUtils(AbstractModel):
         self.hca_role = self.category_model.search([('name', '=', 'HCA')])[0]
         hca = self.user_model.create({
             'name': 'HCA',
-            'login': uuid.uuid4(),
+            'login': str(uuid.uuid4()),
             'password': 'hca',
             'category_id': [[4, self.hca_role.id]],
             'location_ids': [[4, location_id]]
@@ -247,7 +247,7 @@ class NhClinicalTestUtils(AbstractModel):
             self.category_model.search([('name', '=', 'Shift Coordinator')])[0]
         shift_coordinator = self.user_model.create({
             'name': 'Anita Co\'Ordon',
-            'login': uuid.uuid4(),
+            'login': str(uuid.uuid4()),
             'password': 'coordon-anita',
             'category_id': [[4, self.shift_coordinator_role.id]],
             'location_ids': [[6, 0, [location_id]]]
