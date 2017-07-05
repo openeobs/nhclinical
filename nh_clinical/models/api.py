@@ -36,16 +36,14 @@ class nh_clinical_api(orm.AbstractModel):
             )
         patient_pool = self.pool['nh.clinical.patient']
         try:
-            patient_id = patient_pool.get_patient_id_for_identifiers(
+            patient = patient_pool.get_patient_id_for_identifiers(
                 cr, uid,
                 hospital_number=hospital_number,
                 nhs_number=nhs_number,
                 context=context
             )
-            if patient_id:
-                patient_pool.update(
-                    cr, uid, data.get('patient_identifier'),
-                    data, selection='patient_identifier', context=context)
+            if patient:
+                patient.write(data)
         except except_orm:
             self.register(cr, uid, hospital_number, data, context=context)
 
