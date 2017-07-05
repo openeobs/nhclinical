@@ -65,10 +65,9 @@ class NhClinicalPatient(osv.Model):
         nhs_number = vals.get('patient_identifier')
         regex = '[^a-zA-Z0-9]'
         if hospital_number:
-            vals['other_identifier'] = re.sub(
-                regex, '', unicode(hospital_number))
+            vals['other_identifier'] = re.sub(regex, '', hospital_number)
         if nhs_number:
-            vals['patient_identifier'] = re.sub(regex, '', unicode(nhs_number))
+            vals['patient_identifier'] = re.sub(regex, '', nhs_number)
         return vals
 
     @staticmethod
