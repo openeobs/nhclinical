@@ -29,8 +29,8 @@ class TestCleanIdentifiers(TransactionCase):
                                    '#hospital/?,.number'
         vals['patient_identifier'] = '¬`!"£!"test)(*&^!+_}{~@:?><nhs[];/number'
         clean_vals = self.patient_model._clean_identifiers(vals)
-        self.assertEqual(clean_vals['other_identifier'], 'testhospitalnumber')
-        self.assertEqual(clean_vals['patient_identifier'], 'testnhsnumber')
+        self.assertEqual(clean_vals['other_identifier'], '_testhospitalnumber')
+        self.assertEqual(clean_vals['patient_identifier'], 'test_nhsnumber')
 
     def test_doesnt_change_other_values(self):
         """ Test that the method doesn't remove other values in dictionary """

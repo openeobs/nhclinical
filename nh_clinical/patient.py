@@ -63,7 +63,7 @@ class NhClinicalPatient(osv.Model):
         vals = dirty_vals.copy()
         hospital_number = vals.get('other_identifier')
         nhs_number = vals.get('patient_identifier')
-        regex = '[^a-zA-Z0-9]'
+        regex = '[^a-zA-Z0-9_-]'
         if hospital_number:
             vals['other_identifier'] = re.sub(regex, '', hospital_number)
         if nhs_number:
