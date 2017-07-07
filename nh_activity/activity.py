@@ -165,16 +165,25 @@ class nh_activity(orm.Model):
 
         def decorator(func, *args, **kwargs):
             # @wraps(func)
-            @api.multi
-            def wrapper(self, *args, **kwargs):
-                data_model = self.pool[self.data_model]
+            @api.v7
+            def wrapper(self, cr, uid, activity_id, *args, **kwargs):
+                activity_data = self.browse(cr, uid, activity_id)
+                data_model = self.pool[activity_data.data_model]
                 # activity_model = self.pool['nh.activity']
-                func(self, self._cr, self._uid, self.id, {}, **kwargs)
+                func(self, cr, uid, activity_id, *args, **kwargs)
                 data_model_function = getattr(data_model, func.__name__)
                 res = data_model_function(
-                    self._cr, self._uid, self.id, {}, **kwargs)
+                    cr, uid, activity_id, *args, **kwargs)
                 return res
 
+            @api.v8
+            def wrapper(self, *args, **kwargs):
+                data_model = self.pool[self.data_model]
+                func(self, self._cr, self._uid, self.id, *args, **kwargs)
+                data_model_function = getattr(data_model, func.__name__)
+                res = data_model_function(
+                    self._cr, self._uid, self.id, *args, **kwargs)
+                return res
             return wrapper
 
         return decorator
