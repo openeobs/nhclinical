@@ -168,6 +168,10 @@ class nh_activity(orm.Model):
             @api.v7
             def wrapper(self, cr, uid, activity_id, *args, **kwargs):
                 activity_data = self.browse(cr, uid, activity_id)
+                if not activity_data.data_model:
+                    raise osv.except_osv(
+                        'Data Model Error!',
+                        'No data model found on activity.')
                 data_model = self.pool[activity_data.data_model]
                 # activity_model = self.pool['nh.activity']
                 func(self, cr, uid, activity_id, *args, **kwargs)
@@ -178,6 +182,10 @@ class nh_activity(orm.Model):
 
             @api.v8
             def wrapper(self, *args, **kwargs):
+                if not self.data_model:
+                    raise osv.except_osv(
+                        'Data Model Error!',
+                        'No data model found on activity.')
                 data_model = self.pool[self.data_model]
                 func(self, self._cr, self._uid, self.id, *args, **kwargs)
                 data_model_function = getattr(data_model, func.__name__)
