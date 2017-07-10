@@ -167,6 +167,19 @@ class nh_activity(orm.Model):
             # @wraps(func)
             @api.v7
             def wrapper(self, cr, uid, activity_id, *args, **kwargs):
+                if isinstance(activity_id, (list, tuple)) \
+                        and len(activity_id) == 1:
+                    activity_id = activity_id[0]
+                if not isinstance(activity_id, (int, long)):
+                    raise osv.except_osv(
+                        'Type Error!',
+                        "activity_id must be int or long, found to be %s" %
+                        type(activity_id))
+                elif activity_id < 1:
+                    raise osv.except_osv(
+                        'ID Error!',
+                        "activity_id must be > 0, found to be {}".format(
+                            activity_id))
                 activity_data = self.browse(cr, uid, activity_id)
                 if not activity_data.data_model:
                     raise osv.except_osv(
