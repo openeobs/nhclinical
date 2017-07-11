@@ -173,9 +173,9 @@ class DatetimeUtils(models.AbstractModel):
         :return: Datetime in client timezone.
         :rtype: datetime or str
         """
-        date_time = self.validate_and_convert(date_time)
         if date_time is None:
             date_time = self.get_current_time()
+        date_time = self.validate_and_convert(date_time)
 
         date_time = fields.datetime.context_timestamp(
             self._cr, self._uid, date_time, self._context)
