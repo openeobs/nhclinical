@@ -19,6 +19,7 @@ from .nh_clinical_staff_reallocation import *
 from .res_user import *
 from .nh_clinical_user_management import *
 from .nh_clinical_api import *
+from .nh_clinical_spell import *
 
 # Disabled Tests
 # from . import test_doctor

@@ -52,7 +52,7 @@ class TestCheckLocationIdsConstraint(TransactionCase):
         )
         self.test_utils_model.place_patient(
             location_id=self.other_bed.id,
-            placement_id=self.other_placement
+            placement_activity_id=self.other_placement
         )
         self.allocation_pool.responsibility_allocation_activity(
             self.nurse.id, [self.bed.id, self.other_bed.id])

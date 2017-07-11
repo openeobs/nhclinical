@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime, timedelta
 
+from openerp.addons.nh_odoo_fixes import validate
 from openerp.exceptions import ValidationError
 from openerp.tests.common import TransactionCase
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
-
-from openerp.addons.nh_odoo_fixes import validate
 
 
 class TestStartDatetimeNotAfterEndDatetime(TransactionCase):
@@ -52,7 +51,8 @@ class TestStartDatetimeNotAfterEndDatetime(TransactionCase):
             end_datetime
         )
 
-    def test_before_1900_with_datetime_does_not_raise_exception(self):
+    @staticmethod
+    def test_before_1900_with_datetime_does_not_raise_exception():
         start_datetime = datetime(year=1899, month=6, day=6)
         end_datetime = datetime(year=1899, month=6, day=7)
         validate.start_datetime_not_after_end_datetime(

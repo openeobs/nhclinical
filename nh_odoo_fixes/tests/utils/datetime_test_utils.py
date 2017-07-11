@@ -19,4 +19,6 @@ class DatetimeTestUtils(models.AbstractModel):
         datetime_utils = self.env['datetime_utils']
         expected = datetime_utils.zero_seconds(expected)
         actual = datetime_utils.zero_seconds(actual)
-        assert expected == actual
+        if not expected == actual:
+            raise AssertionError("Expected datetime '{}' is not equal to "
+                                 "actual datetime '{}'.")
