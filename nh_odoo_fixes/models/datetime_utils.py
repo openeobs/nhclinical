@@ -142,6 +142,11 @@ class DatetimeUtils(models.AbstractModel):
                 "Passed datetime format {} does not match any format known to "
                 "be used within the system.".format(datetime_format)
             )
+        return cls.convert_datetime_str_to_format(datetime_str,
+                                                  datetime_format)
+
+    @classmethod
+    def convert_datetime_str_to_format(cls, datetime_str, datetime_format):
         date_time = cls.parse_datetime_str_from_known_format(datetime_str)
         datetime_str = date_time.strftime(datetime_format)
         return datetime_str
@@ -160,10 +165,23 @@ class DatetimeUtils(models.AbstractModel):
         return current_datetime
 
     @api.model
-    def get_localised_time(self):
+    def get_localised_time(self, date_time=None, return_string=None,
+                           return_string_format=None):
         """
-        Get the localised time for datetime.now()
+        Get the localised time for datetime.now() or passed datetime.
+        :param date_time: str
+        :return: Datetime in client timezone.
+        :rtype: datetime or str
         """
-        current_time = self.get_current_time()
-        return fields.datetime.context_timestamp(
-            self._cr, self._uid, current_time)
+        date_time = self.validate_and_convert(date_time)
+        if date_time is None:
+            date_time = self.get_current_time()
+
+        date_time = fields.datetime.context_timestamp(
+            self._cr, self._uid, date_time, self._context)
+
+        if return_string:
+            if return_string_format is None:
+                return_string_format = DTF
+            date_time = date_time.strftime(return_string_format)
+        return date_time

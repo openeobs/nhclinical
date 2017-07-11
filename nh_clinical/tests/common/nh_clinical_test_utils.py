@@ -69,19 +69,26 @@ class NhClinicalTestUtils(AbstractModel):
         return self.patient_model.browse(patient_id)
 
     def place_patient(
-            self, location_id=None, placement_id=None):
+            self, location_id=None, placement_activity_id=None):
         if not location_id:
             location_id = self.bed.id
-        if not placement_id:
-            placement_id = self.placement
+        if not placement_activity_id:
+            activity_model = self.env['nh.activity']
+            domain = [
+                ('data_model', '=', 'nh.clinical.patient.placement'),
+                ('patient_id', '=', self.patient.id),
+                ('state', 'not in', ['completed', 'cancelled'])
+            ]
+            placement_activities = activity_model.search(domain)
+            placement_activity_id = placement_activities[0].id
         self.activity_model = self.env['nh.activity']
         self.activity_pool = self.pool['nh.activity']
         self.activity_pool.submit(
             self.env.cr, self.env.uid,
-            placement_id, {'location_id': location_id}
+            placement_activity_id, {'location_id': location_id}
         )
         self.activity_pool.complete(
-            self.env.cr, self.env.uid, placement_id
+            self.env.cr, self.env.uid, placement_activity_id
         )
 
     def discharge_patient(self, hospital_number=None):
@@ -382,7 +389,8 @@ class NhClinicalTestUtils(AbstractModel):
 
     def assert_task_open(self, task_type, user_id=None):
         open_tasks = self.get_open_tasks(task_type, user_id)
-        assert len(open_tasks) > 1
+        if not len(open_tasks) > 1:
+            raise AssertionError("No open tasks.")
 
     def browse_ref(self, xid):
         """
