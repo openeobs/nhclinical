@@ -26,15 +26,6 @@ class TestAdtSpellUpdate(TransactionCase):
         self.existing_nhs_number = self.patient.patient_identifier
         self.existing_hospital_number = self.patient.other_identifier
         self.other_ward = self.test_utils.other_ward
-        self.no_pos_user = self.user_model.create(
-            {
-                'login': 'no_pos',
-                'name': 'No Pos User',
-                'pos_id': False,
-                'pos_ids': [6, 0, 0],
-                'category_id': [[4, self.nurse_role.id]]
-            }
-        )
         self.doctors = """[{
             'type': 'c',
             'code': 'CON02',
@@ -98,12 +89,21 @@ class TestAdtSpellUpdate(TransactionCase):
         Test an exception is raised when trying to update a spell with a user
         not associated with a Point of Service
         """
+        no_pos_user = self.user_model.create(
+            {
+                'login': 'no_pos',
+                'name': 'No Pos User',
+                'pos_id': False,
+                'pos_ids': [6, 0, 0],
+                'category_id': [[4, self.nurse_role.id]]
+            }
+        )
         update_data = {
             'other_identifier': self.existing_hospital_number,
             'location': self.other_ward.code
         }
         with self.assertRaises(except_orm) as error:
-            self.update_model.sudo(self.no_pos_user)\
+            self.update_model.sudo(no_pos_user)\
                 .create_activity({}, update_data)
         self.assertEqual(
             error.exception.value,

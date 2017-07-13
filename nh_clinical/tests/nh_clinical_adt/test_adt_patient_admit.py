@@ -19,15 +19,6 @@ class TestAdtPatientAdmit(TransactionCase):
             self.category_model.search([('name', '=', 'Nurse')])[0]
         self.test_utils.create_locations()
         self.test_utils.create_patient()
-        self.no_pos_user = self.user_model.create(
-            {
-                'login': 'no_pos',
-                'name': 'No Pos User',
-                'pos_id': False,
-                'pos_ids': [6, 0, 0],
-                'category_id': [[4, self.nurse_role.id]]
-            }
-        )
         self.patient = self.test_utils.patient
         self.existing_nhs_number = self.patient.patient_identifier
         self.existing_hospital_number = self.patient.other_identifier
@@ -79,12 +70,21 @@ class TestAdtPatientAdmit(TransactionCase):
         Test that raises error when the user used to admit the patient isn't
         related to a Point Of Service
         """
+        no_pos_user = self.user_model.create(
+            {
+                'login': 'no_pos',
+                'name': 'No Pos User',
+                'pos_id': False,
+                'pos_ids': [6, 0, 0],
+                'category_id': [[4, self.nurse_role.id]]
+            }
+        )
         admit_data = {
             'other_identifier': 'TEST002',
             'location': 'U'
         }
         with self.assertRaises(except_orm) as error:
-            self.admit_model.sudo(self.no_pos_user).create_activity(
+            self.admit_model.sudo(no_pos_user).create_activity(
                 {}, admit_data)
         self.assertEqual(
             error.exception.value,

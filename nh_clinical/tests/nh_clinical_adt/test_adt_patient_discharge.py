@@ -23,15 +23,6 @@ class TestAdtPatientDischarge(TransactionCase):
         self.patient = self.test_utils.patient
         self.existing_nhs_number = self.patient.patient_identifier
         self.existing_hospital_number = self.patient.other_identifier
-        self.no_pos_user = self.user_model.create(
-            {
-                'login': 'no_pos',
-                'name': 'No Pos User',
-                'pos_id': False,
-                'pos_ids': [6, 0, 0],
-                'category_id': [[4, self.nurse_role.id]]
-            }
-        )
 
     def test_discharge_patient(self):
         """ Test that we can discharge a patient """
@@ -76,13 +67,22 @@ class TestAdtPatientDischarge(TransactionCase):
         Test raises an exception when carrying out discharge
         as user without a POS
         """
+        no_pos_user = self.user_model.create(
+            {
+                'login': 'no_pos',
+                'name': 'No Pos User',
+                'pos_id': False,
+                'pos_ids': [6, 0, 0],
+                'category_id': [[4, self.nurse_role.id]]
+            }
+        )
         discharge_data = {
             'other_identifier': self.existing_hospital_number,
             'discharge_date': '2015-05-02 18:00:00',
             'location': 'TEST_DISCHARGE'
         }
         with self.assertRaises(except_orm) as error:
-            self.discharge_model.sudo(self.no_pos_user)\
+            self.discharge_model.sudo(no_pos_user)\
                 .create_activity({}, discharge_data)
         self.assertEqual(
             error.exception.value,

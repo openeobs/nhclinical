@@ -25,15 +25,6 @@ class TestAdtPatientTransfer(TransactionCase):
         self.existing_nhs_number = self.patient.patient_identifier
         self.existing_hospital_number = self.patient.other_identifier
         self.other_ward = self.test_utils.other_ward
-        self.no_pos_user = self.user_model.create(
-            {
-                'login': 'no_pos',
-                'name': 'No Pos User',
-                'pos_id': False,
-                'pos_ids': [6, 0, 0],
-                'category_id': [[4, self.nurse_role.id]]
-            }
-        )
 
     def test_transfer_patient(self):
         """ Test that we can transfer a patient """
@@ -169,12 +160,21 @@ class TestAdtPatientTransfer(TransactionCase):
         Test that an exception is raised when trying to transfer with a
         user that is not associated with a Point Of Service
         """
+        no_pos_user = self.user_model.create(
+            {
+                'login': 'no_pos',
+                'name': 'No Pos User',
+                'pos_id': False,
+                'pos_ids': [6, 0, 0],
+                'category_id': [[4, self.nurse_role.id]]
+            }
+        )
         transfer_data = {
             'other_identifier': self.existing_hospital_number,
             'location': self.other_ward.code
         }
         with self.assertRaises(except_orm) as error:
-            self.transfer_model.sudo(self.no_pos_user)\
+            self.transfer_model.sudo(no_pos_user)\
                 .create_activity({}, transfer_data)
         self.assertEqual(
             error.exception.value,

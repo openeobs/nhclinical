@@ -6,7 +6,6 @@ event driven system to be built on top of it.
 """
 import logging
 from datetime import datetime
-# from functools import wraps
 
 from openerp import SUPERUSER_ID, api
 from openerp.osv import orm, fields, osv
@@ -106,7 +105,6 @@ class nh_activity(orm.Model):
         """
 
         def decorator(func, *args, **kwargs):
-            # @wraps(func)
             @api.v7
             def wrapper(self, cr, uid, activity_id, *args, **kwargs):
                 if isinstance(activity_id, (list, tuple)) \
@@ -128,7 +126,6 @@ class nh_activity(orm.Model):
                         'Data Model Error!',
                         'No data model found on activity.')
                 data_model = self.pool[activity_data.data_model]
-                # activity_model = self.pool['nh.activity']
                 func(self, cr, uid, activity_id, *args, **kwargs)
                 data_model_function = getattr(data_model, func.__name__)
                 res = data_model_function(

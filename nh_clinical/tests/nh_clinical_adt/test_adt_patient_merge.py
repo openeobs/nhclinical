@@ -23,22 +23,8 @@ class TestAdtPatientMerge(TransactionCase):
         self.patient = self.test_utils.patient
         self.other_patient = self.test_utils.create_and_register_patient()
         self.other_ward = self.test_utils.other_ward
-        # self.test_utils.admit_patient(
-        #     hospital_number=self.other_patient.other_identifier,
-        #     patient_id=self.other_patient.id,
-        #     location_code=self.other_ward.code
-        # )
         self.existing_nhs_number = self.patient.patient_identifier
         self.existing_hospital_number = self.patient.other_identifier
-        self.no_pos_user = self.user_model.create(
-            {
-                'login': 'no_pos',
-                'name': 'No Pos User',
-                'pos_id': False,
-                'pos_ids': [6, 0, 0],
-                'category_id': [[4, self.nurse_role.id]]
-            }
-        )
 
     def test_raises_on_incorrect_from_patient_info(self):
         """
