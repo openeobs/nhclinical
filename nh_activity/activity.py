@@ -15,64 +15,6 @@ from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
 _logger = logging.getLogger(__name__)
 
 
-# def data_model_event(callback=None):
-#     """
-#     Decorator for activity methods. This will automatically call a
-#     method with the same name on the
-#     :mod:`data model<activity.nh_activity_data>` related to the
-#     :mod:`activity<activity.nh_activity>` instance after calling the
-#     activity method. The result returned is the one from the data_model
-#     method.
-#     """
-#     def decorator(func):
-#         # @wraps(func)
-#         @api.multi
-#         def wrapper(*args, **kwargs):
-#             self = args[0]
-#             # v8_api = True if hasattr(self, 'env') else False
-#             # v8_api = False
-#             # if hasattr(args[0], 'env'):
-#             #     self = args[0]
-#             #     activity_id = self._ids
-#             #     v8_api = True
-#             # else:
-#             #     self, cr, uid, activity_id = args[:4]
-#             # if isinstance(activity_id, (list, tuple)) \
-#             #         and len(activity_id) == 1:
-#             #     activity_id = activity_id[0]
-#             # if not isinstance(activity_id, (int, long)):
-#             #     raise osv.except_osv(
-#             #         'Type Error!',
-#             #         "activity_id must be int or long, found to be %s" %
-#             #         type(activity_id))
-#             # elif activity_id < 1:
-#             #     raise osv.except_osv(
-#             #         'ID Error!',
-#             #         "activity_id must be > 0,
-# found to be %s" % activity_id)
-#             # if v8_api:
-#             data_model = self.pool[self.data_model]
-#             activity_model = self.pool['nh.activity']
-#             func(activity_model, self._cr, self._uid,
-#                  self.id, *args[1:], **kwargs)
-#             # else:
-#             #     activity = self.browse(args[1], args[2], args[3])
-#             #     data_model = self.pool[activity.data_model]
-#             #     # if len(args) > 3:
-#             #     func(*args, **kwargs)
-#             #     # else:
-#             #     # func(cr, uid, act_id, **kwargs)
-#             data_model_function = getattr(data_model, func.__name__)
-#             # if v8_api:
-#             res = data_model_function(
-#                 self._cr, self._uid, self.id, *args[1:], **kwargs)
-#             # else:
-#             #     res = data_model_function(*args[1:], **kwargs)
-#             return res
-#         return wrapper
-#     return decorator
-
-
 class nh_activity(orm.Model):
     """
     Class representing any event that needs to be recorded by the system.
