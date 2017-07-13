@@ -40,7 +40,7 @@ class TestUniqueIdentifierConstraint(TransactionCase):
             self.patient_model.create(self.patient_data)
         self.assertEqual(
             error.exception.value,
-            'Patient record must have NHS and/or Hospital number'
+            'Patient record must have Hospital number'
         )
 
     @mute_logger('openerp.sql_db')

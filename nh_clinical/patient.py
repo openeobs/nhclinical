@@ -80,10 +80,9 @@ class NhClinicalPatient(osv.Model):
         :param vals: dictionary of patient values
         :return: True
         """
-        if not vals.get('patient_identifier') and not \
-                vals.get('other_identifier'):
+        if not vals.get('other_identifier'):
             raise ValidationError(
-                'Patient record must have NHS and/or Hospital number')
+                'Patient record must have Hospital number')
         return True
 
     @staticmethod

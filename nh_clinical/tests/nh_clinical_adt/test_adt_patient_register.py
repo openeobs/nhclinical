@@ -99,7 +99,7 @@ class TestAdtPatientRegister(TransactionCase):
             register_activity.complete()
         self.assertEqual(
             error.exception.value,
-            'Patient record must have NHS and/or Hospital number'
+            'Patient record must have Hospital number'
         )
 
     def test_register_no_names(self):
@@ -108,7 +108,7 @@ class TestAdtPatientRegister(TransactionCase):
         """
         register_data = {
             'dob': '1984-10-01 00:00:00',
-            'patient_identifier': 'TEST001',
+            'other_identifier': 'TEST001',
             'gender': 'M',
             'sex': 'M'
         }
