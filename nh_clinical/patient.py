@@ -57,7 +57,7 @@ class NhClinicalPatient(osv.Model):
 
         :param value: string to check
         """
-        unallowed_chars = '[^a-zA-Z0-9_\-\s]'
+        unallowed_chars = r'[^a-zA-Z0-9_\-\s]'
         allowed_chars = re.sub(unallowed_chars, '', value)
         if allowed_chars != value:
             raise ValidationError(
@@ -74,7 +74,7 @@ class NhClinicalPatient(osv.Model):
         :param value: string to remove whitespace from
         :return: string without whitespace
         """
-        spaces = '\s'
+        spaces = r'\s'
         val = re.sub(spaces, '', value)
         return val if val else None
 
