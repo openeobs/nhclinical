@@ -51,7 +51,34 @@ class NhClinicalPatient(osv.Model):
     ]
 
     @staticmethod
-    def _clean_identifiers(dirty_vals):
+    def _check_identifier_for_bad_chars(value):
+        """
+        Check for bad characters in string
+
+        :param value: string to check
+        """
+        unallowed_chars = '[^a-zA-Z0-9_\-\s]'
+        allowed_chars = re.sub(unallowed_chars, '', value)
+        if allowed_chars != value:
+            raise ValidationError(
+                'Patient identifier can only contain '
+                'alphanumeric characters, hyphens and underscores'
+            )
+
+    @staticmethod
+    def _remove_whitespace(value):
+        """
+        Remove white space from the supplied string, return None if would
+        be empty string
+
+        :param value: string to remove whitespace from
+        :return: string without whitespace
+        """
+        spaces = '\s'
+        val = re.sub(spaces, '', value)
+        return val if val else None
+
+    def _clean_identifiers(self, dirty_vals):
         """
         Clean up the patient identifiers by removing non-alpha numerical
         characters
@@ -63,11 +90,12 @@ class NhClinicalPatient(osv.Model):
         vals = dirty_vals.copy()
         hospital_number = vals.get('other_identifier')
         nhs_number = vals.get('patient_identifier')
-        regex = '[^a-zA-Z0-9_-]'
         if hospital_number:
-            vals['other_identifier'] = re.sub(regex, '', hospital_number)
+            self._check_identifier_for_bad_chars(hospital_number)
+            vals['other_identifier'] = self._remove_whitespace(hospital_number)
         if nhs_number:
-            vals['patient_identifier'] = re.sub(regex, '', nhs_number)
+            self._check_identifier_for_bad_chars(nhs_number)
+            vals['patient_identifier'] = self._remove_whitespace(nhs_number)
         return vals
 
     @staticmethod

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from openerp.tests.common import TransactionCase
+from openerp.osv.osv import except_orm
 
 
 class TestCleanIdentifiers(TransactionCase):
@@ -22,15 +23,22 @@ class TestCleanIdentifiers(TransactionCase):
         self.assertEqual(clean_vals['other_identifier'], 'testhospitalnumber')
         self.assertEqual(clean_vals['patient_identifier'], 'testnhsnumber')
 
-    def test_removes_non_alphanumeric(self):
-        """ Test that the method removes non-alphanumeric characters """
+    def test_raises_on_non_alphanumeric(self):
+        """
+        Test that the method raises an exeception when non-alphanumeric
+        characters are present in identifier
+        """
         vals = self.test_vals.copy()
         vals['other_identifier'] = '`|!"£$%^&*()_+[]{}test:@~;\'<>' \
                                    '#hospital/?,.number'
         vals['patient_identifier'] = '¬`!"£!"test)(*&^!+_}{~@:?><nhs[];/number'
-        clean_vals = self.patient_model._clean_identifiers(vals)
-        self.assertEqual(clean_vals['other_identifier'], '_testhospitalnumber')
-        self.assertEqual(clean_vals['patient_identifier'], 'test_nhsnumber')
+        with self.assertRaises(except_orm) as error:
+            self.patient_model._clean_identifiers(vals)
+        self.assertEqual(
+            error.exception.value,
+            'Patient identifier can only contain '
+            'alphanumeric characters, hyphens and underscores'
+        )
 
     def test_doesnt_change_other_values(self):
         """ Test that the method doesn't remove other values in dictionary """
