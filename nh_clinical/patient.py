@@ -57,9 +57,9 @@ class NhClinicalPatient(osv.Model):
 
         :param value: string to check
         """
-        unallowed_chars = r'[^a-zA-Z0-9_\-\s]'
-        allowed_chars = re.sub(unallowed_chars, '', value)
-        if allowed_chars != value:
+        allowed_chars = r'[a-zA-Z0-9_\-\s]'
+        match = re.match(allowed_chars, value)
+        if not match:
             raise ValidationError(
                 'Patient identifier can only contain '
                 'alphanumeric characters, hyphens and underscores'
