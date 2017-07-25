@@ -273,6 +273,23 @@ class NhClinicalTestUtils(AbstractModel):
             'location_ids': [[6, 0, [self.ward.id]]]
         })
 
+    def create_system_admin(self):
+        self.category_model = self.env['res.partner.category']
+        self.user_model = self.env['res.users']
+        self.system_admin_role = \
+            self.category_model.search(
+                [
+                    ('name', '=', 'System Administrator')
+                ]
+            )[0]
+        self.system_admin = self.user_model.create({
+            'name': 'System admin',
+            'login': 'system.admin',
+            'password': 'system.admin',
+            'category_id': [[4, self.system_admin_role.id]],
+            'location_ids': [[6, 0, [self.ward.id]]]
+        })
+
     # Methods for getting references to objects needed for test cases.
     def copy_instance_variables(self, caller):
         """
