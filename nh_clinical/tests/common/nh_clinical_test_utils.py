@@ -69,6 +69,17 @@ class NhClinicalTestUtils(AbstractModel):
         )
         return self.patient_model.browse(patient_id)
 
+    def create_patient(self):
+        self.patient_model = self.env['nh.clinical.patient']
+
+        hospital_number = str(uuid.uuid4())
+        patient_id = self.patient_model.create({
+            'family_name': 'Testersen',
+            'given_name': 'Test',
+            'other_identifier': hospital_number
+        })
+        return self.patient_model.browse(patient_id)
+
     def place_patient(
             self, location_id=None, placement_activity_id=None):
         if not location_id:
