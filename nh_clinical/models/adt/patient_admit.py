@@ -31,8 +31,9 @@ class nh_clinical_adt_patient_admit(orm.Model):
     _columns = {
         'location_id': fields.many2one('nh.clinical.location',
                                        'Admission Location'),
-        'patient_id': fields.many2one('nh.clinical.patient', 'Patient',
-                                      required=True),
+        'registration': fields.many2one(
+            'nh.clinical.adt.patient.register', 'Registration'
+        ),
         'pos_id': fields.many2one('nh.clinical.pos', 'POS', required=True),
         'location': fields.char('Location', size=256),
         'code': fields.char("Code", size=256),
