@@ -3,8 +3,8 @@
 from datetime import datetime
 
 from openerp import models, api
-from openerp.osv import fields
 from openerp.fields import Datetime
+from openerp.osv import fields
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
 
 

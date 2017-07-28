@@ -30,6 +30,7 @@ class nh_clinical_patient_move(orm.Model):
     _complete_view_xmlid = "view_patient_move_form"
     _cancel_view_xmlid = "view_patient_move_form"
     _columns = {
+        # TODO Should this field not be required?
         'location_id': fields.many2one('nh.clinical.location',
                                        'Destination Location'),
         'location_name': fields.related(
@@ -38,6 +39,8 @@ class nh_clinical_patient_move(orm.Model):
         'patient_id': fields.many2one('nh.clinical.patient', 'Patient',
                                       required=True),
         'reason': fields.text('Reason'),
+        # TODO This is overwritten in complete so should we stop it from
+        # being given on create?
         'from_location_id': fields.many2one('nh.clinical.location',
                                             'Source Location')
     }

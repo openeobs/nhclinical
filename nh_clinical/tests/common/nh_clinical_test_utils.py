@@ -186,13 +186,15 @@ class NhClinicalTestUtils(AbstractModel):
             }
         )
 
-    def create_location(self, usage='bed', parent=None):
+    def create_location(self, usage='bed', parent=None, name=None):
         if not parent:
             parent = self.ward.id
+        if not name:
+            name = uuid.uuid4()
         return self.location_model.create(
             {
-                'name': str(uuid.uuid4()),
                 'code': str(uuid.uuid4()),
+                'name': name,
                 'usage': usage,
                 'parent_id': parent,
                 'type': 'poc',

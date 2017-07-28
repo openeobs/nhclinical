@@ -769,17 +769,20 @@ class nh_activity_data(orm.AbstractModel):
         return int(a_tuple[0])
 
     @api.model
-    def get_open_activity(self, data_model, spell_activity_id):
+    def get_open_activity(self, spell_activity_id):
         """
         Get the latest open activity for the given model. The method assumes
         that only one open activity at a time is possible for the given model.
         If more than one is found an exception is raised.
 
+        :param data_model:
+        :type data_model: str
         :param spell_activity_id:
+        :type spell_activity_id: int
         :return:
         """
         domain = [
-            ('data_model', '=', data_model),
+            ('data_model', '=', self._name),
             ('state', 'not in', ['completed', 'cancelled']),
             ('parent_id', '=', spell_activity_id)
         ]
