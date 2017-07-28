@@ -334,8 +334,8 @@ class nh_activity_data(orm.AbstractModel):
         :rtype: bool
         """
 
-        res = super(nh_activity_data, self).complete(
-            cr, uid, activity_id, context=context)
+        res = super(nh_activity_data, self) \
+            .complete(cr, uid, activity_id, context=context)
         self._audit_shift_coordinator(cr, uid, activity_id, context=context)
         return res
 
