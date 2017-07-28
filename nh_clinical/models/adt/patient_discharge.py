@@ -61,11 +61,11 @@ class nh_clinical_adt_patient_discharge(orm.Model):
         activity_pool = self.pool['nh.activity']
         spell_id = spell_pool.get_by_patient_id(
             cr, uid, patient_id.id, context=context)
-        if not vals.get('location'):
-            raise osv.except_osv(
-                'Discharge Error!',
-                'Missing location!')
         if not spell_id:
+            if not vals.get('location'):
+                raise osv.except_osv(
+                    'Discharge Error!',
+                    'Missing location and patient is not admitted!')
             discharged = activity_pool.search(
                 cr, uid,
                 [
@@ -78,10 +78,6 @@ class nh_clinical_adt_patient_discharge(orm.Model):
                     'Discharge Error!',
                     'Patient is already discharged!'
                 )
-            # else:
-            #     raise osv.except_osv(
-            #         'Discharge Error!',
-            #         'Patient is not admitted!')
             _logger.warn("Patient admitted from a discharge call!")
             location_pool = self.pool['nh.clinical.location']
             location_id = location_pool.get_by_code(
