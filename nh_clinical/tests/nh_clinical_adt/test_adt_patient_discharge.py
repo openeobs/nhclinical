@@ -116,7 +116,26 @@ class TestAdtPatientDischarge(TransactionCase):
         )
         self.assertTrue(discharge_id, msg="Discharge not found!")
 
-    def test_raises_no_location(self):
+    def test_raises_no_location_no_spell(self):
+        """
+        Test that an exception is raises when trying to discharge a patient
+        without a open spell and no location was provided
+        """
+        discharge_data = {
+            'other_identifier': self.existing_hospital_number,
+            'discharge_date': '2015-05-02 18:00:00'
+        }
+        activity_id = self.discharge_model.create_activity({}, discharge_data)
+        activity = self.activity_model.browse(activity_id)
+        activity.complete()
+        with self.assertRaises(except_orm) as error:
+            self.discharge_model.create_activity({}, discharge_data)
+        self.assertEqual(
+            error.exception.value,
+            'Missing location and patient is not admitted!'
+        )
+
+    def test_discharges_no_location(self):
         """
         Test that an exception is raises when trying to discharge a patient
         without a location being provided
@@ -125,12 +144,17 @@ class TestAdtPatientDischarge(TransactionCase):
             'other_identifier': self.existing_hospital_number,
             'discharge_date': '2015-05-02 18:00:00'
         }
-        with self.assertRaises(except_orm) as error:
-            self.discharge_model.create_activity({}, discharge_data)
-        self.assertEqual(
-            error.exception.value,
-            'Missing location!'
+        activity_id = self.discharge_model.create_activity({}, discharge_data)
+        activity = self.activity_model.browse(activity_id)
+        activity.complete()
+        discharge_id = self.activity_model.search(
+            [
+                ['data_model', '=', 'nh.clinical.patient.discharge'],
+                ['state', '=', 'completed'],
+                ['creator_id', '=', activity_id]
+            ]
         )
+        self.assertTrue(discharge_id, msg="Discharge not found!")
 
     def test_discharge_non_admitted_patient(self):
         """ TEst we can discharge a patient who has not been admitted """
