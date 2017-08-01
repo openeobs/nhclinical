@@ -793,16 +793,14 @@ class nh_activity_data(orm.AbstractModel):
         return record
 
     @api.model
-    def get_latest_activity(self, data_model, spell_activity_id):
+    def get_latest_activity(self, spell_activity_id):
         """
         Return the most recent activity for a given data model.
-
-        :param data_model:
         :param spell_activity_id:
         :return:
         """
         domain = [
-            ('data_model', '=', data_model),
+            ('data_model', '=', self._name),
             ('state', 'not in', ['completed', 'cancelled']),
             ('parent_id', '=', spell_activity_id)
         ]
