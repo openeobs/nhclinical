@@ -84,3 +84,22 @@ class TestAdtPatientCancelAdmit(TransactionCase):
             error.exception.value,
             "Patient's Hospital Number must be supplied!"
         )
+
+    def test_removes_patient_from_bed(self):
+        """
+        Test that on cancelling the admission the patient is removed from the
+        location
+        """
+        self.test_utils.spell_activity_id = self.spell.activity_id.id
+        self.test_utils.spell_activity = self.spell.activity_id
+        self.test_utils.placement = self.test_utils.create_placement()
+        self.test_utils.place_patient()
+        self.assertEqual(
+            self.test_utils.patient.current_location_id.id,
+            self.test_utils.bed.id
+        )
+        cancel_admit_data = {'other_identifier': self.existing_hospital_number}
+        activity_id = self.cancel_model.create_activity({}, cancel_admit_data)
+        activity = self.activity_model.browse(activity_id)
+        activity.complete()
+        self.assertFalse(self.test_utils.patient.current_location_id.id)

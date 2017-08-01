@@ -47,6 +47,10 @@ class nh_clinical_adt_patient_cancel_admit(orm.Model):
         spell_id = spell_pool.get_by_patient_id(
             cr, uid, patient_id.id, exception='False', context=context)
         spell = spell_pool.browse(cr, uid, spell_id, context=context)
+        if patient_id.current_location_id:
+            patient_pool.write(cr, uid, patient_id.id, {
+                'current_location_id': None
+            })
         activity_pool.write(
             cr, uid, activity_id,
             {
