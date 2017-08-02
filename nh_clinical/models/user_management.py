@@ -1,5 +1,6 @@
-from openerp.osv import orm, fields, osv
 import copy
+
+from openerp.osv import orm, fields, osv
 
 
 class NhClinicalUserManagement(orm.Model):
@@ -155,8 +156,11 @@ class NhClinicalUserManagement(orm.Model):
             user_data.pop('ward_ids', None)
         res = user_pool.write(cr, uid, ids, user_data, context=context)
 
-        if vals.get('ward_ids'):
-            locations = vals.get('ward_ids')
+        ward_ids_tuples = vals.get('ward_ids')
+        ward_ids_tuple = ward_ids_tuples[0]
+        ward_ids = ward_ids_tuple[2]
+        if ward_ids:
+            # Some roles like Nurses and HCAs should not be allocated to wards.
             for user in self.browse(cr, uid, ids, context=context):
                 editable = any(
                     [c.name not in self._ward_ids_not_editable
@@ -167,10 +171,11 @@ class NhClinicalUserManagement(orm.Model):
                         'Role Error!',
                         'This user cannot be assigned with ward '
                         'responsibility!')
+            # Validation has passed, go ahead and allocate users to locations.
             for user_id in ids:
                 activity_id = alloc_pool.create_activity(cr, uid, {}, {
                     'responsible_user_id': user_id,
-                    'location_ids': locations}, context=context)
+                    'location_ids': ward_ids}, context=context)
                 activity_pool.complete(cr, uid, activity_id, context=context)
         return res
 
