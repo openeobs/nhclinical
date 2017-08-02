@@ -1,4 +1,5 @@
 from openerp.osv import orm, fields, osv
+import copy
 
 
 class NhClinicalUserManagement(orm.Model):
@@ -213,7 +214,7 @@ class NhClinicalUserManagement(orm.Model):
         :rtype: dict
         """
         user = self.browse(cr, uid, ids[0], context=context)
-        new_context = context.copy()  # have to copy as v8 context = frozendict
+        new_context = copy.deepcopy(context.copy())
         new_context.update({'default_user_id': user.id})
         view = {
             'type': 'ir.actions.act_window',

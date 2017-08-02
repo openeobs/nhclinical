@@ -56,3 +56,18 @@ def in_min_max_range(min_value, max_value, value):
             "Value '{}' is greater than the maximum valid value '{}'".format(
                 value, max_value)
         )
+
+
+def validate_non_empty_string(string):
+    """
+    Validate that string is not empty
+
+    :param string: string to validate
+    :return: if string is empty or not
+    """
+    if string is None or string is False:
+        return False
+    clean_string = unicode(string).strip()
+    if len(clean_string) < 1:
+        return False
+    return True
