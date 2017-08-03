@@ -454,7 +454,8 @@ class nh_activity_data(orm.AbstractModel):
                         context=None):
         """
         Creates a new :mod:`activity<activity.nh_activity>` of the
-        current data type.
+        current data model then performs a submission which will in turn
+        create a record for the current data model.
 
         :param vals_activity: values to save in the
         :mod:`activity<activity.nh_activity>`
