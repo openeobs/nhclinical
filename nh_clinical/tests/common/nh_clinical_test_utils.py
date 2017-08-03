@@ -71,14 +71,13 @@ class NhClinicalTestUtils(AbstractModel):
 
     def create_patient(self):
         self.patient_model = self.env['nh.clinical.patient']
-
         hospital_number = str(uuid.uuid4())
-        patient_id = self.patient_model.create({
+        patient = self.patient_model.create({
             'family_name': 'Testersen',
             'given_name': 'Test',
             'other_identifier': hospital_number
         })
-        return self.patient_model.browse(patient_id)
+        return patient
 
     def place_patient(
             self, location_id=None, placement_activity_id=None):
