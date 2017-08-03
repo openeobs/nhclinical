@@ -1,6 +1,7 @@
 import logging
-from openerp.osv import orm, fields, osv
+
 from openerp import SUPERUSER_ID
+from openerp.osv import orm, fields, osv
 
 _logger = logging.getLogger(__name__)
 
@@ -32,12 +33,13 @@ class nh_clinical_adt_patient_admit(orm.Model):
         'location_id': fields.many2one('nh.clinical.location',
                                        'Admission Location'),
         'registration': fields.many2one(
-            'nh.clinical.adt.patient.register', 'Registration'
-        ),
+            'nh.clinical.adt.patient.register', 'Registration', required=True),
         'pos_id': fields.many2one('nh.clinical.pos', 'POS', required=True),
         'location': fields.char('Location', size=256),
         'code': fields.char("Code", size=256),
         'start_date': fields.datetime("Admission Date"),
+        # TODO Why are these fields necessary? They are a duplicate of the
+        # patient fields which are accessible via self.registration.patient_id
         'other_identifier': fields.char('Hospital Number', size=100),
         'patient_identifier': fields.char('NHS Number', size=100),
         'doctors': fields.text("Doctors")
@@ -71,22 +73,21 @@ class nh_clinical_adt_patient_admit(orm.Model):
                 'Admission Error!',
                 'Location must be set for admission!'
             )
+
+        # Registration is a required field so should definitely have been set
+        # on create, therefore do not bother with checking.
+        registration_id = vals['registration']
+
         location_pool = self.pool['nh.clinical.location']
         location_id = location_pool.get_by_code(
             cr, uid, vals['location'], auto_create=True, context=context)
         location = location_pool.browse(cr, uid, location_id, context=context)
-        patient_pool = self.pool['nh.clinical.patient']
-        patient_id = patient_pool.get_patient_id_for_identifiers(
-            cr, uid,
-            hospital_number=vals.get('other_identifier'),
-            nhs_number=vals.get('patient_identifier'),
-            context=context
-        )
+
         data = vals.copy()
         data.update(
             {
+                'registration': registration_id,
                 'location_id': location_id,
-                'patient_id': patient_id.id,
                 'pos_id': location.pos_id.id
             }
         )
@@ -105,29 +106,36 @@ class nh_clinical_adt_patient_admit(orm.Model):
         """
         res = super(nh_clinical_adt_patient_admit, self).complete(
             cr, uid, activity_id, context=context)
+
         activity_pool = self.pool['nh.activity']
         admission_pool = self.pool['nh.clinical.patient.admission']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
+
+        patient_id = activity.data_ref.registration.patient_id.id
         admission_data = {
             'pos_id': activity.data_ref.pos_id.id,
-            'patient_id': activity.data_ref.patient_id.id,
+            'patient_id': patient_id,
             'location_id': activity.data_ref.location_id.id,
             'code': activity.data_ref.code,
             'start_date': activity.data_ref.start_date
         }
+
         if activity.data_ref.doctors:
             doctor_pool = self.pool['nh.clinical.doctor']
             admission_data.update({'doctors': activity.data_ref.doctors})
             doctor_pool.evaluate_doctors_dict(cr, uid, admission_data,
                                               context=context)
             del admission_data['doctors']
+
         admission_id = admission_pool.create_activity(
             cr, uid, {'creator_id': activity_id}, admission_data,
             context=context)
         activity_pool.complete(cr, uid, admission_id, context=context)
-        spell_id = activity_pool.search(cr, uid, [
-            ['data_model', '=', 'nh.clinical.spell'],
-            ['creator_id', '=', admission_id]], context=context)[0]
-        activity_pool.write(cr, SUPERUSER_ID, activity_id,
-                            {'parent_id': spell_id})
+        spell_id = activity_pool.search(
+            cr, uid, [
+                ['data_model', '=', 'nh.clinical.spell'],
+                ['creator_id', '=', admission_id]
+            ], context=context)[0]
+        activity_pool.write(
+            cr, SUPERUSER_ID, activity_id, {'parent_id': spell_id})
         return res
