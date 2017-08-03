@@ -7,3 +7,4 @@ fake-factory==0.5.1
 python-ldap==2.4.19
 flake8==3.4.1
 Click==6.7
+pylint-odoo==1.8.0
