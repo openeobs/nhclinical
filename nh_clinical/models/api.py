@@ -9,7 +9,6 @@ import logging
 from openerp.osv import orm
 from openerp.osv.osv import except_osv, except_orm
 
-
 _logger = logging.getLogger(__name__)
 
 
@@ -18,9 +17,9 @@ class nh_clinical_api(orm.AbstractModel):
 
     _name = 'nh.clinical.api'
 
-    def _update_or_register_patient(self, cr, uid, data, context=None):
+    def _ensure_patient_is_registered(self, cr, uid, data, context=None):
         """
-        Update or register the patient's information
+        If the patient does not already exist, register them.
 
         :param cr: Odoo Cursor
         :param uid: User's ID
@@ -34,18 +33,30 @@ class nh_clinical_api(orm.AbstractModel):
                 'Identifiers not provided',
                 'Patient\'s NHS or Hospital numbers must be provided'
             )
-        patient_pool = self.pool['nh.clinical.patient']
         try:
+            patient_pool = self.pool['nh.clinical.patient']
             patient = patient_pool.get_patient_id_for_identifiers(
                 cr, uid,
                 hospital_number=hospital_number,
-                nhs_number=nhs_number,
-                context=context
-            )
-            if patient:
-                patient.write(data)
+                context=context)
+
+            adt_register_pool = self.pool['nh.clinical.adt.patient.register']
+            register_search_results = adt_register_pool.search(
+                cr, uid, [('patient_id', '=', patient.id)])
+
+            if register_search_results:
+                registration_id = register_search_results[0]
+                return registration_id
+
+            # If execution reach here then a patient was found for the passed
+            # hospital number (as now exception was thrown) but there is no
+            # register record found either. This shouldn't happen.
+            _logger.warn('Found an existing patient that was not registered.')
         except except_orm:
-            self.register(cr, uid, hospital_number, data, context=context)
+            pass  # Fine if no patient found, we create them via registration.
+        registration_id = self.register(
+            cr, uid, hospital_number, data, context=context)
+        return registration_id
 
     def verify_patient_exists(self, cr, uid, hospital_number, context=None):
         """
@@ -82,7 +93,7 @@ class nh_clinical_api(orm.AbstractModel):
         update_pool = self.pool['nh.clinical.adt.patient.update']
         if hospital_number:
             data.update({'other_identifier': hospital_number})
-        self._update_or_register_patient(cr, uid, data, context=context)
+        self._ensure_patient_is_registered(cr, uid, data, context=context)
         update_activity = update_pool.create_activity(
             cr, uid, {}, {}, context=context)
         res = activity_pool.submit(
@@ -130,16 +141,23 @@ class nh_clinical_api(orm.AbstractModel):
         :returns: ``True``
         :rtype: bool
         """
-
         activity_pool = self.pool['nh.activity']
-        admit_pool = self.pool['nh.clinical.adt.patient.admit']
+        adt_admit_pool = self.pool['nh.clinical.adt.patient.admit']
+
         if hospital_number:
             data.update({'other_identifier': hospital_number})
-        self._update_or_register_patient(cr, uid, data, context=context)
-        admit_activity = admit_pool.create_activity(cr, uid, {}, {},
-                                                    context=context)
-        activity_pool.submit(cr, uid, admit_activity, data, context=context)
-        activity_pool.complete(cr, uid, admit_activity, context=context)
+
+        registration_id = data.get('registration')
+        if not registration_id:
+            registration_id = self._ensure_patient_is_registered(
+                cr, uid, data, context=context)
+            data['registration'] = registration_id
+
+        admit_activity_id = adt_admit_pool.create_activity(
+            cr, uid, {}, {}, context=context)
+        activity_pool.submit(cr, uid, admit_activity_id, data, context=context)
+        activity_pool.complete(cr, uid, admit_activity_id, context=context)
+
         _logger.debug("Patient admitted\n data: %s", data)
         return True
 
@@ -160,7 +178,7 @@ class nh_clinical_api(orm.AbstractModel):
         update_pool = self.pool['nh.clinical.adt.spell.update']
         if hospital_number:
             data.update({'other_identifier': hospital_number})
-        self._update_or_register_patient(cr, uid, data, context=context)
+        self._ensure_patient_is_registered(cr, uid, data, context=context)
         update_activity = update_pool.create_activity(cr, uid, {}, {},
                                                       context=context)
         activity_pool.submit(cr, uid, update_activity, data, context=context)
@@ -205,7 +223,7 @@ class nh_clinical_api(orm.AbstractModel):
         discharge_pool = self.pool['nh.clinical.adt.patient.discharge']
         if hospital_number:
             data.update({'other_identifier': hospital_number})
-        self._update_or_register_patient(cr, uid, data, context=context)
+        self._ensure_patient_is_registered(cr, uid, data, context=context)
         discharge_activity = discharge_pool.create_activity(cr, uid, {}, {},
                                                             context=context)
         activity_pool.submit(cr, uid, discharge_activity, data,
@@ -278,7 +296,7 @@ class nh_clinical_api(orm.AbstractModel):
         transfer_pool = self.pool['nh.clinical.adt.patient.transfer']
         if hospital_number:
             data.update({'other_identifier': hospital_number})
-        self._update_or_register_patient(cr, uid, data, context=context)
+        self._ensure_patient_is_registered(cr, uid, data, context=context)
         transfer_activity = transfer_pool.create_activity(cr, uid, {}, {},
                                                           context=context)
         activity_pool.submit(cr, uid, transfer_activity, data, context=context)
