@@ -1,6 +1,7 @@
-from openerp.tests.common import TransactionCase
-from openerp.osv.osv import except_orm
 from uuid import uuid4
+
+from openerp.osv.osv import except_orm
+from openerp.tests.common import TransactionCase
 
 
 class TestApiAdmit(TransactionCase):
@@ -14,7 +15,7 @@ class TestApiAdmit(TransactionCase):
         self.patient_model = self.env['nh.clinical.patient']
         self.test_utils.create_locations()
         self.test_utils.create_users()
-        self.test_utils.create_patient()
+        self.test_utils.create_and_register_patient()
         self.hospital_number = self.test_utils.patient.other_identifier
         self.nhs_number = self.test_utils.patient.patient_identifier
 

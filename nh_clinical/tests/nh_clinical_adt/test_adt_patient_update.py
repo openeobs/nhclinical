@@ -1,9 +1,10 @@
-from openerp.tests.common import TransactionCase
-# from openerp.osv.osv import except_osv
-from openerp.osv.orm import except_orm
 # from psycopg2 import IntegrityError
 # from openerp.tools.misc import mute_logger
 import uuid
+
+# from openerp.osv.osv import except_osv
+from openerp.osv.orm import except_orm
+from openerp.tests.common import TransactionCase
 
 
 class TestAdtPatientUpdate(TransactionCase):
@@ -18,7 +19,7 @@ class TestAdtPatientUpdate(TransactionCase):
         self.activity_model = self.env['nh.activity']
         self.patient_model = self.env['nh.clinical.patient']
         self.test_utils.create_locations()
-        self.test_utils.create_patient()
+        self.test_utils.create_and_register_patient()
         self.existing_nhs_number = self.test_utils.patient.patient_identifier
         self.existing_hospital_number = \
             self.test_utils.patient.other_identifier

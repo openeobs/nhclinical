@@ -10,23 +10,25 @@ class TestCheckLocationIdsConstraint(TransactionCase):
 
     def setUp(self):
         super(TestCheckLocationIdsConstraint, self).setUp()
-        self.test_utils_model = self.env['nh.clinical.test_utils']
+        self.test_utils = self.env['nh.clinical.test_utils']
         self.allocation_pool = self.env['nh.clinical.staff.allocation']
         self.user_pool = self.env['res.users']
         self.patient_pool = self.env['nh.clinical.patient']
         self.allocating_pool = self.env['nh.clinical.allocating']
         self.resp_allocation_pool = \
             self.env['nh.clinical.user.responsibility.allocation']
-        self.activity_model = self.env['nh.activity']
-        self.test_utils_model.create_locations()
-        self.test_utils_model.create_users()
-        self.test_utils_model.create_patient()
-        self.test_utils_model.admit_patient()
-        self.test_utils_model.placement = \
-            self.test_utils_model.create_placement()
-        self.test_utils_model.place_patient()
+        self.activity_pool = self.env['nh.activity']
+
+        self.test_utils.create_locations()
+        self.test_utils.create_users()
+        self.test_utils.create_and_register_patient()
+        self.test_utils.admit_patient()
+        self.test_utils.placement = \
+            self.test_utils.create_placement()
+        self.test_utils.place_patient()
         self.shift_coordinator = \
-            self.test_utils_model.create_shift_coordinator()
+            self.test_utils.create_shift_coordinator()
+        
         items_needed = [
             'ward',
             'nurse',
@@ -35,10 +37,11 @@ class TestCheckLocationIdsConstraint(TransactionCase):
             'patient'
         ]
         for item in items_needed:
-            self.test_utils_model.copy_instance_variable_if_exists(self, item)
+            self.test_utils.copy_instance_variable_if_exists(self, item)
         self.other_patient = \
-            self.test_utils_model.create_and_register_patient()
-        self.other_spell = self.test_utils_model.admit_patient(
+            self.test_utils.create_and_register_patient(
+                set_instance_variables=False)
+        self.other_spell = self.test_utils.admit_patient(
             hospital_number=self.other_patient.other_identifier,
             location_code=self.ward.code,
             patient_id=self.other_patient.id
@@ -46,11 +49,11 @@ class TestCheckLocationIdsConstraint(TransactionCase):
         self.other_spell_activity_id = self.other_spell.activity_id.id
         # TODO: Rename variable as it is a spell not an activity.
         self.other_spell_activity = self.other_spell.activity_id
-        self.other_placement = self.test_utils_model.create_placement(
+        self.other_placement = self.test_utils.create_placement(
             patient_id=self.other_patient.id,
             location_id=self.ward.id
         )
-        self.test_utils_model.place_patient(
+        self.test_utils.place_patient(
             location_id=self.other_bed.id,
             placement_activity_id=self.other_placement
         )
@@ -58,13 +61,13 @@ class TestCheckLocationIdsConstraint(TransactionCase):
             self.nurse.id, [self.bed.id, self.other_bed.id])
 
         # Create activities for user to lock
-        self.activity_1 = self.activity_model.create({
+        self.activity_1 = self.activity_pool.create({
             'data_model': 'nh.activity',
             'summary': 'This is a test',
             'user_id': self.nurse.id,
             'location_id': self.bed.id
         })
-        self.activity_2 = self.activity_model.create({
+        self.activity_2 = self.activity_pool.create({
             'data_model': 'nh.activity',
             'summary': 'This is a test',
             'user_id': self.nurse.id,

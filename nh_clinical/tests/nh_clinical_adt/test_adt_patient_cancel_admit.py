@@ -1,6 +1,7 @@
-from openerp.tests.common import TransactionCase
-from openerp.osv.orm import except_orm
 import uuid
+
+from openerp.osv.orm import except_orm
+from openerp.tests.common import TransactionCase
 
 
 class TestAdtPatientCancelAdmit(TransactionCase):
@@ -12,9 +13,11 @@ class TestAdtPatientCancelAdmit(TransactionCase):
         self.cancel_model = self.env['nh.clinical.adt.patient.cancel_admit']
         self.activity_model = self.env['nh.activity']
         self.patient_model = self.env['nh.clinical.patient']
+
         self.test_utils.create_locations()
         self.test_utils.create_users()
-        self.test_utils.create_patient()
+        self.test_utils.create_and_register_patient()
+
         self.spell = self.test_utils.admit_patient()
         self.patient = self.test_utils.patient
         self.existing_nhs_number = self.patient.patient_identifier
@@ -39,7 +42,8 @@ class TestAdtPatientCancelAdmit(TransactionCase):
         Test that raises an exception when trying to cancel admit with
         unadmitted patient
         """
-        second_patient = self.test_utils.create_and_register_patient()
+        second_patient = self.test_utils.create_and_register_patient(
+            set_instance_variables=False)
         cancel_admit_data = {
             'other_identifier': second_patient.other_identifier
         }

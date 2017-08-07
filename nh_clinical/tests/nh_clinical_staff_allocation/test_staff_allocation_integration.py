@@ -14,7 +14,7 @@ class TestStaffAllocationIntegration(TransactionCase):
             self.env['nh.clinical.user.responsibility.allocation']
         self.test_utils_model.create_locations()
         self.test_utils_model.create_users()
-        self.test_utils_model.create_patient()
+        self.test_utils.create_and_register_patient()
         self.test_utils_model.admit_patient()
         self.test_utils_model.placement = \
             self.test_utils_model.create_placement()

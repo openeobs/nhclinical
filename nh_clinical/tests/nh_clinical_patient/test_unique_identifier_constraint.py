@@ -1,8 +1,9 @@
-from openerp.tests.common import TransactionCase
+from uuid import uuid4
+
 from openerp.osv.osv import except_orm
+from openerp.tests.common import TransactionCase
 from openerp.tools.misc import mute_logger
 from psycopg2 import IntegrityError
-from uuid import uuid4
 
 
 class TestUniqueIdentifierConstraint(TransactionCase):
@@ -17,7 +18,7 @@ class TestUniqueIdentifierConstraint(TransactionCase):
         self.patient_model = self.env['nh.clinical.patient']
         self.test_utils.create_locations()
         self.test_utils.create_users()
-        self.test_utils.create_patient()
+        self.test_utils.create_and_register_patient()
         self.existing_hospital_number = \
             self.test_utils.patient.other_identifier
         self.existing_nhs_number = self.test_utils.patient.patient_identifier
@@ -90,7 +91,8 @@ class TestUniqueIdentifierConstraint(TransactionCase):
         Test that an exception is raise if a patient record is written to but
         the identifiers submitted are already in use by another patient
         """
-        second_patient = self.test_utils.create_and_register_patient()
+        second_patient = self.test_utils.create_and_register_patient(
+            set_instance_variables=False)
         with self.assertRaises(IntegrityError) as error:
             second_patient.write(
                 {
@@ -110,7 +112,8 @@ class TestUniqueIdentifierConstraint(TransactionCase):
         Test that an exception is raise if a patient record is written to but
         the identifiers submitted are already in use by another patient
         """
-        second_patient = self.test_utils.create_and_register_patient()
+        second_patient = self.test_utils.create_and_register_patient(
+            set_instance_variables=False)
         with self.assertRaises(IntegrityError) as error:
             second_patient.write(
                 {

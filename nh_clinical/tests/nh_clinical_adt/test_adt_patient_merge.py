@@ -1,6 +1,7 @@
-from openerp.tests.common import TransactionCase
-from openerp.osv.osv import except_orm
 from uuid import uuid4
+
+from openerp.osv.osv import except_orm
+from openerp.tests.common import TransactionCase
 
 
 class TestAdtPatientMerge(TransactionCase):
@@ -21,7 +22,8 @@ class TestAdtPatientMerge(TransactionCase):
             self.category_model.search([('name', '=', 'Nurse')])[0]
         self.test_utils.admit_and_place_patient()
         self.patient = self.test_utils.patient
-        self.other_patient = self.test_utils.create_and_register_patient()
+        self.other_patient = self.test_utils.create_and_register_patient(
+            set_instance_variables=False)
         self.other_ward = self.test_utils.other_ward
         self.existing_nhs_number = self.patient.patient_identifier
         self.existing_hospital_number = self.patient.other_identifier

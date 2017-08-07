@@ -1,7 +1,8 @@
+from datetime import datetime
+
+from openerp.osv.orm import except_orm
 from openerp.tests.common import TransactionCase
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
-from openerp.osv.orm import except_orm
-from datetime import datetime
 
 
 class TestAdtPatientDischarge(TransactionCase):
@@ -158,7 +159,8 @@ class TestAdtPatientDischarge(TransactionCase):
 
     def test_discharge_non_admitted_patient(self):
         """ TEst we can discharge a patient who has not been admitted """
-        test_patient = self.test_utils.create_and_register_patient()
+        test_patient = self.test_utils.create_and_register_patient(
+            set_instance_variables=False)
         discharge_data = {
             'other_identifier': test_patient.other_identifier,
             'discharge_date': '2015-05-02 18:00:00',
@@ -198,7 +200,8 @@ class TestAdtPatientDischarge(TransactionCase):
 
     def test_sets_date_to_now_if_not_sent(self):
         """ Test that datetime.now() is used if no date is provided """
-        test_patient = self.test_utils.create_and_register_patient()
+        test_patient = self.test_utils.create_and_register_patient(
+            set_instance_variables=False)
         discharge_data = {
             'other_identifier': test_patient.other_identifier,
             'location': 'U'

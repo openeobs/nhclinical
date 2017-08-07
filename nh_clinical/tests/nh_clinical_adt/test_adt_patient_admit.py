@@ -9,8 +9,6 @@ class TestAdtPatientAdmit(TransactionCase):
 
     def setUp(self):
         super(TestAdtPatientAdmit, self).setUp()
-        self.test_utils = self.env['nh.clinical.test_utils']
-        self.test_utils.create_locations()
 
         self.register_model = self.env['nh.clinical.adt.patient.register']
         self.adt_admit_model = self.env['nh.clinical.adt.patient.admit']
@@ -21,7 +19,11 @@ class TestAdtPatientAdmit(TransactionCase):
         self.nurse_role = \
             self.category_model.search([('name', '=', 'Nurse')])[0]
 
-        self.patient = self.test_utils.create_patient()
+        self.test_utils = self.env['nh.clinical.test_utils']
+        self.test_utils.create_locations()
+        self.test_utils.create_and_register_patient()
+        self.test_utils.copy_instance_variables(self)
+
         self.existing_nhs_number = self.patient.patient_identifier
         self.existing_hospital_number = self.patient.other_identifier
 
@@ -118,7 +120,20 @@ class TestAdtPatientAdmit(TransactionCase):
         )
 
     def test_raises_no_registration(self):
-        pass
+        """
+        Test raises KeyError. This is not a friendly error message but it
+        should never appear to the user as they would always have to create it
+        via an Odoo view which has client-side validation of required fields.
+
+        The benefit of this is that we do not have to add extra code for
+        checking and returning the error message.
+        """
+        admit_data = {
+            'other_identifier': 'TEST002',
+            'location': 'U'
+        }
+        with self.assertRaises(KeyError):
+            self.adt_admit_model.create_activity({}, admit_data)
 
     def test_admit_with_nhs_number(self):
         """ Test can admit patient with NHS Number """

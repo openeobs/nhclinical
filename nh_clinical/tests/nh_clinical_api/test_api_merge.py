@@ -1,6 +1,7 @@
-from openerp.tests.common import TransactionCase
-from openerp.osv.osv import except_orm
 from uuid import uuid4
+
+from openerp.osv.osv import except_orm
+from openerp.tests.common import TransactionCase
 
 
 class TestApiMerge(TransactionCase):
@@ -15,7 +16,8 @@ class TestApiMerge(TransactionCase):
         self.test_utils.admit_and_place_patient()
         self.hospital_number = self.test_utils.patient.other_identifier
         self.nhs_number = self.test_utils.patient.patient_identifier
-        self.other_patient = self.test_utils.create_and_register_patient()
+        self.other_patient = self.test_utils.create_and_register_patient(
+            set_instance_variables=False)
 
     def test_merge_two_patients(self):
         """ Test that we can merge 2 patients """

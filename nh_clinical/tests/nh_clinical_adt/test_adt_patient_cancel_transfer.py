@@ -1,6 +1,7 @@
-from openerp.tests.common import TransactionCase
-from openerp.osv.osv import except_orm
 from uuid import uuid4
+
+from openerp.osv.osv import except_orm
+from openerp.tests.common import TransactionCase
 
 
 class TestAdtPatientCancelTransfer(TransactionCase):
@@ -57,7 +58,8 @@ class TestAdtPatientCancelTransfer(TransactionCase):
         patient that does not have a previous transfer
         :return:
         """
-        other_patient = self.test_utils.create_and_register_patient()
+        other_patient = self.test_utils.create_and_register_patient(
+            set_instance_variables=False)
         self.test_utils.admit_patient(
             hospital_number=other_patient.other_identifier,
             patient_id=other_patient.id

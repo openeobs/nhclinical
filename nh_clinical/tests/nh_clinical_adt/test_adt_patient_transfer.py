@@ -1,5 +1,5 @@
-from openerp.tests.common import TransactionCase
 from openerp.osv.orm import except_orm
+from openerp.tests.common import TransactionCase
 
 
 class TestAdtPatientTransfer(TransactionCase):
@@ -21,7 +21,8 @@ class TestAdtPatientTransfer(TransactionCase):
         self.test_utils.admit_and_place_patient()
         self.patient = self.test_utils.patient
         self.non_admitted_patient = \
-            self.test_utils.create_and_register_patient()
+            self.test_utils.create_and_register_patient(
+                set_instance_variables=False)
         self.existing_nhs_number = self.patient.patient_identifier
         self.existing_hospital_number = self.patient.other_identifier
         self.other_ward = self.test_utils.other_ward

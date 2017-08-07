@@ -12,7 +12,7 @@ class NhClinicalTestUtils(AbstractModel):
     def admit_and_place_patient(self):
         self.create_locations()
         self.create_users()
-        self.create_patient()
+        self.create_and_register_patient()
         self.spell = self.admit_patient()
         self.spell_activity_id = self.spell.activity_id.id
         # TODO: Rename variable as it is a spell not an activity.
@@ -24,11 +24,6 @@ class NhClinicalTestUtils(AbstractModel):
         self.nurse = self.create_nurse()
         self.hca = self.create_hca()
         self.create_doctor()
-
-    def create_patient(self):
-        self.patient = self.create_and_register_patient()
-        self.patient_id = self.patient.id
-        self.hospital_number = self.patient.other_identifier
 
     def admit_patient(
             self, hospital_number=None, patient_id=None, location_code=None):
@@ -54,22 +49,30 @@ class NhClinicalTestUtils(AbstractModel):
             'patient_id': patient_id
         })
 
-    def create_and_register_patient(self):
+    def create_and_register_patient(self, set_instance_variables=True):
         self.api_model = self.env['nh.clinical.api']
         self.patient_model = self.env['nh.clinical.patient']
 
         hospital_number = str(uuid.uuid4())
+        patient_identifier = str(uuid.uuid4())
         patient_id = self.api_model.sudo().register(
             hospital_number,
             {
                 'family_name': 'Testersen',
                 'given_name': 'Test',
-                'patient_identifier': str(uuid.uuid4())
+                'patient_identifier': patient_identifier
             }
         )
+
+        if set_instance_variables:
+            self.patient = self.patient_model.browse(patient_id)
+            # TODO Can be removed, no more concise than using `self.patient.id`
+            self.patient_id = self.patient.id
+            self.hospital_number = self.patient.other_identifier
+
         return self.patient_model.browse(patient_id)
 
-    def create_patient(self):
+    def create_patient(self, set_instance_variables=True):
         self.patient_model = self.env['nh.clinical.patient']
         hospital_number = str(uuid.uuid4())
         patient = self.patient_model.create({
@@ -77,10 +80,13 @@ class NhClinicalTestUtils(AbstractModel):
             'given_name': 'Test',
             'other_identifier': hospital_number
         })
+
+        if set_instance_variables:
+            self.patient = patient
+
         return patient
 
-    def place_patient(
-            self, location_id=None, placement_activity_id=None):
+    def place_patient(self, location_id=None, placement_activity_id=None):
         if not location_id:
             location_id = self.bed.id
         if not placement_activity_id:
@@ -92,6 +98,7 @@ class NhClinicalTestUtils(AbstractModel):
             ]
             placement_activities = activity_model.search(domain)
             placement_activity_id = placement_activities[0].id
+
         self.activity_model = self.env['nh.activity']
         self.activity_pool = self.pool['nh.activity']
         self.activity_pool.submit(
@@ -209,6 +216,7 @@ class NhClinicalTestUtils(AbstractModel):
             }
         )
 
+    # TODO Extract generic method for create user methods.
     def create_nurse(self, location_id=None):
         if not location_id:
             location_id = self.bed.id
@@ -283,6 +291,38 @@ class NhClinicalTestUtils(AbstractModel):
             'category_id': [[4, self.senior_manager_role.id]],
             'location_ids': [[6, 0, [self.ward.id]]]
         })
+
+    def create_system_administrator(self):
+        self.category_model = self.env['res.partner.category']
+        self.user_model = self.env['res.users']
+        self.system_administrator = self.category_model.search(
+            [('name', '=', 'System Administrator')])[0]
+        self.system_administrator = self.user_model.create({
+            'name': 'System Administrator',
+            'login': 'system.administrator',
+            'password': 'system.administrator',
+            'category_id': [[4, self.adt_role.id]],
+            'location_ids': [[6, 0, [self.ward.id]]]
+        })
+
+    def create_adt_user(self):
+        self.category_model = self.env['res.partner.category']
+        self.user_model = self.env['res.users']
+        self.adt_role = self.category_model.search(
+            [('name', '=', 'System Administrator')])[0]
+        group_model = self.env['res.groups']
+        adt_group = \
+            group_model.search([('name', '=', 'NH Clinical Admin Group')])[0]
+        adt_user = self.user_model.create({
+            'name': 'ADT Test',
+            'login': 'adt.test',
+            'password': 'adt.test',
+            'category_id': [[4, self.adt_role.id]],
+            'location_ids': [[6, 0, [self.ward.id]]],
+            'groups_id': [[6, 0, [adt_group.id]]],
+            'pos_id': self.pos.id
+        })
+        return adt_user
 
     # Methods for getting references to objects needed for test cases.
     def copy_instance_variables(self, caller):
