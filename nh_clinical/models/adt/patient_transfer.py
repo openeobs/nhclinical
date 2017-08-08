@@ -1,4 +1,5 @@
 import logging
+
 from openerp.osv import orm, fields, osv
 
 _logger = logging.getLogger(__name__)
@@ -60,7 +61,7 @@ class nh_clinical_adt_patient_transfer(orm.Model):
             olocation_id = False
 
         patient_pool = self.pool['nh.clinical.patient']
-        patient = patient_pool.get_patient_id_for_identifiers(
+        patient = patient_pool.get_patient_for_identifiers(
             cr, uid,
             hospital_number=vals.get('other_identifier'),
             nhs_number=vals.get('patient_identifier'),

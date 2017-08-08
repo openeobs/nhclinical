@@ -1,6 +1,7 @@
 import logging
-from openerp.osv import orm, fields, osv
+
 from openerp import SUPERUSER_ID
+from openerp.osv import orm, fields, osv
 
 _logger = logging.getLogger(__name__)
 
@@ -57,7 +58,7 @@ class nh_clinical_adt_spell_update(orm.Model):
             cr, uid, vals['location'], auto_create=True, context=context)
         location = location_pool.browse(cr, uid, location_id, context=context)
         patient_pool = self.pool['nh.clinical.patient']
-        patient = patient_pool.get_patient_id_for_identifiers(
+        patient = patient_pool.get_patient_for_identifiers(
             cr, uid,
             hospital_number=vals.get('other_identifier'),
             nhs_number=vals.get('patient_identifier'),

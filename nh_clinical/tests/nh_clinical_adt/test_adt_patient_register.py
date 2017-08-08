@@ -1,14 +1,14 @@
-from openerp.tests.common import TransactionCase
 from openerp.osv.orm import except_orm
 from openerp.osv.osv import except_osv
-from psycopg2 import IntegrityError
+from openerp.tests.common import TransactionCase
 from openerp.tools.misc import mute_logger
+from psycopg2 import IntegrityError
 
 
 class TestAdtPatientRegister(TransactionCase):
     """
     Test the nh.clinical.adt.patient.register - Patient Registration via
-     ADT model
+    ADT model.
     """
 
     def setUp(self):
@@ -20,7 +20,7 @@ class TestAdtPatientRegister(TransactionCase):
         self.test_utils.create_locations()
 
     def test_register_new_hospital_number(self):
-        """ Test registering a new patient with hospital number """
+        """ Test registering a new patient with hospital number. """
         register_data = {
             'family_name': 'Family',
             'middle_names': 'Middle',
@@ -63,8 +63,11 @@ class TestAdtPatientRegister(TransactionCase):
             patient.sex,
             msg="Patient Register: wrong patient data registered")
 
-    def test_register_new_patient_with_nhs_number(self):
-        """ Register a new patient with NHS Number """
+    def test_register_new_patient_with_hospital_number_in_values_dict(self):
+        """
+        Register a new patient with hospital number in the values dictionary
+        rather than passed as a positional argument.
+        """
         register_data = {
             'family_name': 'Family',
             'given_name': 'Given',
@@ -81,13 +84,14 @@ class TestAdtPatientRegister(TransactionCase):
         self.assertTrue(patient_id,
                         msg="Patient Register: patient id not returned")
 
-    def test_register_no_identifiers(self):
+    def test_register_no_hospital_number(self):
         """
-        Test raises an error when submitting data for incorrect activity
+        Test raises an error when submitting data for incorrect activity.
         """
         register_data = {
             'family_name': 'Family',
             'given_name': 'Given',
+            'patient_identifier': 'TEST001',
             'dob': '1984-10-01 00:00:00',
             'gender': 'M',
             'sex': 'M'
@@ -104,7 +108,7 @@ class TestAdtPatientRegister(TransactionCase):
 
     def test_register_no_names(self):
         """
-        Test raises an error when submitting data for incorrect activity
+        Test raises an error when submitting data for incorrect activity.
         """
         register_data = {
             'dob': '1984-10-01 00:00:00',
@@ -125,7 +129,7 @@ class TestAdtPatientRegister(TransactionCase):
     @mute_logger('openerp.sql_db')
     def test_register_duplicate_nhs_number(self):
         """
-        Test raises an error when submitting duplicate NHS Number
+        Test raises an error when submitting duplicate NHS Number.
         """
         register_data = {
             'family_name': 'Family',
@@ -155,7 +159,7 @@ class TestAdtPatientRegister(TransactionCase):
     @mute_logger('openerp.sql_db')
     def test_register_duplicate_hospital_number(self):
         """
-        Test raises an error when submitting duplicate NHS Number
+        Test raises an error when submitting duplicate NHS Number.
         """
         register_data = {
             'family_name': 'Family',

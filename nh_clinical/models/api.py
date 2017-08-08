@@ -35,9 +35,10 @@ class nh_clinical_api(orm.AbstractModel):
             )
         try:
             patient_pool = self.pool['nh.clinical.patient']
-            patient = patient_pool.get_patient_id_for_identifiers(
+            patient = patient_pool.get_patient_for_identifiers(
                 cr, uid,
                 hospital_number=hospital_number,
+                nhs_number=nhs_number,
                 context=context)
 
             adt_register_pool = self.pool['nh.clinical.adt.patient.register']
@@ -52,6 +53,7 @@ class nh_clinical_api(orm.AbstractModel):
             # hospital number (as now exception was thrown) but there is no
             # register record found either. This shouldn't happen.
             _logger.warn('Found an existing patient that was not registered.')
+
         except except_orm:
             pass  # Fine if no patient found, we create them via registration.
         registration_id = self.register(
@@ -69,7 +71,7 @@ class nh_clinical_api(orm.AbstractModel):
         :param context: odoo context
         """
         patient_pool = self.pool['nh.clinical.patient']
-        patient_pool.get_patient_id_for_identifiers(
+        patient_pool.get_patient_for_identifiers(
             cr, uid,
             hospital_number=hospital_number,
             context=context
@@ -114,22 +116,28 @@ class nh_clinical_api(orm.AbstractModel):
         :returns: ``True``
         :rtype: bool
         """
-
         activity_pool = self.pool['nh.activity']
         register_pool = self.pool['nh.clinical.adt.patient.register']
-        register_activity = register_pool.create_activity(
-            cr, uid, {}, {}, context=context)
         if hospital_number:
             data.update({'other_identifier': hospital_number})
-        activity_pool.submit(cr, uid, register_activity, data, context=context)
-        res = activity_pool.complete(
-            cr, uid, register_activity, context=context)
+
+        register_activity_id = register_pool.create_activity(
+            cr, uid, {}, {}, context=context)
+        activity_pool.submit(
+            cr, uid, register_activity_id, data, context=context)
+        activity_pool.complete(
+            cr, uid, register_activity_id, context=context)
+
+        register_activity = activity_pool.browse(cr, uid, register_activity_id)
+        register = register_activity.data_ref
+
         _logger.debug("Patient registered\n data: %s", data)
-        return res
+        return register.id
 
     def admit(self, cr, uid, hospital_number, data, context=None):
         """
-        Admits a patient into a specified location.
+        Admits a patient into a specified location. Will register a new patient
+        if one does not exist.
 
         :param hospital_number: Hospital number of the patient
         :type hospital_number: str
@@ -147,11 +155,9 @@ class nh_clinical_api(orm.AbstractModel):
         if hospital_number:
             data.update({'other_identifier': hospital_number})
 
-        registration_id = data.get('registration')
-        if not registration_id:
-            registration_id = self._ensure_patient_is_registered(
-                cr, uid, data, context=context)
-            data['registration'] = registration_id
+        registration_id = self._ensure_patient_is_registered(
+            cr, uid, data, context=context)
+        data['registration'] = registration_id
 
         admit_activity_id = adt_admit_pool.create_activity(
             cr, uid, {}, {}, context=context)
@@ -173,7 +179,6 @@ class nh_clinical_api(orm.AbstractModel):
         :returns: ``True``
         :rtype: bool
         """
-
         activity_pool = self.pool['nh.activity']
         update_pool = self.pool['nh.clinical.adt.spell.update']
         if hospital_number:
@@ -195,7 +200,6 @@ class nh_clinical_api(orm.AbstractModel):
         :returns: ``True``
         :rtype: bool
         """
-
         activity_pool = self.pool['nh.activity']
         cancel_pool = self.pool['nh.clinical.adt.patient.cancel_admit']
         self.verify_patient_exists(cr, uid, hospital_number, context=context)
@@ -218,7 +222,6 @@ class nh_clinical_api(orm.AbstractModel):
         :returns: ``True``
         :rtype: bool
         """
-
         activity_pool = self.pool['nh.activity']
         discharge_pool = self.pool['nh.clinical.adt.patient.discharge']
         if hospital_number:

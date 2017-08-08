@@ -75,7 +75,7 @@ class nh_clinical_adt_patient_admit(orm.Model):
             )
 
         # Registration is a required field so should definitely have been set
-        # on create, therefore do not bother with checking.
+        # on create, therefore do not bother checking for key.
         registration_id = vals['registration']
 
         location_pool = self.pool['nh.clinical.location']
@@ -84,13 +84,21 @@ class nh_clinical_adt_patient_admit(orm.Model):
         location = location_pool.browse(cr, uid, location_id, context=context)
 
         data = vals.copy()
-        data.update(
-            {
-                'registration': registration_id,
-                'location_id': location_id,
-                'pos_id': location.pos_id.id
-            }
-        )
+        data['registration'] = registration_id
+        data['location_id'] = location_id
+        data['pos_id'] = location.pos_id.id
+
+        # Although patient ID is not a field on the adt admission object, it
+        # is currently necessary to pass it as tests and various other things
+        # rely on the patient ID being present.
+        # TODO Stop admission activities needing patient ID to be set.
+        registration_pool = self.pool['nh.clinical.adt.patient.register']
+        registration = registration_pool.browse(cr, uid, registration_id)
+        patient_id = registration.patient_id.id
+        data['patient_id'] = patient_id
+        activity_pool = self.pool['nh.activity']
+        activity_pool.write(cr, uid, activity_id, {'patient_id': patient_id})
+
         return super(nh_clinical_adt_patient_admit, self).submit(
             cr, uid, activity_id, data, context=context)
 
@@ -137,5 +145,7 @@ class nh_clinical_adt_patient_admit(orm.Model):
                 ['creator_id', '=', admission_id]
             ], context=context)[0]
         activity_pool.write(
-            cr, SUPERUSER_ID, activity_id, {'parent_id': spell_id})
+            cr, SUPERUSER_ID, activity_id,
+            {'parent_id': spell_id}
+        )
         return res

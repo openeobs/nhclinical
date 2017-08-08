@@ -55,7 +55,7 @@ class NhClinicalTestUtils(AbstractModel):
 
         hospital_number = str(uuid.uuid4())
         patient_identifier = str(uuid.uuid4())
-        patient_id = self.api_model.sudo().register(
+        registration_id = self.api_model.sudo().register(
             hospital_number,
             {
                 'family_name': 'Testersen',
@@ -63,14 +63,17 @@ class NhClinicalTestUtils(AbstractModel):
                 'patient_identifier': patient_identifier
             }
         )
+        adt_register_model = self.env['nh.clinical.adt.patient.register']
+        adt_register = adt_register_model.browse(registration_id)
+        patient = adt_register.patient_id
 
         if set_instance_variables:
-            self.patient = self.patient_model.browse(patient_id)
+            self.patient = patient
             # TODO Can be removed, no more concise than using `self.patient.id`
             self.patient_id = self.patient.id
             self.hospital_number = self.patient.other_identifier
 
-        return self.patient_model.browse(patient_id)
+        return patient
 
     def create_patient(self, set_instance_variables=True):
         self.patient_model = self.env['nh.clinical.patient']

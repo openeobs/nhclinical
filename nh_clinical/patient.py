@@ -4,11 +4,11 @@ import logging
 
 import re
 from dateutil.parser import parse
+from openerp import api
+from openerp.addons.nh_odoo_fixes.validate import validate_non_empty_string
+from openerp.exceptions import ValidationError
 from openerp.osv import fields, osv
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
-from openerp import api
-from openerp.exceptions import ValidationError
-from openerp.addons.nh_odoo_fixes.validate import validate_non_empty_string
 
 _logger = logging.getLogger(__name__)
 
@@ -99,18 +99,17 @@ class NhClinicalPatient(osv.Model):
         return vals
 
     @staticmethod
-    def _validate_indentifiers(vals):
+    def _validate_identifiers(vals):
         """
-        Validate that the value dict has at least one of:
-        - NHS Number
-        - Hospital Number
+        Validate that the value dict has a hospital number. NHS number is
+        optional.
 
         :param vals: dictionary of patient values
         :return: True
         """
         if not vals.get('other_identifier'):
             raise ValidationError(
-                'Patient record must have Hospital number')
+                'Patient record must have Hospital number.')
         return True
 
     @staticmethod
@@ -140,7 +139,7 @@ class NhClinicalPatient(osv.Model):
             'other_identifier':
                 validate_non_empty_string(self.other_identifier)
         }
-        self._validate_indentifiers(vals_dict)
+        self._validate_identifiers(vals_dict)
 
     @api.constrains('given_name', 'family_name')
     def _check_patient_names(self):
@@ -348,7 +347,7 @@ class NhClinicalPatient(osv.Model):
         :rtype: bool
         """
         vals = self._clean_identifiers(vals)
-        self._validate_indentifiers(vals)
+        self._validate_identifiers(vals)
         self._validate_name(vals)
         if not vals.get('name'):
             vals.update({'name': self._get_fullname(vals)})
@@ -374,7 +373,7 @@ class NhClinicalPatient(osv.Model):
             cr, uid, ids, vals, context=context)
 
     @api.model
-    def get_patient_id_for_identifiers(
+    def get_patient_for_identifiers(
             self, hospital_number=None, nhs_number=None):
         """
         Get patient record with either of the supplied identifier or raise

@@ -68,7 +68,7 @@ class TestOnePointZeroMigration(TransactionCase):
               and column_name = {}
             ;
         """.format(expected_field))
-        records = self.env.cr.fetchall()
+        # records = self.env.cr.fetchall()
 
     def assert_data_integrity_after(self, adt_admit_dictionaries):
         """

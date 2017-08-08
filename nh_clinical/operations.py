@@ -620,12 +620,13 @@ class nh_clinical_patient_admission(orm.Model):
         activity = activity_pool.browse(cr, SUPERUSER_ID, activity_id,
                                         context=context)
         admission = activity.data_ref
-
+        patient_id = admission.patient_id.id
         spell_pool = self.pool['nh.clinical.spell']
         spell_activity_id = spell_pool.create_activity(cr, SUPERUSER_ID, {
+            'patient_id': patient_id,
             'creator_id': activity_id
         }, {
-            'patient_id': admission.patient_id.id,
+            'patient_id': patient_id,
             'location_id': admission.location_id.id,
             'pos_id': admission.pos_id.id,
             'code': admission.code,

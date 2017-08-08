@@ -1,4 +1,5 @@
 import logging
+
 from openerp.osv import orm, fields
 
 _logger = logging.getLogger(__name__)
@@ -65,7 +66,7 @@ class nh_clinical_adt_patient_update(orm.Model):
         """
         patient_model = self.pool['nh.clinical.patient']
         title_pool = self.pool['res.partner.title']
-        patient = patient_model.get_patient_id_for_identifiers(
+        patient = patient_model.get_patient_for_identifiers(
             cr, uid,
             hospital_number=vals.get('other_identifier'),
             nhs_number=vals.get('patient_identifier'),

@@ -32,10 +32,9 @@ class TestUniqueIdentifierConstraint(TransactionCase):
             'ethnicity': 'Z'
         }
 
-    def test_raises_create_no_identifiers(self):
+    def test_raises_create_on_create_no_hosp_num(self):
         """
-        Test that an exception is raised if patient is created without
-        identifiers
+        Test that an exception is raised if no hospital number is provided.
         """
         with self.assertRaises(except_orm) as error:
             self.patient_model.create(self.patient_data)

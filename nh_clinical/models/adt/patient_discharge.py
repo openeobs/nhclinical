@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime as dt
+
 from openerp.osv import orm, fields, osv
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
 
@@ -46,7 +47,7 @@ class nh_clinical_adt_patient_discharge(orm.Model):
                                  % user.login)
         data = vals.copy()
         patient_pool = self.pool['nh.clinical.patient']
-        patient_id = patient_pool.get_patient_id_for_identifiers(
+        patient_id = patient_pool.get_patient_for_identifiers(
             cr, uid,
             hospital_number=vals.get('other_identifier'),
             nhs_number=vals.get('patient_identifier'),

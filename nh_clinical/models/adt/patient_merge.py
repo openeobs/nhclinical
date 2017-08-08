@@ -1,6 +1,7 @@
 import logging
-from openerp.osv import orm, fields, osv
+
 from openerp import SUPERUSER_ID
+from openerp.osv import orm, fields, osv
 
 _logger = logging.getLogger(__name__)
 
@@ -35,14 +36,14 @@ class nh_clinical_adt_patient_merge(orm.Model):
         patient_pool = self.pool['nh.clinical.patient']
         data = vals.copy()
         if data.get('from_identifier'):
-            from_patient = patient_pool.get_patient_id_for_identifiers(
+            from_patient = patient_pool.get_patient_for_identifiers(
                 cr, uid,
                 hospital_number=data.get('from_identifier'),
                 context=context
             )
             data.update({'source_patient_id': from_patient.id})
         if data.get('into_identifier'):
-            into_patient = patient_pool.get_patient_id_for_identifiers(
+            into_patient = patient_pool.get_patient_for_identifiers(
                 cr, uid,
                 hospital_number=data.get('into_identifier'),
                 context=context

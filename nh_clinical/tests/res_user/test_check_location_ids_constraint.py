@@ -28,7 +28,7 @@ class TestCheckLocationIdsConstraint(TransactionCase):
         self.test_utils.place_patient()
         self.shift_coordinator = \
             self.test_utils.create_shift_coordinator()
-        
+
         items_needed = [
             'ward',
             'nurse',
