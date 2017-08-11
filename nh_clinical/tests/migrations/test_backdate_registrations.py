@@ -25,9 +25,9 @@ class TestBackdateRegistrationsFromAdmissions(TransactionCase):
                 self.patients.append(
                     self.test_utils.create_and_register_patient())
             else:
-                patient = self.test_utils.create_patient()
-                self.patients.append(patient)
-                self.patients_without_registrations.append(patient)
+                new_patient = self.test_utils.create_patient()
+                self.patients.append(new_patient)
+                self.patients_without_registrations.append(new_patient)
         self.patient_without_registrations = \
             tuple([patient.id for patient in self.patients])
 
@@ -55,7 +55,7 @@ class TestBackdateRegistrationsFromAdmissions(TransactionCase):
         br.create_registrations_for_patients(self.env.cr, patient_ids)
 
         expected = self.number_of_registrations \
-                   + self.number_of_patients_without_registrations
+            + self.number_of_patients_without_registrations
         actual = len(self.registration_model.search([]))
 
         self.assertEqual(expected, actual)

@@ -58,7 +58,7 @@ class TestMigrateAdtAdmitTable(TransactionCase):
         query = """
             SELECT column_name
             FROM information_schema.columns
-            WHERE table_name = 'nh_clinical_adt_patient_admit' 
+            WHERE table_name = 'nh_clinical_adt_patient_admit'
               AND column_name = 'patient_id'
         """
         self.env.cr.execute(query)

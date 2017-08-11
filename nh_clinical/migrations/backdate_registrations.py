@@ -50,7 +50,7 @@ def _create_activities(cr, patient_ids, operator):
                     data_model,
                     patient_id
                   )
-                  SELECT 
+                  SELECT
                     current_timestamp,
                     current_timestamp,
                     {write_uid},
@@ -79,7 +79,7 @@ def _create_activities(cr, patient_ids, operator):
 def _create_registrations(cr, patient_ids, operator):
     cr.execute("""
             INSERT INTO nh_clinical_adt_patient_register (
-                create_date, 
+                create_date,
                 sex,
                 patient_identifier,
                 ethnicity,
@@ -95,8 +95,8 @@ def _create_registrations(cr, patient_ids, operator):
                 gender,
                 patient_id
               )
-              SELECT 
-                patient.create_date, 
+              SELECT
+                patient.create_date,
                 patient.sex,
                 patient.patient_identifier,
                 patient.ethnicity,
