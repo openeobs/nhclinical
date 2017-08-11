@@ -126,7 +126,6 @@ def _create_registrations(cr, patient_ids, operator):
 
 
 def _update_activity_data_refs(cr, patient_ids, operator):
-    # TODO is this dangerous? It potentially updates all register activities.
     cr.execute("""
         UPDATE nh_activity
         SET data_ref = 'nh.clinical.adt.patient.register,' || register.id
