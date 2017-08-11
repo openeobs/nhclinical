@@ -2,7 +2,7 @@
 # Part of NHClinical. See LICENSE file for full copyright and licensing details
 {
     'name': 'NH Clinical Core',
-    'version': '0.1',
+    'version': '1.0',
     'category': 'Clinical',
     'license': 'AGPL-3',
     'summary': '',
