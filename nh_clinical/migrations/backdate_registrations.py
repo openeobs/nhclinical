@@ -64,7 +64,6 @@ def _create_activities(cr, patient_ids, operator):
                     id
                   FROM nh_clinical_patient as patient
                   WHERE id {operator} {patient_ids}
-                  RETURNING id
                 ;
             """.format(
         operator=operator,
@@ -131,5 +130,6 @@ def _update_activity_data_refs(cr, patient_ids, operator):
         SET data_ref = 'nh.clinical.adt.patient.register,' || register.id
         FROM nh_clinical_adt_patient_register as register
         WHERE nh_activity.patient_id = register.patient_id
-          AND register.patient_id {operator} {patient_ids}
+        AND data_model = 'nh.clinical.adt.patient.register'
+        AND nh_activity.patient_id {operator} {patient_ids}
     """.format(operator=operator, patient_ids=patient_ids))
