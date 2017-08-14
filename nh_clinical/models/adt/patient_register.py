@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from openerp.osv import orm, fields, osv
+from openerp.osv import orm, fields
 
 _logger = logging.getLogger(__name__)
 
@@ -69,6 +69,7 @@ class nh_clinical_adt_patient_register(orm.Model):
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
         patient_pool = self.pool['nh.clinical.patient']
+
         vals = {
             'title': activity.data_ref.title.id,
             'patient_identifier': activity.data_ref.patient_identifier,
@@ -81,16 +82,7 @@ class nh_clinical_adt_patient_register(orm.Model):
             'sex': activity.data_ref.sex,
             'ethnicity': activity.data_ref.ethnicity
         }
-
-        try:
-            patient = patient_pool.get_patient_for_identifiers(
-                cr, uid,
-                hospital_number=vals['other_identifier'],
-                nhs_number=vals['patient_identifier']
-            )
-            patient_id = patient.id
-        except osv.except_osv:
-            patient_id = patient_pool.create(cr, uid, vals, context)
+        patient_id = patient_pool.create(cr, uid, vals, context)
 
         activity_pool.write(
             cr, uid, activity_id,

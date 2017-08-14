@@ -103,7 +103,7 @@ class TestAdtPatientRegister(TransactionCase):
             register_activity.complete()
         self.assertEqual(
             error.exception.value,
-            'Patient record must have Hospital number'
+            'Patient record must have Hospital number.'
         )
 
     def test_register_no_names(self):
