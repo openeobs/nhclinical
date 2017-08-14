@@ -9,6 +9,7 @@ class TestMigrateAdtAdmitTable(TransactionCase):
         super(TestMigrateAdtAdmitTable, self).setUp()
         self.patient_model = self.env['nh.clinical.patient']
         self.registration_model = self.env['nh.clinical.adt.patient.register']
+        self.admit_model = self.env['nh.clinical.adt.patient.admit']
         self.test_utils = self.env['nh.clinical.test_utils']
 
         self.test_utils.create_locations()
@@ -24,35 +25,45 @@ class TestMigrateAdtAdmitTable(TransactionCase):
         ]
         self.registrations = self.registration_model.search(domain)
 
-    # def test_migrate_adt_admit_patient_id_column_to_registration(self):
-    #     admit_model = self.env['nh.clinical.adt.patient.admit']
-    #     domain = [
-    #         ('registration.patient_id', 'in', self.patient_ids)
-    #     ]
-    #
-    #     admissions_before = admit_model.search(domain)
-    #     registrations_before = map(
-    #         lambda admission: admission.registration,
-    #         admissions_before
-    #     )
-    #     # Expecting all registration values to be `False`.
-    #     # Invert booleans so can assert using `all()`.
-    #     registrations_before = map(
-    #         lambda registration: not registrations_before,
-    #         registrations_before
-    #     )
-    #     self.assertTrue(all(registrations_before))
-    #
-    #     migrate_adt_admit_table.\
-    #         migrate_adt_admit_patient_id_column_to_registrations(self.env.cr)
-    #
-    #     admissions_after = admit_model.search(domain)
-    #     registrations_after = map(
-    #         lambda admission: admission.registration,
-    #         admissions_after
-    #     )
-    #
-    #     self.assertEqual(self.registrations, registrations_after)
+    def test_migrate_adt_admit_patient_id_column_to_registration(self):
+        domain = [
+            ('registration.patient_id', 'in', self.patient_ids)
+        ]
+        admissions_before = self.admit_model.search(domain)
+        admission_ids = map(lambda a: a.id, admissions_before)
+        # Set patient ID to simulate a record from before migration.
+        for admission in admissions_before:
+            self.env.cr.execute("""
+                UPDATE nh_clinical_adt_patient_admit AS admit
+                SET patient_id = {patient_id}
+                WHERE id = {admission_id}
+                ;
+            """.format(
+                    patient_id=admission.registration.patient_id.id,
+                    admission_id=admission.id
+                )
+            )
+        # Set registration to `None` to simulate a record from before
+        # migration.
+        for admission in admissions_before:
+            admission.registration = None
+
+        # Expecting all registration values to be `False`.
+        # Invert booleans so can assert using `all()`.
+        registration_values_before = map(
+            lambda a: not a.registration,
+            admissions_before
+        )
+        self.assertTrue(all(registration_values_before))
+
+        migrate_adt_admit_table.\
+            migrate_adt_admit_patient_id_column_to_registrations(self.env.cr)
+
+        admissions_after = self.admit_model.browse(admission_ids)
+        registrations_ids = map(lambda a: a.registration.id, admissions_after)
+        registrations_after = self.registration_model.browse(registrations_ids)
+
+        self.assertEqual(self.registrations, registrations_after)
 
     def test_remove_patient_id_column_from_adt_admit_table(self):
         query = """

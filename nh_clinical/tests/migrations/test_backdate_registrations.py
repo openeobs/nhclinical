@@ -14,8 +14,8 @@ class TestBackdateRegistrationsFromAdmissions(TransactionCase):
         self.registration_model = self.env['nh.clinical.adt.patient.register']
         self.test_utils = self.env['nh.clinical.test_utils']
 
-        self.registration_model.search([]).unlink()
-        # Cannot use unlink on patient as it is overridden to retain data.
+        self.env.cr.execute(
+            "TRUNCATE TABLE nh_clinical_adt_patient_register CASCADE;")
         self.env.cr.execute("TRUNCATE TABLE nh_clinical_patient CASCADE;")
 
         self.patients = []

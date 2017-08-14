@@ -28,7 +28,7 @@ def create_registrations_for_patients(cr, patient_ids):
         operator = '='
         patient_ids = patient_ids[0]
     else:
-        operator = 'in'
+        operator = 'IN'
 
     _create_activities(cr, patient_ids, operator)
     _create_registrations(cr, patient_ids, operator)
