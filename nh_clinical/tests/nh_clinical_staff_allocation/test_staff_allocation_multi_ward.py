@@ -5,22 +5,22 @@ class TestStaffAllocationMultiWard(TransactionCase):
 
     def setUp(self):
         super(TestStaffAllocationMultiWard, self).setUp()
-        self.test_utils_model = self.env['nh.clinical.test_utils']
+        self.test_utils = self.env['nh.clinical.test_utils']
         self.allocation_pool = self.env['nh.clinical.staff.allocation']
         self.user_pool = self.env['res.users']
         self.patient_pool = self.env['nh.clinical.patient']
         self.allocating_pool = self.env['nh.clinical.allocating']
         self.resp_allocation_pool = \
             self.env['nh.clinical.user.responsibility.allocation']
-        self.test_utils_model.create_locations()
-        self.test_utils_model.create_users()
+        self.test_utils.create_locations()
+        self.test_utils.create_users()
         self.test_utils.create_and_register_patient()
-        self.test_utils_model.admit_patient()
-        self.test_utils_model.placement = \
-            self.test_utils_model.create_placement()
-        self.test_utils_model.place_patient()
+        self.test_utils.admit_patient()
+        self.test_utils.placement = \
+            self.test_utils.create_placement()
+        self.test_utils.place_patient()
         self.shift_coordinator = \
-            self.test_utils_model.create_shift_coordinator()
+            self.test_utils.create_shift_coordinator()
         items_needed = [
             'ward',
             'other_ward',
@@ -31,17 +31,17 @@ class TestStaffAllocationMultiWard(TransactionCase):
             'doctor'
         ]
         for item in items_needed:
-            self.test_utils_model.copy_instance_variable_if_exists(self, item)
+            self.test_utils.copy_instance_variable_if_exists(self, item)
 
-        self.other_nurse = self.test_utils_model.create_nurse(
+        self.other_nurse = self.test_utils.create_nurse(
             location_id=self.other_bed.id)
-        self.other_hca = self.test_utils_model.create_hca(
+        self.other_hca = self.test_utils.create_hca(
             location_id=self.other_bed.id)
         self.other_shift_coordinator = \
-            self.test_utils_model.create_shift_coordinator(
+            self.test_utils.create_shift_coordinator(
                 location_id=self.other_ward.id)
-        self.dual_ward_hca = self.test_utils_model.create_hca()
-        self.dual_ward_nurse = self.test_utils_model.create_nurse()
+        self.dual_ward_hca = self.test_utils.create_hca()
+        self.dual_ward_nurse = self.test_utils.create_nurse()
         dual_beds = [self.bed.id, self.other_bed.id]
         self.allocation_pool.responsibility_allocation_activity(
             self.dual_ward_nurse.id, dual_beds)
