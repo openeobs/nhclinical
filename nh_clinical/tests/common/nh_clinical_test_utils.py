@@ -206,13 +206,15 @@ class NhClinicalTestUtils(AbstractModel):
             }
         )
 
-    def create_location(self, usage='bed', parent=None):
+    def create_location(self, usage='bed', parent=None, name=None):
         if not parent:
             parent = self.ward.id
+        if not name:
+            name = uuid.uuid4()
         return self.location_model.create(
             {
-                'name': str(uuid.uuid4()),
                 'code': str(uuid.uuid4()),
+                'name': name,
                 'usage': usage,
                 'parent_id': parent,
                 'type': 'poc',
@@ -292,6 +294,23 @@ class NhClinicalTestUtils(AbstractModel):
             'login': 'snr.manager',
             'password': 'snr.manager',
             'category_id': [[4, self.senior_manager_role.id]],
+            'location_ids': [[6, 0, [self.ward.id]]]
+        })
+
+    def create_system_admin(self):
+        self.category_model = self.env['res.partner.category']
+        self.user_model = self.env['res.users']
+        self.system_admin_role = \
+            self.category_model.search(
+                [
+                    ('name', '=', 'System Administrator')
+                ]
+            )[0]
+        self.system_admin = self.user_model.create({
+            'name': 'System admin',
+            'login': 'system.admin',
+            'password': 'system.admin',
+            'category_id': [[4, self.system_admin_role.id]],
             'location_ids': [[6, 0, [self.ward.id]]]
         })
 
