@@ -56,10 +56,8 @@ class TestMigrateAdtAdmitTable(TransactionCase):
                 SET patient_id = {patient_id}
                 WHERE id = {admission_id}
                 ;
-            """.format(
-                    patient_id=admission.registration.patient_id.id,
-                    admission_id=admission.id
-                )
+            """.format(patient_id=admission.registration.patient_id.id,
+                       admission_id=admission.id)
             )
         # Set registration to `None` to simulate a record from before
         # migration.
