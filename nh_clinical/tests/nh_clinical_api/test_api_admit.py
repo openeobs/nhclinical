@@ -22,7 +22,7 @@ class TestApiAdmit(TransactionCase):
         self.hospital_number = self.test_utils.patient.other_identifier
         self.nhs_number = self.test_utils.patient.patient_identifier
 
-    def test_admit_with_hospital_number(self):
+    def test_admit_with_hospital_number_patient_already_exists(self):
         """ Test that we can admit a patient using the hospital number. """
         admit_data = {
             'location': self.test_utils.ward.code
@@ -37,6 +37,43 @@ class TestApiAdmit(TransactionCase):
         )
         self.assertTrue(activity, msg="Admit Activity not generated")
         self.assertEqual(activity.state, 'completed')
+
+    def test_admit_with_hospital_patient_does_not_exist(self):
+        """
+        Test that admitting a non-existent patient successfully creates and
+        registers them when a hospital number is provided.
+        """
+        new_hospital_number = str(uuid4()).replace('-', '')
+        admit_data = {
+            'location': self.test_utils.ward.code,
+            'family_name': "Fname400",
+            'given_name': 'Gname400',
+            'dob': '1988-08-14 18:00:00',
+            'gender': 'M',
+            'sex': 'M'
+        }
+
+        self.api_model.admit(new_hospital_number, admit_data)
+
+        patient_search_results = self.patient_model.search([
+            ('other_identifier', '=', new_hospital_number)
+        ])
+        self.assertTrue(patient_search_results, msg="Patient was not created.")
+        patient = patient_search_results[0]
+
+        registration_search_results = self.registration_model.search([
+            ('patient_id', '=', patient.id)
+        ])
+        self.assertTrue(registration_search_results,
+                        msg="Patient registration was not created.")
+        registration = registration_search_results[0]
+
+        admission = self.admission_model.search([
+            ['registration', '=', registration.id]
+        ])[0]
+        admission_activity = admission.activity_id
+        self.assertTrue(admission_activity, msg="Admit Activity not generated")
+        self.assertEqual(admission_activity.state, 'completed')
 
     def test_admit_with_nhs_num_patient_already_exists(self):
         """
@@ -72,43 +109,6 @@ class TestApiAdmit(TransactionCase):
             error.exception.value,
             'Patient record must have Hospital number.'
         )
-
-    def test_admit_non_existent_patient(self):
-        """
-        Test that admitting a non-existent patient registers them
-        """
-        new_patient_id = str(uuid4()).replace('-', '')
-        admit_data = {
-            'location': self.test_utils.ward.code,
-            'patient_identifier': new_patient_id,
-            'family_name': "Fname400",
-            'given_name': 'Gname400',
-            'dob': '1988-08-14 18:00:00',
-            'gender': 'M',
-            'sex': 'M'
-        }
-
-        self.api_model.admit(new_patient_id, admit_data)
-
-        patient_search_results = self.patient_model.search([
-            ('other_identifier', '=', new_patient_id)
-        ])
-        self.assertTrue(patient_search_results, msg="Patient was not created.")
-        patient = patient_search_results[0]
-
-        registration_search_results = self.registration_model.search([
-            ('patient_id', '=', patient.id)
-        ])
-        self.assertTrue(registration_search_results,
-                        msg="Patient registration was not created.")
-        registration = registration_search_results[0]
-
-        admission = self.admission_model.search([
-            ['registration', '=', registration.id]
-        ])[0]
-        admission_activity = admission.activity_id
-        self.assertTrue(admission_activity, msg="Admit Activity not generated")
-        self.assertEqual(admission_activity.state, 'completed')
 
     def test_raises_no_patient_info(self):
         """
