@@ -6,9 +6,9 @@ def migrate_adt_admit_patient_id_column_to_registrations(cr):
     """)
     results = cr.fetchall()
 
-    for index, result in enumerate(results):
-        register_id = results[index][0]
-        patient_id = results[index][1]
+    for result in results:
+        register_id = result[0]
+        patient_id = result[1]
         cr.execute("""
             UPDATE nh_clinical_adt_patient_admit
             SET registration = (
