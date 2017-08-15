@@ -33,6 +33,9 @@ class nh_clinical_api(orm.AbstractModel):
                 'Identifiers not provided',
                 'Patient\'s NHS or Hospital numbers must be provided'
             )
+
+        patient = None
+
         try:
             patient_pool = self.pool['nh.clinical.patient']
             patient = patient_pool.get_patient_for_identifiers(
@@ -49,13 +52,27 @@ class nh_clinical_api(orm.AbstractModel):
                 registration_id = register_search_results[0]
                 return registration_id
 
-            # If execution reach here then a patient was found for the passed
+            # If execution reaches here then a patient was found for the passed
             # hospital number (as now exception was thrown) but there is no
             # register record found either. This shouldn't happen.
             _logger.warn('Found an existing patient that was not registered.')
 
         except except_orm:
             pass  # Fine if no patient found, we create them via registration.
+
+        # If patient is already created then add values to be submitted for
+        # ADT register record.
+        if patient:
+            data['patient_id'] = patient.id
+            data['patient_identifier'] = patient.patient_identifier
+            data['family_name'] = patient.family_name
+            data['given_name'] = patient.given_name
+            data['middle_names'] = patient.middle_names
+            data['dob'] = patient.dob
+            data['gender'] = patient.gender
+            data['sex'] = patient.sex
+            data['ethnicity'] = patient.ethnicity
+
         registration_id = self.register(
             cr, uid, hospital_number, data, context=context)
         return registration_id
