@@ -1,4 +1,14 @@
 # -*- coding: utf-8 -*-
+"""
+These tests were created for the purposes of TDD whilst creating the migration
+scripts. They will only work properly under certain conditions.
+
+    1. Have an pre-migration environment.
+    2. Check out the new code containing this test and the migration scripts.
+    3. The version in `__openerp__.py` is updated to 1.0 by the new code.
+       Change it back to what it was before.
+    4. Now you can run the tests without the migration occurring.
+"""
 import uuid
 
 from openerp.addons.nh_clinical.migrations import \

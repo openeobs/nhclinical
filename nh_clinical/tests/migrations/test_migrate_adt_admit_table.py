@@ -1,4 +1,14 @@
 # -*- coding: utf-8 -*-
+"""
+These tests were created for the purposes of TDD whilst creating the migration
+scripts. They will only work properly under certain conditions.
+
+    1. Have an pre-migration environment.
+    2. Check out the new code containing this test and the migration scripts.
+    3. The version in `__openerp__.py` is updated to 1.0 by the new code.
+       Change it back to what it was before.
+    4. Now you can run the tests without the migration occurring.
+"""
 from openerp.addons.nh_clinical.migrations import migrate_adt_admit_table
 from openerp.tests.common import TransactionCase
 
@@ -26,6 +36,14 @@ class TestMigrateAdtAdmitTable(TransactionCase):
         self.registrations = self.registration_model.search(domain)
 
     def test_migrate_adt_admit_patient_id_column_to_registration(self):
+        """
+        There is an important assumption in this test that updating the admit
+        table using SQL will be effective in updating the records used in the
+        application logic.
+
+        The reason this assumption exists is because after updating via SQL,
+        searches do not appear to find the records.
+        """
         domain = [
             ('registration.patient_id', 'in', self.patient_ids)
         ]
@@ -59,8 +77,13 @@ class TestMigrateAdtAdmitTable(TransactionCase):
         migrate_adt_admit_table.\
             migrate_adt_admit_patient_id_column_to_registrations(self.env.cr)
 
-        admissions_after = self.admit_model.browse(admission_ids)
-        registrations_ids = map(lambda a: a.registration.id, admissions_after)
+        # Had to use `read` instead of `browse` as it would return an empty
+        # recordset for the registration as though it did not recognise the
+        # changes made by the SQL. Tried clearing the cache using
+        # `clear_caches` but it had no effect.
+        admissions_after = self.admit_model.browse(admission_ids).read()
+        registrations_ids = map(lambda a: a['registration'][0],
+                                admissions_after)
         registrations_after = self.registration_model.browse(registrations_ids)
 
         self.assertEqual(self.registrations, registrations_after)

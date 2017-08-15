@@ -8,7 +8,7 @@ from . import test_operations
 from . import test_patient_placement_wizard
 from . import test_responsibility_allocation_wizard
 from . import test_users
-from .migrations import *
+
 # Base level tests
 from .nh_activity import *
 from .nh_clinical_adt import *
