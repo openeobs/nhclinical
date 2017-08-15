@@ -75,15 +75,15 @@ class nh_clinical_adt_patient_register(orm.Model):
         if not patient:
             vals = {
                 'title': activity.data_ref.title.id,
-                'patient_id': patient.id,
-                'patient_identifier': patient.patient_identifier,
-                'family_name': patient.family_name,
-                'given_name': patient.given_name,
-                'middle_names': patient.middle_names,
-                'dob': patient.dob,
-                'gender': patient.gender,
-                'sex': patient.sex,
-                'ethnicity': patient.ethnicity
+                'patient_identifier': activity.data_ref.patient_identifier,
+                'other_identifier': activity.data_ref.other_identifier,
+                'family_name': activity.data_ref.family_name,
+                'given_name': activity.data_ref.given_name,
+                'middle_names': activity.data_ref.middle_names,
+                'dob': activity.data_ref.dob,
+                'gender': activity.data_ref.gender,
+                'sex': activity.data_ref.sex,
+                'ethnicity': activity.data_ref.ethnicity
             }
             patient_id = patient_pool.create(cr, uid, vals, context)
         else:
