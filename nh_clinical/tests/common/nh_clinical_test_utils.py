@@ -314,19 +314,6 @@ class NhClinicalTestUtils(AbstractModel):
             'location_ids': [[6, 0, [self.ward.id]]]
         })
 
-    def create_system_administrator(self):
-        self.category_model = self.env['res.partner.category']
-        self.user_model = self.env['res.users']
-        self.system_administrator = self.category_model.search(
-            [('name', '=', 'System Administrator')])[0]
-        self.system_administrator = self.user_model.create({
-            'name': 'System Administrator',
-            'login': 'system.administrator',
-            'password': 'system.administrator',
-            'category_id': [[4, self.adt_role.id]],
-            'location_ids': [[6, 0, [self.ward.id]]]
-        })
-
     def create_adt_user(self):
         self.category_model = self.env['res.partner.category']
         self.user_model = self.env['res.users']
