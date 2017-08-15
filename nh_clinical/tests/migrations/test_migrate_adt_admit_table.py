@@ -24,7 +24,7 @@ class TestMigrateAdtAdmitTable(TransactionCase):
 
         self.test_utils.create_locations()
         self.patients = []
-        for i in range(3):
+        for _ in range(3):
             patient = self.test_utils.create_and_register_patient()
             self.patients.append(patient)
             self.test_utils.admit_patient(patient_id=patient.id)
