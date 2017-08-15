@@ -114,6 +114,7 @@ def _create_registrations(cr, patient_ids, operator):
               JOIN nh_activity as activity
                 ON patient.id = activity.patient_id
               WHERE patient.id {operator} {patient_ids}
+                AND data_model = 'nh.clinical.adt.patient.register'
             ;
         """.format(
         operator=operator,
