@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <record model="ir.ui.view" id="view_register_form">
+            <field name="name">Register Form View</field>
+            <field name="model">nh.clinical.adt.patient.register</field>
+            <field name="arch" type="xml">
+                <form string="patient Form View" delete="0">
+                    <sheet>
+                        <group>
+                            <field name="given_name" />
+                            <field name="middle_names" />
+                            <field name="family_name" />
+                            <field name="dob" widget="date"/>
+                            <field name="sex" />
+                            <field name="gender" />
+                            <field name="ethnicity" />
+                            <field name="patient_identifier" />
+                            <field name="other_identifier" />
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record model="ir.actions.act_window.view" id="act_view_patient_form">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_patient_form"/>
+            <field name="act_window_id" ref="action_patient"/>
+        </record>
+    </data>
+</openerp>

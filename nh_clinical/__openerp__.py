@@ -14,6 +14,7 @@
              'data/nh_cancel_reasons.xml',
              'views/pos_view.xml',
              'views/location_view.xml',
+             'views/patient_register_view.xml',
              'views/patient_view.xml',
              'views/user_view.xml',
              'views/device_view.xml',

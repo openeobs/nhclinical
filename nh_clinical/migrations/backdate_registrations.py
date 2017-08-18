@@ -51,12 +51,12 @@ def _create_activities(cr, patient_ids, operator):
                     patient_id
                   )
                   SELECT
-                    current_timestamp,
-                    current_timestamp,
+                    patient.create_date,
+                    patient.create_date,
                     {write_uid},
                     {create_uid},
                     'completed',
-                    current_timestamp,
+                    patient.write_date,
                     {terminate_uid},
                     FALSE,
                     'ADT Patient Register',
@@ -104,7 +104,7 @@ def _create_registrations(cr, patient_ids, operator):
                 patient.given_name,
                 activity.id,
                 patient.other_identifier,
-                current_timestamp,
+                patient.write_date,
                 {write_uid},
                 patient.family_name,
                 patient.dob,

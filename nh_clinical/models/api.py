@@ -134,18 +134,19 @@ class nh_clinical_api(orm.AbstractModel):
         :rtype: bool
         """
         activity_pool = self.pool['nh.activity']
-        register_pool = self.pool['nh.clinical.adt.patient.register']
+        adt_register_pool = self.pool['nh.clinical.adt.patient.register']
         if hospital_number:
             data.update({'other_identifier': hospital_number})
 
-        register_activity_id = register_pool.create_activity(
-            cr, uid, {}, {}, context=context)
+        register_id = adt_register_pool.create(cr, uid, {}, context=context)
+        register = adt_register_pool.browse(
+            cr, uid, register_id, context=context)
         activity_pool.submit(
-            cr, uid, register_activity_id, data, context=context)
+            cr, uid, register.activity_id, data, context=context)
         activity_pool.complete(
-            cr, uid, register_activity_id, context=context)
+            cr, uid, register.activity_id, context=context)
 
-        register_activity = activity_pool.browse(cr, uid, register_activity_id)
+        register_activity = activity_pool.browse(cr, uid, register.activity_id)
         register = register_activity.data_ref
 
         _logger.debug("Patient registered\n data: %s", data)
