@@ -22,11 +22,5 @@
                 </form>
             </field>
         </record>
-        <record model="ir.actions.act_window.view" id="act_view_patient_form">
-            <field eval="1" name="sequence"/>
-            <field name="view_mode">form</field>
-            <field name="view_id" ref="view_patient_form"/>
-            <field name="act_window_id" ref="action_patient"/>
-        </record>
     </data>
 </openerp>

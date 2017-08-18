@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from openerp.addons.nh_odoo_fixes.validate import validate_non_empty_string
 from openerp.osv import orm, fields
 
 _logger = logging.getLogger(__name__)
 
 
-class nh_clinical_adt_patient_register(orm.Model):
+class NhClinicalAdtPatientRegister(orm.Model):
     """
     Represents the patient register operation in the patient management
     system. (A28 Message)
@@ -45,6 +44,11 @@ class nh_clinical_adt_patient_register(orm.Model):
     ]
 
     _columns = {
+        'name': fields.related(
+            'patient_id', 'name', type='char'),
+        # Patient ID is not a required field because currently the patient is
+        # created upon completion of the registration activity.
+        # It's up for debate whether this should be refactored or is by design.
         'patient_id': fields.many2one('nh.clinical.patient', 'Patient'),
         'patient_identifier': fields.char('NHS Number', size=10),
         'other_identifier': fields.char('Hospital Number', size=50,
@@ -59,48 +63,14 @@ class nh_clinical_adt_patient_register(orm.Model):
         'title': fields.many2one('res.partner.title', 'Title')
     }
 
-    def name_get(self, cr, uid, ids, context=None):
-        """
-        Override name_get method so we return the patient's fullname
-        instead of the default name field
-        """
-        if not ids:
-            return [(0, '')]
-        if isinstance(ids, list):
-            ids = ids[0]
-        names = self.read(cr, uid, ids, [
-            'family_name',
-            'given_name',
-            'middle_names'
-        ], context=context)
-        return [(ids, self._get_fullname(names))]
-
-    def _get_fullname(self, vals, fmt=None):
-        """
-        Formats a fullname string from family, given and middle names.
-
-        :param vals: contains 'family_name', 'given_name' and
-            'middle_names'
-        :type vals: dict
-        :param fmt: format for fullname. Default is
-                    '{fn}, {gn}, {mn}'
-        :type fmt: string
-        :returns: fullname
-        :rtype: string
-        """
-        if not fmt:
-            fmt = '{family_name}, {given_name} {middle_names}'
-        name = {
-            k: vals.get(k) for k in (
-            'family_name',
-            'given_name',
-            'middle_names'
+    # There should only ever be one register record per patient.
+    _sql_constraints = [
+        (
+            'patient_id_uniq',
+            'unique(patient_id)',
+            'A registration already exists for this patient.'
         )
-        }
-        for key, value in name.items():
-            if not validate_non_empty_string(value):
-                name[key] = ''
-        return ' '.join(fmt.format(**name).split())
+    ]
 
     def create(self, cr, uid, vals, context):
         patient_pool = self.pool['nh.clinical.patient']
@@ -111,7 +81,7 @@ class nh_clinical_adt_patient_register(orm.Model):
             cr, uid, {'data_model': self._name}, context=context)
         vals['activity_id'] = activity_id
 
-        register_id = super(nh_clinical_adt_patient_register, self).create(
+        register_id = super(NhClinicalAdtPatientRegister, self).create(
             cr, uid, vals, context=context)
         activity_pool.write(cr, uid, activity_id, {
             'data_ref': "%s,%s" % (self._name, register_id)}, context=context)
@@ -159,6 +129,6 @@ class nh_clinical_adt_patient_register(orm.Model):
             {'patient_id': patient_id}, context=context
         )
 
-        super(nh_clinical_adt_patient_register, self).complete(
+        super(NhClinicalAdtPatientRegister, self).complete(
             cr, uid, activity_id, context)
         return patient_id

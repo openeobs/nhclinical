@@ -208,7 +208,8 @@ class NhClinicalPatient(osv.Model):
             return [(0, '')]
         if isinstance(ids, list):
             ids = ids[0]
-        names = self.read(cr, uid, ids, [
+        pool = self.pool[self._name]
+        names = pool.read(cr, uid, ids, [
             'family_name',
             'given_name',
             'middle_names'
