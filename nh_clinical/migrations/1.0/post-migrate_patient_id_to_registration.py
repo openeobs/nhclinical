@@ -17,8 +17,9 @@ def migrate(cr, installed_version):
         patient_ids = \
             backdate_registrations.get_ids_for_patients_without_registrations(
                 cr)
-        backdate_registrations.create_registrations_for_patients(
-            cr, patient_ids)
+        if patient_ids:
+            backdate_registrations.create_registrations_for_patients(
+                cr, patient_ids)
 
         migrate_adt_admit_table\
             .migrate_adt_admit_patient_id_column_to_registrations(cr)

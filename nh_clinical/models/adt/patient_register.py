@@ -44,8 +44,6 @@ class NhClinicalAdtPatientRegister(orm.Model):
     ]
 
     _columns = {
-        'name': fields.related(
-            'patient_id', 'name', type='char'),
         # Patient ID is not a required field because currently the patient is
         # created upon completion of the registration activity.
         # It's up for debate whether this should be refactored or is by design.
@@ -71,6 +69,22 @@ class NhClinicalAdtPatientRegister(orm.Model):
             'A registration already exists for this patient.'
         )
     ]
+
+    def name_get(self, cr, uid, ids, context=None):
+        """
+        Get the referenced patients full name.
+        """
+        if not ids:
+            return [(0, '')]
+        if isinstance(ids, list):
+            ids = ids[0]
+        names = self.read(cr, uid, ids, [
+            'family_name',
+            'given_name',
+            'middle_names'
+        ], context=context)
+        patient_pool = self.pool['nh.clinical.patient']
+        return [(ids, patient_pool._get_fullname(names))]
 
     def create(self, cr, uid, vals, context):
         patient_pool = self.pool['nh.clinical.patient']
