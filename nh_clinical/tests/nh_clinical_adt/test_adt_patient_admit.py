@@ -27,9 +27,7 @@ class TestAdtPatientAdmit(TransactionCase):
         self.existing_nhs_number = self.patient.patient_identifier
         self.existing_hospital_number = self.patient.other_identifier
 
-        self.register = self.register_model.create({
-            'patient_id': self.patient.id
-        })
+        self.register = self.test_utils.register
 
         self.doctors = """[{
             'type': 'c',

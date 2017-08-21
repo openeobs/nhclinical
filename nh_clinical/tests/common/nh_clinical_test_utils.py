@@ -72,6 +72,7 @@ class NhClinicalTestUtils(AbstractModel):
             # TODO Can be removed, no more concise than using `self.patient.id`
             self.patient_id = self.patient.id
             self.hospital_number = self.patient.other_identifier
+            self.register = adt_register
 
         return patient
 
