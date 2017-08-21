@@ -88,18 +88,11 @@ class NhClinicalAdtPatientRegister(orm.Model):
 
     def create(self, cr, uid, vals, context):
         patient_pool = self.pool['nh.clinical.patient']
+        patient_pool._validate_name(vals)
         patient_pool._validate_identifiers(vals)
-
-        activity_pool = self.pool['nh.activity']
-        activity_id = activity_pool.create(
-            cr, uid, {'data_model': self._name}, context=context)
-        vals['activity_id'] = activity_id
 
         register_id = super(NhClinicalAdtPatientRegister, self).create(
             cr, uid, vals, context=context)
-        activity_pool.write(cr, uid, activity_id, {
-            'data_ref': "%s,%s" % (self._name, register_id)}, context=context)
-
         return register_id
 
     def complete(self, cr, uid, activity_id, context=None):

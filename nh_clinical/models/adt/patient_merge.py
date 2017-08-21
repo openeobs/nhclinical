@@ -89,7 +89,8 @@ class nh_clinical_adt_patient_merge(orm.Model):
                 'patient_id' in model_pool._columns.keys() and \
                 model_name != self._name and \
                 model_name != 'nh.clinical.notification' and model_name != \
-                    'nh.clinical.patient.observation':
+                    'nh.clinical.patient.observation' and model_name != \
+                    'nh.clinical.adt.patient.register':
                 ids = model_pool.search(
                     cr, uid, [('patient_id', '=', from_id)], context=context)
                 if ids:

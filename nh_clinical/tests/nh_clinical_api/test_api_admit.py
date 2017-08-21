@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
 from uuid import uuid4
 
+from openerp.exceptions import ValidationError
 from openerp.osv.osv import except_orm
 from openerp.tests.common import TransactionCase
 
@@ -101,8 +103,10 @@ class TestApiAdmit(TransactionCase):
         patient does not already exist.
         """
         new_patient_nhs_number = 'NHS_NUMBER'
-        with self.assertRaises(except_orm) as error:
+        with self.assertRaises(ValidationError) as error:
             self.api_model.admit('', {
+                'given_name': 'Jon',
+                'family_name': 'Snow',
                 'patient_identifier': new_patient_nhs_number
             })
         self.assertEqual(

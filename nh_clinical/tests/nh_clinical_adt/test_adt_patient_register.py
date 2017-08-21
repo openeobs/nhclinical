@@ -1,5 +1,5 @@
-from openerp.osv.orm import except_orm
-from openerp.osv.osv import except_osv
+# -*- coding: utf-8 -*-
+from openerp.exceptions import ValidationError
 from openerp.tests.common import TransactionCase
 from openerp.tools.misc import mute_logger
 from psycopg2 import IntegrityError
@@ -98,9 +98,8 @@ class TestAdtPatientRegister(TransactionCase):
         }
         register_activity_id = self.register_model.create_activity({}, {})
         register_activity = self.activity_model.browse(register_activity_id)
-        register_activity.submit(register_data)
-        with self.assertRaises(except_orm) as error:
-            register_activity.complete()
+        with self.assertRaises(ValidationError) as error:
+            register_activity.submit(register_data)
         self.assertEqual(
             error.exception.value,
             'Patient record must have Hospital number.'
@@ -118,9 +117,8 @@ class TestAdtPatientRegister(TransactionCase):
         }
         register_activity_id = self.register_model.create_activity({}, {})
         register_activity = self.activity_model.browse(register_activity_id)
-        register_activity.submit(register_data)
-        with self.assertRaises(except_osv) as error:
-            register_activity.complete()
+        with self.assertRaises(ValidationError) as error:
+            register_activity.submit(register_data)
         self.assertEqual(
             error.exception.value,
             'Patient record must have valid Given and Family Names'
@@ -148,8 +146,8 @@ class TestAdtPatientRegister(TransactionCase):
         new_register_activity_id = self.register_model.create_activity({}, {})
         new_register_activity = \
             self.activity_model.browse(new_register_activity_id)
-        new_register_activity.submit(register_data)
         with self.assertRaises(IntegrityError) as error:
+            new_register_activity.submit(register_data)
             new_register_activity.complete()
         self.assertTrue(
             'duplicate key value violates unique constraint' in
@@ -177,8 +175,8 @@ class TestAdtPatientRegister(TransactionCase):
         new_register_activity_id = self.register_model.create_activity({}, {})
         new_register_activity = \
             self.activity_model.browse(new_register_activity_id)
-        new_register_activity.submit(register_data)
         with self.assertRaises(IntegrityError) as error:
+            new_register_activity.submit(register_data)
             new_register_activity.complete()
         self.assertTrue(
             'duplicate key value violates unique constraint' in

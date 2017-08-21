@@ -138,15 +138,18 @@ class nh_clinical_api(orm.AbstractModel):
         if hospital_number:
             data.update({'other_identifier': hospital_number})
 
-        register_id = adt_register_pool.create(cr, uid, data, context=context)
-        register = adt_register_pool.browse(
-            cr, uid, register_id, context=context)
+        register_activity_id = adt_register_pool.create_activity(
+            cr, uid, {}, {}, context=context)
         activity_pool.submit(
-            cr, uid, register.activity_id.id, data, context=context)
-        activity_pool.complete(
-            cr, uid, register.activity_id.id, context=context)
+            cr, uid, register_activity_id, data, context=context)
 
+        activity_pool.complete(
+            cr, uid, register_activity_id, context=context)
         _logger.debug("Patient registered\n data: %s", data)
+
+        register_activity = activity_pool.browse(cr, uid, register_activity_id)
+        register_id = register_activity.data_ref.id
+
         return register_id
 
     def admit(self, cr, uid, hospital_number, data, context=None):
