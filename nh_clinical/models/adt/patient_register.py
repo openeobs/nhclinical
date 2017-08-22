@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import logging
 
+import re
+from openerp import api
 from openerp.osv import orm, fields
 
 _logger = logging.getLogger(__name__)
@@ -67,6 +69,16 @@ class NhClinicalAdtPatientRegister(orm.Model):
             'patient_id_uniq',
             'unique(patient_id)',
             'A registration already exists for this patient.'
+        ),
+        (
+            'patient_identifier_uniq',
+            'unique(patient_identifier)',
+            'Patient with this NHS Number already exists.'
+        ),
+        (
+            'other_identifier_uniq',
+            'unique(other_identifier)',
+            'Patient with this Hospital Number already exists.'
         )
     ]
 
@@ -78,15 +90,43 @@ class NhClinicalAdtPatientRegister(orm.Model):
             return [(0, '')]
         if isinstance(ids, list):
             ids = ids[0]
+
+        patient_pool = self.pool['nh.clinical.patient']
         names = self.read(cr, uid, ids, [
             'family_name',
             'given_name',
             'middle_names'
         ], context=context)
-        patient_pool = self.pool['nh.clinical.patient']
         return [(ids, patient_pool._get_fullname(names))]
 
+    @api.model
+    def name_search(self, name='', args=None, operator='ilike', limit=100):
+        patient_model = self.env['nh.clinical.patient']
+        args = args or []
+        # Modify args as search will be done directly on patient model.
+        for arg in args:  # args looks like [('a_field', '=', 'a_value')]
+            field = arg[0]
+            match = re.match(r"patient_id\.(.*)", field)
+            if match:
+                patient_field = match.group(1)
+                arg[0] = patient_field
+
+        patient_names = patient_model.name_search(
+            name=name, args=args, operator=operator, limit=limit)
+        patient_ids = map(lambda patient: patient[0], patient_names)
+        registrations = self.search([('patient_id', 'in', patient_ids)])
+        register_names = registrations.name_get()
+        return register_names
+
     def create(self, cr, uid, vals, context):
+        # Name field is not needed but is inherited from `nh.activity.data`.
+        # When creating via the field in 'Create Patient Visit' Odoo adds this
+        # key into the context which is used in `openerp.models.create()` to
+        # actually populate the record. We don't want any value in this field.
+        if context and 'default_name' in context:
+            context = context.copy()
+            del context['default_name']
+
         patient_pool = self.pool['nh.clinical.patient']
         patient_pool._validate_name(vals)
         patient_pool._validate_identifiers(vals)

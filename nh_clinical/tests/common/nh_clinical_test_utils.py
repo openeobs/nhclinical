@@ -79,10 +79,12 @@ class NhClinicalTestUtils(AbstractModel):
     def create_patient(self, set_instance_variables=True):
         self.patient_model = self.env['nh.clinical.patient']
         hospital_number = str(uuid.uuid4())
+        nhs_number = str(uuid.uuid4())
         patient = self.patient_model.create({
             'family_name': 'Testersen',
             'given_name': 'Test',
-            'other_identifier': hospital_number
+            'other_identifier': hospital_number,
+            'patient_identifier': nhs_number
         })
 
         if set_instance_variables:

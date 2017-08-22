@@ -215,3 +215,67 @@ class TestAdtPatientRegister(TransactionCase):
         expected = 'Family, Given Middle'
         actual = register_activity.data_ref.display_name
         self.assertEqual(expected, actual)
+
+    def test_name_search_returns_patient_results(self):
+        self.test_utils.create_and_register_patient()
+        self.test_utils.copy_instance_variables(self)
+
+        expected = [(self.test_utils.register.id, self.patient.name)]
+        actual = self.register_model.name_search(name=self.patient.display_name)
+
+        self.assertEqual(expected, actual)
+
+    def test_name_field_is_not_populated_when_context_has_default_value(self):
+        """
+        Creation of a registration via the spellboard view
+        (used in 'Create Patient Visit') passes the initial value typed into
+        the field as a 'default_name' key in the context which if unhandled
+        will be passed through to the create and used to populate the `name`
+        field of the record.
+        """
+        self.test_utils.create_patient()
+        self.test_utils.copy_instance_variables(self)
+
+        default_name = 'BLORP'
+        context = {'default_name': default_name}
+
+        registration = self.register_model.with_context(context).create({
+            'patient_id': self.patient.id,
+            'other_identifier': self.patient.other_identifier,
+            'given_name': self.patient.given_name,
+            'family_name': self.patient.family_name
+        })
+        self.assertIs(registration.name, False)
+
+    def test_duplicate_hospital_number_raises_exception(self):
+        patient_1 = self.test_utils.create_and_register_patient()
+        patient_2 = self.test_utils.create_patient()
+
+        with self.assertRaises(IntegrityError) as error:
+            self.register_model.create({
+                'patient_id': patient_2.id,
+                'other_identifier': patient_1.other_identifier,
+                'given_name': 'BLORP',
+                'family_name': 'BLORPINGTON'
+            })
+        self.assertTrue(
+            'duplicate key value violates unique constraint' in
+            error.exception.message
+        )
+
+    def test_duplicate_nhs_number_raises_exception(self):
+        patient_1 = self.test_utils.create_and_register_patient()
+        patient_2 = self.test_utils.create_patient()
+
+        with self.assertRaises(IntegrityError) as error:
+            self.register_model.create({
+                'patient_id': patient_2.id,
+                'other_identifier': patient_2.other_identifier,
+                'patient_identifier': patient_1.patient_identifier,
+                'given_name': 'BLORP',
+                'family_name': 'BLORPINGTON'
+            })
+        self.assertTrue(
+            'duplicate key value violates unique constraint' in
+            error.exception.message
+        )
