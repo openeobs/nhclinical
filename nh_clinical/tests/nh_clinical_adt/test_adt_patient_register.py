@@ -221,7 +221,8 @@ class TestAdtPatientRegister(TransactionCase):
         self.test_utils.copy_instance_variables(self)
 
         expected = [(self.test_utils.register.id, self.patient.name)]
-        actual = self.register_model.name_search(name=self.patient.display_name)
+        actual = self.register_model.name_search(
+            name=self.patient.display_name)
 
         self.assertEqual(expected, actual)
 
