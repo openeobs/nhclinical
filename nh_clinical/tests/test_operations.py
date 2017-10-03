@@ -4,6 +4,7 @@ from openerp.osv.orm import except_orm
 from openerp.tests import common
 
 
+# TODO move patient transfer tests into tests/nh_clinical_patient_transfer
 class TestOperations(common.SingleTransactionCase):
     @classmethod
     def setUpClass(cls):
