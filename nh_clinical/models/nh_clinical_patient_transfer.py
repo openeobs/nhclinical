@@ -114,12 +114,15 @@ class NhClinicalPatientTransfer(orm.Model):
         """
         res = super(NhClinicalPatientTransfer, self).cancel(
             cr, uid, activity_id, context=context)
+
         activity_pool = self.pool['nh.activity']
         spell_pool = self.pool['nh.clinical.spell']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
         transfer = activity.data_ref
+        patient_id = transfer.patient_id.id
+
         spell_id = spell_pool.get_by_patient_id(
-            cr, uid, transfer.patient_id.id, exception='False',
+            cr, uid, patient_id, exception='False',
             context=context)
         if activity.parent_id.data_ref.id != spell_id:
             raise osv.except_osv(
@@ -134,26 +137,34 @@ class NhClinicalPatientTransfer(orm.Model):
                 'parent_id': activity.parent_id.id,
                 'creator_id': activity_id
             }, {
-                'patient_id': transfer.patient_id.id,
+                'patient_id': patient_id,
                 'location_id': transfer.origin_loc_id.id
             }, context=context)
-            location_pool = self.pool['nh.clinical.location']
-            # check if the previous bed is still available
-            if transfer.origin_loc_id.usage == 'bed' and \
-               transfer.origin_loc_id.is_available:
-                activity_pool.complete(cr, uid, move_activity_id,
-                                       context=context)
-                return res
 
+            # Get the ward ID.
+            location_pool = self.pool['nh.clinical.location']
             ward_id = location_pool.get_closest_parent_id(
                 cr, uid, transfer.origin_loc_id.id, 'ward', context=context) \
                 if transfer.origin_loc_id.usage != 'ward' \
                 else transfer.origin_loc_id.id
-            activity_pool.submit(cr, uid, move_activity_id,
-                                 {'location_id': ward_id}, context=context)
-            activity_pool.complete(cr, uid, move_activity_id, context=context)
-            self.trigger_policy(cr, uid, activity_id, location_id=ward_id,
-                                case=2, context=context)
+
+            # If previous bed is still available, cancel the placement created
+            # after the cancelled transfer, leaving the original completed one.
+            if transfer.origin_loc_id.usage == 'bed' \
+                    and transfer.origin_loc_id.is_available:
+                activity_pool.complete(cr, uid, move_activity_id,
+                                       context=context)
+                placement_pool = self.pool['nh.clinical.patient.placement']
+                placement_pool.cancel_open_placements(cr, uid, patient_id)
+            # Move back to ward.
+            else:
+                activity_pool.submit(
+                    cr, uid, move_activity_id, {'location_id': ward_id},
+                    context=context)
+                activity_pool.complete(
+                    cr, uid, move_activity_id, context=context)
+                self.trigger_policy(cr, uid, activity_id, location_id=ward_id,
+                                    case=2, context=context)
         return res
 
     def get_last(self, cr, uid, patient_id, exception=False, context=None):

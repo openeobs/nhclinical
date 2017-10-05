@@ -295,6 +295,26 @@ class nh_clinical_patient_placement(orm.Model):
         activity = activity_pool.browse(cr, uid, activity_id, context)
         return activity.data_ref.suggested_location_id.id
 
+    @api.model
+    def create(self, vals):
+        new_placement = super(nh_clinical_patient_placement, self).create(vals)
+        self.cancel_open_placements(vals['patient_id'], new_placement)
+        return new_placement
+
+    @api.model
+    def cancel_open_placements(self, patient_id, placement_to_keep_open=None):
+        placement_model = self.env['nh.clinical.patient.placement']
+        placements = placement_model.search([
+            ('patient_id', '=', patient_id),
+            ('state', 'not in', ['completed', 'cancelled'])
+        ])
+
+        if placement_to_keep_open:
+            placements = placements - placement_to_keep_open
+
+        for placement in placements:
+            placement.cancel(placement.activity_id.id)
+
     def complete(self, cr, uid, activity_id, context=None):
         """
         Calls :meth:`complete<activity.nh_activity.complete>` and then
