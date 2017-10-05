@@ -233,18 +233,21 @@ class NhClinicalTestUtils(AbstractModel):
         })
         return hca
 
-    def create_doctor(self):
+    def create_doctor(self, location_ids=None):
         self.category_model = self.env['res.partner.category']
         self.user_model = self.env['res.users']
         self.doctor_role = \
             self.category_model.search([('name', '=', 'Doctor')])[0]
+
+        if not location_ids:
+            location_ids = [self.ward.id, self.bed.id]
         # Create doctor and associate them with bed location and doctor role.
         self.doctor = self.user_model.create({
             'name': 'Doctor Acula',
             'login': 'Dr_Acula',
             'password': 'Dr_Acula',
             'category_id': [[4, self.doctor_role.id]],
-            'location_ids': [[6, 0, [self.ward.id, self.bed.id]]]
+            'location_ids': [[6, 0, location_ids]]
         })
 
     def create_shift_coordinator(self, location_id=None):
