@@ -43,11 +43,13 @@ class TestSubmitUsers(TransactionCase):
             ward_3.id)
 
         doctor_allocation_model = self.env['nh.clinical.doctor.allocation']
-        doctor_allocation_wizard = doctor_allocation_model.sudo(
-            ward_3_shift_coordinator).create({
-            'user_ids': [([6, 0, [self.test_utils.doctor.id]])],
-            'ward_id': ward_3.id
-        })
+        doctor_allocation_wizard = \
+            doctor_allocation_model.sudo(ward_3_shift_coordinator).create(
+                {
+                    'user_ids': [([6, 0, [self.test_utils.doctor.id]])],
+                    'ward_id': ward_3.id
+                }
+            )
         doctor_allocation_wizard.submit_users()
 
         self.assertIn(ward_3, self.doctor.location_ids)
