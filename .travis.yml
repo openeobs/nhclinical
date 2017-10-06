@@ -32,7 +32,7 @@ env:
   matrix:
   - LINT_CHECK="1"
   - ODOO_REPO="bjss/odoo" RUN_PIPELINE="1" TESTS="1" INCLUDE="nh_odoo_fixes,nh_activity,nh_clinical,nh_clinical_ldap"
-    VERSION="liveobs_1.0"
+    VERSION="liveobs_1.11.1"
 virtualenv:
   system_site_packages: true
 before_install:
