@@ -493,16 +493,27 @@ class doctor_allocation_wizard(osv.TransientModel):
         if not isinstance(ids, list):
             ids = [ids]
         wiz = self.browse(cr, uid, ids[0], context=context)
-        respallocation_pool = self.pool[
+        reallocation_pool = self.pool[
             'nh.clinical.user.responsibility.allocation'
         ]
-        activity_pool = self.pool['nh.activity']
+
         for doctor in wiz.user_ids:
-            activity_id = respallocation_pool.create_activity(
+            location_ids = doctor.location_ids
+            if not location_ids:
+                location_ids = []
+            else:
+                location_ids = map(lambda i: i.id, location_ids)
+            location_ids.append(wiz.ward_id.id)
+
+            activity_id = reallocation_pool.create_activity(
                 cr, uid, {}, {
                     'responsible_user_id': doctor.id,
-                    'location_ids': [[6, 0, [wiz.ward_id.id]]]
-                }, context=context)
+                    # Have to use '6' to replace whole list rather than '4' to
+                    # simply update the list as the complete below
+                    'location_ids': [[6, 0, location_ids]]
+                }, context=context
+            )
+            activity_pool = self.pool['nh.activity']
             activity_pool.complete(cr, uid, activity_id, context=context)
         return {'type': 'ir.actions.act_window_close'}
 
