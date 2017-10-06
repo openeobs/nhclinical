@@ -508,8 +508,10 @@ class doctor_allocation_wizard(osv.TransientModel):
             activity_id = reallocation_pool.create_activity(
                 cr, uid, {}, {
                     'responsible_user_id': doctor.id,
-                    # Have to use '6' to replace whole list rather than '4' to
-                    # simply update the list as the complete below
+                    # Have to use '6' in the model relationship syntax used
+                    # below to replace whole list rather than '4' to
+                    # simply update the list as using '4' caused a failure in
+                    # the activity complete method.
                     'location_ids': [[6, 0, location_ids]]
                 }, context=context
             )
