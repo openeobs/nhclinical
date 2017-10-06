@@ -45,8 +45,7 @@ before_install:
 install:
 - pip install --upgrade pip
 - pip install -r requirements.txt
-# Install a pinned version of the dependencies so when OCA's requirements.txt is installed the dependency at this particular version is met
-- pip install Python-Chart==1.39
+# Install a pinned version of the Pillow so when OCA's requirements.txt is installed the dependency at this particular version is met
 - pip install Pillow==2.5.1
 - pip install lxml==3.8.0
 - git clone --depth=1 https://github.com/NeovaHealth/maintainer-quality-tools.git
