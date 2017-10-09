@@ -9,7 +9,7 @@ class NhClinicalTestUtils(AbstractModel):
     _name = 'nh.clinical.test_utils'
 
     # Setup methods
-    def admit_and_place_patient(self):
+    def admit_and_place_patient(self, create_placement=True):
         self.create_locations()
         self.create_users()
         self.create_patient()
@@ -17,6 +17,8 @@ class NhClinicalTestUtils(AbstractModel):
         self.spell_activity_id = self.spell.activity_id.id
         # TODO: Rename variable as it is a spell not an activity.
         self.spell_activity = self.spell.activity_id
+        if create_placement:
+            self.placement = self.create_placement()
         self.place_patient()
 
     def create_users(self):
