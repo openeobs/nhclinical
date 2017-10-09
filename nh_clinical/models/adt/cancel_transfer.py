@@ -1,4 +1,5 @@
 import logging
+
 from openerp.osv import orm, fields
 
 _logger = logging.getLogger(__name__)
@@ -39,7 +40,7 @@ class nh_clinical_adt_patient_cancel_transfer(orm.Model):
         )
         transfer_pool = self.pool['nh.clinical.patient.transfer']
         transfer_id = transfer_pool.get_last(
-            cr, uid, patient.id, exception='False', context=context)
+            cr, uid, patient.id, exception=False, context=context)
         data = vals.copy()
         data.update(
             {'patient_id': patient.id,

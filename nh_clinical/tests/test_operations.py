@@ -186,12 +186,12 @@ class TestOperations(common.SingleTransactionCase):
         # Scenario 3: Exception 'True', Admission exists
         with self.assertRaises(except_orm):
             self.admission_pool.get_last(cr, uid, self.patients[0],
-                                         exception='True')
+                                         exception=True)
 
         # Scenario 4: Exception 'False', Admission does not exist
         with self.assertRaises(except_orm):
             self.admission_pool.get_last(cr, uid, self.patients[1],
-                                         exception='False')
+                                         exception=False)
 
     def test_03_admission_cancel(self):
         cr, uid = self.cr, self.uid
@@ -523,12 +523,12 @@ class TestOperations(common.SingleTransactionCase):
         # Scenario 3: Exception 'True', Discharge exists
         with self.assertRaises(except_orm):
             self.discharge_pool.get_last(cr, uid, self.patients[2],
-                                         exception='True')
+                                         exception=True)
 
         # Scenario 4: Exception 'False', Discharge does not exist
         with self.assertRaises(except_orm):
             self.discharge_pool.get_last(cr, uid, self.patients[0],
-                                         exception='False')
+                                         exception=False)
 
     def test_10_patient_discharge_cancel(self):
         cr, uid = self.cr, self.uid
@@ -659,12 +659,12 @@ class TestOperations(common.SingleTransactionCase):
         # Scenario 3: Exception 'True', Transfer exists
         with self.assertRaises(except_orm):
             self.transfer_pool.get_last(cr, uid, self.patients[2],
-                                        exception='True')
+                                        exception=True)
 
         # Scenario 4: Exception 'False', Transfer does not exist
         with self.assertRaises(except_orm):
             self.transfer_pool.get_last(cr, uid, self.patients[1],
-                                        exception='False')
+                                        exception=False)
 
     def test_13_transfer_cancel(self):
         cr, uid = self.cr, self.uid
