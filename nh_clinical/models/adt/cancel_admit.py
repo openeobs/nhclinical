@@ -60,7 +60,7 @@ class nh_clinical_adt_patient_cancel_admit(orm.Model):
             context=context)
         admission_pool = self.pool['nh.clinical.patient.admission']
         admission_id = admission_pool.get_last(
-            cr, uid, patient_id.id, exception=False, context=context)
+            cr, uid, patient_id.id, exception='False', context=context)
         data = vals.copy()
         data.update(
             {

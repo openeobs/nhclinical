@@ -40,7 +40,7 @@ class nh_clinical_adt_patient_cancel_discharge(orm.Model):
         )
         discharge_pool = self.pool['nh.clinical.patient.discharge']
         discharge_id = discharge_pool.get_last(
-            cr, uid, patient_id.id, exception=False, context=context)
+            cr, uid, patient_id.id, exception='False', context=context)
         data = vals.copy()
         data.update(
             {

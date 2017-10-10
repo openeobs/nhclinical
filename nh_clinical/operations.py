@@ -506,7 +506,7 @@ class nh_clinical_patient_discharge(orm.Model):
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
         admission_pool = self.pool['nh.clinical.patient.admission']
         admission_pool.get_last(cr, uid, activity.data_ref.patient_id.id,
-                                exception=True, context=context)
+                                exception='True', context=context)
         res = super(nh_clinical_patient_discharge, self).cancel(
             cr, uid, activity_id, context=context)
         # reopening spell
@@ -565,12 +565,12 @@ class nh_clinical_patient_discharge(orm.Model):
             cr, uid, domain, order='date_terminated desc, sequence desc',
             context=context)
         if exception:
-            if discharge_ids and exception:
+            if discharge_ids and eval(exception):
                 raise osv.except_osv(
                     'Patient Already Discharged!',
                     'Patient with id %s has already been discharged' %
                     patient_id)
-            if not discharge_ids and not exception:
+            if not discharge_ids and not eval(exception):
                 raise osv.except_osv(
                     'Discharge Not Found!',
                     'There is no completed discharge for patient with id %s' %
@@ -722,12 +722,12 @@ class nh_clinical_patient_admission(orm.Model):
             cr, uid, domain, order='date_terminated desc, sequence desc',
             context=context)
         if exception:
-            if admission_ids and exception:
+            if admission_ids and eval(exception):
                 raise osv.except_osv(
                     'Patient Already Admitted!',
                     'There is already an active admission '
                     'for patient with id %s' % patient_id)
-            if not admission_ids and not exception:
+            if not admission_ids and not eval(exception):
                 raise osv.except_osv(
                     'Admission Not Found!',
                     'There is no active admission for patient with id %s' %

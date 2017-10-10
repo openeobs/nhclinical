@@ -187,12 +187,12 @@ class NhClinicalPatientTransfer(orm.Model):
             cr, uid, domain, order='date_terminated desc, sequence desc',
             context=context)
         if exception:
-            if transfer_ids and exception:
+            if transfer_ids and eval(exception):
                 raise osv.except_osv(
                     'Patient Already Transferred!',
                     'There is already a transfer '
                     'for patient with id %s' % patient_id)
-            if not transfer_ids and not exception:
+            if not transfer_ids and not eval(exception):
                 raise osv.except_osv(
                     'Transfer Not Found!',
                     'There is no transfer for patient with id %s' % patient_id)
