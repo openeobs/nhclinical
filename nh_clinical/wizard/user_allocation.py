@@ -33,10 +33,10 @@ class AllocationWizards(osv.AbstractModel):
         :return: True
         """
         activity_pool = self.pool['nh.activity']
-        respallocation_pool = self.pool[
+        responsibility_allocation_pool = self.pool[
             'nh.clinical.user.responsibility.allocation'
         ]
-        activity_id = respallocation_pool.create_activity(
+        activity_id = responsibility_allocation_pool.create_activity(
             cr, uid, {}, {
                 'responsible_user_id': user_id,
                 'location_ids': [[6, 0, location_ids]]
@@ -493,7 +493,7 @@ class doctor_allocation_wizard(osv.TransientModel):
         if not isinstance(ids, list):
             ids = [ids]
         wiz = self.browse(cr, uid, ids[0], context=context)
-        reallocation_pool = self.pool[
+        responsibility_allocation_pool = self.pool[
             'nh.clinical.user.responsibility.allocation'
         ]
 
@@ -505,7 +505,7 @@ class doctor_allocation_wizard(osv.TransientModel):
                 location_ids = map(lambda i: i.id, location_ids)
             location_ids.append(wiz.ward_id.id)
 
-            activity_id = reallocation_pool.create_activity(
+            activity_id = responsibility_allocation_pool.create_activity(
                 cr, uid, {}, {
                     'responsible_user_id': doctor.id,
                     # Have to use '6' in the model relationship syntax used
