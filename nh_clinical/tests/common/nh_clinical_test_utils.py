@@ -234,6 +234,8 @@ class NhClinicalTestUtils(AbstractModel):
         return hca
 
     def create_doctor(self, location_ids=None):
+        if not isinstance(location_ids, list):
+            raise TypeError("Location IDs must be a list.")
         self.category_model = self.env['res.partner.category']
         self.user_model = self.env['res.users']
         self.doctor_role = \
