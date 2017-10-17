@@ -609,11 +609,7 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         'nh.clinical.adt.patient.discharge': 'adt_discharge',
 
         'nh.clinical.patient.observation.ews': 'observation_ews',
-        'nh.clinical.patient.observation.weight': 'observation_weight',
         'nh.clinical.patient.observation.height': 'observation_height',
-        'nh.clinical.patient.observation.blood_sugar':
-            'observation_blood_sugar',
-
         'nh.clinical.patient.diabetes': 'diabetes',
 
     }
@@ -1065,16 +1061,6 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         v.update(values)
         return v
 
-    def observation_weight(self, cr, uid, values=None):
-        if values is None:
-            values = {}
-        fake = self.next_seed_fake()
-        v = {}
-        assert 'patient_id' in values, "'patient_id' is not in values!"
-        v.update({'weight': float(fake.random_int(min=40, max=200))})
-        v.update(values)
-        return v
-
     def observation_height(self, cr, uid, values=None):
         if values is None:
             values = {}
@@ -1092,13 +1078,5 @@ class nh_clinical_api_demo_data(orm.AbstractModel):
         v = {}
         assert 'patient_id' in values, "'patient_id' is not in values!"
         v.update({'diabetes': fake.random_element([True, False])})
-        v.update(values)
-        return v
-
-    def observation_blood_sugar(self, cr, uid, values=None):
-        if values is None:
-            values = {}
-        fake = self.next_seed_fake()
-        v = {'blood_sugar': float(fake.random_int(min=1, max=100))}
         v.update(values)
         return v

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from . import partner
 from . import user
+from .models import *
 from . import groups
 from . import context
 from . import pos

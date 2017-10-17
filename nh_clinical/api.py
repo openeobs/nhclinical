@@ -1,13 +1,14 @@
-# Part of NHClinical. See LICENSE file for full copyright and licensing details
 # -*- coding: utf-8 -*-
+# Part of NHClinical. See LICENSE file for full copyright and licensing details
 """
 ``api.py`` defines the core methods to interface with the
 :mod:`adt` module.
 """
-
 import logging
 
 from openerp.osv import orm
+
+
 _logger = logging.getLogger(__name__)
 
 
@@ -278,7 +279,6 @@ class nh_clinical_api(orm.AbstractModel):
         :returns: ``True``
         :rtype: bool
         """
-
         activity_pool = self.pool['nh.activity']
         patient_pool = self.pool['nh.clinical.patient']
         transfer_pool = self.pool['nh.clinical.adt.patient.transfer']
@@ -325,4 +325,28 @@ class nh_clinical_api(orm.AbstractModel):
         activity_pool.complete(cr, uid, cancel_transfer_activity,
                                context=context)
         _logger.debug("Transfer cancelled for patient: %s", hospital_number)
+        return True
+
+    def check_activity_access(self, cr, uid, activity_id, context=None):
+        """
+        Verifies if an :class:`activity<activity.nh_activity>` is
+        assigned to a :class:`user<base.res_users>`.
+
+        :param uid: id of user to verify
+        :type uid: int
+        :param activity_id: id of activity to verify
+        :type activity_id: int
+        :returns: ``True`` if user is assigned. Otherwise ``False``
+        :rtype: bool
+        """
+        activity_pool = self.pool['nh.activity']
+        domain = [('id', '=', activity_id), '|', ('user_ids', 'in', [uid]),
+                  ('user_id', '=', uid)]
+        activity_ids = activity_pool.search(cr, uid, domain, context=context)
+        if not activity_ids:
+            return False
+        user_id = activity_pool.read(
+            cr, uid, activity_id, ['user_id'], context=context)['user_id']
+        if user_id and user_id[0] != uid:
+            return False
         return True
