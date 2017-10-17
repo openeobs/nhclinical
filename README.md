@@ -1,6 +1,9 @@
 # NH Clinical
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/40c8b82dfcc74bba88c4e02770323039)](https://www.codacy.com/app/BJSS/nhclinical?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=NeovaHealth/nhclinical&amp;utm_campaign=Badge_Grade)
 
+NHClinical is a set of [Odoo](https://www.odoo.com/) modules that add clinical models 
+and functionality to Odoo.
+
 NHClinical adds clinical models and functionality such as:
 - Clinical Activities
 - Clinical Locations
@@ -15,9 +18,6 @@ These models create a basic hospital set up but it's recommended to install
 needed to run an Acute or Mental Health hospital.
 
 ## Installation
-NHClinical is a set of [Odoo](https://www.odoo.com/) modules that add clinical models 
-and functionality to Odoo.
-
 We currently develop against [our own tag of Odoo](https://github.com/bjss/odoo/tree/liveobs_1.11.1), 
 this is to ensure consistency so it's recommended when installing Odoo that you 
 install this version.
@@ -28,13 +28,6 @@ the NhClinical directory.
 
 After restarting the server you can then log in as the admin user and install the
 `nh_clinical` module. This installs the different models you can work with.
-
-## Upgrading
-To upgrade the NHClinical modules you just need to update the NHClinical modules and
-press the upgrade module button for `nh_clinical`.
-
-It's recommended you backup the existing database and module files before upgrading
-so you can restore should anything go wrong.
 
 ## Contributing
 We welcome contributions via the creation of issues (for feedback, bugs and suggestions)
