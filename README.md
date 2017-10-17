@@ -1,6 +1,19 @@
 # NH Clinical
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/40c8b82dfcc74bba88c4e02770323039)](https://www.codacy.com/app/BJSS/nhclinical?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=NeovaHealth/nhclinical&amp;utm_campaign=Badge_Grade)
 
+NHClinical adds clinical models and functionality such as:
+- Clinical Activities
+- Clinical Locations
+- Clinical User Groups
+- Patients
+- Patient Admission, Discharge and Transfer
+- Patient Visits
+- Ward Staff Management
+
+These models create a basic hospital set up but it's recommended to install
+[Open-eObs](https://github.com/NeovaHealth/openeobs) which adds all the functionality
+needed to run an Acute or Mental Health hospital.
+
 ## Installation
 NHClinical is a set of [Odoo](https://www.odoo.com/) modules that add clinical models 
 and functionality to Odoo.
