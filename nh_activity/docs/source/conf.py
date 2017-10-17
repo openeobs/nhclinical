@@ -41,8 +41,8 @@ extensions = [
 templates_path = ['_templates']
 
 autodoc_mock_imports = [
-    'openerp.osv.orm', 'openerp.osv.osv', 'openerp.osv.fields',
-    'openerp.tools', 'openerp.SUPERUSER_ID', 'faker.Faker'
+    'openerp',
+    'faker'
 ]
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
