@@ -3,7 +3,7 @@ from openerp.tests.common import SingleTransactionCase
 
 class TestPatientNameGet(SingleTransactionCase):
     """
-    Test that the name_get method on nh.clinical.patient
+    Test that the name_get method on nh.clinical.patient.
     """
 
     @classmethod
@@ -30,7 +30,7 @@ class TestPatientNameGet(SingleTransactionCase):
 
     def test_name_get(self):
         """
-        Test that the name_function returns the correct name
+        Test that the name_function returns the correct name.
         """
         cr, uid = self.cr, self.uid
         patient = self.patient_pool.name_get(cr, uid, self.patient_id)
@@ -40,7 +40,7 @@ class TestPatientNameGet(SingleTransactionCase):
     def test_name_get_update(self):
         """
         Test that on updating the patient record the name_get is reflecting
-        the change
+        the change.
         """
         cr, uid = self.cr, self.uid
         patient = self.patient_pool.name_get(cr, uid, self.patient_id)
