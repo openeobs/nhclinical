@@ -13,6 +13,8 @@ Welcome to NHClinical's documentation!
    nh_odoo_fixes/index
    nh_activity/index
    nh_clinical/index
+   nh_clinical_ldap/index
+   nh_logging/index
 
 Indices and tables
 ==================
