@@ -12,11 +12,6 @@
 .. autoclass:: nh_change_password_wizard
     :members:
 
-``User Management``
--------------------
-.. autoclass:: nh_clinical_user_management
-    :members:
-
 ``Clinical Specialty``
 ----------------------
 .. autoclass:: nh_clinical_specialty

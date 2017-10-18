@@ -18,6 +18,7 @@
 #
 import os
 import sys
+from shutil import copytree, ignore_patterns
 sys.path.insert(0, os.path.abspath('../../'))
 
 
@@ -200,3 +201,13 @@ texinfo_documents = [
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'https://docs.python.org/': None}
+
+# h4xX0r time: Move All module docs under this directory so can use glob in
+# toctree
+projects = ['nh_activity', 'nh_clinical']
+for project in projects:
+    source = os.path.abspath('../../{}/docs/source/'.format(project))
+    destination = os.path.abspath('./{}'.format(project))
+    sys.path.insert(0, os.path.abspath('../../{}'.format(project)))
+    sys.path.insert(0, os.path.abspath('../../{}/models'.format(project)))
+    copytree(source, destination, ignore=ignore_patterns('*.py'))

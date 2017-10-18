@@ -7,8 +7,11 @@ Welcome to NHClinical's documentation!
 ======================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
+
+   nh_activity/index
+   nh_clinical/index
 
 
 
