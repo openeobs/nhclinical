@@ -10,10 +10,9 @@ Welcome to NHClinical's documentation!
    :maxdepth: 1
    :caption: Contents:
 
+   nh_odoo_fixes/index
    nh_activity/index
    nh_clinical/index
-
-
 
 Indices and tables
 ==================
