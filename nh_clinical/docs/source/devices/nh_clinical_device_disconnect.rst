@@ -1,4 +1,4 @@
 Disconnect
 ----------
-.. autoclass:: nh_clinical_device_disconnect
+.. autoclass:: devices.nh_clinical_device_disconnect
     :members:
