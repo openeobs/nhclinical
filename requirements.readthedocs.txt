@@ -1,2 +1,2 @@
-git+git://github.com/bjss/odoo.git@liveobs_1.11.1
+# git+git://github.com/bjss/odoo.git@liveobs_1.11.1
 odoo-sphinx-autodoc==0.3.2
