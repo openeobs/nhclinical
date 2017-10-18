@@ -5,11 +5,12 @@
 
 NH Activity
 ===========
-
-Module Reference
-----------------
+.. automodule:: activity
+    :members: data_model_event
 
 .. toctree::
    :maxdepth: 2
+   :caption: Classes
+   :glob:
 
-   activity
+   activity/*
