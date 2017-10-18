@@ -212,5 +212,4 @@ for project in projects:
     if os.path.exists(destination):
         rmtree(destination)
     sys.path.insert(0, os.path.abspath('../../{}'.format(project)))
-    sys.path.insert(0, os.path.abspath('../../{}/models'.format(project)))
     copytree(source, destination, ignore=ignore_patterns('*.py'))

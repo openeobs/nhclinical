@@ -6,10 +6,6 @@
 NH Clinical
 ===========
 
-
-Module Reference
-----------------
-
 .. toctree::
    :maxdepth: 2
 

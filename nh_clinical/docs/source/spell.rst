@@ -1,8 +1,10 @@
-``Spell``
-=========
+Spell
+=====
 .. automodule:: spell
 
-``Spell``
----------
-.. autoclass:: nh_clinical_spell
-    :members:
+.. toctree::
+   :maxdepth: 2
+   :caption: Classes
+   :glob:
+
+   spell/*
