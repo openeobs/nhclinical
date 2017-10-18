@@ -9,7 +9,7 @@ class NhClinicalTestUtils(AbstractModel):
     _name = 'nh.clinical.test_utils'
 
     # Setup methods
-    def admit_and_place_patient(self):
+    def admit_and_place_patient(self, create_placement=True):
         self.create_locations()
         self.create_users()
         self.create_patient()
@@ -17,7 +17,8 @@ class NhClinicalTestUtils(AbstractModel):
         self.spell_activity_id = self.spell.activity_id.id
         # TODO: Rename variable as it is a spell not an activity.
         self.spell_activity = self.spell.activity_id
-        self.placement = self.create_placement()
+        if create_placement:
+            self.placement = self.create_placement()
         self.place_patient()
 
     def create_users(self):
@@ -58,12 +59,13 @@ class NhClinicalTestUtils(AbstractModel):
         self.api_model = self.env['nh.clinical.api']
         self.patient_model = self.env['nh.clinical.patient']
 
-        hospital_number = uuid.uuid4()
+        hospital_number = str(uuid.uuid4())
         patient_id = self.api_model.sudo().register(
             hospital_number,
             {
                 'family_name': 'Testersen',
-                'given_name': 'Test'
+                'given_name': 'Test',
+                'patient_identifier': str(uuid.uuid4())
             }
         )
         return self.patient_model.browse(patient_id)
@@ -126,8 +128,8 @@ class NhClinicalTestUtils(AbstractModel):
         self.patient = self.patient_model.create({
             'given_name': 'Jon',
             'family_name': 'Snow',
-            'patient_identifier': uuid.uuid4(),
-            'other_identifier': uuid.uuid4()
+            'patient_identifier': str(uuid.uuid4()),
+            'other_identifier': str(uuid.uuid4())
         })
 
         self.spell_activity_id = self.spell_model.create_activity(
@@ -185,13 +187,15 @@ class NhClinicalTestUtils(AbstractModel):
             }
         )
 
-    def create_location(self, usage='bed', parent=None):
+    def create_location(self, usage='bed', parent=None, name=None):
         if not parent:
             parent = self.ward.id
+        if not name:
+            name = uuid.uuid4()
         return self.location_model.create(
             {
-                'name': uuid.uuid4(),
-                'code': uuid.uuid4(),
+                'code': str(uuid.uuid4()),
+                'name': name,
                 'usage': usage,
                 'parent_id': parent,
                 'type': 'poc',
@@ -209,7 +213,7 @@ class NhClinicalTestUtils(AbstractModel):
         # Create nurse and associate them with bed location and nurse role.
         return self.user_model.create({
             'name': 'Nurse',
-            'login': uuid.uuid4(),
+            'login': str(uuid.uuid4()),
             'password': 'nurse',
             'category_id': [[4, self.nurse_role.id]],
             'location_ids': [[4, location_id]]
@@ -223,25 +227,30 @@ class NhClinicalTestUtils(AbstractModel):
         self.hca_role = self.category_model.search([('name', '=', 'HCA')])[0]
         hca = self.user_model.create({
             'name': 'HCA',
-            'login': uuid.uuid4(),
+            'login': str(uuid.uuid4()),
             'password': 'hca',
             'category_id': [[4, self.hca_role.id]],
             'location_ids': [[4, location_id]]
         })
         return hca
 
-    def create_doctor(self):
+    def create_doctor(self, location_ids=None):
+        if location_ids is not None and not isinstance(location_ids, list):
+            raise TypeError("Location IDs must be a list.")
         self.category_model = self.env['res.partner.category']
         self.user_model = self.env['res.users']
         self.doctor_role = \
             self.category_model.search([('name', '=', 'Doctor')])[0]
+
+        if not location_ids:
+            location_ids = [self.ward.id, self.bed.id]
         # Create doctor and associate them with bed location and doctor role.
         self.doctor = self.user_model.create({
             'name': 'Doctor Acula',
             'login': 'Dr_Acula',
             'password': 'Dr_Acula',
             'category_id': [[4, self.doctor_role.id]],
-            'location_ids': [[6, 0, [self.ward.id, self.bed.id]]]
+            'location_ids': [[6, 0, location_ids]]
         })
 
     def create_shift_coordinator(self, location_id=None):
@@ -253,7 +262,7 @@ class NhClinicalTestUtils(AbstractModel):
             self.category_model.search([('name', '=', 'Shift Coordinator')])[0]
         shift_coordinator = self.user_model.create({
             'name': 'Anita Co\'Ordon',
-            'login': uuid.uuid4(),
+            'login': str(uuid.uuid4()),
             'password': 'coordon-anita',
             'category_id': [[4, self.shift_coordinator_role.id]],
             'location_ids': [[6, 0, [location_id]]]
@@ -270,6 +279,23 @@ class NhClinicalTestUtils(AbstractModel):
             'login': 'snr.manager',
             'password': 'snr.manager',
             'category_id': [[4, self.senior_manager_role.id]],
+            'location_ids': [[6, 0, [self.ward.id]]]
+        })
+
+    def create_system_admin(self):
+        self.category_model = self.env['res.partner.category']
+        self.user_model = self.env['res.users']
+        self.system_admin_role = \
+            self.category_model.search(
+                [
+                    ('name', '=', 'System Administrator')
+                ]
+            )[0]
+        self.system_admin = self.user_model.create({
+            'name': 'System admin',
+            'login': 'system.admin',
+            'password': 'system.admin',
+            'category_id': [[4, self.system_admin_role.id]],
             'location_ids': [[6, 0, [self.ward.id]]]
         })
 

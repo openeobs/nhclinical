@@ -6,63 +6,12 @@ event driven system to be built on top of it.
 """
 import logging
 from datetime import datetime
-from functools import wraps
 
 from openerp import SUPERUSER_ID, api
 from openerp.osv import orm, fields, osv
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
 
 _logger = logging.getLogger(__name__)
-
-
-def data_model_event(callback=None):
-    """
-    Decorator for activity methods. This will automatically call a
-    method with the same name on the
-    :mod:`data model<activity.nh_activity_data>` related to the
-    :mod:`activity<activity.nh_activity>` instance after calling the
-    activity method. The result returned is the one from the data_model
-    method.
-    """
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            v8_api = False
-            if isinstance(args[1], int):
-                self = args[0]
-                activity_id = args[1]
-                v8_api = True
-            else:
-                self, cr, uid, activity_id = args[:4]
-            if isinstance(activity_id, list) and len(activity_id) == 1:
-                activity_id = activity_id[0]
-            if not isinstance(activity_id, (int, long)):
-                raise osv.except_osv(
-                    'Type Error!',
-                    "activity_id must be int or long, found to be %s" %
-                    type(activity_id))
-            elif activity_id < 1:
-                raise osv.except_osv(
-                    'ID Error!',
-                    "activity_id must be > 0, found to be %s" % activity_id)
-            if v8_api:
-                activity = self.browse(activity_id)
-            else:
-                activity = self.browse(cr, uid, activity_id)
-            data_model = self.pool[activity.data_model]
-            if v8_api:
-                func(self, self._cr, self._uid, *args[1:], **kwargs)
-            else:
-                func(*args, **kwargs)
-            data_model_function = getattr(data_model, func.__name__)
-            if v8_api:
-                res = data_model_function(
-                    self._cr, self._uid, *args[1:], **kwargs)
-            else:
-                res = data_model_function(*args[1:], **kwargs)
-            return res
-        return wrapper
-    return decorator
 
 
 class nh_activity(orm.Model):
@@ -145,6 +94,60 @@ class nh_activity(orm.Model):
         'assign_locked': False
     }
 
+    def data_model_event(callback=None, *args, **kwargs):
+        """
+        Decorator for activity methods. This will automatically call a
+        method with the same name on the
+        :mod:`data model<activity.nh_activity_data>` related to the
+        :mod:`activity<activity.nh_activity>` instance after calling the
+        activity method. The result returned is the one from the data_model
+        method.
+        """
+
+        def decorator(func, *args, **kwargs):
+            @api.v7
+            def wrapper(self, cr, uid, activity_id, *args, **kwargs):
+                if isinstance(activity_id, (list, tuple)) \
+                        and len(activity_id) == 1:
+                    activity_id = activity_id[0]
+                if not isinstance(activity_id, (int, long)):
+                    raise osv.except_osv(
+                        'Type Error!',
+                        "activity_id must be int or long, found to be %s" %
+                        type(activity_id))
+                elif activity_id < 1:
+                    raise osv.except_osv(
+                        'ID Error!',
+                        "activity_id must be > 0, found to be {}".format(
+                            activity_id))
+                activity_data = self.browse(cr, uid, activity_id)
+                if not activity_data.data_model:
+                    raise osv.except_osv(
+                        'Data Model Error!',
+                        'No data model found on activity.')
+                data_model = self.pool[activity_data.data_model]
+                func(self, cr, uid, activity_id, *args, **kwargs)
+                data_model_function = getattr(data_model, func.__name__)
+                res = data_model_function(
+                    cr, uid, activity_id, *args, **kwargs)
+                return res
+
+            @api.v8
+            def wrapper(self, *args, **kwargs):
+                if not self.data_model:
+                    raise osv.except_osv(
+                        'Data Model Error!',
+                        'No data model found on activity.')
+                data_model = self.pool[self.data_model]
+                func(self, self._cr, self._uid, self.id, *args, **kwargs)
+                data_model_function = getattr(data_model, func.__name__)
+                res = data_model_function(
+                    self._cr, self._uid, self.id, *args, **kwargs)
+                return res
+            return wrapper
+
+        return decorator
+
     def create(self, cr, uid, vals, context=None):
         """
         Creates an activity. Raises an exception if ``data_model``
@@ -170,7 +173,8 @@ class nh_activity(orm.Model):
             summary = data_model_pool.get_description()
             vals.update({'summary': summary})
 
-        activity_id = super(nh_activity, self).create(cr, uid, vals, context)
+        activity_id = super(nh_activity, self).create(
+            cr, uid, vals, context=context)
         _logger.debug("activity '%s' created, activity.id=%s",
                       vals.get('data_model'), activity_id)
         return activity_id
@@ -191,7 +195,8 @@ class nh_activity(orm.Model):
             cr.execute("select coalesce(max(sequence), 0) from nh_activity")
             sequence = cr.fetchone()[0] + 1
             vals.update({'sequence': sequence})
-        return super(nh_activity, self).write(cr, uid, ids, vals, context)
+        return super(nh_activity, self).write(
+            cr, uid, ids, vals, context=context)
 
     def get_recursive_created_ids(self, cr, uid, activity_id, context=None):
         """
@@ -442,7 +447,8 @@ class nh_activity_data(orm.AbstractModel):
     _order = 'id desc'
 
     def create(self, cr, uid, vals, context=None):
-        return super(nh_activity_data, self).create(cr, uid, vals, context)
+        return super(nh_activity_data, self).create(
+            cr, uid, vals, context=context)
 
     def create_activity(self, cr, uid, vals_activity=None, vals_data=None,
                         context=None):
@@ -479,9 +485,11 @@ class nh_activity_data(orm.AbstractModel):
             )
         activity_pool = self.pool['nh.activity']
         vals_activity.update({'data_model': self._name})
-        new_activity_id = activity_pool.create(cr, uid, vals_activity, context)
+        new_activity_id = activity_pool.create(
+            cr, uid, vals_activity, context=context)
         if vals_data:
-            activity_pool.submit(cr, uid, new_activity_id, vals_data, context)
+            activity_pool.submit(
+                cr, uid, new_activity_id, vals_data, context=context)
         return new_activity_id
 
     def start(self, cr, uid, activity_id, context=None):
@@ -516,12 +524,18 @@ class nh_activity_data(orm.AbstractModel):
         activity_pool = self.pool['nh.activity']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
         self.check_action(activity.state, 'complete')
-        activity_pool.write(cr, uid, activity.id,
-                            {'state': 'completed', 'terminate_uid': uid,
-                             'date_terminated': datetime.now().strftime(DTF)},
-                            context=context)
-        _logger.debug("activity '%s', activity.id=%s completed",
-                      activity.data_model, activity.id)
+        activity_pool.write(
+            cr, uid, activity.id,
+            {
+                'state': 'completed',
+                'terminate_uid': uid,
+                'date_terminated': datetime.now().strftime(DTF)
+            },
+            context=context)
+        _logger.debug(
+            "activity '%s', activity.id=%s completed",
+            activity.data_model, activity.id
+        )
         return True
 
     def assign(self, cr, uid, activity_id, user_id, context=None):
@@ -599,7 +613,7 @@ class nh_activity_data(orm.AbstractModel):
         :rtype: bool
         """
         activity_pool = self.pool['nh.activity']
-        activity = activity_pool.browse(cr, uid, activity_id, context)
+        activity = activity_pool.browse(cr, uid, activity_id, context=context)
         self.check_action(activity.state, 'cancel')
         activity_pool.write(cr, uid, activity_id, {
             'state': 'cancelled', 'terminate_uid': uid,
@@ -659,7 +673,7 @@ class nh_activity_data(orm.AbstractModel):
                 "activity '%s', activity.id=%s data submitted: %s",
                 activity.data_model, activity.id, str(data_vals))
             data_vals.update({'activity_id': activity_id})
-            data_id = self.create(cr, uid, data_vals, context)
+            data_id = self.create(cr, uid, data_vals, context=context)
             activity_pool.write(cr, uid, activity_id, {
                 'data_ref': "%s,%s" % (self._name, data_id)}, context=context)
         else:
@@ -700,10 +714,11 @@ class nh_activity_data(orm.AbstractModel):
             activity_pool.write(
                 cr, uid, active_id,
                 {'data_ref': "%s,%s" % (self._name, str(ids[0]))})
-            activity = activity_pool.browse(cr, uid, active_id, context)
+            activity = activity_pool.browse(
+                cr, uid, active_id, context=context)
             activity_pool.update_activity(cr, SUPERUSER_ID, activity.id,
                                           context)
-            activity_pool.complete(cr, uid, activity.id, context)
+            activity_pool.complete(cr, uid, activity.id, context=context)
             _logger.debug(
                 "activity '%s', activity.id=%s data completed via UI",
                 activity.data_model, activity.id)
@@ -754,17 +769,20 @@ class nh_activity_data(orm.AbstractModel):
         return int(a_tuple[0])
 
     @api.model
-    def get_open_activity(self, data_model, spell_activity_id):
+    def get_open_activity(self, spell_activity_id):
         """
         Get the latest open activity for the given model. The method assumes
         that only one open activity at a time is possible for the given model.
         If more than one is found an exception is raised.
 
+        :param data_model:
+        :type data_model: str
         :param spell_activity_id:
+        :type spell_activity_id: int
         :return:
         """
         domain = [
-            ('data_model', '=', data_model),
+            ('data_model', '=', self._name),
             ('state', 'not in', ['completed', 'cancelled']),
             ('parent_id', '=', spell_activity_id)
         ]
@@ -775,16 +793,14 @@ class nh_activity_data(orm.AbstractModel):
         return record
 
     @api.model
-    def get_latest_activity(self, data_model, spell_activity_id):
+    def get_latest_activity(self, spell_activity_id):
         """
         Return the most recent activity for a given data model.
-
-        :param data_model:
         :param spell_activity_id:
         :return:
         """
         domain = [
-            ('data_model', '=', data_model),
+            ('data_model', '=', self._name),
             ('state', 'not in', ['completed', 'cancelled']),
             ('parent_id', '=', spell_activity_id)
         ]

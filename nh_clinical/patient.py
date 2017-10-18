@@ -6,11 +6,14 @@ import re
 from dateutil.parser import parse
 from openerp.osv import fields, osv
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
+from openerp import api
+from openerp.exceptions import ValidationError
+from openerp.addons.nh_odoo_fixes.validate import validate_non_empty_string
 
 _logger = logging.getLogger(__name__)
 
 
-class nh_clinical_patient(osv.Model):
+class NhClinicalPatient(osv.Model):
     """
     Represents a patient.
     """
@@ -34,7 +37,124 @@ class nh_clinical_patient(osv.Model):
         ['S', 'Other ethnic group'], ['Z', 'Not stated']
     ]
 
-    def _get_fullname(self, vals, fmt='{fn}, {gn} {mn}'):
+    _sql_constraints = [
+        (
+            'patient_identifier',
+            'unique(patient_identifier)',
+            'Patient with this NHS Number already exists'
+        ),
+        (
+            'other_identifier',
+            'unique(other_identifier)',
+            'Patient with this Hospital Number already exists'
+        )
+    ]
+
+    @staticmethod
+    def _check_identifier_for_bad_chars(value):
+        """
+        Check for bad characters in string
+
+        :param value: string to check
+        """
+        allowed_chars = r'[a-zA-Z0-9_\-\s]'
+        match = re.match(allowed_chars, value)
+        if not match:
+            raise ValidationError(
+                'Patient identifier can only contain '
+                'alphanumeric characters, hyphens and underscores'
+            )
+
+    @staticmethod
+    def _remove_whitespace(value):
+        """
+        Remove white space from the supplied string, return None if would
+        be empty string
+
+        :param value: string to remove whitespace from
+        :return: string without whitespace
+        """
+        spaces = r'\s'
+        val = re.sub(spaces, '', value)
+        return val if val else None
+
+    def _clean_identifiers(self, dirty_vals):
+        """
+        Clean up the patient identifiers by removing non-alpha numerical
+        characters
+
+        :param dirty_vals: Dictionary of values which contains identifiers
+            which need cleaning
+        :return: Dictionary of values with squeaky clean identifiers
+        """
+        vals = dirty_vals.copy()
+        hospital_number = vals.get('other_identifier')
+        nhs_number = vals.get('patient_identifier')
+        if hospital_number:
+            self._check_identifier_for_bad_chars(hospital_number)
+            vals['other_identifier'] = self._remove_whitespace(hospital_number)
+        if nhs_number:
+            self._check_identifier_for_bad_chars(nhs_number)
+            vals['patient_identifier'] = self._remove_whitespace(nhs_number)
+        return vals
+
+    @staticmethod
+    def _validate_indentifiers(vals):
+        """
+        Validate that the value dict has at least one of:
+        - NHS Number
+        - Hospital Number
+
+        :param vals: dictionary of patient values
+        :return: True
+        """
+        if not vals.get('other_identifier'):
+            raise ValidationError(
+                'Patient record must have Hospital number')
+        return True
+
+    @staticmethod
+    def _validate_name(vals):
+        """
+        Validate that the value dict has both:
+        - given_name
+        - family_name
+
+        :param vals: dictionary of patient values
+        :return: True
+        """
+        if not vals.get('given_name') or not vals.get('family_name'):
+            raise ValidationError(
+                'Patient record must have valid Given and Family Names'
+            )
+        return True
+
+    @api.constrains('patient_identifier', 'other_identifier')
+    def _check_identifiers_defined(self):
+        """
+        Check that the record contains at least an NHS or Hospital number
+        """
+        vals_dict = {
+            'patient_identifier':
+                validate_non_empty_string(self.patient_identifier),
+            'other_identifier':
+                validate_non_empty_string(self.other_identifier)
+        }
+        self._validate_indentifiers(vals_dict)
+
+    @api.constrains('given_name', 'family_name')
+    def _check_patient_names(self):
+        """
+        Check that the patient's name is actually set as Odoo's required flag
+        can be fooled by a string made of just spaces
+        """
+        vals = {
+            'given_name': validate_non_empty_string(self.given_name),
+            'family_name': validate_non_empty_string(self.family_name)
+        }
+        self._validate_name(vals)
+
+    def _get_fullname(self, vals, fmt=None):
         """
         Formats a fullname string from family, given and middle names.
 
@@ -47,22 +167,19 @@ class nh_clinical_patient(osv.Model):
         :returns: fullname
         :rtype: string
         """
-
-        # for k in ['family_name', 'given_name', 'middle_names']:
-        #     if k not in vals or vals[k] in [None, False]:
-        #         vals.update({k: ''})
-        for k in ['family_name', 'given_name']:
-            if k not in vals or vals[k] in [None, False]:
-                raise osv.except_osv(
-                    'Integrity Error!',
-                    'Patient must have a full name!')
-        middle_names = vals.get('middle_names')
-        if not middle_names:
-            middle_names = ''
-
-        return ' '.join(fmt.format(fn=vals.get('family_name'),
-                                   gn=vals.get('given_name'),
-                                   mn=middle_names).split())
+        if not fmt:
+            fmt = '{family_name}, {given_name} {middle_names}'
+        name = {
+            k: vals.get(k) for k in (
+                'family_name',
+                'given_name',
+                'middle_names'
+            )
+        }
+        for key, value in name.items():
+            if not validate_non_empty_string(value):
+                name[key] = ''
+        return ' '.join(fmt.format(**name).split())
 
     def _get_name(self, cr, uid, ids, fn, args, context=None):
         """
@@ -99,73 +216,6 @@ class nh_clinical_patient(osv.Model):
         ], context=context)
         return [(ids, self._get_fullname(names))]
 
-    def check_hospital_number(self, cr, uid, hospital_number, exception=False,
-                              context=None):
-        """
-        Checks for a patient by `hospital number`.
-
-        :param hospital_number: patient's hospital number
-        :type hospital_number: string
-        :param exception: ``True`` or ``False``. Default is ``False``
-        :type exception: bool
-        :returns: ``True`` if patient exists. Otherwise ``False``
-        :rtype: bool
-        :raises: :class:`except_orm<openerp.osv.osv.except_orm>` if
-            ``exception`` is ``True`` and  if the patient exists or if
-            the patient does not
-        """
-        if not hospital_number:
-            result = False
-        else:
-            domain = [['other_identifier', '=', hospital_number]]
-            result = bool(self.search(cr, uid, domain, context=context))
-        if exception:
-            if result and eval(exception):
-                raise osv.except_osv(
-                    'Integrity Error!',
-                    'Patient with Hospital Number %s already exists!'
-                    % hospital_number)
-            elif not result and not eval(exception):
-                raise osv.except_osv(
-                    'Patient Not Found!',
-                    'There is no patient with Hospital Number %s'
-                    % hospital_number)
-        return result
-
-    def check_nhs_number(self, cr, uid, nhs_number, exception=False,
-                         context=None):
-        """
-        Checks for patient by provided `NHS Number`.
-
-        :param nhs_number: patient's nhs number
-        :type nhs_number: string
-        :param exception: ``True`` or ``False``. Default is ``False``
-        :type exception: bool
-        :returns: ``True`` if patient exists. Otherwise ``False``
-        :rtype: bool
-        :raises: :class:`except_orm<openerp.osv.osv.except_orm>` if
-            ``exception`` is ``True`` and  if the patient exists or if
-            the patient does not
-        """
-
-        if not nhs_number:
-            result = False
-        else:
-            domain = [['patient_identifier', '=', nhs_number]]
-            result = bool(self.search(cr, uid, domain, context=context))
-        if exception:
-            if result and eval(exception):
-                raise osv.except_osv(
-                    'Integrity Error!',
-                    'Patient with NHS Number %s already exists!'
-                    % nhs_number)
-            elif not result and not eval(exception):
-                raise osv.except_osv(
-                    'Patient Not Found!',
-                    'There is no patient with NHS Number %s'
-                    % nhs_number)
-        return result
-
     def update(self, cr, uid, identifier, data, selection='other_identifier',
                context=None):
         """
@@ -183,7 +233,6 @@ class nh_clinical_patient(osv.Model):
         :returns: ``True``
         :rtype: bool
         """
-
         patient_id = self.search(cr, uid, [[selection, '=', identifier]],
                                  context=context)
         return self.write(cr, uid, patient_id, data, context=context)
@@ -231,11 +280,14 @@ class nh_clinical_patient(osv.Model):
         'ethnicity': fields.selection(_ethnicity, 'Ethnicity'),
         'patient_identifier': fields.char('NHS Number', size=100,
                                           select=True, help="NHS Number"),
-        'other_identifier': fields.char('Hospital Number', size=100,
-                                        select=True, help="Hospital Number"),
-        'given_name': fields.char('Given Name', size=200),
+        'other_identifier': fields.char(
+            'Hospital Number', size=100, select=True,
+            help="Hospital Number", required=True),
+        'given_name': fields.char(
+            'Given Name', size=200, required=True),
         'middle_names': fields.char('Middle Name(s)', size=200),
-        'family_name': fields.char('Family Name', size=200, select=True),
+        'family_name': fields.char(
+            'Family Name', size=200, select=True, required=True),
         'full_name': fields.function(_get_name, type='text',
                                      string="Full Name"),
         'follower_ids': fields.many2many('res.users',
@@ -259,7 +311,7 @@ class nh_clinical_patient(osv.Model):
 
     def load(self, cr, uid, fields, data, context=None):
         self.format_data(fields, data, context=context)
-        return super(nh_clinical_patient, self).load(
+        return super(NhClinicalPatient, self).load(
             cr, uid, fields, data, context=context)
 
     def format_data(self, fields, data, context=None):
@@ -295,21 +347,12 @@ class nh_clinical_patient(osv.Model):
         :returns: ``True`` if created
         :rtype: bool
         """
-        if isinstance(vals, dict) and not vals.get('other_identifier') \
-                and not vals.get('patient_identifier'):
-            raise osv.except_osv(
-                'Patient Data Error!',
-                'Either the Hospital Number or the NHS Number is required '
-                'to register/update a patient.')
+        vals = self._clean_identifiers(vals)
+        self._validate_indentifiers(vals)
+        self._validate_name(vals)
         if not vals.get('name'):
             vals.update({'name': self._get_fullname(vals)})
-        if vals.get('other_identifier'):
-            self.check_hospital_number(cr, uid, vals.get('other_identifier'),
-                                       exception='True', context=context)
-        if vals.get('patient_identifier'):
-            self.check_nhs_number(cr, uid, vals.get('patient_identifier'),
-                                  exception='True', context=context)
-        return super(nh_clinical_patient, self).create(
+        return super(NhClinicalPatient, self).create(
             cr, uid, vals,
             context=dict(context or {}, mail_create_nosubscribe=True))
 
@@ -320,15 +363,46 @@ class nh_clinical_patient(osv.Model):
         :returns: ``True`` if created
         :rtype: bool
         """
+        vals = self._clean_identifiers(vals)
         title_pool = self.pool['res.partner.title']
         keys = vals.keys()
         if 'title' in keys:
             if not isinstance(vals.get('title'), int):
-                vals['title'] = title_pool.get_title_by_name(cr, uid,
-                                                             vals['title'],
-                                                             context=context)
-        return super(nh_clinical_patient, self).write(cr, uid, ids, vals,
-                                                      context=context)
+                vals['title'] = title_pool.get_title_by_name(
+                    cr, uid, vals['title'], context=context)
+        return super(NhClinicalPatient, self).write(
+            cr, uid, ids, vals, context=context)
+
+    @api.model
+    def get_patient_id_for_identifiers(
+            self, hospital_number=None, nhs_number=None):
+        """
+        Get patient record with either of the supplied identifier or raise
+        error
+
+        :param hospital_number: Other identifier for the patient record
+        :param nhs_number: Patient identifier for the patient record
+        :return: patient ID for patient with either of the identifiers
+        """
+        if not hospital_number and not nhs_number:
+            raise osv.except_osv(
+                'Identifiers not provided',
+                'Patient\'s NHS or Hospital numbers must be provided'
+            )
+        search_filter = []
+        if hospital_number:
+            search_filter.append(['other_identifier', '=', hospital_number])
+        if nhs_number:
+            search_filter.append(['patient_identifier', '=', nhs_number])
+        if len(search_filter) > 1:
+            search_filter.insert(0, '|')
+        patient_id = self.search(search_filter)
+        if not patient_id:
+            raise osv.except_osv(
+                'Patient Not Found!',
+                'There is no patient in system with credentials provided')
+        else:
+            return patient_id[0]
 
     def unlink(self, cr, uid, ids, context=None):
         """
@@ -342,90 +416,8 @@ class nh_clinical_patient(osv.Model):
         :rtype: bool
         """
 
-        return super(nh_clinical_patient, self).write(cr, uid, ids,
-                                                      {'active': False},
-                                                      context=context)
-
-    def check_data(self, cr, uid, data, create=True, exception=True,
-                   context=None):
-        """
-        Default will check if patient exists. Either `hospital number`
-        (``other_identifier``) or `NHS number` (``patient_identifier``)
-        is required.
-
-        If ``create`` is ``True``, then both ``other_identifier`` and
-        ``patient_identifier`` must be unique. Otherwise either or both
-        identifiers will be accepted in ``data`` parameter.
-
-        If ``title`` is in ``data`` parameter, then method changes title
-        to res.partner.title id. If ``title`` is not included, a new
-        title will be created.
-
-        :param data: must include either ``patient_identifier`` or
-            ``other_identifier``
-        :type data: dict
-        :param create: ``True`` [default]
-        :type create: bool
-        :param exception: if ``True`` [default], it will raise an
-            exception if no patient exists or more than one patient
-            exists
-        :type create: bool
-        :raises: :class:`except_orm<openerp.osv.osv.except_orm>` if
-            ``exception`` arguments is ``True`` and  if patient doesn't
-            exists or if duplicate patients are found
-        :returns: ``True`` if successful. Otherwise ``False``
-        :rtype: bool
-        """
-
-        title_pool = self.pool['res.partner.title']
-        if 'patient_identifier' not in data.keys() and \
-                'other_identifier' not in data.keys():
-            raise osv.except_osv(
-                'Patient Data Error!',
-                'Either the Hospital Number or the NHS Number is required to '
-                'register/update a patient.')
-        if create:
-            if data.get('other_identifier'):
-                self.check_hospital_number(cr, uid, data['other_identifier'],
-                                           exception='True', context=context)
-            if data.get('patient_identifier'):
-                self.check_nhs_number(cr, uid, data['patient_identifier'],
-                                      exception='True', context=context)
-        else:
-            if data.get('other_identifier') and data.get('patient_identifier'):
-                domain = [
-                    '|',
-                    ['other_identifier', '=', data['other_identifier']],
-                    ['patient_identifier', '=', data['patient_identifier']]
-                ]
-            elif data.get('other_identifier'):
-                domain = [['other_identifier', '=', data['other_identifier']]]
-            else:
-                domain = [
-                    ['patient_identifier', '=', data['patient_identifier']]
-                ]
-            patient_id = self.search(cr, uid, domain, context=context)
-            if not patient_id:
-                if exception:
-                    raise osv.except_osv(
-                        'Update Error!',
-                        'No patient found with the provided identifier.')
-                else:
-                    return False
-            if len(patient_id) > 1:
-                if exception:
-                    raise osv.except_osv(
-                        'Update Error!',
-                        'Identifiers for more than one patient provided.')
-                else:
-                    return False
-            data['patient_id'] = patient_id[0]
-        if 'title' in data.keys():
-            if not isinstance(data.get('title'), int):
-                data['title'] = title_pool.get_title_by_name(cr, uid,
-                                                             data['title'],
-                                                             context=context)
-        return True
+        return super(NhClinicalPatient, self).write(
+            cr, uid, ids, {'active': False}, context=context)
 
     def get_not_admitted_patient_ids(self, cr, uid, context=None):
         """Returns patients ids for patients with no open spell."""

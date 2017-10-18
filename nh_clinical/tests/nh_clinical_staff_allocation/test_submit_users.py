@@ -41,15 +41,15 @@ class TestStaffAllocationSubmitUsers(SingleTransactionCase):
         """
         wizard_test = self.allocation_pool.submit_users(
             self.cr, self.uid, [64], context='submit_users_test')
-        self.assertEqual(wizard_test,
-                         {
-                             'type': 'ir.actions.act_window',
-                             'name': 'Nursing Shift Change',
-                             'res_model': 'nh.clinical.staff.allocation',
-                             'res_id': 64,
-                             'view_mode': 'form',
-                             'target': 'new',
-                         })
+        action = {
+            'type': 'ir.actions.act_window',
+            'name': 'Nursing Shift Change',
+            'res_model': 'nh.clinical.staff.allocation',
+            'res_id': 64,
+            'view_mode': 'form',
+            'target': 'new',
+        }
+        self.assertEqual(wizard_test, action)
 
     def test_errors_on_bad_id(self):
         """
