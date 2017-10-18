@@ -18,7 +18,7 @@
 #
 import os
 import sys
-from shutil import copytree, ignore_patterns
+from shutil import copytree, ignore_patterns, rmtree
 sys.path.insert(0, os.path.abspath('../../'))
 
 
@@ -208,6 +208,8 @@ projects = ['nh_activity', 'nh_clinical']
 for project in projects:
     source = os.path.abspath('../../{}/docs/source/'.format(project))
     destination = os.path.abspath('./{}'.format(project))
+    if os.path.exists(destination):
+        rmtree(destination)
     sys.path.insert(0, os.path.abspath('../../{}'.format(project)))
     sys.path.insert(0, os.path.abspath('../../{}/models'.format(project)))
     copytree(source, destination, ignore=ignore_patterns('*.py'))
