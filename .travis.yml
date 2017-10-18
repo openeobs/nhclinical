@@ -17,6 +17,8 @@ addons:
   apt:
     packages:
     - expect-dev
+    # TODO Investigate if this is needed. Stopped working in Travis so we
+    # added a pip install line for it, but may be used elsewhere in the stack.
     - python-lxml
     - python-simplejson
     - python-serial
