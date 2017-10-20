@@ -1,10 +1,10 @@
 # Part of NHClinical. See LICENSE file for full copyright and licensing details
 # -*- coding: utf-8 -*-
 import logging
-from mock import MagicMock
 
-from openerp.tests import common
+from mock import MagicMock
 from openerp.osv.orm import except_orm
+from openerp.tests import common
 
 _logger = logging.getLogger(__name__)
 
@@ -39,9 +39,17 @@ class TestClinicalSpell(common.SingleTransactionCase):
             cr, uid, {'name': 'Test Ward', 'code': 'TESTWARD', 'usage': 'ward',
                       'parent_id': cls.hospital_id, 'type': 'poc'})
         cls.patient_id = cls.patient_pool.create(
-            cr, uid, {'other_identifier': 'TESTHN01'})
+            cr, uid, {
+                'other_identifier': 'TESTHN01',
+                'given_name': 'GIVEN_NAME',
+                'family_name': 'FAMILY_NAME'
+            })
         cls.patient2_id = cls.patient_pool.create(
-            cr, uid, {'other_identifier': 'TESTHN02'})
+            cr, uid, {
+                'other_identifier': 'TESTHN02',
+                'given_name': 'GIVEN_NAME',
+                'family_name': 'FAMILY_NAME'
+            })
 
         cls.spell_id_1 = 1
 

@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from openerp.tests.common import SingleTransactionCase
 from openerp.osv.orm import except_orm
+from openerp.tests.common import SingleTransactionCase
 
 _logger = logging.getLogger(__name__)
 
@@ -62,7 +62,10 @@ class TestDevices(SingleTransactionCase):
         cls.patients = [
             cls.patient_pool.create(cr, uid, {
                 'other_identifier': 'TESTP000'+str(i),
-                'patient_identifier': 'TESTNHS0'+str(i)}) for i in range(2)
+                'patient_identifier': 'TESTNHS0'+str(i),
+                'given_name': 'GIVEN_NAME' + str(i),
+                'family_name': 'FAMILY_NAME' + str(i),
+            }) for i in range(2)
         ]
 
         cls.activity_pool.start(cr, uid, cls.spell_pool.create_activity(
