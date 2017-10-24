@@ -41,8 +41,8 @@ extensions = [
 templates_path = ['_templates']
 
 autodoc_mock_imports = [
-    'openerp.osv.orm', 'openerp.osv.osv', 'openerp.osv.fields',
-    'openerp.tools', 'openerp.SUPERUSER_ID', 'faker.Faker'
+    'openerp',
+    'faker'
 ]
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
@@ -118,7 +118,7 @@ todo_include_todos = True
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'alabaster'
+# html_theme = 'alabaster'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the

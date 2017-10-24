@@ -412,7 +412,7 @@ class nh_activity_data(orm.AbstractModel):
         state.
 
         :param state: state of the activity where we want to execute the
-        action.
+            action.
         :type state: str
         :param action: action we want to execute.
         :type action: str
@@ -457,10 +457,10 @@ class nh_activity_data(orm.AbstractModel):
         current data type.
 
         :param vals_activity: values to save in the
-        :mod:`activity<activity.nh_activity>`
+            :mod:`activity<activity.nh_activity>`
         :type vals_activity: dict
         :param vals_data: values to save in the
-        :mod:`data model<activity.nh_activity_data`
+            :mod:`data model<activity.nh_activity_data`
         :type vals_data: dict
         :returns: :mod:`activity<activity.nh_activity>` id.
         :rtype: int
