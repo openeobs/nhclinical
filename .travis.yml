@@ -48,6 +48,7 @@ install:
 # Install a pinned version of the Pillow so when OCA's requirements.txt is installed the dependency at this particular version is met
 - pip install Pillow==2.5.1
 - pip install lxml==3.8.0
+- pip install python-ldap==2.4.19
 - git clone --depth=1 https://github.com/NeovaHealth/maintainer-quality-tools.git
   ${HOME}/maintainer-quality-tools
 - pip install -r ${HOME}/maintainer-quality-tools/requirements.txt
