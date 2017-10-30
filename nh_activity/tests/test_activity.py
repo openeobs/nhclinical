@@ -580,7 +580,6 @@ class TestActivity(common.SingleTransactionCase):
         with self.assertRaises(except_orm):
             self.activity_pool.complete(cr, uid, activity_id)
 
-    @skip('Fix the "almost-equal comparison" for datetime')
     def test_cancel_cancels_an_activity(self):
         cr, uid = self.cr, self.uid
 

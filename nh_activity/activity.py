@@ -6,7 +6,6 @@ event driven system to be built on top of it.
 """
 import logging
 from datetime import datetime
-
 from openerp import SUPERUSER_ID, api
 from openerp.osv import orm, fields, osv
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
@@ -502,11 +501,15 @@ class nh_activity_data(orm.AbstractModel):
         :rtype: bool
         """
         activity_pool = self.pool['nh.activity']
+        datetime_model = self.pool['datetime_utils']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
         self.check_action(activity.state, 'start')
         activity_pool.write(
             cr, uid, activity_id,
-            {'state': 'started', 'date_started': datetime.now().strftime(DTF)},
+            {
+                'state': 'started',
+                'date_started': datetime_model.get_current_time(as_string=True)
+            },
             context=context)
         _logger.debug("activity '%s', activity.id=%s started",
                       activity.data_model, activity.id)
@@ -522,6 +525,7 @@ class nh_activity_data(orm.AbstractModel):
         :rtype: bool
         """
         activity_pool = self.pool['nh.activity']
+        datetime_model = self.pool['datetime_utils']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
         self.check_action(activity.state, 'complete')
         activity_pool.write(
@@ -529,7 +533,8 @@ class nh_activity_data(orm.AbstractModel):
             {
                 'state': 'completed',
                 'terminate_uid': uid,
-                'date_terminated': datetime.now().strftime(DTF)
+                'date_terminated':
+                    datetime_model.get_current_time(as_string=True)
             },
             context=context)
         _logger.debug(
@@ -613,11 +618,19 @@ class nh_activity_data(orm.AbstractModel):
         :rtype: bool
         """
         activity_pool = self.pool['nh.activity']
+        datetime_model = self.pool['datetime_utils']
         activity = activity_pool.browse(cr, uid, activity_id, context=context)
         self.check_action(activity.state, 'cancel')
-        activity_pool.write(cr, uid, activity_id, {
-            'state': 'cancelled', 'terminate_uid': uid,
-            'date_terminated': datetime.now().strftime(DTF)}, context=context)
+        activity_pool.write(
+            cr, uid, activity_id,
+            {
+                'state': 'cancelled',
+                'terminate_uid': uid,
+                'date_terminated':
+                    datetime_model.get_current_time(as_string=True)
+            },
+            context=context
+        )
         _logger.debug("activity '%s', activity.id=%s cancelled",
                       activity.data_model, activity.id)
         return True
