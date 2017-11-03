@@ -198,6 +198,7 @@ class TestAdtPatientDischarge(TransactionCase):
 
     def test_sets_date_to_now_if_not_sent(self):
         """ Test that datetime.now() is used if no date is provided """
+        datetime_model = self.env['datetime_utils']
         test_patient = self.test_utils.create_and_register_patient()
         discharge_data = {
             'other_identifier': test_patient.other_identifier,
@@ -214,7 +215,7 @@ class TestAdtPatientDischarge(TransactionCase):
             ]
         )
         discharge_date = datetime.strptime(discharge_id.date_terminated, DTF)
-        now = datetime.now()
+        now = datetime_model.get_current_time()
         self.assertEqual(discharge_date.year, now.year)
         self.assertEqual(discharge_date.month, now.month)
         self.assertEqual(discharge_date.day, now.day)
