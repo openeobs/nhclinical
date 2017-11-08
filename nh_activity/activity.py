@@ -8,7 +8,6 @@ import logging
 from datetime import datetime
 from openerp import SUPERUSER_ID, api
 from openerp.osv import orm, fields, osv
-from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
 
 _logger = logging.getLogger(__name__)
 
