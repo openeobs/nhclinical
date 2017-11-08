@@ -12,12 +12,24 @@ from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
 
 
 def not_in_the_future_multiple_args(*args):
+    """
+    Validates multiple datetime/strings representing datetimes
+
+    :param args: iterable of datetime/string representing datetime
+    """
     for arg in args:
         if arg:
             not_in_the_future(arg)
 
 
 def not_in_the_future(date_time):
+    """
+    Validate that supplied date_time string is not after the current server
+    time.
+
+    :param date_time: String or datetime. NOTE: This needs to be in UTC as
+        datetime.now() will return a naive date.
+    """
     date_time = _convert_string_to_datetime(date_time)
 
     now = datetime.now()
@@ -26,6 +38,16 @@ def not_in_the_future(date_time):
 
 
 def start_datetime_not_after_end_datetime(start_datetime, end_datetime):
+    """
+    Validate that start_datetime is not after end_datetime.
+
+    Datetimes if not instances of datetime.datetime will be converted
+    into naive datetimes. So there will be issues comparing a timezone aware
+    and naive datetime.
+
+    :param start_datetime: String or datetime
+    :param end_datetime: String or datetime
+    """
     start_datetime = _convert_string_to_datetime(start_datetime)
     end_datetime = _convert_string_to_datetime(end_datetime)
 
@@ -34,6 +56,14 @@ def start_datetime_not_after_end_datetime(start_datetime, end_datetime):
 
 
 def _convert_string_to_datetime(date_time):
+    """
+    Converts a supplied string into a datetime or just passes through
+    a supplied datetime.
+
+    :param date_time: String or datetime object.
+    :return: Naive datetime object if converted from string
+    :rtype: datetime.datetime
+    """
     if isinstance(date_time, basestring):
         date_time = datetime.strptime(date_time, DTF)
     elif isinstance(date_time, datetime):
@@ -46,6 +76,13 @@ def _convert_string_to_datetime(date_time):
 
 
 def in_min_max_range(min_value, max_value, value):
+    """
+    Validate that the supplied value is within the supplied range
+
+    :param min_value: Minimal value the value cannot be lesser than
+    :param max_value: Maximum value the value cannot be greater than
+    :param value: Value to ensure is the minimum and maximum values
+    """
     if value < min_value:
         raise ValidationError(
             "Value '{}' is less than the minimum valid value '{}'".format(
