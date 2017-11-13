@@ -518,8 +518,10 @@ class TestActivity(common.SingleTransactionCase):
         self.assertFalse(self.activity_pool.write.called)
         del self.activity_pool.write
 
-    @skip('Fix the "almost-equal comparison" for datetime')
-    def test_start_starts_an_activity(self):
+    def test_start_activity(self):
+        """
+        Test that the start() method moves the activity into the started stage
+        """
         cr, uid = self.cr, self.uid
 
         activity_id = self.activity_pool.create(
@@ -529,6 +531,18 @@ class TestActivity(common.SingleTransactionCase):
         activity = self.activity_pool.browse(cr, uid, activity_id)
         self.assertEqual(activity.state, 'started',
                          msg="Activity state not updated after Start")
+
+    def test_date_started(self):
+        """
+        Test that the start() method sets the start day for the activity
+        """
+        cr, uid = self.cr, self.uid
+
+        activity_id = self.activity_pool.create(
+            cr, uid, {'data_model': 'test.activity.data.model'})
+        self.assertTrue(self.activity_pool.start(
+            cr, uid, activity_id), msg="Activity Start failed")
+        activity = self.activity_pool.browse(cr, uid, activity_id)
         self.assertAlmostEqual(
             activity.date_started, dt.now().strftime(dtf),
             msg="Activity date started not updated after Start")
@@ -550,8 +564,10 @@ class TestActivity(common.SingleTransactionCase):
         with self.assertRaises(except_orm):
             self.activity_pool.start(cr, uid, activity_id)
 
-    @skip('Fix the "almost-equal comparison" for datetime')
-    def test_complete_completes_an_activity(self):
+    def test_complete_activity(self):
+        """
+        Test that the complete() method moves the state into completed
+        """
         cr, uid = self.cr, self.uid
 
         activity_id = self.activity_pool.create(
@@ -568,6 +584,36 @@ class TestActivity(common.SingleTransactionCase):
             activity.terminate_uid.id, uid,
             msg="Activity completion user not updated after Complete")
 
+    def test_complete_date_terminated(self):
+        """
+        Test that the complete() method sets the date_terminated
+        """
+        cr, uid = self.cr, self.uid
+
+        activity_id = self.activity_pool.create(
+            cr, uid, {'data_model': 'test.activity.data.model'})
+        self.assertTrue(self.activity_pool.complete(
+            cr, uid, activity_id), msg="Activity Complete failed")
+        activity = self.activity_pool.browse(cr, uid, activity_id)
+        self.assertAlmostEqual(
+            activity.date_terminated, dt.now().strftime(dtf),
+            msg="Activity date terminated not updated after Complete")
+
+    def test_complete_terminate_uid(self):
+        """
+        Test that the complete() method sets the terminate_uid
+        """
+        cr, uid = self.cr, self.uid
+
+        activity_id = self.activity_pool.create(
+            cr, uid, {'data_model': 'test.activity.data.model'})
+        self.assertTrue(self.activity_pool.complete(
+            cr, uid, activity_id), msg="Activity Complete failed")
+        activity = self.activity_pool.browse(cr, uid, activity_id)
+        self.assertEqual(
+            activity.terminate_uid.id, uid,
+            msg="Activity completion user not updated after Complete")
+
     def test_complete_raises_exception_when_completed_cancelled(self):
         cr, uid = self.cr, self.uid
 
@@ -580,7 +626,10 @@ class TestActivity(common.SingleTransactionCase):
         with self.assertRaises(except_orm):
             self.activity_pool.complete(cr, uid, activity_id)
 
-    def test_cancel_cancels_an_activity(self):
+    def test_cancel_activity(self):
+        """
+        Test that cancel sets the state of the activity to cancelled
+        """
         cr, uid = self.cr, self.uid
 
         activity_id = self.activity_pool.create(
@@ -593,6 +642,36 @@ class TestActivity(common.SingleTransactionCase):
         self.assertAlmostEqual(
             activity.date_terminated, dt.now().strftime(dtf),
             msg="Activity date terminated not updated after Cancel")
+        self.assertEqual(
+            activity.terminate_uid.id, uid,
+            msg="Activity completion user not updated after Cancel")
+
+    def test_cancel_date_terminated(self):
+        """
+        Test that cancel sets the date_terminated
+        """
+        cr, uid = self.cr, self.uid
+
+        activity_id = self.activity_pool.create(
+            cr, uid, {'data_model': 'test.activity.data.model'})
+        self.assertTrue(self.activity_pool.cancel(cr, uid, activity_id),
+                        msg="Activity Cancel failed")
+        activity = self.activity_pool.browse(cr, uid, activity_id)
+        self.assertAlmostEqual(
+            activity.date_terminated, dt.now().strftime(dtf),
+            msg="Activity date terminated not updated after Cancel")
+
+    def test_cancel_terminate_uid(self):
+        """
+        Test that cancel sets the terminate_uid
+        """
+        cr, uid = self.cr, self.uid
+
+        activity_id = self.activity_pool.create(
+            cr, uid, {'data_model': 'test.activity.data.model'})
+        self.assertTrue(self.activity_pool.cancel(cr, uid, activity_id),
+                        msg="Activity Cancel failed")
+        activity = self.activity_pool.browse(cr, uid, activity_id)
         self.assertEqual(
             activity.terminate_uid.id, uid,
             msg="Activity completion user not updated after Cancel")
