@@ -7,7 +7,6 @@ from mock import MagicMock
 from openerp.tests import common
 from openerp.osv.orm import except_orm
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as dtf
-from unittest import skip
 
 _logger = logging.getLogger(__name__)
 
