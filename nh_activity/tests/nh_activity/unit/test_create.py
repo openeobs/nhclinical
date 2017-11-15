@@ -1,4 +1,5 @@
 from openerp.tests.common import TransactionCase
+from openerp.osv.orm import except_orm
 
 
 class TestCreate(TransactionCase):
@@ -8,7 +9,7 @@ class TestCreate(TransactionCase):
         """
         Set up the tests
         """
-        super(TestActivity, self).setUp()
+        super(TestCreate, self).setUp()
         self.activity_model = self.env['nh.activity']
         self.user_model = self.env['res.users']
     
@@ -28,12 +29,11 @@ class TestCreate(TransactionCase):
         Test that create() method correctly sets the data model for the created
         activity 
         """
-        activity_id = self.activity_model.create(
+        activity = self.activity_model.create(
             {
                 'data_model': 'test.activity.data.model'
             }
         )
-        activity = self.activity_model.browse(cr, uid, activity_id)
         self.assertEqual(
             activity.data_model,
             'test.activity.data.model',
@@ -45,12 +45,11 @@ class TestCreate(TransactionCase):
         Test that the create() method correctly sets the summary for the 
         created activity 
         """
-        activity_id = self.activity_model.create(
+        activity = self.activity_model.create(
             {
                 'data_model': 'test.activity.data.model'
             }
         )
-        activity = self.activity_model.browse(cr, uid, activity_id)
         self.assertEqual(
             activity.summary,
             'Test Activity Model',
@@ -62,6 +61,11 @@ class TestCreate(TransactionCase):
         Test that the create() method correctly sets the initial state of the
         created activity
         """
+        activity = self.activity_model.create(
+            {
+                'data_model': 'test.activity.data.model'
+            }
+        )
         self.assertEqual(
             activity.state,
             'new',
@@ -94,12 +98,11 @@ class TestCreate(TransactionCase):
         data model if the data model has a description
         """
 
-        activity_id = self.activity_model.create(
+        activity = self.activity_model.create(
             {
                 'data_model': 'test.activity.data.model2'
             }
         )
-        activity = self.activity_model.browse(activity_id)
         self.assertEqual(
             activity.summary,
             'Undefined Activity',
@@ -111,13 +114,12 @@ class TestCreate(TransactionCase):
         Test that when a summary is supplied that the created activity has that
         summary
         """
-        activity_id = self.activity_model.create(
+        activity = self.activity_model.create(
             {
                 'data_model': 'test.activity.data.model2',
                 'summary': 'Test Activity Data Model'
             }
         )
-        activity = self.activity_model.browse(activity_id)
         self.assertEqual(
             activity.summary,
             'Test Activity Data Model',

@@ -9,20 +9,26 @@ class TestAssign(TransactionCase):
     the assign() method of nh.activity.data.
     """
 
+    EVENT_TRIGGERED = False
+    DATA_MODEL_ACTIVITY_ID = None
+
     def setUp(self):
         """
         Set up the tests
         """
         super(TestAssign, self).setUp()
         self.activity_model = self.env['nh.activity']
-        self.activity_data_model = self.env['nh.activity.data']
+        self.test_activity_data_model = self.env['test.activity.data.model']
         self.user_model = self.env['res.users']
         self.EVENT_TRIGGERED = False
+        self.DATA_MODEL_ACTIVITY_ID = None
 
         def mock_assign(*args, **kwargs):
+            self.EVENT_TRIGGERED = True
+            self.DATA_MODEL_ACTIVITY_ID = args[3]
             return True
 
-        self.activity_data_model._patch_method(
+        self.test_activity_data_model._patch_method(
             'assign',
             mock_assign
         )
@@ -37,7 +43,7 @@ class TestAssign(TransactionCase):
         """
         Remove any patches set up as part of the tests
         """
-        self.activity_data_model._revert_method('assign')
+        self.test_activity_data_model._revert_method('assign')
         super(TestAssign, self).tearDown()
 
     def test_bad_user_id(self):
@@ -47,3 +53,19 @@ class TestAssign(TransactionCase):
         """
         with self.assertRaises(except_orm):
             self.activity.assign('User ID')
+
+    def test_calls_data_method(self):
+        """
+        Test that the assign method on the model defined in the data_model of
+        of the activity is called when calling assign on the nh.activity model
+        """
+        self.activity.assign(self.uid)
+        self.assertTrue(self.EVENT_TRIGGERED)
+
+    def test_calls_data_method_with_id(self):
+        """
+        Test that the assign method on the model defined in the data_model of
+        the activity is called with the activity id
+        """
+        self.activity.assign(self.uid)
+        self.assertEqual(self.activity.id, self.DATA_MODEL_ACTIVITY_ID)

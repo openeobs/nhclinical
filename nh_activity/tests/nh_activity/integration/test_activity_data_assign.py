@@ -47,8 +47,8 @@ class TestActivityDataAssign(TransactionCase):
         Test that assign raises an exception if trying to assign an activity
         that has already been assigned
         """
-        self.activity.assign(self.uid)
-        user_ids = self.user_model.search([['id', '!=', self.uid]])
+        self.activity.write({'user_id': self.uid})
+        user_ids = self.user_model.search([['id', '!=', self.uid]]).ids
         with self.assertRaises(except_orm):
             self.activity.assign(user_ids[0])
 
