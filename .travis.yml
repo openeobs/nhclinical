@@ -32,7 +32,7 @@ env:
   matrix:
   - LINT_CHECK="1"
   - ODOO_REPO="bjss/odoo" RUN_PIPELINE="1" TESTS="1" INCLUDE="nh_odoo_fixes,nh_activity,nh_clinical,nh_clinical_ldap"
-    VERSION="liveobs_1.0"
+    VERSION="liveobs_1.11.1"
 virtualenv:
   system_site_packages: true
 before_install:
@@ -48,6 +48,7 @@ install:
 # Install a pinned version of the Pillow so when OCA's requirements.txt is installed the dependency at this particular version is met
 - pip install Pillow==2.5.1
 - pip install lxml==3.8.0
+- pip install python-ldap==2.4.19
 - git clone --depth=1 https://github.com/NeovaHealth/maintainer-quality-tools.git
   ${HOME}/maintainer-quality-tools
 - pip install -r ${HOME}/maintainer-quality-tools/requirements.txt

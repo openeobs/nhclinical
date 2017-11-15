@@ -22,24 +22,25 @@ def _quote(to_quote):
 
 
 def parse(self, cr, uid, context):
-    """ Transform the leaves of the expression
+    """
+    Transform the leaves of the expression
 
-        The principle is to pop elements from a leaf stack one at a time.
-        Each leaf is processed. The processing is a if/elif list of various
-        cases that appear in the leafs (many2one, function fields, ...).
-        Two things can happen as a processing result:
-        - the leaf has been modified and/or new leafs have to be introduced
-          in the expression; they are pushed into the leaf stack, to be
-          processed right after
-        - the leaf is added to the result
+    The principle is to pop elements from a leaf stack one at a time.
+    Each leaf is processed. The processing is a if/elif list of various
+    cases that appear in the leafs (many2one, function fields, ...).
+    Two things can happen as a processing result:
+    - the leaf has been modified and/or new leafs have to be introduced
+      in the expression; they are pushed into the leaf stack, to be
+      processed right after
+    - the leaf is added to the result
 
-        Some internal var explanation:
-            :var obj working_model: model object, model containing the field
-                (the name provided in the left operand)
-            :var list field_path: left operand seen as a path
-                 (foo.bar -> [foo, bar])
-            :var obj relational_model: relational model of a field (field._obj)
-                ex: res_partner.bank_ids -> res.partner.bank
+    Some internal var explanation:
+        :var obj working_model: model object, model containing the field
+            (the name provided in the left operand)
+        :var list field_path: left operand seen as a path
+             (foo.bar -> [foo, bar])
+        :var obj relational_model: relational model of a field (field._obj)
+            ex: res_partner.bank_ids -> res.partner.bank
     """
 
     def to_ids(value, relational_model, context=None, limit=None):

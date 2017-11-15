@@ -1,11 +1,10 @@
-``API``
-=======
+API
+===
 .. automodule:: api
 
-``API``
--------
-.. autoclass:: nh_clinical_api
-    :members:
+.. toctree::
+   :maxdepth: 2
+   :caption: Classes
+   :glob:
 
-
-
+   api/*

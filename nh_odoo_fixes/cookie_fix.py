@@ -9,10 +9,11 @@ from werkzeug.wrappers import Response as WerkzeugResponse
 def get_response(self, httprequest, result, explicit_session):
     """
     Override Odoo's default 3 month cookie timeout with our own
-    :param httprequest:  An instance of openerp.http.HttpRequest
+
+    :param httprequest: An instance of openerp.http.HttpRequest
     :param result: The result to return to the client from openerp.http.route
     :param explicit_session: optional openerp.http.Session
-    :return : Returns the result response with a cookie that expires in x hours
+    :return: Returns the result response with a cookie that expires in x hours
     """
     if isinstance(result, Response) and result.is_qweb:
         try:
