@@ -1,4 +1,5 @@
 from openerp.tests.common import TransactionCase
+from openerp.osv.orm import except_orm
 
 
 class TestCheckAction(TransactionCase):
@@ -10,7 +11,7 @@ class TestCheckAction(TransactionCase):
         """
         Set up the tests
         """
-        super(TestSubmit, self).setUp()
+        super(TestCheckAction, self).setUp()
         self.test_model = self.env['test.activity.data.model']
         
     def test_check_action_new_to_schedule(self):

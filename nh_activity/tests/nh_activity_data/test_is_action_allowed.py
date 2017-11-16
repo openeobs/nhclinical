@@ -10,7 +10,7 @@ class TestIsActionAllowed(TransactionCase):
         """
         Set up the tests
         """
-        super(TestSubmit, self).setUp()
+        super(TestIsActionAllowed, self).setUp()
         self.test_model = self.env['test.activity.data.model']
 
     def test_new_to_schedule(self):
@@ -90,7 +90,7 @@ class TestIsActionAllowed(TransactionCase):
         Test that the canceled -> start transition is not allowed
         """
         self.assertFalse(
-            self.test_model.is_action_allowed('canceled', 'start')
+            self.test_model.is_action_allowed('cancelled', 'start')
         )
 
     def test_new_to_complete(self):

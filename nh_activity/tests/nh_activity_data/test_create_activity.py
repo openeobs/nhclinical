@@ -1,4 +1,5 @@
 from openerp.tests.common import TransactionCase
+from openerp.osv.orm import except_orm
 
 
 class TestCreateActivity(TransactionCase):
@@ -10,33 +11,29 @@ class TestCreateActivity(TransactionCase):
         self.test_model = self.env['test.activity.data.model']
         self.activity_model = self.env['nh.activity']
         self.user_model = self.env['res.users']
+        activity_id = self.test_model.create_activity(
+            {},
+            {
+                'field1': 'test'
+            }
+        )
+        self.activity = self.activity_model.browse(activity_id)
         
     def test_create_activity(self):
         """
         Test the create_activity method creates an activity
         """
-        activity_id = self.test_model.create_activity(
-            {},
-            {
-                'field1': 'test'
-            }
+        self.assertTrue(
+            self.activity,
+            msg="Create Activity from data model failed"
         )
-        self.assertTrue(activity_id,
-                        msg="Create Activity from data model failed")
         
     def test_data_model(self):
         """
         Test that create_activity sets the data_model
         """
-        activity_id = self.test_model.create_activity(
-            {},
-            {
-                'field1': 'test'
-            }
-        )
-        activity = self.activity_model.browse(activity_id)
         self.assertEqual(
-            activity.data_model,
+            self.activity.data_model,
             'test.activity.data.model',
             msg="Create Activity set wrong data model"
         )
@@ -45,30 +42,19 @@ class TestCreateActivity(TransactionCase):
         """ 
         Test that create_activity sets the user who created the activity 
         """
-        activity_id = self.test_model.create_activity(
-            {},
-            {
-                'field1': 'test'
-            }
+        self.assertEqual(
+            self.activity.create_uid.id,
+            self.uid,
+            msg="Create Activity set wrong creator User"
         )
-        activity = self.activity_model.browse(activity_id)
-        self.assertEqual(activity.create_uid.id, uid,
-                         msg="Create Activity set wrong creator User")
 
     def test_model_field_value(self):
         """
         Test that the field value supplied during create_activity sets the
         field value on the model instance created as part of create_activity
         """
-        activity_id = self.test_model.create_activity(
-            {},
-            {
-                'field1': 'test'
-            }
-        )
-        activity = self.activity_model.browse(activity_id)
         self.assertEqual(
-            activity.data_ref.field1,
+            self.activity.data_ref.field1,
             'test',
             msg="Create Activity recorded wrong data in Data Model"
         )

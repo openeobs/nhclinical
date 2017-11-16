@@ -9,20 +9,22 @@ class TestActivityWrite(TransactionCase):
         super(TestActivityWrite, self).setUp()
         self.activity_model = self.env['nh.activity']
         self.user_model = self.env['res.users']
+        self.activity = self.activity_model.create(
+            {
+                'data_model': 'test.activity.data.model'
+            }
+        )
 
     def test_write(self):
         """
         Test that write updates the data of the activity
         """
-        self.activity_model.write(
-            activity_id,
-            {
+        self.activity.write({
                 'user_id': 1
             }
         )
-        activity = self.activity_model.browse(activity_id)
         self.assertEqual(
-            activity.user_id.id,
+            self.activity.user_id.id,
             1,
             msg="Activity not written correctly"
         )
@@ -31,22 +33,15 @@ class TestActivityWrite(TransactionCase):
         """
         Test that the sequence is not incremented if the state doesn't change
         """
-        activity_id = self.activity_model.create(
-            {
-                'data_model': 'test.activity.data.model'
-            }
-        )
         self.cr.execute("select coalesce(max(sequence), 0) from nh_activity")
         sequence = self.cr.fetchone()[0]
-        self.activity_model.write(
-            activity_id,
+        self.activity.write(
             {
                 'user_id': 1
             }
         )
-        activity = self.activity_model.browse(activity_id)
         self.assertEqual(
-            activity.sequence,
+            self.activity.sequence,
             sequence,
             msg="Activity sequence updated incorrectly"
         )
@@ -55,22 +50,15 @@ class TestActivityWrite(TransactionCase):
         """
         Test that the sequence is incrememted if the state is changed
         """
-        activity_id = self.activity_model.create(
-            {
-                'data_model': 'test.activity.data.model'
-            }
-        )
         self.cr.execute("select coalesce(max(sequence), 0) from nh_activity")
         sequence = self.cr.fetchone()[0]
-        activity = self.activity_model.browse(activity_id)
-        self.activity_model.write(
-            activity_id,
+        self.activity.write(
             {
                 'state': 'started'
             }
         )
         self.assertEqual(
-            activity.sequence,
+            self.activity.sequence,
             sequence+1,
             msg="Activity sequence not updated"
         )

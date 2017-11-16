@@ -275,8 +275,12 @@ class nh_activity(orm.Model):
                     'Type Error!',
                     "date must be a datetime or a date formatted string, "
                     "found to be %s" % type(date_scheduled))
-            date_format_list = ['%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M',
-                                '%Y-%m-%d %H', '%Y-%m-%d']
+            date_format_list = [
+                '%Y-%m-%d %H:%M:%S',
+                '%Y-%m-%d %H:%M',
+                '%Y-%m-%d %H',
+                '%Y-%m-%d'
+            ]
             res = []
             for date_format in date_format_list:
                 try:
