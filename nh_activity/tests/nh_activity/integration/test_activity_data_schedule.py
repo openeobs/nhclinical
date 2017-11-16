@@ -58,8 +58,8 @@ class TestSchedule(TransactionCase):
 
     def test_no_date_scheduled(self):
         """
-        Test that schedule() moves the activity into scheduled if the activity
-        already has the date_scheduled property set
+        Test that schedule() raises an exception when no date_scheduled is
+        supplied
         """
         with self.assertRaises(except_orm):
             self.activity.schedule()
