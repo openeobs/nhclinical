@@ -211,7 +211,7 @@ class nh_clinical_patient_swap_beds(orm.Model):
             cr, uid, activity_id, context=context)
 
 
-class nh_clinical_patient_placement(orm.Model):
+class NhClinicalPatientPlacement(orm.Model):
     """
     Represents the action of assigning a `bed` usage
     :mod:`location<base.nh_clinical_location>` to an admitted patient.
@@ -248,9 +248,9 @@ class nh_clinical_patient_placement(orm.Model):
 
     def get_form_description(self, cr, uid, patient_id, context=None):
         """
-         Returns a description in dictionary format of the input fields
-         that would be required in the user gui when completing this
-         action.
+        Returns a description in dictionary format of the input fields
+        that would be required in the user gui when completing this
+        action.
 
         :param patient_id: :mod:`patient<base.nh_clinical_patient>` id
         :type patient_id: int
@@ -297,7 +297,7 @@ class nh_clinical_patient_placement(orm.Model):
 
     @api.model
     def create(self, vals):
-        new_placement = super(nh_clinical_patient_placement, self).create(vals)
+        new_placement = super(NhClinicalPatientPlacement, self).create(vals)
         self.cancel_open_placements(vals['patient_id'], new_placement)
         return new_placement
 
@@ -338,7 +338,7 @@ class nh_clinical_patient_placement(orm.Model):
             raise osv.except_osv(
                 'Placement Error!',
                 'Placement cannot be completed without location')
-        res = super(nh_clinical_patient_placement, self).complete(
+        res = super(NhClinicalPatientPlacement, self).complete(
             cr, uid, activity_id, context)
         placement_activity = activity_pool.browse(
             cr, uid, activity_id, context)
@@ -382,7 +382,7 @@ class nh_clinical_patient_placement(orm.Model):
                 raise osv.except_osv(
                     "Patient Placement Error!",
                     "Location id=%s is not available" % vals['location_id'])
-        return super(nh_clinical_patient_placement, self).submit(
+        return super(NhClinicalPatientPlacement, self).submit(
             cr, uid, activity_id, vals, context)
 
     @api.model
