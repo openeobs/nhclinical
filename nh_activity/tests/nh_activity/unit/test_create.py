@@ -4,7 +4,7 @@ from openerp.osv.orm import except_orm
 
 class TestCreate(TransactionCase):
     """ Test the create method of the nh.activity model """
-    
+
     def setUp(self):
         """
         Set up the tests
@@ -12,7 +12,7 @@ class TestCreate(TransactionCase):
         super(TestCreate, self).setUp()
         self.activity_model = self.env['nh.activity']
         self.user_model = self.env['res.users']
-    
+
     def test_create(self):
         """
         Test that create() creates an activity
@@ -23,11 +23,11 @@ class TestCreate(TransactionCase):
             }
         )
         self.assertTrue(activity_id, msg="Activity create failed")
-        
+
     def test_create_data_model(self):
         """
         Test that create() method correctly sets the data model for the created
-        activity 
+        activity
         """
         activity = self.activity_model.create(
             {
@@ -39,11 +39,11 @@ class TestCreate(TransactionCase):
             'test.activity.data.model',
             msg="Activity created with the wrong data model"
         )
-        
+
     def test_create_summary(self):
         """
-        Test that the create() method correctly sets the summary for the 
-        created activity 
+        Test that the create() method correctly sets the summary for the
+        created activity
         """
         activity = self.activity_model.create(
             {
@@ -55,7 +55,7 @@ class TestCreate(TransactionCase):
             'Test Activity Model',
             msg="Activity default summary not added"
         )
-        
+
     def test_create_state(self):
         """
         Test that the create() method correctly sets the initial state of the

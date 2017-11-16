@@ -9,7 +9,7 @@ class TestStart(TransactionCase):
 
     EVENT_TRIGGERED = False
     DATA_MODEL_ACTIVITY_ID = None
-    
+
     def setUp(self):
         """ Set up the tests """
         super(TestStart, self).setUp()
@@ -40,7 +40,7 @@ class TestStart(TransactionCase):
         """
         self.test_activity_data_model._revert_method('start')
         super(TestStart, self).tearDown()
-        
+
     def test_start(self):
         """
         Test that the start method returns True

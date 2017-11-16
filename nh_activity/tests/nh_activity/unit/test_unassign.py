@@ -3,13 +3,13 @@ from openerp.tests.common import TransactionCase
 
 class TestUnassign(TransactionCase):
     """
-    Test the unassign method on nh_activity. At the nh_activity module level the
-    unassign method only returns True as it's used as a hook later on
+    Test the unassign method on nh_activity. At the nh_activity module level
+    the unassign method only returns True as it's used as a hook later on
     """
 
     EVENT_TRIGGERED = False
     DATA_MODEL_ACTIVITY_ID = None
-    
+
     def setUp(self):
         """ Set up the tests """
         super(TestUnassign, self).setUp()
@@ -40,7 +40,7 @@ class TestUnassign(TransactionCase):
         """
         self.test_activity_data_model._revert_method('unassign')
         super(TestUnassign, self).tearDown()
-        
+
     def test_unassign(self):
         """
         Test that the unassign method returns True

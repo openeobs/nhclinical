@@ -13,20 +13,20 @@ class TestCheckAction(TransactionCase):
         """
         super(TestCheckAction, self).setUp()
         self.test_model = self.env['test.activity.data.model']
-        
+
     def test_check_action_new_to_schedule(self):
         """
         Test that check_action returns True for new -> scheduled transition
         """
         self.assertTrue(self.test_model.check_action('new', 'schedule'))
-        
+
     def test_check_action_scheduled_to_schedule(self):
         """
-        Test that check_action returns True for schedule -> scheduled 
+        Test that check_action returns True for schedule -> scheduled
         transition
         """
         self.assertTrue(self.test_model.check_action('scheduled', 'schedule'))
-        
+
     def test_check_action_started_to_schedule(self):
         """
         Test that check_action raises an exception for started -> scheduled
@@ -34,7 +34,7 @@ class TestCheckAction(TransactionCase):
         """
         with self.assertRaises(except_orm):
             self.test_model.check_action('started', 'schedule')
-            
+
     def test_check_action_completed_to_schedule(self):
         """
         Test that check_action raises an exception for completd -> scheduled
@@ -42,7 +42,7 @@ class TestCheckAction(TransactionCase):
         """
         with self.assertRaises(except_orm):
             self.test_model.check_action('completed', 'schedule')
-            
+
     def test_check_action_cancelled_to_schedule(self):
         """
         Test that check_action raises an exception for cancelled -> scheduled
@@ -59,7 +59,7 @@ class TestCheckAction(TransactionCase):
 
     def test_check_action_startd_to_start(self):
         """
-        Test that check_action returns True for start -> startd 
+        Test that check_action returns True for start -> startd
         transition
         """
         self.assertTrue(self.test_model.check_action('scheduled', 'start'))
@@ -96,7 +96,7 @@ class TestCheckAction(TransactionCase):
 
     def test_check_action_scheduled_to_complete(self):
         """
-        Test that check_action returns True for scheduled -> completed 
+        Test that check_action returns True for scheduled -> completed
         transition
         """
         self.assertTrue(self.test_model.check_action('scheduled', 'complete'))
@@ -131,7 +131,7 @@ class TestCheckAction(TransactionCase):
 
     def test_check_action_scheduled_to_cancel(self):
         """
-        Test that check_action returns True for schedule -> canceld 
+        Test that check_action returns True for schedule -> canceld
         transition
         """
         self.assertTrue(self.test_model.check_action('scheduled', 'cancel'))
@@ -144,7 +144,7 @@ class TestCheckAction(TransactionCase):
 
     def test_check_action_completed_to_cancel(self):
         """
-        Test that check_action returns True for completed -> cancelled 
+        Test that check_action returns True for completed -> cancelled
         """
         self.assertTrue(self.test_model.check_action('completed', 'cancel'))
 
@@ -164,7 +164,7 @@ class TestCheckAction(TransactionCase):
 
     def test_check_action_scheduled_to_submit(self):
         """
-        Test that check_action returns True for schedule -> submitd 
+        Test that check_action returns True for schedule -> submitd
         transition
         """
         self.assertTrue(self.test_model.check_action('scheduled', 'submit'))
@@ -190,7 +190,7 @@ class TestCheckAction(TransactionCase):
         """
         with self.assertRaises(except_orm):
             self.test_model.check_action('cancelled', 'submit')
-            
+
     def test_check_action_new_to_assign(self):
         """
         Test that check_action returns True for new -> assignd transition
@@ -199,7 +199,7 @@ class TestCheckAction(TransactionCase):
 
     def test_check_action_scheduled_to_assign(self):
         """
-        Test that check_action returns True for schedule -> assignd 
+        Test that check_action returns True for schedule -> assignd
         transition
         """
         self.assertTrue(self.test_model.check_action('scheduled', 'assign'))
@@ -225,7 +225,7 @@ class TestCheckAction(TransactionCase):
         """
         with self.assertRaises(except_orm):
             self.test_model.check_action('cancelled', 'assign')
-            
+
     def test_check_action_new_to_unassign(self):
         """
         Test that check_action returns True for new -> unassignd transition
@@ -234,7 +234,7 @@ class TestCheckAction(TransactionCase):
 
     def test_check_action_scheduled_to_unassign(self):
         """
-        Test that check_action returns True for schedule -> unassignd 
+        Test that check_action returns True for schedule -> unassignd
         transition
         """
         self.assertTrue(self.test_model.check_action('scheduled', 'unassign'))

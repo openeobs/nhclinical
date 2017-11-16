@@ -4,7 +4,7 @@ from openerp.osv.orm import except_orm
 
 class TestCreateActivity(TransactionCase):
     """ Test the create_activity() method of the activity model """
-    
+
     def setUp(self):
         """ Set up the tests """
         super(TestCreateActivity, self).setUp()
@@ -18,7 +18,7 @@ class TestCreateActivity(TransactionCase):
             }
         )
         self.activity = self.activity_model.browse(activity_id)
-        
+
     def test_create_activity(self):
         """
         Test the create_activity method creates an activity
@@ -27,7 +27,7 @@ class TestCreateActivity(TransactionCase):
             self.activity,
             msg="Create Activity from data model failed"
         )
-        
+
     def test_data_model(self):
         """
         Test that create_activity sets the data_model
@@ -37,10 +37,10 @@ class TestCreateActivity(TransactionCase):
             'test.activity.data.model',
             msg="Create Activity set wrong data model"
         )
-        
+
     def test_create_uid(self):
-        """ 
-        Test that create_activity sets the user who created the activity 
+        """
+        Test that create_activity sets the user who created the activity
         """
         self.assertEqual(
             self.activity.create_uid.id,

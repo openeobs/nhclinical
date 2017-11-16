@@ -19,7 +19,8 @@ class TestActivityWrite(TransactionCase):
         """
         Test that write updates the data of the activity
         """
-        self.activity.write({
+        self.activity.write(
+            {
                 'user_id': 1
             }
         )

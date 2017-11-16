@@ -9,7 +9,7 @@ class TestUpdate(TransactionCase):
 
     EVENT_TRIGGERED = False
     DATA_MODEL_ACTIVITY_ID = None
-    
+
     def setUp(self):
         """ Set up the tests """
         super(TestUpdate, self).setUp()
@@ -40,7 +40,7 @@ class TestUpdate(TransactionCase):
         """
         self.test_activity_data_model._revert_method('update_activity')
         super(TestUpdate, self).tearDown()
-        
+
     def test_update_activity(self):
         """
         Test that the update_activity method returns True when an update

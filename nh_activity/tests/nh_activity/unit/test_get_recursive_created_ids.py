@@ -3,12 +3,12 @@ from openerp.tests.common import TransactionCase
 
 class TestGetRecursiveCreatedIds(TransactionCase):
     """ Test get_recursive_created_ids() method of nh_activity model """
-    
+
     def setUp(self):
         """ Set up the tests """
         super(TestGetRecursiveCreatedIds, self).setUp()
         self.activity_model = self.env['nh.activity']
-        
+
     def test_includes_activity_id(self):
         """
         Test that get_recursive_created_ids includes the id of the activity

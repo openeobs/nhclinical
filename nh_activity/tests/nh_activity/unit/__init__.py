@@ -9,3 +9,5 @@ from . import test_submit
 from . import test_schedule
 from . import test_start
 from . import test_unassign
+from . import test_v8_data_model_event
+from . import test_v7_data_model_event
