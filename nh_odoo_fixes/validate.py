@@ -58,6 +58,18 @@ def in_min_max_range(min_value, max_value, value):
         )
 
 
+def fields_in_min_max_range(record, field_names_to_validate):
+    for field_name in field_names_to_validate:
+        minimum_field_name = record._fields[field_name].min
+        maximum_field_name = record._fields[field_name].max
+
+        minimum = getattr(record, minimum_field_name)
+        maximum = getattr(record, maximum_field_name)
+
+        field_value = getattr(record, field_name)
+        in_min_max_range(minimum, maximum, field_value)
+
+
 def validate_non_empty_string(string):
     """
     Validate that string is not empty
