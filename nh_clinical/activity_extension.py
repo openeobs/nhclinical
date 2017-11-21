@@ -620,10 +620,8 @@ class nh_activity_data(orm.AbstractModel):
                 'creator_id': activity_id
             }, data, context=context)
             if trigger_activity['type'] == 'recurring':
-                frequency = activity_pool.browse(
-                    cr, SUPERUSER_ID, ta_activity_id,
-                    context=context).data_ref.frequency
-                date_schedule = (dt.now()+td(minutes=frequency)).strftime(DTF)
+                date_schedule = self.get_recurring_activity_date_scheduled(
+                    cr, uid, ta_activity_id, context)
             else:
                 date_schedule = dt.now()+td(minutes=60)
             if trigger_activity['type'] == 'start':
@@ -640,6 +638,15 @@ class nh_activity_data(orm.AbstractModel):
                 activity_pool.schedule(cr, SUPERUSER_ID, ta_activity_id,
                                        date_schedule, context=context)
         return True
+
+    def get_recurring_activity_date_scheduled(
+            self, cr, uid, triggered_activity_id, context):
+        activity_pool = self.pool['nh.activity']
+        frequency = activity_pool.browse(
+            cr, SUPERUSER_ID, triggered_activity_id,
+            context=context).data_ref.frequency
+        date_scheduled = (dt.now() + td(minutes=frequency)).strftime(DTF)
+        return date_scheduled
 
     def get_child_activity(self, activity_model, activity, data_model,
                            context=None):
