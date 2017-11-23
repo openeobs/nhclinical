@@ -30,26 +30,9 @@ class TestActivityWrite(TransactionCase):
             msg="Activity not written correctly"
         )
 
-    def test_state_not_changed(self):
-        """
-        Test that the sequence is not incremented if the state doesn't change
-        """
-        self.cr.execute("select coalesce(max(sequence), 0) from nh_activity")
-        sequence = self.cr.fetchone()[0]
-        self.activity.write(
-            {
-                'user_id': 1
-            }
-        )
-        self.assertEqual(
-            self.activity.sequence,
-            sequence,
-            msg="Activity sequence updated incorrectly"
-        )
-
     def test_state_changed(self):
         """
-        Test that the sequence is incrememted if the state is changed
+        Test that the sequence is incremented if the state is changed
         """
         self.cr.execute("select coalesce(max(sequence), 0) from nh_activity")
         sequence = self.cr.fetchone()[0]
