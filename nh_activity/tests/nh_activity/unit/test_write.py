@@ -53,7 +53,7 @@ class TestActivityWrite(TransactionCase):
 
     def test_state_changed(self):
         """
-        Test that the sequence is incremented if the state is changed
+        Test that the sequence is incremented if the state is changed.
         """
         self.cr.execute("select coalesce(max(sequence), 0) from nh_activity")
         sequence = self.cr.fetchone()[0]
