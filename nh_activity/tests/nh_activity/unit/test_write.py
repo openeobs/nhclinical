@@ -17,7 +17,7 @@ class TestActivityWrite(TransactionCase):
 
     def test_write(self):
         """
-        Test that write updates the data of the activity
+        Test that write updates the data of the activity.
         """
         self.activity.write(
             {
