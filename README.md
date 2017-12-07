@@ -36,4 +36,3 @@ and pull requests (for submitting code).
 You can read our contribution guidelines for more information on how to contribute
 and what you can expect when contributing to NHClinical.
 
-Added a commit.
