@@ -36,3 +36,8 @@ and pull requests (for submitting code).
 You can read our contribution guidelines for more information on how to contribute
 and what you can expect when contributing to NHClinical.
 
+## Building Sphinx docs
+1. `pip install sphinx`
+1. `sphinx-build -h`
+1. `cd docs/`
+1. `sphinx-build source html`

@@ -651,6 +651,7 @@ class nh_activity_data(orm.AbstractModel):
         completed and a new one has just been created. It returns the datetime
         which the newly created activity should be due by adding a 'frequency'
         to the current datetime.
+
         :param triggered_activity_id:
         :type triggered_activity_id: int
         :return: The datetime the newly triggered recurring activity should be

@@ -1,5 +1,5 @@
 Placement
 ---------
-.. autoclass:: operations.nh_clinical_patient_placement
+.. autoclass:: operations.NhClinicalPatientPlacement
     :members:
     :undoc-members:
