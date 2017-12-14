@@ -15,9 +15,11 @@ class TestInMinMaxRange(SingleTransactionCase):
     def call_test(value, minimum, maximum):
         """
         Call the method under test.
-        :param value:
-        :param minimum:
-        :param maximum:
+
+        :param value: Any value of any type that should be in between or equal
+        to the minimum and maximum.
+        :param minimum: The value cannot be below this.
+        :param maximum: The value cannot be above this.
         """
         validate.in_min_max_range(minimum, maximum, value)
 

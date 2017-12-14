@@ -297,6 +297,14 @@ class NhClinicalPatientPlacement(orm.Model):
 
     @api.model
     def create(self, vals):
+        """
+        Override of Odoo's built-in method to ensure that only one placement
+        is ever open. It does this by cancelling any open placements before
+        returning the new one.
+
+        :param vals: See `openerp.models.BaseModel.create`.
+        :return:
+        """
         new_placement = super(NhClinicalPatientPlacement, self).create(vals)
         self.cancel_open_placements(vals['patient_id'], new_placement)
         return new_placement
