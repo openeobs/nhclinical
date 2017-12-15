@@ -17,7 +17,7 @@ class TestInMinMaxRange(SingleTransactionCase):
         Call the method under test.
 
         :param value: Any value of any type that should be in between or equal
-        to the minimum and maximum.
+            to the minimum and maximum.
         :param minimum: The value cannot be below this.
         :param maximum: The value cannot be above this.
         """
