@@ -6,6 +6,7 @@ operations that are not represented by any other objects in the system
 but still need to be audittable.
 """
 import logging
+
 from openerp.osv import orm, fields, osv
 
 _logger = logging.getLogger(__name__)
@@ -150,11 +151,12 @@ class nh_clinical_user_responsibility_allocation(orm.Model):
 
     def get_allocation_locations(self, cr, uid, allocation_obj, context=None):
         """
-        Get a list locations to allocate the user to
+        Get a list locations to allocate the user to.
+
         :param cr: Cursor
         :param uid: User ID to perform operation with
         :param allocation_obj: The activity data ref from a user responsibility
-        allocation
+            allocation
         :param context: Odoo context
         :return: list of location ids
         """

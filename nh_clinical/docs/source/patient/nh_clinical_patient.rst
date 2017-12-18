@@ -1,5 +1,5 @@
 Patient
 -------
-.. autoclass:: patient.nh_clinical_patient
+.. autoclass:: patient.NhClinicalPatient
     :members:
     :undoc-members:
