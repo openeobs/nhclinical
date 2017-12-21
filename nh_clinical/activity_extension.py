@@ -8,7 +8,7 @@ information on their representative classes.
 import logging
 from datetime import datetime as dt, timedelta as td
 
-from openerp import SUPERUSER_ID
+from openerp import SUPERUSER_ID, api
 from openerp.osv import orm, fields
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
 
@@ -620,10 +620,8 @@ class nh_activity_data(orm.AbstractModel):
                 'creator_id': activity_id
             }, data, context=context)
             if trigger_activity['type'] == 'recurring':
-                frequency = activity_pool.browse(
-                    cr, SUPERUSER_ID, ta_activity_id,
-                    context=context).data_ref.frequency
-                date_schedule = (dt.now()+td(minutes=frequency)).strftime(DTF)
+                date_schedule = self.get_recurring_activity_date_scheduled(
+                    cr, uid, ta_activity_id, context)
             else:
                 date_schedule = dt.now()+td(minutes=60)
             if trigger_activity['type'] == 'start':
@@ -640,6 +638,31 @@ class nh_activity_data(orm.AbstractModel):
                 activity_pool.schedule(cr, SUPERUSER_ID, ta_activity_id,
                                        date_schedule, context=context)
         return True
+
+    @api.model
+    def get_recurring_activity_date_scheduled(
+            self, triggered_activity_id):
+        """
+        Recurring activities are ones that automatically create a new one when
+        they are completed. It is common for EWS to be set as a recurring
+        activity in a trust's policy.
+
+        This method is called when an existing recurring activity has been
+        completed and a new one has just been created. It returns the datetime
+        which the newly created activity should be due by adding a 'frequency'
+        to the current datetime.
+
+        :param triggered_activity_id:
+        :type triggered_activity_id: int
+        :return: The datetime the newly triggered recurring activity should be
+            due.
+        :rtype: str
+        """
+        activity_model = self.env['nh.activity']
+        frequency = activity_model.sudo()\
+            .browse(triggered_activity_id).data_ref.frequency
+        date_scheduled = (dt.now() + td(minutes=frequency)).strftime(DTF)
+        return date_scheduled
 
     def get_child_activity(self, activity_model, activity, data_model,
                            context=None):

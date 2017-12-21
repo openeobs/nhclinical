@@ -17,6 +17,7 @@ NH Clinical
    devices
    groups
    location
+   models
    operations
    partner
    patient

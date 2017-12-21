@@ -77,11 +77,14 @@ def _convert_string_to_datetime(date_time):
 
 def in_min_max_range(min_value, max_value, value):
     """
-    Validate that the supplied value is within the supplied range
+    Validates that a value is within a range given by the passed minimum and
+    maximum values. The value is allowed to be equal to the minimum and
+    maximum but not less than or greater than.
 
-    :param min_value: Minimal value the value cannot be lesser than
-    :param max_value: Maximum value the value cannot be greater than
-    :param value: Value to ensure is the minimum and maximum values
+    :param min_value: Minimal value the value cannot be lesser than.
+    :param max_value: Maximum value the value cannot be greater than.
+    :param value: Value to ensure is the minimum and maximum values.
+    :raises: ValidationError
     """
     if value < min_value:
         raise ValidationError(
@@ -95,12 +98,39 @@ def in_min_max_range(min_value, max_value, value):
         )
 
 
+def fields_in_min_max_range(record, field_names_to_validate):
+    """
+    This method has a very specific use case. A model may be used for
+    something like configuration and may have fields like `temperature`,
+    `temperature_minimum`, and `temperature_maximum`. The method will take a
+    record with all its fields populated and validate that each 'normal' field
+    is within the range specified by its corresponding minimum and maximum
+    fields.
+
+    Any model that has fields that follow the naming convention demonstrated
+    above can use this method for validation.
+    :param record:
+    :param field_names_to_validate:
+    :type field_names_to_validate: dict
+    :return:
+    """
+    for field_name in field_names_to_validate:
+        minimum_field_name = record._fields[field_name].min
+        maximum_field_name = record._fields[field_name].max
+
+        minimum = getattr(record, minimum_field_name)
+        maximum = getattr(record, maximum_field_name)
+
+        field_value = getattr(record, field_name)
+        in_min_max_range(minimum, maximum, field_value)
+
+
 def validate_non_empty_string(string):
     """
-    Validate that string is not empty
+    Validate that string is not empty.
 
-    :param string: string to validate
-    :return: if string is empty or not
+    :param string: String to validate.
+    :return: If string is empty or not.
     """
     if string is None or string is False:
         return False
