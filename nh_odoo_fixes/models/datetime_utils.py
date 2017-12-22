@@ -9,7 +9,9 @@ from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
 
 
 class DatetimeUtils(models.AbstractModel):
-
+    """
+    Various helpful methods for handling datetime.
+    """
     _name = 'datetime_utils'
 
     time_format_front_end = '%H:%M'
