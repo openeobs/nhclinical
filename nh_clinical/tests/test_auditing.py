@@ -1,11 +1,12 @@
-# Part of NHClinical. See LICENSE file for full copyright and licensing details
 # -*- coding: utf-8 -*-
-from openerp.tests import common
-from openerp.osv.orm import except_orm
+# Part of NHClinical. See LICENSE file for full copyright and licensing details
 from datetime import datetime as dt
-from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as dtf
 
 from faker import Faker
+from openerp.osv.orm import except_orm
+from openerp.tests import common
+from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as dtf
+
 fake = Faker()
 
 

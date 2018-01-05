@@ -1,27 +1,12 @@
-``Activity``
-=========================
+Activity Extension
+==================
 .. automodule:: activity_extension
 
-``Cancel Reason``
---------------------
-.. autoclass:: nh_cancel_reason
-    :members:
-    :private-members:
+.. py:function:: activity_extension.list2sqlstr
 
-``Activity``
----------------
-.. autoclass:: nh_activity
-    :members:
-    :private-members:
+.. toctree::
+   :maxdepth: 2
+   :caption: Classes
+   :glob:
 
-``Activity Data``
---------------------
-.. autoclass:: nh_activity_data
-    :members:
-    :private-members:
-
-``Activity Access``
--------------------
-.. autoclass:: nh_clinical_activity_access
-    :members:
-    :private-members:
+   activity_extension/*

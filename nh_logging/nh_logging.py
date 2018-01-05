@@ -8,6 +8,12 @@ from openerp.netsvc import DBFormatter
 
 
 def new_format(self, record):
+    """
+    Override the log output to include the User ID
+
+    :param record: Log record
+    :return: Formatted log record
+    """
     current_pid = os.getpid()
     current_thread = threading.currentThread()
     current_db = getattr(current_thread, 'dbname', '?')

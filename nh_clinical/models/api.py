@@ -9,7 +9,6 @@ import logging
 from openerp.osv import orm
 from openerp.osv.osv import except_osv, except_orm
 
-
 _logger = logging.getLogger(__name__)
 
 
@@ -130,7 +129,6 @@ class nh_clinical_api(orm.AbstractModel):
         :returns: ``True``
         :rtype: bool
         """
-
         activity_pool = self.pool['nh.activity']
         admit_pool = self.pool['nh.clinical.adt.patient.admit']
         if hospital_number:
@@ -250,7 +248,6 @@ class nh_clinical_api(orm.AbstractModel):
         :returns: ``True``
         :rtype: bool
         """
-
         self.verify_patient_exists(cr, uid, hospital_number, context=context)
         activity_pool = self.pool['nh.activity']
         merge_pool = self.pool['nh.clinical.adt.patient.merge']

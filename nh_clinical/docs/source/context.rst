@@ -1,8 +1,10 @@
-``Context``
-===========
+Context
+=======
 .. automodule:: context
 
-``Context``
------------
-.. autoclass:: nh_clinical_context
-    :members:
+.. toctree::
+   :maxdepth: 2
+   :caption: Classes
+   :glob:
+
+   context/*

@@ -5,36 +5,12 @@
 
 NH Activity
 ===========
-
-If it fits, i sits stretch, or spot something, big eyes, big eyes, crouch,
-shake butt, prepare to pounce leave fur on owners clothes refuse to drink water
-except out of someone's glass meow all night having their mate disturbing
-sleeping humans so refuse to drink water except out of someone's glass.
-
-User's Guide
-------------
+.. automodule:: activity
+    :members: data_model_event
 
 .. toctree::
    :maxdepth: 2
+   :caption: Classes
+   :glob:
 
-   intro
-   getting-started
-
-Module Reference
-----------------
-
-.. toctree::
-   :maxdepth: 2
-
-   activity
-
-Additional Notes
-----------------
-
-.. toctree::
-   :maxdepth: 2
-
-   contribute
-   changelog
-
-
+   activity/*
