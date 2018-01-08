@@ -121,10 +121,10 @@ class NhClinicalValidationUtils(AbstractModel):
         """
         This method has a very specific use case. A model may be used for
         something like configuration and may have fields like `temperature`,
-        `temperature_minimum`, and `temperature_maximum`. The method will take a
-        record with all its fields populated and validate that each 'normal' field
-        is within the range specified by its corresponding minimum and maximum
-        fields.
+        `temperature_minimum`, and `temperature_maximum`. The method will take
+        a record with all its fields populated and validate that each 'normal'
+        field is within the range specified by its corresponding minimum and
+        maximum fields.
 
         Any model that has fields that follow the naming convention demonstrated
         above can use this method for validation.

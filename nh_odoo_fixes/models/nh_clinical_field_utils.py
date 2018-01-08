@@ -33,7 +33,8 @@ class FieldUtils(AbstractModel):
         :rtype: list
         """
         field_names = FieldUtils.get_field_names(record)
-        field_names_to_validate = [field_name for field_name in field_names
-                                   if 'minimum' not in field_name
-                                   and 'maximum' not in field_name]
+        field_names_to_validate = [
+            field_name for field_name in field_names
+            if 'minimum' not in field_name and 'maximum' not in field_name
+        ]
         return field_names_to_validate
