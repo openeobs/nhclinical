@@ -126,8 +126,8 @@ class NhClinicalValidationUtils(AbstractModel):
         field is within the range specified by its corresponding minimum and
         maximum fields.
 
-        Any model that has fields that follow the naming convention demonstrated
-        above can use this method for validation.
+        Any model that has fields that follow the naming convention
+        demonstrated above can use this method for validation.
 
         :param record:
         :param field_names_to_validate:
