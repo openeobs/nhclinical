@@ -109,6 +109,7 @@ def fields_in_min_max_range(record, field_names_to_validate):
 
     Any model that has fields that follow the naming convention demonstrated
     above can use this method for validation.
+
     :param record:
     :param field_names_to_validate:
     :type field_names_to_validate: dict
