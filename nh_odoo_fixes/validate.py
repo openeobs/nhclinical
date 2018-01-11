@@ -99,34 +99,6 @@ def in_min_max_range(min_value, max_value, value):
         )
 
 
-def fields_in_min_max_range(record, field_names_to_validate):
-    """
-    This method has a very specific use case. A model may be used for
-    something like configuration and may have fields like `temperature`,
-    `temperature_minimum`, and `temperature_maximum`. The method will take a
-    record with all its fields populated and validate that each 'normal' field
-    is within the range specified by its corresponding minimum and maximum
-    fields.
-
-    Any model that has fields that follow the naming convention demonstrated
-    above can use this method for validation.
-
-    :param record:
-    :param field_names_to_validate:
-    :type field_names_to_validate: dict
-    :return:
-    """
-    for field_name in field_names_to_validate:
-        minimum_field_name = record._fields[field_name].min
-        maximum_field_name = record._fields[field_name].max
-
-        minimum = getattr(record, minimum_field_name)
-        maximum = getattr(record, maximum_field_name)
-
-        field_value = getattr(record, field_name)
-        in_min_max_range(minimum, maximum, field_value)
-
-
 def validate_non_empty_string(string):
     """
     Validate that string is not empty.
