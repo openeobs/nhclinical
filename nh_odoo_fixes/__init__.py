@@ -7,6 +7,6 @@ from . import fix_server_shutdown_issue
 from . import orm_fixes
 from . import remove_exception_name_from_error_dialogs
 from . import validate
-from .models import datetime_utils
+from .models import *
 
 from .tests import common
