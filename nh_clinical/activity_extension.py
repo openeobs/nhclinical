@@ -28,18 +28,6 @@ def list2sqlstr(lst):
     return ",".join(res)
 
 
-class nh_cancel_reason(orm.Model):
-    """
-    Cancellation reason for an activity.
-    """
-
-    _name = 'nh.cancel.reason'
-    _columns = {
-        'name': fields.char('Name', size=300),
-        'system': fields.boolean('System/User Reason')
-    }
-
-
 class nh_activity(orm.Model):
     """
     Extends class :class:`nh_activity<activity.nh_activity>`.
@@ -538,14 +526,165 @@ class nh_activity_data(orm.AbstractModel):
         user_ids += follower_ids
         return list(set(user_ids))
 
-    # TODO EOBS-703: Trigger policy method is too large
-    def trigger_policy(self, cr, uid, activity_id, location_id=None,
-                       case=False, context=None):
+    #TODO EOBS-2171 This can be removed?
+    @api.model
+    def check_policy_activity_context(self, activity, location_id=None):
+        """
+        Check that the policy activity can be triggered based on the location's
+        context (Normally eobs)
+
+        :param activity: Policy activity definition
+        :type activity: dict
+        :param location_id: ID of location to check policy for
+        :type location_id: int
+        :return: True if can create activity for location
+        :rtype: bool
+        """
+        location_model = self.env['nh.clinical.location']
+        triggered_context = activity.get('context')
+        if triggered_context and location_id:
+            location = location_model.browse(location_id)
+            # Create a list of bools representing if the activity and location
+            # contexts match. If none of them match then return False
+            if not any(
+                    [c.name == triggered_context for c in
+                     location.context_ids]):
+                return False
+        return True
+
+    @api.model
+    def check_trigger_domains(self, domains=None):
+        """
+        Check if any records are returned for the supplied domains. If so then
+        return False
+
+        :param domains: list of dicts with object (model to query) and domain
+            (search query to carry out on model)
+        :return: True if no records found, False is records found
+        :rtype: bool
+        """
+        if not domains:
+            return False
+        for domain in domains:
+            domain_pool = self.env.get(domain['object'])
+            search_domain = domain['domain'] + [
+                ['parent_id', '=', self.spell_activity_id.id]
+            ]
+            if domain_pool.search(search_domain):
+                return True
+        return False
+
+    @api.model
+    def trigger_policy_cancel_others(self, trigger_model):
+        """
+        Cancel all open activities when triggering the policy
+        """
+        activity_model = self.env['nh.activity']
+        model_data = self.env['ir.model.data']
+        # Create a dict of the model names and cancel reasons so can do a
+        # lookup while also leaving room to extend with other models
+        reasons = {
+            'nh.clinical.patient.placement': model_data.get_object(
+                'nh_clinical', 'cancel_reason_placement').id
+        }
+        activity_model.cancel_open_activities(
+            trigger_model,
+            cancel_reason_id=reasons.get(self._name)
+        )
+
+    def _get_policy_create_data(self, case=None):
+        """
+        Get the create_data dictionary for the policy
+
+        :param case: Case that controls the logic used when getting policy
+        :type case: int
+        :return: Dictionary of values to use when creating a new activity
+        :rtype: dict
+        """
+        return {}
+
+    @api.model
+    def trigger_policy_create_activity(self, model, case):
+        """
+        Create a new activity using the data defined in the policy
+
+        :param model: Model to create activity on
+        :type model: Odoo model
+        :param new_activity_data: Dictionary of values to use when creating the
+            new activity
+        :param case: Case to use when getting the data to create the new
+            activity with
+        """
+        new_activity_data = {
+            'patient_id': self.data_ref.patient_id.id
+        }
+        # Get the create data from the model instance (a subclass of this one)
+        # so that models can define the data themselves
+        new_activity_data.update(self._get_policy_create_data(case))
+        return model.sudo(1).create_activity(
+            {
+                'patient_id': self.data_ref.patient_id.id,
+                'parent_id': self.spell_activity_id,
+                'creator_id': self.id
+            },
+            new_activity_data
+        )
+
+    @api.model
+    def get_schedule_date(self, activity, recurring=False):
+        """
+        Get the time to schedule the activity at
+
+        :param activity: Activity to get the schedule date for
+        :param recurring: If the schedule date needs to take into consideration
+            recurrance for the activities
+        :return: Date to schedule the activity for
+        :rtype: datetime
+        """
+        if recurring:
+            date_schedule = activity.get_recurring_activity_date_scheduled()
+        else:
+            date_schedule = dt.now() + td(minutes=60)
+        return date_schedule
+
+    @api.model
+    def trigger_policy_activity(self, activity, case=None):
+        """
+        Trigger the activity as defined in the policy dictionary
+
+        :param activity: Activity dictionary contains:
+            - model
+            - type
+            - cancel_others (optional)
+        :type activity: dict
+        :param case: Case to use when triggering policy
+        :type case: int
+        """
+        triggered_model = self.env[activity['model']]
+        if activity.get('cancel_others'):
+            self.trigger_policy_cancel_others(activity['model'])
+        triggered_activity = \
+            self.trigger_policy_create_activity(triggered_model, case)
+        if activity['type'] == 'start':
+            activity.sudo(1).start()
+        elif activity['type'] == 'complete':
+            if activity.get('data'):
+                activity.sudo(1).submit(activity['data'])
+            activity.sudo(1).complete()
+        else:
+            recurring = activity['type'] == 'recurring'
+            schedule_date = self.get_schedule_date(
+                triggered_activity, recurring=recurring)
+            activity.sudo(1).schedule(schedule_date)
+
+    @api.model
+    def trigger_policy(self, activity_id, location_id=None, case=False):
         """
         Triggers the list of activities in the ``_POLICY['activities']``
         list.
 
-        :param activity_id: id of activity triggering policy
+        :param activity_id: ID of the activity associated with the
+            record
         :type activity_id: int
         :param location_id: location id [optional].
             Required for checking context
@@ -553,90 +692,31 @@ class nh_activity_data(orm.AbstractModel):
         :param case: default ``False``. Otherwise integer related to
             risk of patient
         :type case: bool or int
-        :returns: ``True``
+        :returns: ``False`` if no spell activity otherwise ``True``
         :rtype: bool
         """
-        activity_pool = self.pool['nh.activity']
-        spell_pool = self.pool['nh.clinical.spell']
-        location_pool = self.pool['nh.clinical.location']
-        if self._POLICY.get('activities', []):
-            activity = activity_pool.browse(cr, SUPERUSER_ID, activity_id,
-                                            context)
-            spell_id = spell_pool.get_by_patient_id(
-                cr, SUPERUSER_ID, activity.data_ref.patient_id.id,
-                context=context)
-            if spell_id:
-                spell_activity_id = spell_pool.browse(
-                    cr, uid, spell_id, context=context).activity_id.id
-            else:
-                return False
-
-        else:
-            return True
+        # If no spell associated with activity then we want to just return
+        # TODO: Refactor this so instead of passing over an activity ID it
+        # can just load a record.
+        activity_model = self.env['nh.activity']
+        activity = activity_model.browse(activity_id)
+        if not activity.parent_id.id:
+            return False
+        # Iterate through the activities in the policy dictionary
         for trigger_activity in self._POLICY.get('activities', []):
+            # We only want to trigger the activities for the correct case if
+            # defined (in EWS this would be the clinical risk)
             if case and trigger_activity.get('case') != case:
                 continue
-            pool = self.pool[trigger_activity['model']]
-            if trigger_activity.get('context') and location_id:
-                location = location_pool.browse(cr, uid, location_id,
-                                                context=context)
-                if not any(
-                        [c.name == trigger_activity.get('context')
-                         for c in location.context_ids]):
-                    continue
-            if trigger_activity.get('domains'):
-                break_trigger = False
-                for domain in trigger_activity.get('domains'):
-                    domain_pool = self.pool.get(domain['object'])
-                    search_domain = domain['domain'] + [
-                        ['parent_id', '=', spell_activity_id]
-                    ]
-                    if domain_pool.search(cr, uid, search_domain,
-                                          context=context):
-                        break_trigger = True
-                if break_trigger:
-                    continue
-            if trigger_activity.get('cancel_others'):
-                cancel_reason_id = None
-                if self._name == 'nh.clinical.patient.placement':
-                    model_data = self.pool['ir.model.data']
-                    cancel_reason_id = \
-                        model_data.get_object(
-                            cr, uid, 'nh_clinical', 'cancel_reason_placement'
-                        ).id
-                activity_pool.cancel_open_activities(
-                    cr, uid, spell_activity_id, pool._name,
-                    cancel_reason_id=cancel_reason_id, context=context
-                )
-            data = {
-                'patient_id': activity.data_ref.patient_id.id
-            }
-            if trigger_activity.get('create_data'):
-                for key in trigger_activity['create_data'].keys():
-                    data[key] = eval(trigger_activity['create_data'][key])
-            ta_activity_id = pool.create_activity(cr, SUPERUSER_ID, {
-                'patient_id': activity.patient_id.id,
-                'parent_id': spell_activity_id,
-                'creator_id': activity_id
-            }, data, context=context)
-            if trigger_activity['type'] == 'recurring':
-                date_schedule = self.get_recurring_activity_date_scheduled(
-                    cr, uid, ta_activity_id, context)
-            else:
-                date_schedule = dt.now()+td(minutes=60)
-            if trigger_activity['type'] == 'start':
-                activity_pool.start(
-                    cr, SUPERUSER_ID, ta_activity_id, context=context)
-            elif trigger_activity['type'] == 'complete':
-                if trigger_activity.get('data'):
-                    activity_pool.submit(
-                        cr, SUPERUSER_ID, ta_activity_id,
-                        trigger_activity['data'], context=context)
-                activity_pool.complete(cr, SUPERUSER_ID, ta_activity_id,
-                                       context=context)
-            else:
-                activity_pool.schedule(cr, SUPERUSER_ID, ta_activity_id,
-                                       date_schedule, context=context)
+            # If there is a domain object on the triggered activity we need
+            # to check there's no existing records
+            if self.check_trigger_domains(trigger_activity.get('domains')):
+                continue
+            # Check that the policy applies to the location and trigger if it
+            # does
+            if self.check_policy_activity_context(
+                    trigger_activity, location_id=location_id):
+                self.trigger_policy_activity(trigger_activity)
         return True
 
     @api.model

@@ -16,18 +16,13 @@ class test_activity_data_model0(orm.Model):
             'model': 'test.activity.data.model0',
             'type': 'schedule',
             'cancel_others': True,
-            'create_data': {
-                'field1': 'activity.data_ref.field1',
-                'frequency': 'activity.data_ref.frequency'
-            },
+            'create_data': True,
             'case': 1
         }, {
             'model': 'test.activity.data.model1',
             'type': 'start',
             'cancel_others': True,
-            'create_data': {
-                'field1': 'activity.data_ref.field1'
-            },
+            'create_data': True,
             'domains': [
                 {
                     'object': 'nh.activity',
@@ -43,10 +38,7 @@ class test_activity_data_model0(orm.Model):
             'model': 'test.activity.data.model3',
             'type': 'recurring',
             'cancel_others': False,
-            'create_data': {
-                'field1': 'activity.data_ref.field1',
-                'frequency': 'activity.data_ref.frequency'
-            },
+            'create_data': True,
             'case': 3,
             'context': 'test2'
         }, {
@@ -65,6 +57,25 @@ class test_activity_data_model0(orm.Model):
         'frequency': fields.integer('Frequency'),
         'patient_id': fields.many2one('nh.clinical.patient', "Patient")
     }
+
+    def _get_policy_create_data(self, case=None):
+        """
+        Override _get_policy_create_data to return a dict
+
+        :return: Dictionary
+        :rtype: dict
+        """
+        if case == 1 or case == 3:
+            return {
+                'field1': self.field1,
+                'frequency': self.frequency
+            }
+        elif case == 2:
+            return {
+                'field1': self.field1
+            }
+        else:
+            return {}
 
 
 class test_activity_data_model1(orm.Model):

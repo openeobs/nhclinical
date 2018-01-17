@@ -4,7 +4,7 @@
 Defines context.
 """
 import logging
-
+from openerp import api
 from openerp.osv import orm, fields, osv
 
 _logger = logging.getLogger(__name__)
@@ -26,6 +26,7 @@ class nh_clinical_context(orm.Model):
         'models': fields.text('Applicable Models')
     }
 
+    @api.multi
     def check_model(self, cr, uid, ids, model, context=None):
         """
         Checks if model is applicable for the context.
