@@ -26,21 +26,20 @@ class nh_clinical_context(orm.Model):
         'models': fields.text('Applicable Models')
     }
 
-    @api.multi
-    def check_model(self, cr, uid, ids, model, context=None):
+    @api.model
+    def check_model(self, context_ids, model):
         """
         Checks if model is applicable for the context.
 
-        :param ids: context ids
-        :type ids: list
+        :param context_ids: context ids
+        :type context_ids: list
         :param model: model to check
         :returns: ``True`` if model is applicable
         :rtype: bool
         :raises: :class:`except_orm<openerp.osv.osv.except_orm>` if not
             applicable
         """
-
-        for c in self.browse(cr, uid, ids, context=context):
+        for c in self.browse(context_ids):
             if model not in eval(c.models):
                 raise osv.except_osv(
                     'Error!',

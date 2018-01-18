@@ -124,31 +124,35 @@ class nh_activity(orm.Model):
             'cancel_reason_id': cancel_reason_id
         })
 
-    def cancel_open_activities(self, cr, uid, parent_id, model,
-                               cancel_reason_id=None, context=None):
+    @api.model
+    def cancel_open_activities(
+            self, spell_act_id, model, cancel_reason_id=None):
         """
-        Cancels all open activities of parent activity.
+        Cancels all open activities associated with the spell_activity_id.
 
-        :param parent_id: id of the parent activity
-        :type parent_id: int
+        :param spell_act_id: id of the spell activity
+        :type spell_act_id: int
         :param model: model (type) of activity
         :type model: str
+        :param cancel_reason_id: ID of the reason used when cancell activities
+        :type cancel_reason_id: int
         :returns: ``True`` if all open activities are cancelled or if
             there are no open activities. Otherwise, ``False``
         :rtype: bool
         """
 
-        domain = [('parent_id', '=', parent_id),
+        domain = [('spell_activity_id', '=', spell_act_id),
                   ('data_model', '=', model),
                   ('state', 'not in', ['completed', 'cancelled'])]
-        open_activity_ids = self.search(cr, uid, domain, context=context)
+        open_activity_ids = self.search(domain)
         if cancel_reason_id:
-            return all([self.cancel_with_reason(
-                cr, uid, a, cancel_reason_id
-            ) for a in open_activity_ids])
+            return all(
+                [
+                    self.cancel_with_reason(act.id, cancel_reason_id)
+                    for act in open_activity_ids
+                ])
         return all(
-            [self.cancel(cr, uid, a, context=context)
-             for a in open_activity_ids]
+            [act.cancel() for act in open_activity_ids]
         )
 
     def update_users(self, cr, uid, user_ids):
@@ -553,11 +557,12 @@ class nh_activity_data(orm.AbstractModel):
         return True
 
     @api.model
-    def check_trigger_domains(self, domains=None):
+    def check_trigger_domains(self, activity, domains=None):
         """
         Check if any records are returned for the supplied domains. If so then
         return False
 
+        :param activity: nh.clinical.activity instance
         :param domains: list of dicts with object (model to query) and domain
             (search query to carry out on model)
         :return: True if no records found, False is records found
@@ -566,18 +571,21 @@ class nh_activity_data(orm.AbstractModel):
         if not domains:
             return False
         for domain in domains:
-            domain_pool = self.env.get(domain['object'])
+            domain_pool = self.env[domain['object']]
             search_domain = domain['domain'] + [
-                ['parent_id', '=', self.spell_activity_id.id]
+                ['parent_id', '=', activity.spell_activity_id.id]
             ]
             if domain_pool.search(search_domain):
                 return True
         return False
 
     @api.model
-    def trigger_policy_cancel_others(self, trigger_model):
+    def trigger_policy_cancel_others(self, spell_activity_id, trigger_model):
         """
         Cancel all open activities when triggering the policy
+
+        :param spell_activity_id: ID of the spell's activity record. This is
+            used by the cancel_
         """
         activity_model = self.env['nh.activity']
         model_data = self.env['ir.model.data']
@@ -588,6 +596,7 @@ class nh_activity_data(orm.AbstractModel):
                 'nh_clinical', 'cancel_reason_placement').id
         }
         activity_model.cancel_open_activities(
+            spell_activity_id,
             trigger_model,
             cancel_reason_id=reasons.get(self._name)
         )
@@ -604,28 +613,30 @@ class nh_activity_data(orm.AbstractModel):
         return {}
 
     @api.model
-    def trigger_policy_create_activity(self, model, case):
+    def trigger_policy_create_activity(
+            self, source_activity, model, case=None):
         """
-        Create a new activity using the data defined in the policy
+        Create a new activity using the data defined in the policy with the
+        source activity as it's creator
 
+        :param source_activity: Activity to use to get activity info from
+        :type source_activity: nh.activity record
         :param model: Model to create activity on
         :type model: Odoo model
-        :param new_activity_data: Dictionary of values to use when creating the
-            new activity
         :param case: Case to use when getting the data to create the new
             activity with
         """
         new_activity_data = {
-            'patient_id': self.data_ref.patient_id.id
+            'patient_id': source_activity.patient_id.id
         }
         # Get the create data from the model instance (a subclass of this one)
         # so that models can define the data themselves
         new_activity_data.update(self._get_policy_create_data(case))
         return model.sudo(1).create_activity(
             {
-                'patient_id': self.data_ref.patient_id.id,
-                'parent_id': self.spell_activity_id,
-                'creator_id': self.id
+                'patient_id': source_activity.patient_id.id,
+                'parent_id': source_activity.spell_activity_id.id,
+                'creator_id': source_activity.id
             },
             new_activity_data
         )
@@ -635,46 +646,70 @@ class nh_activity_data(orm.AbstractModel):
         """
         Get the time to schedule the activity at
 
-        :param activity: Activity to get the schedule date for
+        :param activity: Activity to get schedule date for
         :param recurring: If the schedule date needs to take into consideration
             recurrance for the activities
         :return: Date to schedule the activity for
         :rtype: datetime
         """
         if recurring:
-            date_schedule = activity.get_recurring_activity_date_scheduled()
+            date_schedule = \
+                self.get_recurring_activity_date_scheduled(activity)
         else:
             date_schedule = dt.now() + td(minutes=60)
         return date_schedule
 
     @api.model
-    def trigger_policy_activity(self, activity, case=None):
+    def trigger_policy_activity(
+            self, source_activity, activity_dict, case=None):
         """
         Trigger the activity as defined in the policy dictionary
 
-        :param activity: Activity dictionary contains:
+        :param source_activity: Record of the activity that's going to be used
+            as the base for the new activities
+        :type source_activity: nh.activity record
+        :param activity_dict: Activity dictionary contains:
             - model
             - type
             - cancel_others (optional)
-        :type activity: dict
+        :type activity_dict: dict
         :param case: Case to use when triggering policy
         :type case: int
         """
-        triggered_model = self.env[activity['model']]
-        if activity.get('cancel_others'):
-            self.trigger_policy_cancel_others(activity['model'])
+        triggered_model = self.env[activity_dict['model']]
+        if activity_dict.get('cancel_others'):
+            self.trigger_policy_cancel_others(
+                source_activity.spell_activity_id.id,
+                activity_dict['model']
+            )
         triggered_activity = \
-            self.trigger_policy_create_activity(triggered_model, case)
-        if activity['type'] == 'start':
+            self.trigger_policy_create_activity(
+                source_activity, triggered_model, case)
+        self.trigger_policy_change_state(triggered_activity, activity_dict)
+
+    def trigger_policy_change_state(self, activity_id, policy_dict):
+        """
+        Change the state of the supplied activity in accordance with the
+        supplied policy dict
+
+        :param activity_id: ID of the activity to change state of
+        :param policy_dict: Dictionary representing the policy to enact on the
+            activity
+        """
+        activity_model = self.env['nh.activity']
+        activity = activity_model.browse(activity_id)
+        state = policy_dict.get('type')
+        if state == 'start':
             activity.sudo(1).start()
-        elif activity['type'] == 'complete':
-            if activity.get('data'):
-                activity.sudo(1).submit(activity['data'])
+        elif state == 'complete':
+            data = policy_dict.get('data')
+            if data:
+                activity.sudo(1).submit(data)
             activity.sudo(1).complete()
         else:
-            recurring = activity['type'] == 'recurring'
+            recurring = state == 'recurring'
             schedule_date = self.get_schedule_date(
-                triggered_activity, recurring=recurring)
+                activity, recurring=recurring)
             activity.sudo(1).schedule(schedule_date)
 
     @api.model
@@ -700,7 +735,7 @@ class nh_activity_data(orm.AbstractModel):
         # can just load a record.
         activity_model = self.env['nh.activity']
         activity = activity_model.browse(activity_id)
-        if not activity.parent_id.id:
+        if not activity.spell_activity_id.id:
             return False
         # Iterate through the activities in the policy dictionary
         for trigger_activity in self._POLICY.get('activities', []):
@@ -710,18 +745,18 @@ class nh_activity_data(orm.AbstractModel):
                 continue
             # If there is a domain object on the triggered activity we need
             # to check there's no existing records
-            if self.check_trigger_domains(trigger_activity.get('domains')):
+            if self.check_trigger_domains(
+                    activity, trigger_activity.get('domains')):
                 continue
             # Check that the policy applies to the location and trigger if it
             # does
             if self.check_policy_activity_context(
                     trigger_activity, location_id=location_id):
-                self.trigger_policy_activity(trigger_activity)
+                self.trigger_policy_activity(activity, trigger_activity, case)
         return True
 
     @api.model
-    def get_recurring_activity_date_scheduled(
-            self, triggered_activity_id):
+    def get_recurring_activity_date_scheduled(self, activity):
         """
         Recurring activities are ones that automatically create a new one when
         they are completed. It is common for EWS to be set as a recurring
@@ -738,9 +773,7 @@ class nh_activity_data(orm.AbstractModel):
             due.
         :rtype: str
         """
-        activity_model = self.env['nh.activity']
-        frequency = activity_model.sudo()\
-            .browse(triggered_activity_id).data_ref.frequency
+        frequency = activity.data_ref.frequency
         date_scheduled = (dt.now() + td(minutes=frequency)).strftime(DTF)
         return date_scheduled
 

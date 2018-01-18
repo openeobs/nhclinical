@@ -29,6 +29,18 @@ class TestCheckPolicyActivityContext(TransactionCase):
             location_id=self.location.id
         )
 
+    def call_no_context_test(self):
+        """
+        Call the check_policy_activity_context method with the context and
+        the location_id and return the result
+
+        :return: Result of calling check_policy_activity_context
+        """
+        return self.activity_data_model.check_policy_activity_context(
+            {},
+            location_id=self.location.id
+        )
+
     def test_location_context(self):
         """
         Test that if the location has an 'eobs' context and the activity to
@@ -53,7 +65,7 @@ class TestCheckPolicyActivityContext(TransactionCase):
         new_context = context_model.create(
             {
                 'name': 'test',
-                'models': 'nh.clinical.location'
+                'models': ['nh.clinical.location']
             }
         )
         self.location.context_ids = [[6, 0, new_context.ids]]
@@ -62,13 +74,16 @@ class TestCheckPolicyActivityContext(TransactionCase):
     def test_activity_no_context(self):
         """
         Test that if the location has an 'eobs' context and the activity to
-        trigger has no context that it returns False
+        trigger has no context that it returns True as it doesn't check the
+        contexts match
         """
-        self.assertTrue(False)
+        self.assertTrue(self.call_no_context_test())
 
     def test_no_contexts(self):
         """
         Test that if neither the location or the activity to trigger have
-        contexts that it returns False
+        contexts that it returns True as it doesn't check the
+        contexts match
         """
-        self.assertTrue(False)
+        self.location.context_ids = None
+        self.assertTrue(self.call_no_context_test())
