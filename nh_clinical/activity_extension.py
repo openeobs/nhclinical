@@ -612,9 +612,8 @@ class nh_activity_data(orm.AbstractModel):
         """
         return {}
 
-    @api.model
-    def trigger_policy_create_activity(
-            self, source_activity, model, case=None):
+    @staticmethod
+    def trigger_policy_create_activity(source_activity, model, case=None):
         """
         Create a new activity using the data defined in the policy with the
         source activity as it's creator
@@ -631,7 +630,8 @@ class nh_activity_data(orm.AbstractModel):
         }
         # Get the create data from the model instance (a subclass of this one)
         # so that models can define the data themselves
-        new_activity_data.update(self._get_policy_create_data(case))
+        new_activity_data.update(
+            source_activity.data_ref._get_policy_create_data(case))
         return model.sudo(1).create_activity(
             {
                 'patient_id': source_activity.patient_id.id,
@@ -735,7 +735,14 @@ class nh_activity_data(orm.AbstractModel):
         # can just load a record.
         activity_model = self.env['nh.activity']
         activity = activity_model.browse(activity_id)
-        if not activity.spell_activity_id.id:
+        spell_activity = activity_model.search(
+            [
+                ['state', 'not in', ['completed', 'cancelled']],
+                ['patient_id', '=', activity.patient_id.id],
+                ['data_model', '=', 'nh.clinical.spell']
+            ]
+        )
+        if not spell_activity.id:
             return False
         # Iterate through the activities in the policy dictionary
         for trigger_activity in self._POLICY.get('activities', []):
