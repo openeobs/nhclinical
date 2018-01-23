@@ -530,7 +530,7 @@ class nh_activity_data(orm.AbstractModel):
         user_ids += follower_ids
         return list(set(user_ids))
 
-    #TODO EOBS-2171 This can be removed?
+    # TODO EOBS-2171 This can be removed?
     @api.model
     def check_policy_activity_context(self, activity, location_id=None):
         """
@@ -632,7 +632,7 @@ class nh_activity_data(orm.AbstractModel):
         # so that models can define the data themselves
         new_activity_data.update(
             source_activity.data_ref._get_policy_create_data(case))
-        return model.sudo(1).create_activity(
+        return model.sudo(SUPERUSER_ID).create_activity(
             {
                 'patient_id': source_activity.patient_id.id,
                 'parent_id': source_activity.parent_id.id,
@@ -701,17 +701,17 @@ class nh_activity_data(orm.AbstractModel):
         activity = activity_model.browse(activity_id)
         state = policy_dict.get('type')
         if state == 'start':
-            activity.sudo(1).start()
+            activity.sudo(SUPERUSER_ID).start()
         elif state == 'complete':
             data = policy_dict.get('data')
             if data:
-                activity.sudo(1).submit(data)
-            activity.sudo(1).complete()
+                activity.sudo(SUPERUSER_ID).submit(data)
+            activity.sudo(SUPERUSER_ID).complete()
         else:
             recurring = state == 'recurring'
             schedule_date = self.get_schedule_date(
                 activity, recurring=recurring)
-            activity.sudo(1).schedule(schedule_date)
+            activity.sudo(SUPERUSER_ID).schedule(schedule_date)
 
     @api.model
     def trigger_policy(self, activity_id, location_id=None, case=False):

@@ -10,7 +10,7 @@ class TestTriggerPolicyCancelOthers(TransactionCase):
         """ Set up the tests """
         super(TestTriggerPolicyCancelOthers, self).setUp()
         self.test_utils = self.env['nh.clinical.test_utils']
-        self.activity_model= self.env['nh.activity']
+        self.activity_model = self.env['nh.activity']
         self.placement_model = self.env['nh.clinical.patient.placement']
         self.admission_model = self.env['nh.clinical.patient.admission']
         self.test_utils.create_locations()
