@@ -753,7 +753,7 @@ class nh_activity_data(orm.AbstractModel):
                 ['data_model', '=', 'nh.clinical.spell']
             ]
         )
-        if not spell_activity.id:
+        if not spell_activity:
             return False
         # Iterate through the activities in the policy dictionary
         for trigger_activity in self._POLICY.get('activities', []):
