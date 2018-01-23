@@ -762,8 +762,8 @@ class nh_activity_data(orm.AbstractModel):
                 self.trigger_policy_activity(activity, trigger_activity, case)
         return True
 
-    @api.model
-    def get_recurring_activity_date_scheduled(self, activity):
+    @staticmethod
+    def get_recurring_activity_date_scheduled(activity):
         """
         Recurring activities are ones that automatically create a new one when
         they are completed. It is common for EWS to be set as a recurring
@@ -774,8 +774,7 @@ class nh_activity_data(orm.AbstractModel):
         which the newly created activity should be due by adding a 'frequency'
         to the current datetime.
 
-        :param triggered_activity_id:
-        :type triggered_activity_id: int
+        :param activity: Activity to get recurring date scheduled for
         :return: The datetime the newly triggered recurring activity should be
             due.
         :rtype: str

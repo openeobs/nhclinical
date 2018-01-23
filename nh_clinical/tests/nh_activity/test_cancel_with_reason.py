@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 from openerp.tests.common import TransactionCase
-from openerp.osv.osv import except_osv
-from openerp.exceptions import MissingError
 
 
 class TestCancelWithReason(TransactionCase):
