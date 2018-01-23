@@ -629,7 +629,7 @@ class nh_activity_data(orm.AbstractModel):
         :param source_activity: Activity to use to get activity info from
         :type source_activity: nh.activity record
         :param model: Model to create activity on
-        :type model: Odoo model
+        :type model: openerp.models.Model
         :param case: Case to use when getting the data to create the new
             activity with
         """
@@ -640,7 +640,7 @@ class nh_activity_data(orm.AbstractModel):
         # so that models can define the data themselves
         new_activity_data.update(
             source_activity.data_ref._get_policy_create_data(case))
-        return model.sudo(SUPERUSER_ID).create_activity(
+        return model.sudo().create_activity(
             {
                 'patient_id': source_activity.patient_id.id,
                 'parent_id': source_activity.parent_id.id,
@@ -709,17 +709,17 @@ class nh_activity_data(orm.AbstractModel):
         activity = activity_model.browse(activity_id)
         state = policy_dict.get('type')
         if state == 'start':
-            activity.sudo(SUPERUSER_ID).start()
+            activity.sudo().start()
         elif state == 'complete':
             data = policy_dict.get('data')
             if data:
-                activity.sudo(SUPERUSER_ID).submit(data)
-            activity.sudo(SUPERUSER_ID).complete()
+                activity.sudo().submit(data)
+            activity.sudo().complete()
         else:
             recurring = state == 'recurring'
             schedule_date = self.get_schedule_date(
                 activity, recurring=recurring)
-            activity.sudo(SUPERUSER_ID).schedule(schedule_date)
+            activity.sudo().schedule(schedule_date)
 
     @api.model
     def trigger_policy(self, activity_id, location_id=None, case=False):
