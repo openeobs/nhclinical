@@ -35,16 +35,22 @@ class TestTriggerPolicyCreateActivity(TransactionCase):
         Test that where a model implements the _get_policy_create_data() method
         that is adds this data to the activity
         """
-        policy_instance = self.test_policy_model.create({
-            'field1': 'Test',
-            'frequency': 1
-        })
-        new_act_id = policy_instance.trigger_policy_create_activity(
-            self.spell_activity,
+        policy_instance_id = self.test_policy_model.create_activity(
+            {
+                'parent_id': self.spell_activity.id
+            },
+            {
+                'field1': 'Test',
+                'frequency': 1
+            }
+        )
+        policy_instance = self.activity_model.browse(policy_instance_id)
+        new_act_id = policy_instance.data_ref.trigger_policy_create_activity(
+            policy_instance,
             self.test_policy_model,
             1
         )
         new_act = self.activity_model.browse(new_act_id)
         self.assertEqual(new_act.data_ref.field1, 'Test')
         self.assertEqual(new_act.data_ref.frequency, 1)
-        self.assertEqual(new_act.spell_activity_id.id, self.spell_activity.id)
+        self.assertEqual(new_act.parent_id.id, self.spell_activity.id)

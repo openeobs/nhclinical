@@ -635,7 +635,8 @@ class nh_activity_data(orm.AbstractModel):
         return model.sudo(1).create_activity(
             {
                 'patient_id': source_activity.patient_id.id,
-                'parent_id': source_activity.spell_activity_id.id,
+                'parent_id': source_activity.parent_id.id,
+                'spell_activity_id': source_activity.spell_activity_id.id,
                 'creator_id': source_activity.id
             },
             new_activity_data
