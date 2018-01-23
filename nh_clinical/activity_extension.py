@@ -556,25 +556,34 @@ class nh_activity_data(orm.AbstractModel):
         return True
 
     @api.model
-    def check_trigger_domains(self, activity, domains=None):
+    def check_trigger_domains(self, activity, search_definitions=None):
         """
         Check if any records are returned for the supplied domains. If so then
         return False
 
         :param activity: nh.clinical.activity instance
-        :param domains: list of dicts with object (model to query) and domain
-            (search query to carry out on model)
+        :param search_definitions: list of dicts with object (model to query)
+            and domain (search query to carry out on model)
+
+            for example:
+            [
+                {
+                    'object': 'nh.clinical.patient',
+                    'domain': [['patient_id', '=', XXX]]
+                }
+            ]
+        :type: list(dict)
         :return: True if no records found, False is records found
         :rtype: bool
         """
-        if not domains:
+        if not search_definitions:
             return False
-        for domain in domains:
-            domain_pool = self.env[domain['object']]
-            search_domain = domain['domain'] + [
+        for search_definition in search_definitions:
+            search_pool = self.env[search_definition['object']]
+            search_domain = search_definition['domain'] + [
                 ['parent_id', '=', activity.spell_activity_id.id]
             ]
-            if domain_pool.search(search_domain):
+            if search_pool.search(search_domain):
                 return True
         return False
 
