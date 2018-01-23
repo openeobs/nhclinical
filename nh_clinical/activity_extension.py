@@ -531,20 +531,20 @@ class nh_activity_data(orm.AbstractModel):
 
     # TODO EOBS-2171 This can be removed?
     @api.model
-    def check_policy_activity_context(self, activity, location_id=None):
+    def check_policy_activity_context(self, activity_dict, location_id=None):
         """
         Check that the policy activity can be triggered based on the location's
         context (Normally eobs)
 
-        :param activity: Policy activity definition
-        :type activity: dict
+        :param activity_dict: Policy activity definition
+        :type activity_dict: dict
         :param location_id: ID of location to check policy for
         :type location_id: int
         :return: True if can create activity for location
         :rtype: bool
         """
         location_model = self.env['nh.clinical.location']
-        triggered_context = activity.get('context')
+        triggered_context = activity_dict.get('context')
         if triggered_context and location_id:
             location = location_model.browse(location_id)
             # Create a list of bools representing if the activity and location
