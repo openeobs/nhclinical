@@ -696,12 +696,14 @@ class nh_activity_data(orm.AbstractModel):
                 source_activity, triggered_model, case)
         self.trigger_policy_change_state(triggered_activity, activity_dict)
 
+    # activity_id here is an nh.activity ID not nh.activity.data due to this
+    # method needing the change the state of the underlying activity record
     def trigger_policy_change_state(self, activity_id, policy_dict):
         """
         Change the state of the supplied activity in accordance with the
         supplied policy dict
 
-        :param activity_id: ID of the activity to change state of
+        :param activity_id: ID of the activity record
         :param policy_dict: Dictionary representing the policy to enact on the
             activity
         """
