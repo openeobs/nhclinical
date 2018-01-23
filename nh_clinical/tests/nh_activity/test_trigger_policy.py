@@ -29,7 +29,7 @@ class TestTriggerPolicy(TransactionCase):
             self.test_1_activity_id)
         self.test_2_activity_id = self.test2_model.create_activity(
             {
-                'parent_id': self.test_utils.spell.id
+                'parent_id': self.test_utils.spell.activity_id.id
             },
             {
                 'field1': 'TEST',
@@ -38,7 +38,7 @@ class TestTriggerPolicy(TransactionCase):
         )
         self.test_3_activity_id = self.test3_model.create_activity(
             {
-                'parent_id': self.test_utils.spell.id
+                'parent_id': self.test_utils.spell.activity_id.id
             },
             {
                 'field1': 'TEST',

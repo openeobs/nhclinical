@@ -15,7 +15,7 @@ class TestGetPolicyCreateData(TransactionCase):
         self.test_no_policy_model = self.env['test.activity.data.model3']
         self.test_utils.admit_and_place_patient()
         activity_info = {
-            'parent_id': self.test_utils.spell.id
+            'parent_id': self.test_utils.spell.activity_id.id
         }
         activity_data = {
             'field1': 'Test',

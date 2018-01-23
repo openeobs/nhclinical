@@ -19,31 +19,18 @@ class TestCancelWithReason(TransactionCase):
             self.browse_ref('nh_clinical.cancel_reason_placement')
 
     def test_activity_is_cancelled(self):
-        self.activity_model.cancel_with_reason(
-            self.activity.id, self.cancel_reason_placement.id
-        )
+        self.activity.cancel_with_reason(self.cancel_reason_placement)
 
         self.assertEqual(self.activity.state, 'cancelled')
 
     def test_activity_has_cancellation_reason(self):
-        self.activity_model.cancel_with_reason(
-            self.activity.id, self.cancel_reason_placement.id
-        )
+        self.activity.cancel_with_reason(self.cancel_reason_placement)
 
         self.assertEqual(
             self.activity.cancel_reason_id, self.cancel_reason_placement
         )
 
     def test_none_activity_id(self):
-        with self.assertRaises(except_osv):
+        with self.assertRaises(KeyError):
             self.activity_model.cancel_with_reason(
-                None, self.cancel_reason_placement.id
-            )
-
-    def test_non_existent_activity_id(self):
-        max_id = 2147483647
-
-        with self.assertRaises(MissingError):
-            self.activity_model.cancel_with_reason(
-                max_id, self.cancel_reason_placement.id
-            )
+                self.cancel_reason_placement)

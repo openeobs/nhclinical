@@ -110,23 +110,22 @@ class nh_activity(orm.Model):
                            context=context)
         return res
 
-    def cancel_with_reason(self, cr, uid, activity_id, cancel_reason_id):
+    @api.multi
+    def cancel_with_reason(self, cancel_reason):
         """
         Cancel the activity add a cancel reason to it.
 
-        :param activity_id:
-        :param cancel_reason_id:
+        :param cancel_reason: Reason for cancelling
         :return: ``True``
         :rtype: bool
         """
-        self.cancel(cr, uid, activity_id)
-        return self.write(cr, uid, activity_id, {
-            'cancel_reason_id': cancel_reason_id
-        })
+        self.cancel()
+        self.cancel_reason_id = cancel_reason
+        return True
 
     @api.model
     def cancel_open_activities(
-            self, spell_act_id, model, cancel_reason_id=None):
+            self, spell_act_id, model, cancel_reason=None):
         """
         Cancels all open activities associated with the spell_activity_id.
 
@@ -134,8 +133,8 @@ class nh_activity(orm.Model):
         :type spell_act_id: int
         :param model: model (type) of activity
         :type model: str
-        :param cancel_reason_id: ID of the reason used when cancell activities
-        :type cancel_reason_id: int
+        :param cancel_reason: The reason used when cancel activities
+        :type cancel_reason: nh.clinical.cancel_reason record
         :returns: ``True`` if all open activities are cancelled or if
             there are no open activities. Otherwise, ``False``
         :rtype: bool
@@ -145,10 +144,10 @@ class nh_activity(orm.Model):
                   ('data_model', '=', model),
                   ('state', 'not in', ['completed', 'cancelled'])]
         open_activity_ids = self.search(domain)
-        if cancel_reason_id:
+        if cancel_reason:
             return all(
                 [
-                    self.cancel_with_reason(act.id, cancel_reason_id)
+                    act.cancel_with_reason(cancel_reason)
                     for act in open_activity_ids
                 ])
         return all(
@@ -593,12 +592,12 @@ class nh_activity_data(orm.AbstractModel):
         # lookup while also leaving room to extend with other models
         reasons = {
             'nh.clinical.patient.placement': model_data.get_object(
-                'nh_clinical', 'cancel_reason_placement').id
+                'nh_clinical', 'cancel_reason_placement')
         }
         activity_model.cancel_open_activities(
             spell_activity_id,
             trigger_model,
-            cancel_reason_id=reasons.get(self._name)
+            cancel_reason=reasons.get(self._name)
         )
 
     def _get_policy_create_data(self, case=None):
