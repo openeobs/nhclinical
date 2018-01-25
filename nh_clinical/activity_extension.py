@@ -8,7 +8,7 @@ information on their representative classes.
 import logging
 from datetime import datetime as dt, timedelta as td
 
-from openerp import SUPERUSER_ID, api
+from openerp import api
 from openerp.osv import orm, fields
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
 
