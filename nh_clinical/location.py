@@ -3,7 +3,7 @@
 import logging
 
 from openerp.osv import orm, fields
-from openerp import SUPERUSER_ID
+from openerp import SUPERUSER_ID, api
 
 
 _logger = logging.getLogger(__name__)
@@ -489,25 +489,23 @@ class nh_clinical_location(orm.Model):
                 context=context)
         return activity_pool.complete(cr, uid, activity_id, context=context)
 
-    def check_context_ids(self, cr, uid, context_ids, context=None):
+    @api.model
+    def check_context_ids(self, context_ids):
         """
+        Check that the context can be applied to the model
 
-        :param cr:
-        :param uid:
         :param context_ids:
-        :param context:
         :return:
         """
-        if isinstance(context_ids[0], list):
+        if isinstance(context_ids[0], (list, tuple)):
             if context_ids[0][0] == 4:
                 context_ids = [c[1] for c in context_ids]
             elif context_ids[0][0] == 6:
                 context_ids = context_ids[0][2]
             else:
                 return True
-        self.pool['nh.clinical.context'].check_model(cr, uid, context_ids,
-                                                     self._name,
-                                                     context=context)
+        context_model = self.env['nh.clinical.context']
+        context_model.check_model(context_ids, self._name)
         return True
 
     def get_by_code(self, cr, uid, code, auto_create=False, context=None):
