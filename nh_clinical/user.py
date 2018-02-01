@@ -4,11 +4,10 @@
 Extends Odoo's res_users.
 """
 import logging
-import re
 
+import re
 from openerp import SUPERUSER_ID, api
 from openerp.osv import orm, fields, osv
-
 
 _logger = logging.getLogger(__name__)
 
@@ -143,12 +142,14 @@ class res_users(orm.Model):
                 old_group_ids = self.read(
                     cr, uid, user_id, ['groups_id'],
                     context=context)['groups_id'] if user_id else []
-                for ogid in old_group_ids:
+
+                def filter_old_group_ids(group_id):
                     is_nhc_related = category_pool.search(
-                        cr, uid, [['group_ids', 'in', [ogid]]],
+                        cr, uid, [['group_ids', 'in', [group_id]]],
                         context=context)
-                    if not is_nhc_related:
-                        old_group_ids.remove(ogid)
+                    return is_nhc_related
+                old_group_ids = filter(filter_old_group_ids, old_group_ids)
+
                 group_ids = list(set(old_group_ids + new_group_ids))
                 for gid in group_ids:
                     if gid in old_group_ids and gid not in new_group_ids:
@@ -180,15 +181,13 @@ class res_users(orm.Model):
                 remaining_group_ids += category_pool.read(
                     cr, uid, cid, ['group_ids'], context=context)['group_ids']
             remaining_group_ids = set(remaining_group_ids)
-            for gid_tuple in add_groups_id:
-                if gid_tuple[0] == 3:
-                    if gid_tuple[1] in remaining_group_ids:
-                        add_groups_id.remove(gid_tuple)
+            add_groups_id = \
+                filter(lambda e: e[0] != 3 or e[1] not in remaining_group_ids,
+                       add_groups_id)
         # Make sure we don't remove any group that is being added
-        for gid_tuple in add_groups_id:
-            if gid_tuple[0] == 3:
-                if (4, gid_tuple[1]) in add_groups_id:
-                    add_groups_id.remove(gid_tuple)
+        add_groups_id = \
+            filter(lambda e: e[0] != 3 or (4, e[1]) not in add_groups_id,
+                   add_groups_id)
         vals['groups_id'] += add_groups_id
         return True
 
