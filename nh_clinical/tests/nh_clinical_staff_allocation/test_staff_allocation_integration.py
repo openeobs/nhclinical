@@ -111,7 +111,7 @@ class TestStaffAllocationIntegration(TransactionCase):
         """
         self.wizard.submit_ward()
         self.wizard.deallocate()
-        users = [self.hca.id, self.nurse.id]
+        users = [self.nurse.id, self.hca.id]
         self.wizard.write(
             {
                 'user_ids': [[6, 0, users]]
