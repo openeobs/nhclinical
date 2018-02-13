@@ -119,7 +119,6 @@ class TestStaffAllocationIntegration(TransactionCase):
         )
         self.wizard.submit_users()
         self.assertEqual(self.wizard.stage, 'allocation')
-        users.reverse()
         self.assertEqual(list(self.wizard.user_ids._ids), users)
 
     def test_complete(self):
