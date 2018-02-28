@@ -31,9 +31,11 @@ class TestStaffReallocationDefaultUsers(TransactionCase):
         expected_users_on_shift = user_model.browse(expected_users_on_shift_ids)
 
         allocation_model = self.env['nh.clinical.staff.allocation']
-        allocation = allocation_model.create({
-            'user_ids': expected_users_on_shift
-        })
+        allocation = allocation_model.create({})
+        # Have to assign users after creation because setting in creation
+        # dictionary does not work. Not sure why.
+        allocation.ward_id = test_utils.ward.id
+        allocation.user_ids = expected_users_on_shift
         allocation.complete()
 
         reallocation_model = self.env['nh.clinical.staff.reallocation']
