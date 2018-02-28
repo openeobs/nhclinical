@@ -28,7 +28,8 @@ class TestStaffReallocationDefaultUsers(TransactionCase):
         )
         user_model = self.env['res.users']
         # Expected needs to be a recordset to match actual result type.
-        expected_users_on_shift = user_model.browse(expected_users_on_shift_ids)
+        expected_users_on_shift = \
+            user_model.browse(expected_users_on_shift_ids)
 
         allocation_model = self.env['nh.clinical.staff.allocation']
         allocation = allocation_model.create({})
