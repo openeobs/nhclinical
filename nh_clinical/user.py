@@ -338,6 +338,25 @@ class res_users(orm.Model):
         ) for g in user.groups_id if 'NH Clinical' in g.name and g.name !=
             'NH Clinical Base Group']
 
+    @api.multi
+    def filter_nurses(self, users):
+        nurse_group_name = 'NH Clinical Nurse Group'
+        return self.filter_users_by_group(users, nurse_group_name)
+
+    @api.multi
+    def filter_hcas(self, users):
+        hca_group_name = 'NH Clinical HCA Group'
+        return self.filter_users_by_group(users, hca_group_name)
+
+    @classmethod
+    def filter_users_by_group(cls, users, group):
+        return filter(lambda user: cls.user_in_group(user, group), users)
+
+    @staticmethod
+    def user_in_group(user, group):
+        user_groups = map(lambda group: group.name, user.groups_id)
+        return group in user_groups
+
 
 class nh_change_password_wizard(osv.TransientModel):
     """

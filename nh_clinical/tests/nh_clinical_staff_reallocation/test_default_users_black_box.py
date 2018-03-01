@@ -1,9 +1,42 @@
 from openerp.tests.common import TransactionCase
 
 
+# EOBS-549
 class TestStaffReallocationDefaultUsers(TransactionCase):
 
-    # EOBS-549
+    def setUp(self):
+        super(TestStaffReallocationDefaultUsers, self).setUp()
+        self.test_utils = self.env['nh.clinical.test_utils']
+        self.test_utils.admit_and_place_patient()  # Creates locations and users.
+        self.shift_coordinator = self.test_utils.create_shift_coordinator()
+        self.nurse = self.test_utils.nurse
+        self.hca = self.test_utils.hca
+        self.nurse_2 = self.test_utils.create_nurse(allocate=False)
+        self.hca_2 = self.test_utils.create_hca(allocate=False)
+
+        expected_users_on_shift_ids = map(
+            lambda e: e.id, [
+                self.nurse, self.nurse_2, self.hca, self.hca_2
+            ]
+        )
+        user_model = self.env['res.users']
+        self.allocation_model = self.env['nh.clinical.staff.allocation']
+        self.reallocation_model = self.env['nh.clinical.staff.reallocation']
+        # Expected needs to be a recordset to match actual result type.
+        self.expected_users_on_shift = \
+            user_model.browse(expected_users_on_shift_ids)
+
+        self._create_shift_change(
+            self.test_utils.ward.id, expected_users_on_shift_ids)
+
+    def _create_shift_change(self, ward_id, users):
+        self.allocation = self.allocation_model.create({})
+        # Have to assign users after creation because setting in creation
+        # dictionary does not work. Not sure why.
+        self.allocation.ward_id = ward_id
+        self.allocation.user_ids = users
+        self.allocation.complete()
+
     def test_returns_all_users_added_to_roll_call(self):
         """
         Ensure that all users added to the roll call of a shift are present
@@ -13,35 +46,15 @@ class TestStaffReallocationDefaultUsers(TransactionCase):
         who were added to the roll call but not allocated directly to beds did
         not appear in subsequent allocation wizards.
         """
-        test_utils = self.env['nh.clinical.test_utils']
-        test_utils.admit_and_place_patient()  # Creates locations and users.
-        self.shift_coordinator = test_utils.create_shift_coordinator()
-        self.nurse = test_utils.nurse
-        self.hca = test_utils.hca
-        self.nurse_2 = test_utils.create_nurse(allocate=False)
-        self.hca_2 = test_utils.create_hca(allocate=False)
+        self.reallocation = self.reallocation_model.sudo(
+            self.shift_coordinator).create({})
+        actual_users_on_shift = self.reallocation.user_ids
+        self.assertEqual(self.expected_users_on_shift, actual_users_on_shift)
 
-        expected_users_on_shift_ids = map(
-            lambda e: e.id, [
-                self.nurse, self.nurse_2, self.hca, self.hca_2
-            ]
-        )
-        user_model = self.env['res.users']
-        # Expected needs to be a recordset to match actual result type.
-        expected_users_on_shift = \
-            user_model.browse(expected_users_on_shift_ids)
-
-        allocation_model = self.env['nh.clinical.staff.allocation']
-        allocation = allocation_model.create({})
-        # Have to assign users after creation because setting in creation
-        # dictionary does not work. Not sure why.
-        allocation.ward_id = test_utils.ward.id
-        allocation.user_ids = expected_users_on_shift
-        allocation.complete()
-
-        reallocation_model = self.env['nh.clinical.staff.reallocation']
-        reallocation = \
-            reallocation_model.sudo(self.shift_coordinator).create({})
-        actual_users_on_shift = reallocation.user_ids
-
-        self.assertEqual(expected_users_on_shift, actual_users_on_shift)
+    def test_returns_all_users_added_to_roll_call_shift_change_created(
+            self):
+        self.allocation_model.create({})
+        self.reallocation = self.reallocation_model.sudo(
+            self.shift_coordinator).create({})
+        actual_users_on_shift = self.reallocation.user_ids
+        self.assertEqual(self.expected_users_on_shift, actual_users_on_shift)
