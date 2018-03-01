@@ -7,7 +7,8 @@ class TestStaffReallocationDefaultUsers(TransactionCase):
     def setUp(self):
         super(TestStaffReallocationDefaultUsers, self).setUp()
         self.test_utils = self.env['nh.clinical.test_utils']
-        self.test_utils.admit_and_place_patient()  # Creates locations and users.
+        # Creates locations and users.
+        self.test_utils.admit_and_place_patient()
         self.shift_coordinator = self.test_utils.create_shift_coordinator()
         self.nurse = self.test_utils.nurse
         self.hca = self.test_utils.hca
