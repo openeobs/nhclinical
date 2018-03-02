@@ -576,25 +576,21 @@ class allocating_user(osv.TransientModel):
 
     def fields_view_get(self, cr, uid, view_id=None, view_type='form',
                         context=None, toolbar=False, submenu=False):
-        res = super(allocating_user, self).fields_view_get(cr, uid, view_id,
-                                                           view_type, context,
-                                                           toolbar, submenu)
+        res = super(allocating_user, self).fields_view_get(
+            cr, uid, view_id, view_type, context, toolbar, submenu)
+
         allocation_pool = self.pool['nh.clinical.staff.allocation']
         reallocation_pool = self.pool['nh.clinical.staff.reallocation']
         al_id = allocation_pool.search(cr, uid, [['create_uid', '=', uid]],
                                        order='id desc')
         real_id = reallocation_pool.search(cr, uid, [['create_uid', '=', uid]],
                                            order='id desc')
-        allocation = True if al_id else False
-        if al_id and real_id:
-            al = allocation_pool.browse(cr, uid, al_id[0], context=context)
-            real = reallocation_pool.browse(cr, uid, real_id[0],
-                                            context=context)
-            allocation = True if al.create_date > real.create_date else False
+
         if not (al_id or real_id) or view_type != 'form':
             return res
         else:
-            if allocation:
+            parent_view = context['parent_view']
+            if parent_view == 'allocation':
                 allocation = allocation_pool.browse(cr, uid, al_id[0],
                                                     context=context)
                 user_ids = [u.id for u in allocation.user_ids]
@@ -606,7 +602,7 @@ class allocating_user(osv.TransientModel):
                     ['id', 'in', user_ids],
                     ['groups_id.name', 'in', ['NH Clinical HCA Group']]
                 ]
-            else:
+            elif parent_view == 'reallocation':
                 reallocation_model = self.pool[
                     'nh.clinical.staff.reallocation']
                 ward_id = reallocation_model._get_default_ward(
@@ -622,6 +618,10 @@ class allocating_user(osv.TransientModel):
                     ['id', 'in', shift.hcas._ids],
                     ['groups_id.name', 'in', ['NH Clinical HCA Group']]
                 ]
+            else:
+                raise ValueError(
+                    "Unknown view. This method does not support this view yet."
+                )
         return res
 
 
