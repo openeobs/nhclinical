@@ -97,7 +97,7 @@ class AllocationWizards(osv.AbstractModel):
 
         :param cr:
         :param uid:
-        :param wizard: 
+        :param wizard:
         """
         nurses = wizard.user_ids.filter_nurses(wizard.user_ids)
         hcas = wizard.user_ids.filter_hcas(wizard.user_ids)
