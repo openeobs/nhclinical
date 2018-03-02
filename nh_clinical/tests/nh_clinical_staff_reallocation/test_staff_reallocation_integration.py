@@ -6,7 +6,8 @@ class TestStaffReallocationIntegration(TransactionCase):
     def setUp(self):
         super(TestStaffReallocationIntegration, self).setUp()
         self.test_utils_model = self.env['nh.clinical.test_utils']
-        self.allocation_pool = self.env['nh.clinical.staff.reallocation']
+        self.allocation_pool = self.env['nh.clinical.staff.allocation']
+        self.reallocation_pool = self.env['nh.clinical.staff.reallocation']
         self.user_pool = self.env['res.users']
         self.patient_pool = self.env['nh.clinical.patient']
         self.allocating_pool = self.env['nh.clinical.allocating']
@@ -33,7 +34,14 @@ class TestStaffReallocationIntegration(TransactionCase):
         for item in items_needed:
             self.test_utils_model.copy_instance_variable_if_exists(self, item)
         # self.other_nurse = self.test_utils_model.create_nurse()
-        self.wizard = self.allocation_pool \
+        self.allocation_pool \
+            .sudo(self.shift_coordinator) \
+            .create({
+                'ward_id': self.ward.id,
+                'user_ids': [(6, 0, [self.nurse.id, self.hca.id])]
+            }) \
+            .complete()
+        self.wizard = self.reallocation_pool \
             .sudo(self.shift_coordinator) \
             .create({'ward_id': self.ward.id})
 
@@ -96,7 +104,7 @@ class TestStaffReallocationIntegration(TransactionCase):
         self.wizard.reallocate()
         self.wizard.complete()
 
-        wizard_2 = self.allocation_pool.sudo(self.shift_coordinator).create({})
+        wizard_2 = self.reallocation_pool.sudo(self.shift_coordinator).create({})
         wizard_2.reallocate()
         wizard_2.complete()
         # may need to update reference for sc

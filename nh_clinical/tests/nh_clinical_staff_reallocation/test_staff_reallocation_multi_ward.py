@@ -6,7 +6,8 @@ class TestStaffReallocationMultiWard(TransactionCase):
     def setUp(self):
         super(TestStaffReallocationMultiWard, self).setUp()
         self.test_utils_model = self.env['nh.clinical.test_utils']
-        self.allocation_pool = self.env['nh.clinical.staff.reallocation']
+        self.allocation_pool = self.env['nh.clinical.staff.allocation']
+        self.reallocation_pool = self.env['nh.clinical.staff.reallocation']
         self.user_pool = self.env['res.users']
         self.patient_pool = self.env['nh.clinical.patient']
         self.allocating_pool = self.env['nh.clinical.allocating']
@@ -48,12 +49,23 @@ class TestStaffReallocationMultiWard(TransactionCase):
         self.dual_ward_hca = self.test_utils_model.create_hca()
         self.dual_ward_nurse = self.test_utils_model.create_nurse()
         dual_beds = [self.bed_2_ward_1.id, self.bed_2_ward_2.id]
-        self.allocation_pool.responsibility_allocation_activity(
+        self.reallocation_pool.responsibility_allocation_activity(
             self.dual_ward_nurse.id, dual_beds)
-        self.allocation_pool.responsibility_allocation_activity(
+        self.reallocation_pool.responsibility_allocation_activity(
             self.dual_ward_hca.id, dual_beds)
 
-        self.wizard = self.allocation_pool \
+        self.allocation_pool \
+            .sudo(self.shift_coordinator) \
+            .create({
+                'ward_id': self.ward.id,
+                'user_ids': [(6, 0, [
+                    self.nurse.id, self.hca.id,
+                    self.dual_ward_nurse.id, self.dual_ward_hca.id
+                ])]
+            })\
+            .complete()
+
+        self.wizard = self.reallocation_pool \
             .sudo(self.shift_coordinator) \
             .create({})
 
