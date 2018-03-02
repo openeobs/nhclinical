@@ -104,7 +104,9 @@ class TestStaffReallocationIntegration(TransactionCase):
         self.wizard.reallocate()
         self.wizard.complete()
 
-        wizard_2 = self.reallocation_pool.sudo(self.shift_coordinator).create({})
+        wizard_2 = self.reallocation_pool\
+            .sudo(self.shift_coordinator)\
+            .create({})
         wizard_2.reallocate()
         wizard_2.complete()
         # may need to update reference for sc
