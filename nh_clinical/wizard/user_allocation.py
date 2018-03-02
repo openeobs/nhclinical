@@ -92,6 +92,13 @@ class AllocationWizards(osv.AbstractModel):
         return {'type': 'ir.actions.act_window_close'}
 
     def _create_shift(self, cr, uid, wizard):
+        """
+        Create a shift object based on the data in the wizard record.
+
+        :param cr:
+        :param uid:
+        :param wizard: 
+        """
         nurses = wizard.user_ids.filter_nurses(wizard.user_ids)
         hcas = wizard.user_ids.filter_hcas(wizard.user_ids)
 
