@@ -4,7 +4,15 @@ from openerp.tests.common import TransactionCase
 
 # EOBS-549, EOBS-2378
 class TestFieldsViewGet(TransactionCase):
-
+    """
+    Test the field_view_get method override. This method returns a definition
+    of the field which determines how it is displayed and how it behaves.
+    Specifically this override is used to change the `domain` property of the
+    field definition so that the when populating the field the users that are
+    returned as part of the autocomplete feature are limited to only those
+    users that are eligible for that field (nurses for the nurse field and
+    hcas for the hca field).
+    """
     def call_test(self):
         test_utils = self.env['nh.clinical.test_utils']
         test_utils.admit_and_place_patient()  # Creates locations and users.
@@ -53,6 +61,10 @@ class TestFieldsViewGet(TransactionCase):
         self.hca_ids = hca_id_field_domain[0][2]
 
     def test_returns_all_nurses_added_to_roll_call(self):
+        """
+        Only the nurses assigned to the shift are returned as autocomplete
+        options in the allocating view.
+        """
         self.call_test()
         self.assertEqual(
             sorted(self.expected_nurse_ids_available_for_allocation),
@@ -60,6 +72,10 @@ class TestFieldsViewGet(TransactionCase):
         )
 
     def test_returns_all_hcas_added_to_roll_call(self):
+        """
+        Only the HCAs assigned to the shift are returned as autocomplete
+        options in the allocating view.
+        """
         self.call_test()
         self.assertEqual(
             sorted(self.expected_hca_ids_available_for_allocation),

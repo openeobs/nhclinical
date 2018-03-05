@@ -3,7 +3,10 @@ from openerp.tests.common import TransactionCase
 
 # EOBS-549
 class TestStaffReallocationDefaultUsers(TransactionCase):
-
+    """
+    Test the `_get_default_users` method of the
+    `nh.clinical.staff.reallocation` model.
+    """
     def setUp(self):
         super(TestStaffReallocationDefaultUsers, self).setUp()
         self.test_utils = self.env['nh.clinical.test_utils']
@@ -54,6 +57,12 @@ class TestStaffReallocationDefaultUsers(TransactionCase):
 
     def test_returns_all_users_added_to_roll_call_shift_change_created(
             self):
+        """
+        During development it was discovered that creating a second allocation
+        record (opening the shift change wizard again without confirming)
+        before reallocation caused an error. This test checks that no error is
+        raised and the correct users are still returned.
+        """
         self.allocation_model.create({})
         self.reallocation = self.reallocation_model.sudo(
             self.shift_coordinator).create({})
