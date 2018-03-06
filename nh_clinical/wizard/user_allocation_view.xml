@@ -159,7 +159,7 @@
                             </field>
                             <field name="allocating_ids" nolabel="1" options="{'no_create': True}" no_open="1"
                                colspan="2" attrs="{'invisible': [['stage','!=','allocation']]}" context="{'parent_view': 'reallocation'}">
-                                <tree delete="false">
+                                <tree delete="false" create="false">
                                     <field name="location_id" readonly="1"/>
                                     <field name="patient_ids" readonly="1"/>
                                     <field name="nurse_name" widget="nh_many2one"/>
