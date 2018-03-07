@@ -15,8 +15,6 @@ class TestCheckLocationIdsConstraint(TransactionCase):
         self.user_pool = self.env['res.users']
         self.patient_pool = self.env['nh.clinical.patient']
         self.allocating_pool = self.env['nh.clinical.allocating']
-        self.resp_allocation_pool = \
-            self.env['nh.clinical.user.responsibility.allocation']
         self.activity_model = self.env['nh.activity']
         self.test_utils_model.create_locations()
         self.test_utils_model.create_users()

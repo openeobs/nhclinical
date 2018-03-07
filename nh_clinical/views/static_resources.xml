@@ -1,9 +1,0 @@
-<openerp>
-    <data>
-        <template id="assets_backend" name="nh_clinical assets" inherit_id="web.assets_backend">
-            <xpath expr="." position="inside">
-                <script type="text/javascript" src="/nh_clinical/static/src/js/nh_clinical.js"></script>
-            </xpath>
-        </template>
-    </data>
-</openerp>
