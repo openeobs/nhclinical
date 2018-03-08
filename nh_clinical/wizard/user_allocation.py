@@ -627,10 +627,6 @@ class allocating_user(osv.TransientModel):
                 "Unknown view. This method does not support this view yet."
             )
 
-        if not user_ids:
-            raise Warning(_("No users were found for this shift. "
-                            "Have they been added in the Roll Call?"))
-
         # Can add all users to both field domains because they are also
         # filtered by user group.
         nurse_ids.extend(user_ids)
