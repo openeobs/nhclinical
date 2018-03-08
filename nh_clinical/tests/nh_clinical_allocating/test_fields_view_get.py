@@ -41,6 +41,15 @@ class TestFieldsViewGet(TransactionCase):
         self.expected_hcas_available_for_allocation = \
             user_model.browse(self.expected_hca_ids_available_for_allocation)
 
+        self.expected_nurses_domain = [
+            ['id', 'in', self.expected_nurse_ids_available_for_allocation],
+            ['groups_id.name', 'in', ['NH Clinical Nurse Group']]
+        ]
+        self.expected_hcas_domain = [
+            ['id', 'in', self.expected_hcas_available_for_allocation],
+            ['groups_id.name', 'in', ['NH Clinical HCA Group']]
+        ]
+
     def call_test(self, wizard_type='allocation', vaccuum_wizards=False):
         self.allocation_model = self.env['nh.clinical.staff.allocation']\
             .sudo(self.shift_coordinator)
@@ -68,15 +77,8 @@ class TestFieldsViewGet(TransactionCase):
             .with_context({'parent_view': wizard_type})
         fields_view = allocating_model.fields_view_get(view_type='form')
 
-        self.nurse_id_field_domain = \
-            fields_view['fields']['nurse_id']['domain']
-        self.hca_id_field_domain = fields_view['fields']['hca_ids']['domain']
-        self.nurse_ids = self.nurse_id_field_domain[0][2]
-        self.hca_ids = self.hca_id_field_domain[0][2]
-        self.allocation_expected_hca_group_domain_parameter = \
-            ['groups_id.name', 'in', ['NH Clinical HCA Group']]
-        self.allocation_expected_nurse_group_domain_parameter = \
-            ['groups_id.name', 'in', ['NH Clinical Nurse Group']]
+        self.actual_nurses_domain = fields_view['fields']['nurse_id']['domain']
+        self.actual_hcas_domain = fields_view['fields']['hca_ids']['domain']
 
     def test_returns_nurses_added_to_roll_call_during_allocation(self):
         """
@@ -84,14 +86,9 @@ class TestFieldsViewGet(TransactionCase):
         options in the allocating view.
         """
         self.call_test(wizard_type='allocation')
-        self.assertEqual(
-            sorted(self.expected_nurse_ids_available_for_allocation +
-                   self.expected_hca_ids_available_for_allocation),
-            sorted(self.nurse_ids)
-        )
         self.assertTrue(
-            self.allocation_expected_nurse_group_domain_parameter in
-            self.nurse_id_field_domain)
+            self.expected_nurses_domain,
+            self.actual_nurses_domain)
 
     def test_returns_hcas_added_to_roll_call_during_allocation(self):
         """
@@ -99,14 +96,9 @@ class TestFieldsViewGet(TransactionCase):
         options in the allocating view.
         """
         self.call_test(wizard_type='allocation')
-        self.assertEqual(
-            sorted(self.expected_nurse_ids_available_for_allocation +
-                   self.expected_hca_ids_available_for_allocation),
-            sorted(self.hca_ids)
-        )
         self.assertTrue(
-            self.allocation_expected_hca_group_domain_parameter in
-            self.hca_id_field_domain)
+            self.expected_hcas_domain,
+            self.actual_hcas_domain)
 
     def test_returns_nurses_added_to_roll_call_during_reallocation(self):
         """
@@ -114,10 +106,9 @@ class TestFieldsViewGet(TransactionCase):
         options in the allocating view.
         """
         self.call_test(wizard_type='reallocation')
-        self.assertEqual(
-            sorted(self.expected_nurse_ids_available_for_allocation),
-            sorted(self.nurse_ids)
-        )
+        self.assertTrue(
+            self.expected_nurses_domain,
+            self.actual_nurses_domain)
 
     def test_returns_hcas_added_to_roll_call_during_reallocation(self):
         """
@@ -125,14 +116,23 @@ class TestFieldsViewGet(TransactionCase):
         options in the allocating view.
         """
         self.call_test(wizard_type='reallocation')
-        self.assertEqual(
-            sorted(self.expected_hca_ids_available_for_allocation),
-            sorted(self.hca_ids)
-        )
+        self.assertTrue(
+            self.expected_hcas_domain,
+            self.actual_hcas_domain)
 
     def test_returns_nurses_added_to_roll_call_when_no_wizards_exist(self):
         self.call_test(wizard_type='reallocation', vaccuum_wizards=True)
-        self.assertEqual(
-            sorted(self.expected_nurse_ids_available_for_allocation),
-            sorted(self.nurse_ids)
-        )
+        self.assertTrue(
+            self.expected_nurses_domain,
+            self.actual_nurses_domain)
+
+    def test_returns_hcas_added_to_roll_call_when_no_wizards_exist(self):
+        """
+        Method still functions even if there are no transient records still in
+        memory. This test became necessary because some of the logic assumed
+        records existed which led to the wrong users being returned.
+        """
+        self.call_test(wizard_type='reallocation', vaccuum_wizards=True)
+        self.assertTrue(
+            self.expected_hcas_domain,
+            self.actual_hcas_domain)
