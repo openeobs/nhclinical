@@ -1,8 +1,6 @@
-# Part of NHClinical. See LICENSE file for full copyright and licensing details
 # -*- coding: utf-8 -*-
+# Part of NHClinical. See LICENSE file for full copyright and licensing details
 from openerp.osv import osv, fields
-from openerp import _
-from openerp.exceptions import Warning
 
 
 def list_diff(a, b):
