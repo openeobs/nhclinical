@@ -1,5 +1,5 @@
-# Part of NHClinical. See LICENSE file for full copyright and licensing details
 # -*- coding: utf-8 -*-
+# Part of NHClinical. See LICENSE file for full copyright and licensing details
 from openerp.osv import osv, fields
 
 
@@ -88,7 +88,41 @@ class AllocationWizards(osv.AbstractModel):
         for key, value in allocation.iteritems():
             self.responsibility_allocation_activity(cr, uid, key, value,
                                                     context=context)
+        self._create_shift(cr, uid, wizard)
         return {'type': 'ir.actions.act_window_close'}
+
+    def _create_shift(self, cr, uid, wizard):
+        """
+        Create a shift object based on the data in the wizard record.
+
+        :param cr:
+        :param uid:
+        :param wizard:
+        """
+        nurses = wizard.user_ids.filter_nurses(wizard.user_ids)
+        hcas = wizard.user_ids.filter_hcas(wizard.user_ids)
+
+        shift_model = self.pool['nh.clinical.shift']
+        shift_model.create(
+            cr, uid, {
+                'ward': wizard.ward_id.id,
+                'nurses': [(6, 0, map(lambda e: e.id, nurses))],
+                'hcas': [(6, 0, map(lambda e: e.id, hcas))]
+            }
+        )
+
+    def _get_latest_shift_for_ward(self, cr, uid, ward_id):
+        shift_model = self.pool['nh.clinical.shift']
+        latest_shift_for_ward_search_results = shift_model.search(
+            cr, uid,
+            [('ward', '=', ward_id)],
+            order='id desc', limit=1
+        )
+        if latest_shift_for_ward_search_results:
+            latest_shift_for_ward_id = latest_shift_for_ward_search_results[0]
+        else:
+            return
+        return shift_model.browse(cr, uid, latest_shift_for_ward_id)
 
 
 class StaffAllocationWizard(osv.TransientModel):
@@ -236,9 +270,14 @@ class StaffReallocationWizard(osv.TransientModel):
                       ['location_ids', 'in', location_ids]], context=context)
 
     def _get_default_users(self, cr, uid, context=None):
-        location_ids = self._get_default_locations(cr, uid, context=context)
-        return self.get_users_for_locations(cr, uid, location_ids,
-                                            context=context)
+        ward_id = self._get_default_ward(cr, uid, context=context)
+        latest_shift_for_ward = \
+            self._get_latest_shift_for_ward(cr, uid, ward_id)
+        if not latest_shift_for_ward:
+            return
+        users_on_shift = \
+            latest_shift_for_ward.nurses + latest_shift_for_ward.hcas
+        return users_on_shift
 
     def _get_default_locations(self, cr, uid, context=None):
         location_pool = self.pool['nh.clinical.location']
@@ -544,48 +583,52 @@ class allocating_user(osv.TransientModel):
 
     def fields_view_get(self, cr, uid, view_id=None, view_type='form',
                         context=None, toolbar=False, submenu=False):
-        res = super(allocating_user, self).fields_view_get(cr, uid, view_id,
-                                                           view_type, context,
-                                                           toolbar, submenu)
-        allocation_pool = self.pool['nh.clinical.staff.allocation']
-        reallocation_pool = self.pool['nh.clinical.staff.reallocation']
-        al_id = allocation_pool.search(cr, uid, [['create_uid', '=', uid]],
-                                       order='id desc')
-        real_id = reallocation_pool.search(cr, uid, [['create_uid', '=', uid]],
-                                           order='id desc')
-        allocation = True if al_id else False
-        if al_id and real_id:
-            al = allocation_pool.browse(cr, uid, al_id[0], context=context)
-            real = reallocation_pool.browse(cr, uid, real_id[0],
-                                            context=context)
-            allocation = True if al.create_date > real.create_date else False
-        if not (al_id or real_id) or view_type != 'form':
+        res = super(allocating_user, self).fields_view_get(
+            cr, uid, view_id, view_type, context, toolbar, submenu)
+
+        if view_type != 'form':
             return res
+
+        # At this point no staff will be available as options for populating
+        # the field. The rest of the method will populate the `ids` domain
+        # parameter.
+        nurse_ids = []
+        hca_ids = []
+        res['fields']['nurse_id']['domain'] = [
+            ['id', 'in', nurse_ids],
+            ['groups_id.name', 'in', ['NH Clinical Nurse Group']]
+        ]
+        res['fields']['hca_ids']['domain'] = [
+            ['id', 'in', hca_ids],
+            ['groups_id.name', 'in', ['NH Clinical HCA Group']]
+        ]
+
+        parent_view = context['parent_view']
+        if parent_view == 'allocation':
+            allocation_model = self.pool['nh.clinical.staff.allocation']
+            allocation_id = allocation_model.search(
+                cr, uid, [('create_uid', '=', uid)], order='id desc', limit=1)
+            allocation = allocation_model.browse(
+                cr, uid, allocation_id[0], context=context)
+            user_ids = [u.id for u in allocation.user_ids]
+        elif parent_view == 'reallocation':
+            reallocation_model = self.pool[
+                'nh.clinical.staff.reallocation']
+            ward_id = reallocation_model._get_default_ward(
+                cr, uid, context=context)
+            allocation_model = self.pool['nh.clinical.allocation']
+            shift = allocation_model._get_latest_shift_for_ward(
+                cr, uid, ward_id)
+            user_ids = shift.nurses._ids + shift.hcas._ids
         else:
-            if allocation:
-                allocation = allocation_pool.browse(cr, uid, al_id[0],
-                                                    context=context)
-                user_ids = [u.id for u in allocation.user_ids]
-                res['fields']['nurse_id']['domain'] = [
-                    ['id', 'in', user_ids],
-                    ['groups_id.name', 'in', ['NH Clinical Nurse Group']]
-                ]
-                res['fields']['hca_ids']['domain'] = [
-                    ['id', 'in', user_ids],
-                    ['groups_id.name', 'in', ['NH Clinical HCA Group']]
-                ]
-            else:
-                reallocation = reallocation_pool.browse(cr, uid, real_id[0],
-                                                        context=context)
-                user_ids = [u.id for u in reallocation.user_ids]
-                res['fields']['nurse_id']['domain'] = [
-                    ['id', 'in', user_ids],
-                    ['groups_id.name', 'in', ['NH Clinical Nurse Group']]
-                ]
-                res['fields']['hca_ids']['domain'] = [
-                    ['id', 'in', user_ids],
-                    ['groups_id.name', 'in', ['NH Clinical HCA Group']]
-                ]
+            raise ValueError(
+                "Unknown view. This method does not support this view yet."
+            )
+
+        # Can add all users to both field domains because they are also
+        # filtered by user group.
+        nurse_ids.extend(user_ids)
+        hca_ids.extend(user_ids)
         return res
 
 

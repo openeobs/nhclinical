@@ -202,37 +202,37 @@ class NhClinicalTestUtils(AbstractModel):
             }
         )
 
-    def create_nurse(self, location_id=None):
-        if not location_id:
-            location_id = self.bed.id
+    def _create_user(self, category, location_id=None, allocate=True):
+        """
+        Creates a user.
+
+        :param category: Must be an existing category name like 'Nurse' or
+        'HCA'.
+        :param location_id:
+        :param allocate:
+        :return:
+        """
         self.category_model = self.env['res.partner.category']
         self.user_model = self.env['res.users']
 
-        self.nurse_role = \
-            self.category_model.search([('name', '=', 'Nurse')])[0]
+        self.user_role = \
+            self.category_model.search([('name', '=', category)])[0]
         # Create nurse and associate them with bed location and nurse role.
-        return self.user_model.create({
-            'name': 'Nurse',
+        creation_values = {
+            'name': category,
             'login': str(uuid.uuid4()),
-            'password': 'nurse',
-            'category_id': [[4, self.nurse_role.id]],
-            'location_ids': [[4, location_id]]
-        })
+            'password': category,
+            'category_id': [[4, self.user_role.id]],
+        }
+        if allocate is True:
+            creation_values['location_ids'] = [(4, location_id or self.bed.id)]
+        return self.user_model.create(creation_values)
 
-    def create_hca(self, location_id=None):
-        if not location_id:
-            location_id = self.bed.id
-        self.category_model = self.env['res.partner.category']
-        self.user_model = self.env['res.users']
-        self.hca_role = self.category_model.search([('name', '=', 'HCA')])[0]
-        hca = self.user_model.create({
-            'name': 'HCA',
-            'login': str(uuid.uuid4()),
-            'password': 'hca',
-            'category_id': [[4, self.hca_role.id]],
-            'location_ids': [[4, location_id]]
-        })
-        return hca
+    def create_nurse(self, location_id=None, allocate=True):
+        return self._create_user('Nurse', location_id, allocate)
+
+    def create_hca(self, location_id=None, allocate=True):
+        return self._create_user('HCA', location_id, allocate)
 
     def create_doctor(self, location_ids=None):
         if location_ids is not None and not isinstance(location_ids, list):

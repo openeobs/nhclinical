@@ -116,7 +116,7 @@
                                    attrs="{'invisible': [['stage','!=','users']]}"
                                    string="Nursing Staff for new shift:"/>
                             <field name="allocating_ids" nolabel="1" options="{'no_create': True}" no_open="1"
-                               colspan="2" attrs="{'invisible': [['stage','!=','allocation']]}" readonly="1">
+                                   colspan="2" attrs="{'invisible': [['stage','!=','allocation']]}" readonly="1" context="{'parent_view': 'allocation'}">
                                 <tree>
                                     <field name="location_id" readonly="1"/>
                                     <field name="patient_ids" readonly="1"/>
@@ -158,8 +158,8 @@
                                 <!--</tree>-->
                             </field>
                             <field name="allocating_ids" nolabel="1" options="{'no_create': True}" no_open="1"
-                               colspan="2" readonly="1" attrs="{'invisible': [['stage','!=','allocation']]}">
-                                <tree>
+                               colspan="2" attrs="{'invisible': [['stage','!=','allocation']]}" context="{'parent_view': 'reallocation'}">
+                                <tree delete="false" create="false">
                                     <field name="location_id" readonly="1"/>
                                     <field name="patient_ids" readonly="1"/>
                                     <field name="nurse_name" widget="nh_many2one"/>

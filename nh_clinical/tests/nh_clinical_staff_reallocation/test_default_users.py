@@ -1,67 +1,70 @@
-from openerp.tests.common import SingleTransactionCase
+from openerp.tests.common import TransactionCase
 
 
-class TestStaffReallocationDefaultUsers(SingleTransactionCase):
+# EOBS-549
+class TestStaffReallocationDefaultUsers(TransactionCase):
+    """
+    Test the `_get_default_users` method of the
+    `nh.clinical.staff.reallocation` model.
+    """
+    def setUp(self):
+        super(TestStaffReallocationDefaultUsers, self).setUp()
+        self.test_utils = self.env['nh.clinical.test_utils']
+        # Creates locations and users.
+        self.test_utils.admit_and_place_patient()
+        self.shift_coordinator = self.test_utils.create_shift_coordinator()
+        self.nurse = self.test_utils.nurse
+        self.hca = self.test_utils.hca
+        self.nurse_2 = self.test_utils.create_nurse(allocate=False)
+        self.hca_2 = self.test_utils.create_hca(allocate=False)
 
-    BEDS = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-    USERS = [1337]
+        expected_users_on_shift_ids = map(
+            lambda e: e.id, [
+                self.nurse, self.nurse_2, self.hca, self.hca_2
+            ]
+        )
+        user_model = self.env['res.users']
+        self.allocation_model = self.env['nh.clinical.staff.allocation']
+        self.reallocation_model = self.env['nh.clinical.staff.reallocation']
+        # Expected needs to be a recordset to match actual result type.
+        self.expected_users_on_shift = \
+            user_model.browse(expected_users_on_shift_ids)
 
-    @classmethod
-    def setUpClass(cls):
-        super(TestStaffReallocationDefaultUsers, cls).setUpClass()
-        cls.users_pool = cls.registry('res.users')
-        cls.allocation_pool = cls.registry('nh.clinical.staff.reallocation')
+        self._create_shift_change(
+            self.test_utils.ward.id, expected_users_on_shift_ids)
 
-        def mock_get_default_locations(*args, **kwargs):
-            context = kwargs.get('context')
-            if context and context == 'check_get_locations':
-                global location_called
-                location_called = True
-            return cls.BEDS
+    def _create_shift_change(self, ward_id, users):
+        self.allocation = self.allocation_model.create({})
+        # Have to assign users after creation because setting in creation
+        # dictionary does not work. Not sure why.
+        self.allocation.ward_id = ward_id
+        self.allocation.user_ids = users
+        self.allocation.complete()
 
-        def mock_users_search(*args, **kwargs):
-            context = kwargs.get('context')
-            if context:
-                if context == 'check_methods':
-                    return []
-                if context == 'check_search':
-                    global users_search
-                    users_search = args[3]
-            return cls.USERS
-
-        cls.allocation_pool._patch_method('_get_default_locations',
-                                          mock_get_default_locations)
-        cls.users_pool._patch_method('search', mock_users_search)
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.allocation_pool._revert_method('_get_default_locations')
-        cls.users_pool._revert_method('search')
-        super(TestStaffReallocationDefaultUsers, cls).tearDownClass()
-
-    def test_calls_get_default_locations(self):
+    def test_returns_all_users_added_to_roll_call(self):
         """
-        Test that it calls get_default_location
-        """
-        self.allocation_pool._get_default_users(self.cr, self.uid,
-                                                context='check_get_locations')
-        self.assertTrue(location_called)
+        Ensure that all users added to the roll call of a shift are present
+        in subsequent allocation records.
 
-    def test_uses_location_ids_in_search(self):
+        The particular reason this regression test came about was because users
+        who were added to the roll call but not allocated directly to beds did
+        not appear in subsequent allocation wizards.
         """
-        Test that it uses location IDs when searching for users
-        """
-        self.allocation_pool._get_default_users(self.cr, self.uid,
-                                                context='check_search')
-        self.assertEqual(users_search[0],
-                         ['groups_id.name', 'in',
-                          self.allocation_pool._nursing_groups])
-        self.assertEqual(users_search[1],
-                         ['location_ids', 'in', self.BEDS])
+        self.reallocation = self.reallocation_model.sudo(
+            self.shift_coordinator).create({})
+        actual_users_on_shift = self.reallocation.user_ids
+        self.assertEqual(self.expected_users_on_shift, actual_users_on_shift)
 
-    def test_returns_users(self):
+    def test_returns_all_users_added_to_roll_call_shift_change_created(
+            self):
         """
-        Test that it returns the users it finds
+        During development it was discovered that creating a second allocation
+        record (opening the shift change wizard again without confirming)
+        before reallocation caused an error. This test checks that no error is
+        raised and the correct users are still returned.
         """
-        users = self.allocation_pool._get_default_users(self.cr, self.uid)
-        self.assertEqual(users, self.USERS)
+        self.allocation_model.create({})
+        self.reallocation = self.reallocation_model.sudo(
+            self.shift_coordinator).create({})
+        actual_users_on_shift = self.reallocation.user_ids
+        self.assertEqual(self.expected_users_on_shift, actual_users_on_shift)
