@@ -7,7 +7,7 @@
     'license': 'AGPL-3',
     'summary': 'Clinical extension of Odoo.',
     'description': """
-    Serves as a bundle for several modules that extend Odoo into the clinical 
+    Serves as a bundle for several modules that extend Odoo into the clinical
     domain.
     """,
     'author': 'Neova Health',
