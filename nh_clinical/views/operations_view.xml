@@ -19,16 +19,16 @@
             <field name="model">nh.clinical.patient.placement</field>
             <field name="arch" type="xml">
                 <form string="Patient Placement" version="7.0">
-                    <group>
-                        <field name="patient_id" readonly="1" options="{'no_open': True}"/>
-                        <field name="suggested_location_id" readonly="1" options="{'no_open': True}" string="Location"/>
-                    </group>
-                    <field name="location_id"
+                   <label for="patient_id" string="Patient"/>
+                   <field name="patient_id" readonly="1"/>
+                   <label for="location_id" string="Location"/>
+                   <field name="suggested_location_id" readonly="1" options="{'no_create': True}"/>
+                   <field name="location_id"
                           required="True"
                           domain="[('is_available','=',True),('usage','=','bed'),('id','child_of',suggested_location_id)]"
                           widget="nh_many2one"
                           options="{'no_open': True, 'no_create_edit': True}"/>
-                    <button name="complete_ui" type="object" string="Confirm Placement"/>
+                   <button name="complete_ui" type="object" string="Confirm Placement"/>
                 </form>
             </field>
         </record>
