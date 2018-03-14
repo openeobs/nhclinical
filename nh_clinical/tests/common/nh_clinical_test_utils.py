@@ -9,9 +9,12 @@ class NhClinicalTestUtils(AbstractModel):
     _name = 'nh.clinical.test_utils'
 
     # Setup methods
-    def admit_and_place_patient(self, create_placement=True):
+    def setup_ward(self):
         self.create_locations()
         self.create_users()
+
+    def admit_and_place_patient(self, create_placement=True):
+        self.setup_ward()
         self.create_patient()
         self.spell = self.admit_patient()
         self.spell_activity_id = self.spell.activity_id.id
@@ -30,6 +33,7 @@ class NhClinicalTestUtils(AbstractModel):
         self.patient = self.create_and_register_patient()
         self.patient_id = self.patient.id
         self.hospital_number = self.patient.other_identifier
+        return self.patient
 
     def admit_patient(
             self, hospital_number=None, patient_id=None, location_code=None):
