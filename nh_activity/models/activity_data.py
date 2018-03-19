@@ -179,6 +179,8 @@ class nh_activity_data(orm.AbstractModel):
         )
         return True
 
+    # TODO remove this. Instead just show on the page that someone else also
+    # has this task open.
     def assign(self, cr, uid, activity_id, user_id, context=None):
         """
         Assigns activity to a user. Raises an exception if it is already

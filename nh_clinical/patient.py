@@ -1,5 +1,5 @@
-# Part of NHClinical. See LICENSE file for full copyright and licensing details
 # -*- coding: utf-8 -*-
+# Part of NHClinical. See LICENSE file for full copyright and licensing details
 import logging
 
 import re
@@ -429,3 +429,10 @@ class NhClinicalPatient(osv.Model):
         all_patient_ids = set(self.search(cr, uid, []))
         all_patient_ids.difference_update(spell_patient_ids)
         return list(all_patient_ids)
+
+    @api.model
+    def get_all_patients_on_ward(self, ward_id):
+        patients_on_ward = self.search([
+            ('current_location_id', 'child_of', ward_id)
+        ])
+        return patients_on_ward
