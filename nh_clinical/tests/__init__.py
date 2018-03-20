@@ -14,7 +14,6 @@ from .nh_clinical_api import *
 from .nh_clinical_patient import *
 from .nh_clinical_patient_transfer import *
 from .nh_clinical_spell import *
-from .res_user import *
 
 # Disabled Tests
 # from . import test_auditing
