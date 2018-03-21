@@ -432,10 +432,13 @@ class NhClinicalPatient(osv.Model):
         return list(all_patient_ids)
 
     @api.model
-    def get_all_patients_on_ward(self, ward_id):
-        patients_on_ward = self.search([
-            ('current_location_id', 'child_of', ward_id)
-        ])
+    def get_patients_on_ward(self, ward_id, patient_ids=None):
+        domain = [('current_location_id', 'child_of', ward_id)]
+        if isinstance(patient_ids, list):
+            domain.append(('id', 'in', patient_ids))
+        elif isinstance(patient_ids, int):
+            domain.append(('id', '=', patient_ids))
+        patients_on_ward = self.search(domain)
         return patients_on_ward
 
     @api.one
