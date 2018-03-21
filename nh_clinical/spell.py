@@ -260,10 +260,10 @@ class nh_clinical_spell(orm.Model):
     @api.model
     def get_spell_activity_by_patient_id(self, patient_id):
         """
-        Get the `nh.clinical.spell` record for the given patient.
+        Get the latest open spell_activity for the given patient.
 
         :param patient_id:
-        :type patient_id: 'nh.clinical.patient' record
+        :type patient_id: int
         :return: spell if it exists, otherwise None
         :rtype: 'nh.clinical.spell' record
         """
