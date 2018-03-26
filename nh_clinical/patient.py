@@ -443,8 +443,6 @@ class NhClinicalPatient(osv.Model):
 
     @api.one
     def serialise(self):
-        latest_three_ews = self.get_latest_ews(limit=3)
-        latest_ews = latest_three_ews[0] if latest_three_ews else None
         patient_dict = {
             'id': self.id,
             'full_name': self.full_name,
@@ -455,38 +453,6 @@ class NhClinicalPatient(osv.Model):
             'gender': self.gender,
             'sex': self.sex,
             'location': self.current_location_id.name,
-            'parent_location': self.current_location_id.parent_id.name,
-            'clinical_risk': latest_ews.clinical_risk if latest_ews else None,
-            'frequency': latest_ews.frequency if latest_ews else 0,
-            'next_ews_time': self.get_next_ews_time(latest_ews),
-            'ews_score': latest_ews.score if latest_ews else '',
-            'ews_trend': self.get_ews_trend(),
-            'refusal_in_effect': self.get_refusal_in_effect(),
-            'rapid_tranq': self.get_rapid_tranq_status()
+            'parent_location': self.current_location_id.parent_id.name
         }
         return patient_dict
-
-    def get_latest_ews(self, limit=1):
-        ews_model = self.env['nh.clinical.patient.observation.ews']
-        latest_ews = ews_model.search([
-            ('patient_id', '=', self.id),
-            ('state', '=', 'completed')
-        ], order='date_terminated desc', limit=limit)
-        return latest_ews
-
-    def get_next_ews_time(self, latest_ews):
-        # date_scheduled = datetime.strptime(
-        #     latest_ews.activity_id.date_scheduled, DTF)
-        # if date_scheduled:
-        #     if datetime.now() > date_scheduled:
-        #
-        return 'overdue: 2 day(s) 22:44 hours'
-
-    def get_ews_trend(self):
-        return 'same'
-
-    def get_refusal_in_effect(self):
-        return None
-
-    def get_rapid_tranq_status(self):
-        return False
