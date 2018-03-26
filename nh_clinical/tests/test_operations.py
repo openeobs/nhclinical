@@ -23,8 +23,6 @@ class TestOperations(common.SingleTransactionCase):
         cls.placement_pool = cls.registry('nh.clinical.patient.placement')
         cls.move_pool = cls.registry('nh.clinical.patient.move')
         cls.swap_pool = cls.registry('nh.clinical.patient.swap_beds')
-        cls.follow_pool = cls.registry('nh.clinical.patient.follow')
-        cls.unfollow_pool = cls.registry('nh.clinical.patient.unfollow')
         cls.admission_pool = cls.registry('nh.clinical.patient.admission')
         cls.discharge_pool = cls.registry('nh.clinical.patient.discharge')
         cls.transfer_pool = cls.registry('nh.clinical.patient.transfer')
@@ -724,87 +722,3 @@ class TestOperations(common.SingleTransactionCase):
                       ['data_model', '=', 'nh.clinical.patient.transfer']])
         with self.assertRaises(except_orm):
             self.activity_pool.cancel(cr, uid, transfer_id[0])
-
-    def test_14_patient_following(self):
-        cr, uid = self.cr, self.uid
-
-        ward_id = self.locations.keys()[0]
-        wm_id = self.users[ward_id]['wm']
-        nurse_id = self.users[ward_id]['n']
-
-        # Creating 4 Patient Follow Activities:
-        # 1) test Patient Follow.
-        # 2) test open follow activities are cancelled
-        # when 'unfollowing' a patient.
-        # 3) test 2nd case only happens if you created those follow activities.
-        follow_id = self.follow_pool.create_activity(
-            cr, uid, {'user_id': nurse_id},
-            {'patient_ids': [[4, self.patients[3]]]}
-        )
-        follow_id2 = self.follow_pool.create_activity(
-            cr, uid, {'user_id': nurse_id},
-            {'patient_ids': [[6, False, [self.patients[3], self.patients[4]]]]}
-        )
-        follow_id3 = self.follow_pool.create_activity(
-            cr, wm_id, {'user_id': nurse_id},
-            {'patient_ids': [[6, False, [self.patients[3], self.patients[4]]]]}
-        )
-        self.assertTrue(follow_id,
-                        msg="Patient Follow: Create activity failed")
-        self.assertTrue(follow_id2,
-                        msg="Patient Follow: Create activity failed")
-        self.assertTrue(follow_id3,
-                        msg="Patient Follow: Create activity failed")
-
-        # Complete Follow Activity and check System state POST-COMPLETE
-        self.activity_pool.complete(cr, uid, follow_id)
-        user = self.users_pool.browse(cr, uid, nurse_id)
-        self.assertTrue(
-            self.patients[3] in [patient.id for patient in user.following_ids],
-            msg="Patient Follow: The user is not following that patient")
-        self.assertFalse(
-            self.patients[4] in [patient.id for patient in user.following_ids],
-            msg="Patient Follow: "
-                "The user should not be following that patient")
-        patient = self.patient_pool.browse(cr, uid, self.patients[3])
-        patient2 = self.patient_pool.browse(cr, uid, self.patients[4])
-        self.assertTrue(nurse_id in [u.id for u in patient.follower_ids],
-                        msg="Patient Follow: "
-                            "The user is not in the patient followers list")
-        self.assertFalse(
-            nurse_id in [u.id for u in patient2.follower_ids],
-            msg="Patient Follow: "
-                "The user should not be in the patient followers list")
-
-        # Create an Unfollow Activity
-        unfollow_id = self.unfollow_pool.create_activity(
-            cr, uid, {}, {'patient_ids': [[4, self.patients[3]]]})
-        self.assertTrue(unfollow_id,
-                        msg="Patient Unfollow: Create activity failed")
-
-        # Complete Unfollow Activity and check System state POST-COMPLETE
-        self.activity_pool.complete(cr, uid, unfollow_id)
-        user = self.users_pool.browse(cr, uid, nurse_id)
-        self.assertTrue(
-            self.patients[3] not in [pat.id for pat in user.following_ids],
-            msg="Patient Unfollow: The user is still following that patient")
-        patient = self.patient_pool.browse(cr, uid, self.patients[3])
-        self.assertTrue(
-            nurse_id not in [u.id for u in patient.follower_ids],
-            msg="Patient Unfollow: "
-                "The user still is in the patient followers list")
-
-        follow = self.activity_pool.browse(cr, uid, follow_id2)
-        self.assertEqual(follow.state, 'cancelled',
-                         msg="Patient Unfollow: A follow activity containing "
-                             "the unfollowed patient was not cancelled")
-        follow = self.activity_pool.browse(cr, uid, follow_id3)
-        self.assertNotEqual(follow.state, 'cancelled',
-                            msg="Patient Unfollow: A follow activity created "
-                                "by a different user was cancelled")
-
-        # Try to complete follow activity without user assigned to it
-        follow_id = self.follow_pool.create_activity(
-            cr, uid, {}, {'patient_ids': [[4, self.patients[3]]]})
-        with self.assertRaises(except_orm):
-            self.activity_pool.complete(cr, uid, follow_id)
