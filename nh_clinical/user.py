@@ -357,6 +357,26 @@ class res_users(orm.Model):
         user_groups = map(lambda group: group.name, user.groups_id)
         return group in user_groups
 
+    @api.multi
+    def is_doctor(self):
+        return self._is_in_user_group('Doctor')
+
+    @api.multi
+    def is_shift_coordinator(self):
+        return self._is_in_user_group('Shift Coordinator')
+
+    @api.multi
+    def is_senior_manager(self):
+        return self._is_in_user_group('Senior Manager')
+
+    @api.multi
+    def _is_in_user_group(self, user_role_name):
+        self.ensure_one()
+        for group in self.groups_id:
+            if group.name == 'NH Clinical {} Group'.format(user_role_name):
+                return True
+        return False
+
 
 class nh_change_password_wizard(osv.TransientModel):
     """
