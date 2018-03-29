@@ -3,7 +3,6 @@
 import logging
 import re
 from dateutil.parser import parse
-from datetime import datetime
 
 from openerp.osv import fields, osv
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
