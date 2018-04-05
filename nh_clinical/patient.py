@@ -432,6 +432,14 @@ class NhClinicalPatient(osv.Model):
 
     @api.model
     def get_patients_on_ward(self, ward_id, patient_ids=None):
+        """
+        :param ward_id:
+        :type ward_id: int
+        :param patient_ids:
+        :type patient_ids: int or list of nh.clinical.patient records
+        :return: All the patients on the given ward
+        :rtype: list of nh.clinical.patient records
+        """
         domain = [('current_location_id', 'child_of', ward_id)]
         if isinstance(patient_ids, list):
             domain.append(('id', 'in', patient_ids))
@@ -442,6 +450,14 @@ class NhClinicalPatient(osv.Model):
 
     @api.one
     def serialise(self):
+        """
+        Convert the current patient record to a dictionary. Commonly used to
+        be sent to the front-end. The `self` argument must be a single
+        nh.clinical.patient record.
+
+        :return: Patient dictionary.
+        :rtype: dict
+        """
         patient_dict = {
             'id': self.id,
             'full_name': self.full_name,

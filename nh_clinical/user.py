@@ -359,18 +359,37 @@ class res_users(orm.Model):
 
     @api.multi
     def is_doctor(self):
+        """
+        :return:
+        :rtype: bool
+        """
         return self._is_in_user_group('Doctor')
 
     @api.multi
     def is_shift_coordinator(self):
+        """
+        :return:
+        :rtype: bool
+        """
         return self._is_in_user_group('Shift Coordinator')
 
     @api.multi
     def is_senior_manager(self):
+        """
+        :return:
+        :rtype: bool
+        """
         return self._is_in_user_group('Senior Manager')
 
     @api.multi
     def _is_in_user_group(self, user_role_name):
+        """
+        :param user_role_name: The user's role in title case e.g.
+        'Shift Coordinator'.
+        :type user_role_name: str
+        :return:
+        :rtype: bool
+        """
         self.ensure_one()
         for group in self.groups_id:
             if group.name == 'NH Clinical {} Group'.format(user_role_name):
