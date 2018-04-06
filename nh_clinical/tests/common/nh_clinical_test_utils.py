@@ -12,6 +12,7 @@ class NhClinicalTestUtils(AbstractModel):
     def setup_ward(self):
         self.create_locations()
         self.create_users()
+        self.create_shifts()
 
     def admit_and_place_patient(self, create_placement=True):
         self.setup_ward()
@@ -28,6 +29,14 @@ class NhClinicalTestUtils(AbstractModel):
         self.nurse = self.create_nurse()
         self.hca = self.create_hca()
         self.create_doctor()
+
+    def create_shifts(self):
+        shift_model = self.env['nh.clinical.shift']
+        shift_model.create({
+            'ward': self.ward.id,
+            'nurses': [(6, 0, [self.nurse.id])],
+            'hcas': [(6, 0, [self.hca.id])]
+        })
 
     def create_patient(self):
         self.patient = self.create_and_register_patient()
@@ -327,7 +336,9 @@ class NhClinicalTestUtils(AbstractModel):
         :type caller: object
         :return:
         """
-        instance_variable_names = ['patient', 'spell', 'spell_activity']
+        instance_variable_names = [
+            'patient', 'spell', 'spell_activity', 'nurse'
+        ]
         for name in instance_variable_names:
             self.copy_instance_variable_if_exists(caller, name)
 
