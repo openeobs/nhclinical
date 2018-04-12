@@ -382,6 +382,14 @@ class res_users(orm.Model):
         return self._is_in_user_group('Senior Manager')
 
     @api.multi
+    def is_system_admin(self):
+        """
+        :return:
+        :rtype: bool
+        """
+        return self._is_in_user_group('Admin')
+
+    @api.multi
     def _is_in_user_group(self, user_role_name):
         """
         :param user_role_name: The user's role in title case e.g.
