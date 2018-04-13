@@ -468,6 +468,7 @@ class NhClinicalPatient(osv.Model):
             'gender': self.gender,
             'sex': self.sex,
             'location': self.current_location_id.name,
-            'parent_location': self.current_location_id.parent_id.name
+            'parent_location': self.current_location_id.parent_id.name,
+            'deadlines': []
         }
         return patient_dict
