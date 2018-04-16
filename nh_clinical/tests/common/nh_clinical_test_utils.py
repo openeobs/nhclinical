@@ -327,7 +327,9 @@ class NhClinicalTestUtils(AbstractModel):
         :type caller: object
         :return:
         """
-        instance_variable_names = ['patient', 'spell', 'spell_activity']
+        instance_variable_names = [
+            'patient', 'spell', 'spell_activity', 'nurse', 'doctor'
+        ]
         for name in instance_variable_names:
             self.copy_instance_variable_if_exists(caller, name)
 

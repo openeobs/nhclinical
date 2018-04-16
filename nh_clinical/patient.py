@@ -1,9 +1,9 @@
-# Part of NHClinical. See LICENSE file for full copyright and licensing details
 # -*- coding: utf-8 -*-
+# Part of NHClinical. See LICENSE file for full copyright and licensing details
 import logging
-
 import re
 from dateutil.parser import parse
+
 from openerp.osv import fields, osv
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
 from openerp import api
@@ -429,3 +429,45 @@ class NhClinicalPatient(osv.Model):
         all_patient_ids = set(self.search(cr, uid, []))
         all_patient_ids.difference_update(spell_patient_ids)
         return list(all_patient_ids)
+
+    @api.model
+    def get_patients_on_ward(self, ward_id, patient_ids=None):
+        """
+        :param ward_id:
+        :type ward_id: int
+        :param patient_ids:
+        :type patient_ids: int or list of nh.clinical.patient records
+        :return: All the patients on the given ward
+        :rtype: list of nh.clinical.patient records
+        """
+        domain = [('current_location_id', 'child_of', ward_id)]
+        if isinstance(patient_ids, list):
+            domain.append(('id', 'in', patient_ids))
+        elif isinstance(patient_ids, int):
+            domain.append(('id', '=', patient_ids))
+        patients_on_ward = self.search(domain)
+        return patients_on_ward
+
+    @api.one
+    def serialise(self):
+        """
+        Convert the current patient record to a dictionary. Commonly used to
+        be sent to the front-end. The `self` argument must be a single
+        nh.clinical.patient record.
+
+        :return: Patient dictionary.
+        :rtype: dict
+        """
+        patient_dict = {
+            'id': self.id,
+            'full_name': self.full_name,
+            # TODO See why this was substringed in the old SQL query.
+            'patient_identifier': self.patient_identifier,
+            'other_identifier': self.other_identifier,
+            'dob': self.dob,
+            'gender': self.gender,
+            'sex': self.sex,
+            'location': self.current_location_id.name,
+            'parent_location': self.current_location_id.parent_id.name
+        }
+        return patient_dict
