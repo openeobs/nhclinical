@@ -30,7 +30,7 @@
         'security/operations/ir.model.access.csv',
         'data/change_ward_manager_to_shift_coordinator.xml'
     ],
-    'demo': ['data/test/locations.xml', 'data/test/users.xml'],
+    'demo': [],
     'css': [],
     'js': [],
     'qweb': [],
