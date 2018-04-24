@@ -150,27 +150,26 @@ class NhClinicalTestUtils(AbstractModel):
 
         self.spell = self.spell_activity.data_ref
 
-    def search_for_hospital_and_pos(self):
+    def create_hospital_and_pos(self):
         self.location_model = self.env['nh.clinical.location']
         self.pos_model = self.env['nh.clinical.pos']
 
-        hospital_search = self.location_model.search(
-            [('usage', '=', 'hospital')]
-        )
-        if hospital_search:
-            self.hospital = hospital_search[0]
-        else:
-            raise ValueError('Could not find hospital ID')
-        pos_search = self.pos_model.search(
-            [('location_id', '=', self.hospital.id)]
-        )
-        if pos_search:
-            self.pos = pos_search[0]
-        else:
-            raise ValueError('Could not find POS with location ID of hospital')
+        self.hospital = self.location_model.create({
+            'name': 'Your Hospital',
+            'code': 'YH01',
+            'type': 'pos',
+            'usage': 'hospital'
+        })
+        self.company = \
+            self.env['ir.model.data'].get_object('base', 'main_company')
+        self.pos = self.pos_model.create({
+            'name': 'Your Hospital',
+            'location_id': self.hospital.id,
+            'company_id': self.company.id
+        })
 
     def create_locations(self):
-        self.search_for_hospital_and_pos()
+        self.create_hospital_and_pos()
         self.location_model = self.env['nh.clinical.location']
 
         self.ward = self.create_location('ward', self.hospital.id)
@@ -303,6 +302,9 @@ class NhClinicalTestUtils(AbstractModel):
             'location_ids': [[6, 0, [self.ward.id]]]
         })
 
+    def create_adt_user(self, location_id=None, allocate=False):
+        return self._create_user('System Administrator', location_id, allocate)
+
     # Methods for getting references to objects needed for test cases.
     def copy_instance_variables(self, caller):
         """
@@ -328,7 +330,8 @@ class NhClinicalTestUtils(AbstractModel):
         :return:
         """
         instance_variable_names = [
-            'patient', 'spell', 'spell_activity', 'nurse', 'doctor'
+            'patient', 'spell', 'spell_activity', 'nurse', 'doctor', 'company',
+            'hospital', 'pos'
         ]
         for name in instance_variable_names:
             self.copy_instance_variable_if_exists(caller, name)
