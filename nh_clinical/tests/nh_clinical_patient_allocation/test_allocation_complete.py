@@ -15,6 +15,10 @@ class TestAllocationComplete(SavepointCase):
         self.activity_model = self.env['nh.activity']
 
     def test_creates_move_record(self):
+        """
+        Completing an admission activity should in turn create a move record
+        that represents the movement of the patient into the ward.
+        """
         move_records_for_patient_before = self.move_model.search([
             ('patient_id', '=', self.patient.id)
         ])
@@ -38,7 +42,14 @@ class TestAllocationComplete(SavepointCase):
             len(move_records_for_patient_after)
         )
 
+    # EOBS-2131
     def test_move_record_has_correct_admission_date(self):
+        """
+        The move record created by the completion of the admission activity
+        should have the same value of the admission record's `start_date` field
+        in its own `move_datetime` field as the move records are used to
+        displayed when and where a patient has moved in the UI.
+        """
         expected_start_date = '2015-04-30 17:00:00'
         admission_activity_id = self.admission_model.create_activity(
             {},
