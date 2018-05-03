@@ -1,9 +1,9 @@
-# Part of NHClinical. See LICENSE file for full copyright and licensing details
 # -*- coding: utf-8 -*-
+# Part of NHClinical. See LICENSE file for full copyright and licensing details
 import logging
 
-from openerp.tests.common import SingleTransactionCase
 from openerp.osv.orm import except_orm
+from openerp.tests.common import SingleTransactionCase
 
 _logger = logging.getLogger(__name__)
 
@@ -50,33 +50,29 @@ class TestUsers(SingleTransactionCase):
             cr, uid, [['name', '=', 'Shift Coordinator']])[0]
         cls.nurse_role_id = cls.category_pool.search(
             cr, uid, [['name', '=', 'Nurse']])[0]
-        cls.hca_role_id = cls.category_pool.search(cr, uid,
-                                                   [['name', '=', 'HCA']])[0]
+        cls.hca_role_id = cls.category_pool.search(
+            cr, uid, [['name', '=', 'HCA']])[0]
 
-        cls.hospital_id = cls.location_pool.create(
-            cr, uid, {'name': 'Test Hospital', 'code': 'TESTHOSP',
-                      'usage': 'hospital'})
-        cls.pos_id = cls.pos_pool.create(
-            cr, uid, {'name': 'Test POS', 'location_id': cls.hospital_id})
+        cls.test_utils_model = cls.env['nh.clinical.test_utils']
+        cls.test_utils_model.admit_and_place_patient()
+        cls.test_utils_model.copy_instance_variables(cls)
+        shift_coordinator = cls.test_utils_model.create_shift_coordinator()
+        cls.test_utils_model.create_system_admin()
+        cls.system_admin = cls.test_utils_model.system_admin
+        cls.system_admin.pos_ids = False
+        adt_user = cls.test_utils_model.create_adt_user()
 
-        cls.adt_uid = cls.user_pool.create(
-            cr, uid, {'name': 'Admin 0', 'login': 'user_000',
-                      'password': 'user_000',
-                      'groups_id': [[4, cls.admin_group_id[0]]],
-                      'category_id': [[4, cls.admin_role_id]],
-                      'pos_ids': [[6, 0, [cls.pos_id]]]})
-
-        cls.admin_uid = cls.user_pool.create(
-            cr, uid, {'name': 'Admin 1', 'login': 'user_001',
-                      'password': 'user_001',
-                      'groups_id': [[4, cls.admin_group_id[0]]]})
-        cls.wm_uid = cls.user_pool.search(
-            cr, uid, [['name', '=', 'WM0 Test']]
-        )[0]
+        cls.hospital_id = cls.hospital.id
+        cls.pos_id = cls.pos.id
+        cls.adt_uid = adt_user.id
+        cls.admin_uid = cls.test_utils_model.system_admin.id
+        cls.wm_uid = shift_coordinator.id
 
         cls.doctor_id = cls.doctor_pool.create(
             cr, uid, {'name': 'Doctor01', 'gender': 'M', 'code': 'DOCT01'})
-        cls.dr_title_id = cls.title_pool.create(cr, uid, {'name': 'Dr'})
+        cls.user_model = cls.env['res.users']
+        cls.title_model = cls.env['res.partner.title']
+        cls.dr_title_id = cls.title_model.create({'name': 'Dr'}).id
 
     def test_01_check_pos(self):
         cr, uid = self.cr, self.uid
@@ -197,16 +193,15 @@ class TestUsers(SingleTransactionCase):
 
     def test_03_create(self):
         cr, uid = self.cr, self.uid
-
-        # Scenario 1: Create a new user linked to a doctor object
-        user_id = self.user_pool.create(
-            cr, uid, {'name': 'Dr1', 'login': 'dr1', 'password': 'dr1',
-                      'doctor_id': self.doctor_id,
-                      'groups_id': [[4, self.dr_group_id]],
-                      'title': self.dr_title_id})
-        doctor = self.doctor_pool.browse(cr, uid, self.doctor_id)
-        self.assertEqual(doctor.user_id.id, user_id)
-        user = self.user_pool.browse(cr, uid, user_id)
+        doctor_user = self.user_model.create({
+            'name': 'Dr1', 'login': 'dr1', 'password': 'dr1',
+            'doctor_id': self.doctor_id,
+            'groups_id': [(4, self.dr_group_id)],
+            'title': self.dr_title_id
+        })
+        updated_doctor = self.doctor_pool.browse(cr, uid, self.doctor_id)
+        self.assertEqual(updated_doctor.user_id.id, doctor_user.id)
+        user = self.user_pool.browse(cr, uid, doctor_user.id)
         self.assertTrue(user.partner_id.doctor)
 
     def test_04_name_get(self):
@@ -214,7 +209,7 @@ class TestUsers(SingleTransactionCase):
 
         # Scenario 1: Get name for a normal user
         name = self.user_pool.name_get(cr, uid, self.admin_uid, context=None)
-        self.assertEqual(name[0][1], 'Admin 1')
+        self.assertEqual(name[0][1], 'System admin')
 
         # Scenario 2: Get name for a doctor user
         doctor_uid = self.user_pool.search(cr, uid, [['name', '=', 'Dr1']])[0]
@@ -227,7 +222,7 @@ class TestUsers(SingleTransactionCase):
             cr, uid, self.admin_uid,
             {'parent_id': company_id, 'city': 'City1', 'email': 'a@b.org'})
         name = self.user_pool.name_get(cr, uid, self.admin_uid)
-        self.assertEqual(name[0][1], 'Company1, Admin 1')
+        self.assertEqual(name[0][1], 'Company1, System admin')
 
         # Scenario 4: Get only address
         name = self.user_pool.name_get(cr, uid, self.admin_uid,
@@ -237,12 +232,12 @@ class TestUsers(SingleTransactionCase):
         # Scenario 5: Get name and address
         name = self.user_pool.name_get(cr, uid, self.admin_uid,
                                        {'show_address': 1})
-        self.assertEqual(name[0][1], "Company1, Admin 1\nCity1  \n")
+        self.assertEqual(name[0][1], "Company1, System admin\nCity1  \n")
 
         # Scenario 6: Get name and email
         name = self.user_pool.name_get(cr, uid, self.admin_uid,
                                        {'show_email': 1})
-        self.assertEqual(name[0][1], "Company1, Admin 1 <a@b.org>")
+        self.assertEqual(name[0][1], "Company1, System admin <a@b.org>")
 
     def test_05_mail_message_get_default_from(self):
         cr, uid = self.cr, self.uid
