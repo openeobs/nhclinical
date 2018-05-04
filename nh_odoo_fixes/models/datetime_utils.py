@@ -157,7 +157,8 @@ class DatetimeUtils(models.AbstractModel):
     def get_current_time(cls, as_string=False):
         """
         Get the current time. Making this a separate function makes it easier
-        to patch
+        to patch.
+
         :param as_string: Should return datetime as string
         :return: datetime or string representation of datetime
         """
