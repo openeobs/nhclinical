@@ -110,6 +110,16 @@ class nh_clinical_patient_move(orm.Model):
                 cr, uid, activity.parent_id.id,
                 {'location_id': activity.data_ref.location_id.id},
                 context=context)
+
+        if not activity.data_ref.move_datetime:
+            datetime_pool = self.pool['datetime_utils']
+            move_datetime = datetime_pool.get_current_time(as_string=True)
+            self.write(
+                cr, uid, activity.data_ref.id, {
+                    'move_datetime': move_datetime
+                }
+            )
+
         return super(nh_clinical_patient_move, self).complete(
             cr, uid, activity_id, context)
 
