@@ -36,16 +36,22 @@ class NhClinicalTestUtils(AbstractModel):
         return self.patient
 
     def admit_patient(
-            self, hospital_number=None, patient_id=None, location_code=None):
+            self, hospital_number=None, patient_id=None, location_code=None,
+            start_date=None):
         if not hospital_number:
             hospital_number = self.hospital_number
         if not patient_id:
             patient_id = self.patient_id
-        if not location_code:
-            location_code = self.ward.code
-        self.spell_model = self.env['nh.clinical.spell']
+
+        creation_values = {
+            'location': location_code or self.ward.code
+        }
+        if start_date:
+            creation_values['start_date'] = start_date
+
         self.api_model = self.env['nh.clinical.api']
-        self.api_model.admit(hospital_number, {'location': location_code})
+        self.api_model.admit(hospital_number, creation_values)
+        self.spell_model = self.env['nh.clinical.spell']
         return self.spell_model.search([('patient_id', '=', patient_id)])[0]
 
     def create_placement(self, patient_id=None, location_id=None):
@@ -98,16 +104,16 @@ class NhClinicalTestUtils(AbstractModel):
         )
 
     def discharge_patient(self, hospital_number=None):
-        if not hospital_number:
-            hospital_number = self.hospital_number
+        hospital_number = hospital_number or self.hospital_number
         api_model = self.env['nh.clinical.api']
         api_model.discharge(hospital_number, {
             'location': 'DISL'
         })
 
-    def transfer_patient(self, location_code, hospital_number=None):
-        if not hospital_number:
-            hospital_number = self.hospital_number
+    def transfer_patient(self, location_code=None, hospital_number=None):
+        hospital_number = hospital_number or self.hospital_number
+        location_code = location_code or self.other_ward.code
+
         api_model = self.env['nh.clinical.api']
         api_model.transfer(hospital_number, {
             'location': location_code

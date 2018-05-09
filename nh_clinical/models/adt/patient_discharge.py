@@ -1,7 +1,6 @@
 import logging
-from datetime import datetime as dt
+
 from openerp.osv import orm, fields, osv
-from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT as DTF
 
 _logger = logging.getLogger(__name__)
 
@@ -55,7 +54,8 @@ class nh_clinical_adt_patient_discharge(orm.Model):
         if vals.get('discharge_date'):
             discharge_date = vals.get('discharge_date')
         else:
-            discharge_date = dt.now().strftime(DTF)
+            datetime_pool = self.pool['datetime_utils']
+            discharge_date = datetime_pool.get_current_time(as_string=True)
 
         spell_pool = self.pool['nh.clinical.spell']
         activity_pool = self.pool['nh.activity']
