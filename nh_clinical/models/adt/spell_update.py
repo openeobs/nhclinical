@@ -1,6 +1,7 @@
 import logging
-from openerp.osv import orm, fields, osv
+
 from openerp import SUPERUSER_ID
+from openerp.osv import orm, fields, osv
 
 _logger = logging.getLogger(__name__)
 
@@ -145,7 +146,8 @@ class nh_clinical_adt_spell_update(orm.Model):
                 },
                 {
                     'patient_id': update.patient_id.id,
-                    'location_id': update.location_id.id
+                    'location_id': update.location_id.id,
+                    'move_datetime': update.start_date
                 },
                 context=context)
             activity_pool.complete(

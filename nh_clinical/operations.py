@@ -42,7 +42,7 @@ class nh_clinical_patient_move(orm.Model):
         # TODO This is overwritten in complete so should we stop it from
         # being given on create?
         'from_location_id': fields.many2one('nh.clinical.location',
-                                            'Source Location')
+                                            'Source Location'),
     }
 
     _order = 'id desc'
@@ -110,6 +110,16 @@ class nh_clinical_patient_move(orm.Model):
                 cr, uid, activity.parent_id.id,
                 {'location_id': activity.data_ref.location_id.id},
                 context=context)
+
+        if not activity.data_ref.move_datetime:
+            datetime_pool = self.pool['datetime_utils']
+            move_datetime = datetime_pool.get_current_time(as_string=True)
+            self.write(
+                cr, uid, activity.data_ref.id, {
+                    'move_datetime': move_datetime
+                }
+            )
+
         return super(nh_clinical_patient_move, self).complete(
             cr, uid, activity_id, context)
 
@@ -478,7 +488,8 @@ class nh_clinical_patient_discharge(orm.Model):
             {'parent_id': activity.parent_id.id, 'creator_id': activity_id},
             {
                 'patient_id': activity.data_ref.patient_id.id,
-                'location_id': loc_id
+                'location_id': loc_id,
+                'move_datetime': activity.data_ref.discharge_date
             }, context=context)
 
         activity_pool.complete(cr, uid, move_activity_id, context=context)
@@ -529,7 +540,8 @@ class nh_clinical_patient_discharge(orm.Model):
             'creator_id': activity_id
         }, {
             'patient_id': activity.data_ref.patient_id.id,
-            'location_id': activity.data_ref.location_id.id
+            'location_id': activity.data_ref.location_id.id,
+            'move_datetime': activity.data_ref.discharge_date
         }, context=context)
         location_pool = self.pool['nh.clinical.location']
         # check if the previous bed is still available
@@ -679,7 +691,8 @@ class nh_clinical_patient_admission(orm.Model):
             'creator_id': activity_id
         }, {
             'patient_id': admission.patient_id.id,
-            'location_id': admission.location_id.id
+            'location_id': admission.location_id.id,
+            'move_datetime': admission.start_date
         }, context=context)
         activity_pool.complete(cr, SUPERUSER_ID, move_activity_id,
                                context=context)
