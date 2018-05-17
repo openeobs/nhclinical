@@ -5,6 +5,7 @@
 event driven system to be built on top of it.
 """
 import logging
+
 from openerp import SUPERUSER_ID, api
 from openerp.osv import orm, fields, osv
 
@@ -27,7 +28,6 @@ class nh_activity_data(orm.AbstractModel):
         'cancelled': []
     }
 
-    # Label for the observation suitable for display.
     _description = 'Undefined Activity'
 
     @classmethod
