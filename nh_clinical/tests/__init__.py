@@ -16,8 +16,12 @@ from .nh_clinical_patient_transfer import *
 from .nh_clinical_spell import *
 
 # Disabled Tests
-# from . import test_auditing
-# from . import test_base
-# from . import test_data_formatter
-# from . import test_model
-# from . import test_new_demo
+from . import test_auditing
+from . import test_base
+from . import test_data_formatter
+from . import test_model
+from . import test_new_demo
+
+from .nh_clinical_allocating import *
+from .nh_clinical_location import *
+from .nh_clinical_patient_allocation import *

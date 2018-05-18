@@ -65,4 +65,5 @@ class TestDemoAPI(common.SingleTransactionCase):
                  ]), msg="User groups not correct")
 
     def test_build_uat_post(self):
-        pass
+        self.assertTrue(False)
+# TODO - this was just 'pass'
