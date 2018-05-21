@@ -336,8 +336,8 @@ class NhClinicalTestUtils(AbstractModel):
         :return:
         """
         instance_variable_names = [
-            'patient', 'spell', 'spell_activity', 'nurse', 'doctor', 'company',
-            'hospital', 'pos', 'ward'
+            'patient', 'spell', 'spell_activity', 'hca', 'nurse', 'doctor',
+            'company', 'hospital', 'pos', 'ward'
         ]
         for name in instance_variable_names:
             self.copy_instance_variable_if_exists(caller, name)
@@ -361,7 +361,7 @@ class NhClinicalTestUtils(AbstractModel):
     def get_open_activities_for_patient(self, data_model=None, user_id=None):
         """
         Get activity(s) for patient. If a data model is supplied then return
-        those only in that data model otherwise just all open activities
+        those only in that data model otherwise just all open activities.
 
         :param data_model: A data model to filter on
         :param user_id: User we want to get activities for
